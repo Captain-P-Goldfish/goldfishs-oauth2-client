@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+
+    <property name="blob_type" value="LONGBLOB" dbms="hsqldb, mssql, mysql, mariadb"/>
+    <property name="blob_type" value="BLOB" dbms="oracle"/>
+    <property name="blob_type" value="BYTEA" dbms="postgresql"/>
+
+    <changeSet author="pascal_knueppel" id="sequence-table-creation" dbms="mysql">
+        <comment>mysql supports sequences only with a workaround by creating a table with a counter</comment>
+        <createTable tableName="hibernate_sequence">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="pascal_knueppel" id="sequence-table-creation" dbms="mariadb">
+        <preConditions onFail="CONTINUE">
+            <customPrecondition
+                    className="MariaDbBefore10_3PreCondition"/>
+        </preConditions>
+        <comment>the sequence table creation is necessary before mariadb 10.3</comment>
+        <createTable tableName="hibernate_sequence">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+        <insert tableName="hibernate_sequence">
+            <column name="next_val" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="pascal_knueppel" id="sequence-creation" dbms="mariadb">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <customPrecondition
+                        className="MariaDbBefore10_3PreCondition"/>
+            </not>
+        </preConditions>
+        <comment>the sequence-table is not supported anymore since mariadb 10.3</comment>
+        <createSequence startValue="1" sequenceName="hibernate_sequence"
+                        incrementBy="1"/>
+    </changeSet>
+
+    <changeSet author="pascal_knueppel" id="sequence-creation" dbms="mssql,hsqldb,postgresql,oracle">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <sequenceExists sequenceName="hibernate_sequence"/>
+            </not>
+        </preConditions>
+        <createSequence startValue="1" sequenceName="hibernate_sequence"
+                        incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="1" author="pascal_knueppel">
+
+
+        <createTable tableName="KEYSTORE">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="KEYSTORE_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="KEYSTORE_BYTES" type="${blob_type}"/>
+            <column name="KEYSTORE_PASSWORD" type="VARCHAR(255)"/>
+            <column name="KEYSTORE_TYPE" type="VARCHAR(10)"/>
+            <column name="ALIAS" type="VARCHAR(64)"/>
+            <column name="PRIVATE_KEY_PASSWORD" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="TRUSTSTORE">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="TRUSTSTORE_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="TRUSTSTORE_BYTES" type="${blob_type}"/>
+            <column name="TRUSTSTORE_PASSWORD" type="VARCHAR(255)"/>
+            <column name="TRUSTSTORE_TYPE" type="VARCHAR(10)"/>
+        </createTable>
+
+        <createTable tableName="OPENID_PROVIDER">
+            <column name="id" type="BIGINT">
+                <constraints primaryKeyName="OIDC_PROVIDER_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="PROVIDER_NAME" type="VARCHAR(255)"/>
+            <column name="DISCOVERY_ENDPOINT" type="VARCHAR(1024)"/>
+            <column name="AUTHORIZATION_ENDPOINT" type="VARCHAR(1024)"/>
+            <column name="TOKEN_ENDPOINT" type="VARCHAR(1024)"/>
+            <column name="USER_INFO_ENDPOINT" type="VARCHAR(1024)"/>
+            <column name="SIGNATURE_VERIFICATION_KEY" type="${blob_type}"/>
+        </createTable>
+
+        <createTable tableName="CLIENT">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="CLIENT_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="CLIENT_ID" type="VARCHAR(255)"/>
+            <column name="CLIENT_SECRET" type="VARCHAR(255)"/>
+            <column name="REDIRECT_URI" type="VARCHAR(1024)"/>
+            <column name="AUDIENCE" type="VARCHAR(1024)"/>
+            <column name="OPENID_PROVIDER_ID" type="BIGINT">
+                <constraints foreignKeyName="CLIENT_OPENID_PROVIDER_FK" referencedColumnNames="ID"/>
+            </column>
+            <column name="SIGANTURE_KEYSTORE_ID" type="BIGINT">
+                <constraints foreignKeyName="CLIENT_SIGNATURE_KEYSTORE_FK" referencedColumnNames="ID"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="PROXY">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="PROXY_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="PROXY_HOST" type="VARCHAR(255)"/>
+            <column name="PROXY_PORT" type="INTEGER"/>
+            <column name="PROXY_USERNAME" type="VARCHAR(255)"/>
+            <column name="PROXY_PASSWORD" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="OAUTH2_LAST_USED_SETTINGS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="OAUTH2_LAST_SETTINGS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="CONNECT_TIMEOUT" type="integer"/>
+            <column name="REQUEST_TIMEOUT" type="integer"/>
+            <column name="SOCKET_TIMEOUT" type="integer"/>
+            <column name="REDIRECT_URI_SELECTION" type="VARCHAR(15)"/>
+            <column name="CUSTOM_REDIRECT_URI" type="VARCHAR(255)"/>
+            <column name="REQUEST_TYPE" type="VARCHAR(15)"/>
+            <column name="URL_PARAMS" type="${blob_type}"/>
+            <column name="AUTH_TYPE" type="VARCHAR(5)"/>
+            <column name="GRANT_TYPE" type="VARCHAR(30)"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="USER_PASSWORD" type="VARCHAR(255)"/>
+            <column name="OPENID_PROVIDER_ID" type="BIGINT">
+                <constraints foreignKeyName="LAST_USED_OPENID_PROVIDER_FK"
+                             referencedTableName="OPENID_PROVIDER"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="CLIENT_ID" type="BIGINT">
+                <constraints foreignKeyName="LAST_USED_CLIENT_FK"
+                             referencedTableName="CLIENT"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="TRUSTSTORE_ID" type="BIGINT">
+                <constraints foreignKeyName="LAST_USED_TRUSTSTORE_FK"
+                             referencedTableName="TRUSTSTORE"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="SSL_KEYSTORE_ID" type="BIGINT">
+                <constraints foreignKeyName="LAST_USED_SSL_KEYSTORE_FK"
+                             referencedTableName="KEYSTORE"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="PROXY_ID" type="BIGINT">
+                <constraints foreignKeyName="PROXY_LAST_USED_FK"
+                             referencedTableName="PROXY"
+                             referencedColumnNames="ID"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="SCOPES">
+            <column name="SETTINGS_ID" type="BIGINT">
+                <constraints foreignKeyName="LAST_USED_SCOPES_FK" referencedTableName="OAUTH2_LAST_USED_SETTINGS"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="SCOPE" type="VARCHAR(100)"/>
+        </createTable>
+
+        <createIndex tableName="SCOPES" indexName="LAST_USED_SCOPES_IDX">
+            <column name="SETTINGS_ID" type="BIGINT"/>
+        </createIndex>
+
+        <createTable tableName="REST_CLIENT_LAST_USED_SETTINGS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="REST_LAST_SETTINGS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="CONNECT_TIMEOUT" type="integer"/>
+            <column name="REQUEST_TIMEOUT" type="integer"/>
+            <column name="SOCKET_TIMEOUT" type="integer"/>
+            <column name="REQUEST_URL" type="${blob_type}"/>
+            <column name="REQUEST_METHOD" type="varchar(25)"/>
+            <column name="REQUEST_HEADERS" type="${blob_type}"/>
+            <column name="REQUEST_BODY" type="${blob_type}"/>
+            <column name="RESPONSE" type="${blob_type}"/>
+            <column name="USERNAME" type="varchar(50)"/>
+            <column name="PASSWORD" type="varchar(50)"/>
+            <column name="AUTH_TYPE" type="varchar(50)"/>
+            <column name="OPENID_PROVIDER_ID" type="BIGINT">
+                <constraints foreignKeyName="REST_LAST_OPENID_PROVIDER_FK"
+                             referencedTableName="OPENID_PROVIDER"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="CLIENT_ID" type="BIGINT">
+                <constraints foreignKeyName="REST_LAST_USED_CLIENT_FK"
+                             referencedTableName="CLIENT"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="TRUSTSTORE_ID" type="BIGINT">
+                <constraints foreignKeyName="REST_LAST_USED_TRUSTSTORE_FK"
+                             referencedTableName="TRUSTSTORE"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="SSL_KEYSTORE_ID" type="BIGINT">
+                <constraints foreignKeyName="REST_LAST_USED_SSL_KEYSTORE_FK"
+                             referencedTableName="KEYSTORE"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="PROXY_ID" type="BIGINT">
+                <constraints foreignKeyName="REST_PROXY_LAST_USED_FK"
+                             referencedTableName="PROXY"
+                             referencedColumnNames="ID"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="REQUEST_TEMPLATES">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="REQUEST_TEMPLATES_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="varchar(100)"/>
+            <column name="REQUEST_URL" type="${blob_type}"/>
+            <column name="REQUEST_METHOD" type="varchar(25)"/>
+            <column name="REQUEST_HEADERS" type="${blob_type}"/>
+            <column name="REQUEST_BODY" type="${blob_type}"/>
+        </createTable>
+
+        <addColumn tableName="REST_CLIENT_LAST_USED_SETTINGS">
+            <column name="IGNORE_HOSTNAME_VERIFIER" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
