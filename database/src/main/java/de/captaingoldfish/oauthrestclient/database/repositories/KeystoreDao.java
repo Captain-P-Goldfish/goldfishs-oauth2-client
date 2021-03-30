@@ -14,5 +14,6 @@ import de.captaingoldfish.oauthrestclient.database.entities.Keystore;
  * <br>
  * this class represents the database-access from spring to the {@link Keystore}-objects
  */
-public interface KeystoreDao extends JpaRepository<Keystore, Long>, JpaSpecificationExecutor<Keystore>
+public interface KeystoreDao
+  extends JpaRepository<Keystore, Long>, JpaSpecificationExecutor<Keystore>, KeystoreDaoExtension
 {}

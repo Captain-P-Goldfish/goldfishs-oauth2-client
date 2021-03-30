@@ -27,7 +27,6 @@ public class KeystoreTest extends DbBaseTest
   @Test
   public void testKeystoreTest()
   {
-    final String name = "my-keystore";
     final String alias = "unit-tests";
     final String keystorePassword = "123456";
     final String privateKeyPassword = keystorePassword;
@@ -37,17 +36,26 @@ public class KeystoreTest extends DbBaseTest
       keystoreBytes = IOUtils.toByteArray(inputStream);
     }
     InputStream inputStream = new ByteArrayInputStream(keystoreBytes);
-    Keystore keystore = new Keystore(name, inputStream, KeyStoreSupporter.KeyStoreType.JKS, alias, keystorePassword,
-                                     privateKeyPassword);
+    Keystore keystore = new Keystore(inputStream, KeyStoreSupporter.KeyStoreType.JKS, keystorePassword);
+    keystore.addAliasEntry(alias, privateKeyPassword);
     Assertions.assertDoesNotThrow(() -> keystoreDao.save(keystore));
     Assertions.assertEquals(KeyStoreSupporter.KeyStoreType.JKS, keystore.getKeystoreType());
-    Assertions.assertEquals(name, keystore.getName());
-    Assertions.assertEquals(name, keystore.getName());
     Assertions.assertEquals(keystorePassword, keystore.getKeystorePassword());
-    Assertions.assertEquals(privateKeyPassword, keystore.getPrivateKeyPassword());
-    Assertions.assertEquals(alias, keystore.getAlias());
+
+    Assertions.assertEquals(1, keystore.getKeystoreEntries().size());
+    KeystoreEntry aliasKey = keystore.getKeystoreEntries().get(0);
+    Assertions.assertEquals(privateKeyPassword, aliasKey.getPrivateKeyPassword());
+    Assertions.assertEquals(alias, aliasKey.getAlias());
     Assertions.assertArrayEquals(keystoreBytes, keystore.getKeystoreBytes());
-    Assertions.assertNotNull(keystore.getPrivateKey());
-    Assertions.assertNotNull(keystore.getCertificate());
+    Assertions.assertNotNull(keystore.getPrivateKey(aliasKey));
+    Assertions.assertNotNull(keystore.getCertificate(aliasKey));
+
+    Keystore loadedKeystore = keystoreDao.findById(1L).get();
+    Assertions.assertEquals(1, loadedKeystore.getKeystoreEntries().size());
+
+    Assertions.assertEquals(1, countEntriesOfTable("KEYSTORE_ALIAS_PASSWORDS"));
+    keystoreDao.deleteAll();
+    Assertions.assertEquals(0, keystoreDao.count());
+    Assertions.assertEquals(0, countEntriesOfTable("KEYSTORE_ALIAS_PASSWORDS"));
   }
 }

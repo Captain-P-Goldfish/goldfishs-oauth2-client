@@ -2,7 +2,9 @@ package de.captaingoldfish.oauthrestclient.database;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.UUID;
+import java.math.BigInteger;
+
+import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.oauthrestclient.database.entities.Keystore;
+import de.captaingoldfish.oauthrestclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.oauthrestclient.database.repositories.ClientDao;
 import de.captaingoldfish.oauthrestclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.oauthrestclient.database.repositories.OpenIdProviderDao;
@@ -41,6 +44,9 @@ public abstract class DbBaseTest implements FileReferences
   @Autowired
   protected OpenIdProviderDao openIdProviderDao;
 
+  @Autowired
+  private EntityManager entityManager;
+
   @AfterEach
   public void clearTables()
   {
@@ -54,7 +60,6 @@ public abstract class DbBaseTest implements FileReferences
   @SneakyThrows
   protected Keystore getUnitTestKeystore()
   {
-    final String name = UUID.randomUUID().toString();
     final String alias = "unit-tests";
     final String keystorePassword = "123456";
     final String privateKeyPassword = keystorePassword;
@@ -64,8 +69,15 @@ public abstract class DbBaseTest implements FileReferences
       keystoreBytes = IOUtils.toByteArray(inputStream);
     }
     InputStream inputStream = new ByteArrayInputStream(keystoreBytes);
-    Keystore keystore = new Keystore(name, inputStream, KeyStoreSupporter.KeyStoreType.JKS, alias, keystorePassword,
-                                     privateKeyPassword);
+    Keystore keystore = new Keystore(inputStream, KeyStoreSupporter.KeyStoreType.JKS, keystorePassword);
+    KeystoreEntry keystoreEntry = new KeystoreEntry(alias, privateKeyPassword);
+    keystore.getKeystoreEntries().add(keystoreEntry);
     return Assertions.assertDoesNotThrow(() -> keystoreDao.save(keystore));
+  }
+
+  protected int countEntriesOfTable(String tableName)
+  {
+    return ((BigInteger)entityManager.createNativeQuery("select count(*) from " + tableName)
+                                     .getSingleResult()).intValue();
   }
 }

@@ -62,13 +62,23 @@
             <column name="ID" type="BIGINT">
                 <constraints primaryKeyName="KEYSTORE_PRIME_KEY" primaryKey="true"/>
             </column>
-            <column name="NAME" type="VARCHAR(255)"/>
             <column name="KEYSTORE_BYTES" type="${blob_type}"/>
             <column name="KEYSTORE_PASSWORD" type="VARCHAR(255)"/>
             <column name="KEYSTORE_TYPE" type="VARCHAR(10)"/>
+        </createTable>
+
+        <createTable tableName="KEYSTORE_ENTRIES">
+            <column name="KEYSTORE_ID" type="BIGINT">
+                <constraints foreignKeyName="KEYSTORE_ENTRIES_FK" referencedTableName="KEYSTORE"
+                             referencedColumnNames="ID"/>
+            </column>
             <column name="ALIAS" type="VARCHAR(64)"/>
             <column name="PRIVATE_KEY_PASSWORD" type="VARCHAR(255)"/>
         </createTable>
+
+        <createIndex tableName="KEYSTORE_ENTRIES" indexName="KEYSTORE_ENTRIES_IDX">
+            <column name="KEYSTORE_ID"/>
+        </createIndex>
 
         <createTable tableName="TRUSTSTORE">
             <column name="ID" type="BIGINT">
