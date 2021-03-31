@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MultipartException;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -63,6 +65,19 @@ public class ExceptionRequestHandler
   {
     log.error(ex.getMessage(), ex);
     response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    ObjectNode errorNode = getErrorNode(ex);
+    response.getOutputStream().write(errorNode.toString().getBytes(StandardCharsets.UTF_8));
+  }
+
+  /**
+   * parses an erroneous http media type exception for the react frontend
+   */
+  @SneakyThrows
+  @ExceptionHandler({HttpMediaTypeNotSupportedException.class, MultipartException.class})
+  public void handleOtherExceptions(Exception ex, HttpServletResponse response)
+  {
+    log.debug(ex.getMessage(), ex);
+    response.setStatus(HttpStatus.BAD_REQUEST.value());
     ObjectNode errorNode = getErrorNode(ex);
     response.getOutputStream().write(errorNode.toString().getBytes(StandardCharsets.UTF_8));
   }
@@ -125,7 +140,10 @@ public class ExceptionRequestHandler
         handleRequestError(responseNode, objectError);
       }
     });
-    responseNode.set("errors", errorNode);
+    if (!errorNode.isEmpty())
+    {
+      responseNode.set("errors", errorNode);
+    }
     return Optional.of(responseNode);
   }
 
@@ -138,11 +156,14 @@ public class ExceptionRequestHandler
     if (errorMessages == null)
     {
       errorMessages = new ArrayNode(JsonNodeFactory.instance);
-      responseNode.set("errorMessages", errorMessages);
     }
     if (StringUtils.isNotBlank(objectError.getDefaultMessage()))
     {
       errorMessages.add(objectError.getDefaultMessage());
+    }
+    if (!errorMessages.isEmpty())
+    {
+      responseNode.set("errorMessages", errorMessages);
     }
   }
 

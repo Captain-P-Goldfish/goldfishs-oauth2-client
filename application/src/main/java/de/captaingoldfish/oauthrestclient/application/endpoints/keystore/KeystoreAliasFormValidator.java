@@ -43,45 +43,46 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
     final String stateId = keystoreAliasForm.getStateId();
     if (StringUtils.isBlank(stateId))
     {
-      context.buildConstraintViolationWithTemplate("Ups the required stateId parameter was missing in the request...")
-             .addConstraintViolation();
-      isValid = false;
+      String errorMessage = "Ups the required stateId parameter was missing in the request...";
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
+      return false;
     }
 
     List<String> aliases = keystoreAliasForm.getAliases();
     if (aliases == null || aliases.isEmpty())
     {
-      context.buildConstraintViolationWithTemplate("An alias must be selected")
-             .addPropertyNode("aliases")
-             .addConstraintViolation();
-      isValid = false;
+      String errorMessage = "No alias was selected";
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage).addPropertyNode("aliases").addConstraintViolation();
+      return false;
     }
 
-    if (aliases != null && aliases.size() != 1)
+    if (aliases.size() != 1)
     {
-      context.buildConstraintViolationWithTemplate("Only a single alias can be selected but found: " + aliases)
-             .addPropertyNode("aliases")
-             .addConstraintViolation();
-      isValid = false;
+      String errorMessage = "Only a single alias can be selected but found: " + aliases;
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage).addPropertyNode("aliases").addConstraintViolation();
+      return false;
     }
 
     KeystoreFileCache keystoreFileCache = WebAppConfig.getApplicationContext().getBean(KeystoreFileCache.class);
     Keystore keystore = keystoreFileCache.getKeystoreFile(stateId);
     if (keystore == null)
     {
-      context.buildConstraintViolationWithTemplate("The stateId '" + stateId
-                                                   + "' could not be resolved to a previously uploaded keystore")
-             .addConstraintViolation();
+      String errorMessage = "The stateId '" + stateId + "' could not be resolved to a previously uploaded keystore";
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
       return false;
     }
 
     KeyStore javaKeystore = keystore.getKeyStore();
-    final String alias = aliases == null || aliases.isEmpty() ? null : aliases.get(0);
+    final String alias = aliases.get(0);
     if (!javaKeystore.containsAlias(alias))
     {
-      context.buildConstraintViolationWithTemplate("Unknown alias selected: " + alias)
-             .addPropertyNode("aliases")
-             .addConstraintViolation();
+      String errorMessage = "Unknown alias selected: " + alias;
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage).addPropertyNode("aliases").addConstraintViolation();
       isValid = false;
     }
 
@@ -110,7 +111,9 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
 
     if (privateKey == null)
     {
-      context.buildConstraintViolationWithTemplate("Could not access private key of alias '" + alias)
+      String errorMessage = "Could not access private key of alias '" + alias + "'";
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage)
              .addPropertyNode("privateKeyPassword")
              .addConstraintViolation();
       isValid = false;
@@ -127,7 +130,8 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
                                                        .anyMatch(newAlias::equals);
     if (aliasNameAlreadyTaken)
     {
-      String errorMessage = "Alias '" + newAlias + "' is already used. Please override this alias with another name.";
+      String errorMessage = "Alias '" + newAlias + "' is already used. Please override this alias with another name";
+      log.debug(errorMessage);
       if (newAlias.equals(keystoreAliasForm.getAliasOverride()))
       {
         context.buildConstraintViolationWithTemplate(errorMessage)
@@ -145,10 +149,9 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
     String existingUnderAlias = applicationKeystore.getKeyStore().getCertificateAlias(certificate);
     if (existingUnderAlias != null)
     {
-      context.buildConstraintViolationWithTemplate("The selected Key is already present under the alias '"
-                                                   + existingUnderAlias + "'")
-             .addPropertyNode("aliases")
-             .addConstraintViolation();
+      String errorMessage = "The selected Key is already present under the alias '" + existingUnderAlias + "'";
+      log.debug(errorMessage);
+      context.buildConstraintViolationWithTemplate(errorMessage).addPropertyNode("aliases").addConstraintViolation();
       isValid = false;
     }
 

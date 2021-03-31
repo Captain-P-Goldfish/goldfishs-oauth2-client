@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 
@@ -193,5 +194,21 @@ public class Keystore
   private boolean keystoreEntryExists(KeystoreEntry keystoreEntry)
   {
     return keyStore == null || StringUtils.isBlank(keystoreEntry.getAlias());
+  }
+
+  /**
+   * mainly used for unit tests. This method returns the keystore entries that are really present in the
+   * application keystore
+   */
+  @SneakyThrows
+  public List<String> getKeyStoreAliases()
+  {
+    Enumeration<String> aliasesEnumeration = keyStore.aliases();
+    List<String> aliases = new ArrayList<>();
+    while (aliasesEnumeration.hasMoreElements())
+    {
+      aliases.add(aliasesEnumeration.nextElement());
+    }
+    return aliases;
   }
 }

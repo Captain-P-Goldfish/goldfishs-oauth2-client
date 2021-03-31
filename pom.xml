@@ -66,6 +66,7 @@
         <version.nimbus>9.4.2</version.nimbus>
         <version.caffeine>3.0.1</version.caffeine>
         <version.commons.fileupload>1.4</version.commons.fileupload>
+        <version.unirest>3.11.11</version.unirest>
 
         <!-- version conflicts -->
         <version.javassist>3.27.0-GA</version.javassist>
@@ -214,6 +215,11 @@
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
                 <version>${version.commons.fileupload}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.konghq</groupId>
+                <artifactId>unirest-java</artifactId>
+                <version>${version.unirest}</version>
             </dependency>
 
             <!-- version conflicts -->

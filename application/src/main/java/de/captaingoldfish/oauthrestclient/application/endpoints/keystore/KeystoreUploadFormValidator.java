@@ -33,7 +33,9 @@ public class KeystoreUploadFormValidator
 
     if (StringUtils.isEmpty(keystoreUploadForm.getKeystorePassword()))
     {
-      context.buildConstraintViolationWithTemplate("Not accepting empty passwords")
+      String errormessage = "Not accepting empty passwords";
+      log.debug(errormessage);
+      context.buildConstraintViolationWithTemplate(errormessage)
              .addPropertyNode("keystorePassword")
              .addConstraintViolation();
       isValid = false;
@@ -41,7 +43,9 @@ public class KeystoreUploadFormValidator
 
     if (keystoreUploadForm.getKeystoreFile() == null || keystoreUploadForm.getKeystoreFile().isEmpty())
     {
-      context.buildConstraintViolationWithTemplate("Keystore file must not be empty")
+      String errormessage = "Keystore file must not be empty";
+      log.debug(errormessage);
+      context.buildConstraintViolationWithTemplate(errormessage)
              .addPropertyNode("keystoreFile")
              .addConstraintViolation();
       return false;
@@ -60,8 +64,19 @@ public class KeystoreUploadFormValidator
       Throwable current = ex;
       while (current != null)
       {
-        context.buildConstraintViolationWithTemplate(Optional.ofNullable(current.getMessage())
-                                                             .orElse("NullPointerException"))
+        String errormessage = Optional.ofNullable(current.getMessage()).orElse("NullPointerException");
+        if (errormessage.contains("exception unwrapping private key"))
+        {
+          String errormessage2 = "key-passwords must match keystore-password. This is a restriction of the "
+                                 + "BouncyCastle PKCS12 implementation. As a workaround rename the file extension "
+                                 + "to '.jks' this may work based on the used JDK";
+          log.debug(errormessage2);
+          context.buildConstraintViolationWithTemplate(errormessage2)
+                 .addPropertyNode("keystoreFile")
+                 .addConstraintViolation();
+        }
+        log.debug(errormessage);
+        context.buildConstraintViolationWithTemplate(errormessage)
                .addPropertyNode("keystoreFile")
                .addConstraintViolation();
         current = current.getCause();
