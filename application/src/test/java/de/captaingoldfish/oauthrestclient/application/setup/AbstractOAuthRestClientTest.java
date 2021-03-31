@@ -71,7 +71,7 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   public List<String> jsonArrayToList(JSONArray jsonArray)
   {
     List<String> values = new ArrayList<>();
-    jsonArray.forEach(val -> values.add((String) val));
+    jsonArray.forEach(val -> values.add((String)val));
     return values;
   }
 }

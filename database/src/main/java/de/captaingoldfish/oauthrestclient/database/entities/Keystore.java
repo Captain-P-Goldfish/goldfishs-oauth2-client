@@ -143,6 +143,7 @@ public class Keystore
     {
       PrivateKey privateKey;
       char[] privateKeyPasswordCharArray = Optional.ofNullable(keystoreEntry.getPrivateKeyPassword())
+                                                   .filter(password -> password.length() > 0)
                                                    .map(String::toCharArray)
                                                    .orElse(null);
       char[] keystorePasswordCharArray = Optional.ofNullable(keystorePassword).map(String::toCharArray).orElse(null);
