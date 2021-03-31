@@ -114,7 +114,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
 
           // validate select-alias response
           {
-            Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+            Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
             JSONObject jsonObject = response.getBody().getObject();
             Assertions.assertEquals(alias, jsonObject.getString("alias"));
             JSONObject certificateInfo = jsonObject.getJSONObject("certificateInfo");
@@ -552,7 +552,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
                                              .field("aliases", Collections.singletonList(alias))
                                              .asJson();
     log.warn(response.getBody().toPrettyString());
-    Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+    Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
   }
 
   @Test
@@ -603,7 +603,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
                                                .field("stateId", stateId)
                                                .field("aliases", Collections.singletonList(alias))
                                                .asJson();
-      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
     }
 
     {
@@ -643,7 +643,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
                                                  .field("aliasOverride", aliasOverride)
                                                  .asJson();
         log.warn(response.getBody().toPrettyString());
-        Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
         Keystore applicationKeystore = keystoreDao.getKeystore();
         MatcherAssert.assertThat(applicationKeystore.getKeyStoreAliases(), Matchers.hasItem(aliasOverride));
       }
@@ -663,7 +663,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
                                                .field("stateId", stateId)
                                                .field("aliases", Collections.singletonList(alias))
                                                .asJson();
-      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
     }
 
     {
@@ -707,7 +707,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
                                                .field("aliases", Collections.singletonList(alias))
                                                .asJson();
       log.warn(response.getBody().toPrettyString());
-      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
 
     }
 
@@ -745,7 +745,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
                                                  .field("aliases", Collections.singletonList(keystoreEntry.getAlias()))
                                                  .field("privateKeyPassword", keystoreEntry.getPrivateKeyPassword())
                                                  .asJson();
-        Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
       }
     }
 
@@ -755,12 +755,112 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(getUnitTestKeystoreEntryAccess().size(), array.length());
     for ( Object object : array )
     {
-      JSONObject keystoreInfo = (JSONObject) object;
+      JSONObject keystoreInfo = (JSONObject)object;
       String alias = keystoreInfo.getString("alias");
       Assertions.assertDoesNotThrow(() -> getUnitTestKeystoreEntryAccess(alias));
       JSONObject certInfo = Assertions.assertDoesNotThrow(() -> keystoreInfo.getJSONObject("certificateInfo"));
       Assertions.assertEquals(5, certInfo.length());
     }
+  }
+
+  @Test
+  public void testDeleteKeystoreEntries()
+  {
+    // preparation
+    {
+      final String stateId = uploadKeystoreFile(UNIT_TEST_KEYSTORE_JKS);
+      for ( KeystoreEntry keystoreEntry : getUnitTestKeystoreEntryAccess() )
+      {
+        HttpResponse<JsonNode> response = Unirest.post(getApplicationUrl("/keystore/select-alias"))
+                                                 .field("stateId", stateId)
+                                                 .field("aliases", Collections.singletonList(keystoreEntry.getAlias()))
+                                                 .field("privateKeyPassword", keystoreEntry.getPrivateKeyPassword())
+                                                 .asJson();
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
+      }
+    }
+
+    int expectedNumberOfEntriesInKeystore = getUnitTestKeystoreEntryAccess().size();
+    for ( KeystoreEntry keystoreEntry : getUnitTestKeystoreEntryAccess() )
+    {
+      // check application keystore
+      {
+        Keystore keystore = keystoreDao.getKeystore();
+        Assertions.assertEquals(expectedNumberOfEntriesInKeystore, keystore.getKeyStoreAliases().size());
+        Assertions.assertEquals(expectedNumberOfEntriesInKeystore, keystore.getKeystoreEntries().size());
+      }
+
+      HttpResponse<String> response = Unirest.delete(getApplicationUrl("/keystore/delete-alias"))
+                                             .field("alias", keystoreEntry.getAlias())
+                                             .asString();
+
+      Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatus());
+      MatcherAssert.assertThat(response.getBody(), Matchers.emptyOrNullString());
+
+      // check application keystore
+      {
+        expectedNumberOfEntriesInKeystore--;
+        Keystore keystore = keystoreDao.getKeystore();
+        Assertions.assertEquals(expectedNumberOfEntriesInKeystore, keystore.getKeyStoreAliases().size());
+        Assertions.assertEquals(expectedNumberOfEntriesInKeystore, keystore.getKeystoreEntries().size());
+      }
+    }
+  }
+
+  @Test
+  public void testDeleteKeystoreEntryWithUnknownAlias()
+  {
+    // preparation
+    {
+      final String stateId = uploadKeystoreFile(UNIT_TEST_KEYSTORE_JKS);
+      HttpResponse<JsonNode> response = Unirest.post(getApplicationUrl("/keystore/select-alias"))
+                                               .field("stateId", stateId)
+                                               .field("aliases", Collections.singletonList("goldfish"))
+                                               .asJson();
+      Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
+    }
+
+    HttpResponse<JsonNode> response = Unirest.delete(getApplicationUrl("/keystore/delete-alias"))
+                                             .field("alias", "unknown-alias")
+                                             .asJson();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+    log.warn(response.getBody().toPrettyString());
+    JSONObject jsonObject = response.getBody().getObject();
+    Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
+    JSONObject errors = jsonObject.getJSONObject("errors");
+    Assertions.assertEquals(1, errors.length());
+    List<String> aliasErrors = jsonArrayToList(errors.getJSONArray("alias"));
+    Assertions.assertEquals(1, aliasErrors.size());
+
+    String errorMessage = "Unknown alias 'unknown-alias'";
+    MatcherAssert.assertThat(aliasErrors, Matchers.containsInAnyOrder(errorMessage));
+  }
+
+  @Test
+  public void testDeleteKeystoreEntryWithMissingAlias()
+  {
+    // preparation
+    {
+      final String stateId = uploadKeystoreFile(UNIT_TEST_KEYSTORE_JKS);
+      HttpResponse<JsonNode> response = Unirest.post(getApplicationUrl("/keystore/select-alias"))
+                                               .field("stateId", stateId)
+                                               .field("aliases", Collections.singletonList("goldfish"))
+                                               .asJson();
+      Assertions.assertEquals(HttpStatus.CREATED, response.getStatus());
+    }
+
+    HttpResponse<JsonNode> response = Unirest.delete(getApplicationUrl("/keystore/delete-alias")).asJson();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+    log.warn(response.getBody().toPrettyString());
+    JSONObject jsonObject = response.getBody().getObject();
+    Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
+    JSONObject errors = jsonObject.getJSONObject("errors");
+    Assertions.assertEquals(1, errors.length());
+    List<String> aliasErrors = jsonArrayToList(errors.getJSONArray("alias"));
+    Assertions.assertEquals(1, aliasErrors.size());
+
+    String errorMessage = "Required parameter 'alias' is missing in request";
+    MatcherAssert.assertThat(aliasErrors, Matchers.containsInAnyOrder(errorMessage));
   }
 
 

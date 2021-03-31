@@ -7,10 +7,12 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.captaingoldfish.oauthrestclient.application.exceptions.RequestException;
@@ -55,6 +57,7 @@ public class KeystoreController
    * saves the selected alias into the application keystore
    */
   @PostMapping(path = "/select-alias", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseStatus(HttpStatus.CREATED)
   public KeystoreEntryInfoForm selectAlias(@Valid @ModelAttribute KeystoreAliasForm keystoreAliasForm,
                                            BindingResult bindingResult)
   {
@@ -72,6 +75,20 @@ public class KeystoreController
   public List<KeystoreEntryInfoForm> getAliases()
   {
     return keystoreService.getKeystoreInfos();
+  }
+
+  /**
+   * loads the certificate information of the application keystore
+   */
+  @DeleteMapping(path = "/delete-alias", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteAliases(@Valid @ModelAttribute KeystoreDeleteEntryForm deleteEntryForm, BindingResult bindingResult)
+  {
+    if (bindingResult.hasErrors())
+    {
+      throw new RequestException("Cannot delete keystore entry", HttpStatus.BAD_REQUEST.value(), bindingResult);
+    }
+    keystoreService.deleteKeystoreEntry(deleteEntryForm.getAlias());
   }
 
 }

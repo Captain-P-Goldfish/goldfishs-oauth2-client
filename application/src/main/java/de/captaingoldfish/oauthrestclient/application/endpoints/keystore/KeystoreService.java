@@ -106,4 +106,28 @@ class KeystoreService
       return new KeystoreEntryInfoForm(keystoreAliasPasswords.getAlias(), certificateInfo);
     }).collect(Collectors.toList());
   }
+
+  /**
+   * deletes an entry from the application keystore
+   * 
+   * @param alias the entry that should be deleted
+   */
+  @SneakyThrows
+  public void deleteKeystoreEntry(String alias)
+  {
+    Keystore keystore = keystoreDao.getKeystore();
+    Optional<KeystoreEntry> keystoreEntryOptional = keystore.getKeystoreEntries()
+                                                            .stream()
+                                                            .filter(entry -> entry.getAlias().equals(alias))
+                                                            .findAny();
+    if (keystoreEntryOptional.isPresent())
+    {
+      KeystoreEntry keystoreEntry = keystoreEntryOptional.get();
+      keystore.getKeystoreEntries().remove(keystoreEntry);
+      keystore.getKeyStore().deleteEntry(alias);
+      byte[] newKeystoreBytes = KeyStoreSupporter.getBytes(keystore.getKeyStore(), keystore.getKeystorePassword());
+      keystore.setKeystoreBytes(newKeystoreBytes);
+      keystoreDao.save(keystore);
+    }
+  }
 }

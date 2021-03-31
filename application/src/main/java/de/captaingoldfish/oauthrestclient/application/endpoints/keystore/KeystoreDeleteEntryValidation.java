@@ -13,10 +13,10 @@ import javax.validation.Payload;
  * @author Pascal Knueppel
  * @since 27.03.2021
  */
-@Constraint(validatedBy = KeystoreAliasFormValidator.class)
+@Constraint(validatedBy = KeystoreDeleteEntryValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface KeystoreAliasFormValidation
+public @interface KeystoreDeleteEntryValidation
 {
 
   String message() default "";
