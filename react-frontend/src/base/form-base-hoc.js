@@ -112,6 +112,7 @@ export default function FormBaseHoc(WrappedComponent) {
                     fieldErrors: {}
                 });
             }
+            this.setState({success: false})
         }
 
         submitForm(e) {
@@ -154,7 +155,7 @@ export default function FormBaseHoc(WrappedComponent) {
                 <Form id={this.props.formId} className={this.props.class} onSubmit={this.submitForm}>
                     <h2>{this.props.header}</h2>
 
-                    <Alert variant={"success"} show={this.state.success !== undefined}>
+                    <Alert variant={"success"} show={this.state.success === true}>
                         <Form.Text>
                             <GoThumbsup /> {this.props.successMessage}
                         </Form.Text>

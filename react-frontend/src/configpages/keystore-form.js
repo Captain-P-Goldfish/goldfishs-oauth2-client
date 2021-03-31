@@ -282,7 +282,7 @@ export default class KeystoreForm extends React.Component {
                                           httpMethod="POST"
                                           value={this.state.stateId}
                                           aliases={this.state.aliases}
-                                          successMessage="Keystore entry was successfully added saved"
+                                          successMessage="Keystore entry was successfully added"
                                           buttonText="Save"
                                           onSubmitSuccess={this.onAliasSelectionSuccess} />
                 {keystoreAliasList}
