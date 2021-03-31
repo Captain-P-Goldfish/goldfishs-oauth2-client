@@ -8,6 +8,9 @@
         </Console>
     </Appenders>
     <Loggers>
+        <Logger name="de.captaingoldfish" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
         <Logger name="liquibase" level="trace" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>

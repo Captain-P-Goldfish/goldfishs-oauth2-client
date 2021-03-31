@@ -30,6 +30,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import de.captaingoldfish.oauthrestclient.commons.exceptions.KeyStoreCreationFailedException;
 import de.captaingoldfish.oauthrestclient.commons.exceptions.KeyStoreEntryException;
 import de.captaingoldfish.oauthrestclient.commons.exceptions.KeyStoreReadingException;
+import de.captaingoldfish.oauthrestclient.commons.exceptions.KeystoreEntryExistsException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -272,7 +273,7 @@ public final class KeyStoreSupporter
     Optional<Key> existingKey = getKeyEntry(keyStore, alias, password);
     if (existingKey.isPresent())
     {
-      throw new IllegalArgumentException(String.format("key entry for alias '%s' does already exist", alias));
+      throw new KeystoreEntryExistsException(String.format("key entry for alias '%s' does already exist", alias));
     }
     else
     {
@@ -473,12 +474,12 @@ public final class KeyStoreSupporter
   {
     if (keyStoreBytes == null || keyStoreType == null || keyStorePassword == null)
     {
-      throw new KeyStoreCreationFailedException("Cannot create a keystore if null values are given...");
+      throw new KeyStoreCreationFailedException("Parsing of keystore failed");
     }
     try (InputStream inputStream = new ByteArrayInputStream(keyStoreBytes))
     {
       KeyStore keyStore = KeyStore.getInstance(keyStoreType.name(), selectProvider(keyStoreType));
-      keyStore.load(inputStream, keyStorePassword.toCharArray());
+      keyStore.load(inputStream, Optional.ofNullable(keyStorePassword).map(String::toCharArray).orElse(new char[0]));
       return keyStore;
     }
   }
@@ -710,7 +711,9 @@ public final class KeyStoreSupporter
     try
     {
       return Optional.ofNullable(keyStore.getKey(alias,
-                                                 Optional.ofNullable(password).map(String::toCharArray).orElse(null)));
+                                                 Optional.ofNullable(password)
+                                                         .map(String::toCharArray)
+                                                         .orElse(new char[0])));
     }
     catch (UnrecoverableKeyException e)
     {

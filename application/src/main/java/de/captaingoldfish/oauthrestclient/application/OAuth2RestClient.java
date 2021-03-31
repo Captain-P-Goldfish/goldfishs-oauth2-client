@@ -1,11 +1,13 @@
 package de.captaingoldfish.oauthrestclient.application;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 
@@ -18,7 +20,8 @@ import lombok.extern.slf4j.Slf4j;
  * <br>
  */
 @Slf4j
-@SpringBootApplication(exclude = {ThymeleafAutoConfiguration.class, MultipartAutoConfiguration.class})
+@SpringBootApplication(exclude = {ThymeleafAutoConfiguration.class, MultipartAutoConfiguration.class,
+                                  LiquibaseAutoConfiguration.class})
 public class OAuth2RestClient implements CommandLineRunner
 {
 
@@ -33,6 +36,9 @@ public class OAuth2RestClient implements CommandLineRunner
   @Override
   public void run(String... args) throws Exception
   {
-    log.info("\n{}", IOUtils.toString(getClass().getResourceAsStream("/running-banner.txt"), StandardCharsets.UTF_8));
+    try (InputStream inputStream = getClass().getResourceAsStream("/running-banner.txt"))
+    {
+      log.info("\n{}", IOUtils.toString(inputStream, StandardCharsets.UTF_8));
+    }
   }
 }

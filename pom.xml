@@ -15,8 +15,8 @@
             <name>BSD-3-Clause</name>
             <url>https://opensource.org/licenses/BSD-3-Clause</url>
         </license>
-
     </licenses>
+
     <modules>
         <module>application</module>
         <module>database</module>
@@ -49,7 +49,7 @@
         <!-- application dependencies -->
         <version.commons.lang3>3.11</version.commons.lang3>
         <version.commons.io>2.8.0</version.commons.io>
-        <version.spring>5.3.3</version.spring>
+        <version.spring>5.3.5</version.spring>
         <version.springboot>2.4.3</version.springboot>
         <version.spring.data>2.4.3</version.spring.data>
         <version.hsqldb>2.5.1</version.hsqldb>
@@ -64,10 +64,12 @@
         <version.hibernate>5.4.27.Final</version.hibernate>
         <version.hibernate.validator>6.2.0.Final</version.hibernate.validator>
         <version.nimbus>9.4.2</version.nimbus>
-        <version.minidev.json.smart>2.3</version.minidev.json.smart>
+        <version.caffeine>3.0.1</version.caffeine>
+        <version.commons.fileupload>1.4</version.commons.fileupload>
 
         <!-- version conflicts -->
         <version.javassist>3.27.0-GA</version.javassist>
+        <version.checker.qual>3.11.0</version.checker.qual>
 
         <!-- logging dependencies -->
         <version.log4j2>2.14.0</version.log4j2>
@@ -151,6 +153,11 @@
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>${version.bouncy.castle}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${version.caffeine}</version>
+            </dependency>
 
             <!-- database -->
             <dependency>
@@ -203,13 +210,22 @@
                 <artifactId>validation-api</artifactId>
                 <version>${version.validation.api}</version>
             </dependency>
-
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${version.commons.fileupload}</version>
+            </dependency>
 
             <!-- version conflicts -->
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
                 <version>${version.javassist}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${version.checker.qual}</version>
             </dependency>
 
 
@@ -301,6 +317,8 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- **************************************************************************************** -->
 
     <dependencies>
         <dependency>
@@ -487,17 +505,20 @@
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>${version.maven.formatter.plugin}</version>
-                <configuration>
-                    <configFile>${formatter-path}/formatter.xml</configFile>
-                    <lineEnding>LF</lineEnding>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>validate</goal>
+                            <goal>format</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <configFile>${formatter-path}/formatter.xml</configFile>
+                    <lineEnding>LF</lineEnding>
+                    <excludes>
+                        <exclude>react-frontend/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -529,8 +550,95 @@
                     </rules>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>npm-install</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.11.2</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>install node and npm</id>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <configuration>
+                                    <nodeVersion>v14.16.0</nodeVersion>
+                                    <npmVersion>7.7.0</npmVersion>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm install</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install --save react react-dom react-scripts react-bootstrap
+                                        react-bootstrap-icons react-icons bootstrap async bs-custom-file-input
+                                        react-router-dom
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <workingDirectory>${project.basedir}/react-frontend</workingDirectory>
+                            <installDirectory>${project.basedir}/react-frontend</installDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>npm-build</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.11.2</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>npm run build</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run build</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm run test</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run test -- --watchAll=false</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <workingDirectory>${project.basedir}/react-frontend</workingDirectory>
+                            <installDirectory>${project.basedir}/react-frontend</installDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

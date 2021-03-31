@@ -1,12 +1,18 @@
 package de.captaingoldfish.oauthrestclient.application.projectconfig;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import lombok.Getter;
 
 
 /**
@@ -15,8 +21,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @ComponentScan("de.captaingoldfish.oauthrestclient")
 @Configuration
-public class WebAppConfig implements WebMvcConfigurer
+public class WebAppConfig implements WebMvcConfigurer, ApplicationContextAware
 {
+
+  /**
+   * the spring application context to get access from classes that act outside the spring context
+   */
+  @Getter
+  private static ApplicationContext applicationContext;
 
   /**
    * this method holds all resource-bundle paths that will be used
@@ -63,5 +75,26 @@ public class WebAppConfig implements WebMvcConfigurer
     LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
     bean.setValidationMessageSource(messageSource());
     return bean;
+  }
+
+  /**
+   * this is the multipart resolver which is needed to upload files. It MUST be named "multipartResolver"
+   * because it is not found by the framework otherwise
+   *
+   * @return the multipart resolver
+   */
+  @Bean(name = "multipartResolver")
+  public CommonsMultipartResolver multiPartResolver()
+  {
+    return new CommonsMultipartResolver();
+  }
+
+  /**
+   * make the application context available from everywhere within the application
+   */
+  @Override
+  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+  {
+    WebAppConfig.applicationContext = applicationContext;
   }
 }

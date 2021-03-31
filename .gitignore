@@ -10,7 +10,8 @@ temp
 
 
 # ********************************************* react *********************************************
-/node_modules
+node_modules
+node
 /.pnp
 .pnp.js
 
@@ -18,7 +19,7 @@ temp
 /coverage
 
 # production
-/build
+build
 
 # misc
 .DS_Store
