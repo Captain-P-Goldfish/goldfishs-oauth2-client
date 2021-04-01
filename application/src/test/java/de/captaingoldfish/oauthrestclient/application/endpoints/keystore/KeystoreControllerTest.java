@@ -171,7 +171,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
       JSONObject jsonObject = response.getBody().getObject();
       Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-      JSONObject errors = jsonObject.getJSONObject("errors");
+      JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
       Assertions.assertEquals(1, errors.length());
       List<String> keystoreFileErrors = jsonArrayToList(errors.getJSONArray("keystoreFile"));
       Assertions.assertEquals(1, keystoreFileErrors.size());
@@ -202,7 +202,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
       log.warn(response.getBody().toPrettyString());
       JSONObject jsonObject = response.getBody().getObject();
       Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-      JSONObject errors = jsonObject.getJSONObject("errors");
+      JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
       Assertions.assertEquals(1, errors.length());
       List<String> keystoreFileErrors = jsonArrayToList(errors.getJSONArray("keystoreFile"));
       Assertions.assertEquals(2, keystoreFileErrors.size());
@@ -236,7 +236,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
       log.warn(response.getBody().toPrettyString());
       JSONObject jsonObject = response.getBody().getObject();
       Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-      JSONObject errors = jsonObject.getJSONObject("errors");
+      JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
       Assertions.assertEquals(1, errors.length());
       List<String> keystoreFileErrors = jsonArrayToList(errors.getJSONArray("keystoreFile"));
       Assertions.assertEquals(1, keystoreFileErrors.size());
@@ -265,7 +265,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
       log.warn(response.getBody().toPrettyString());
       JSONObject jsonObject = response.getBody().getObject();
       Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-      JSONObject errors = jsonObject.getJSONObject("errors");
+      JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
       Assertions.assertEquals(2, errors.length());
       {
         List<String> keystoreFileErrors = jsonArrayToList(errors.getJSONArray("keystoreFile"));
@@ -305,7 +305,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
       log.warn(response.getBody().toPrettyString());
       JSONObject jsonObject = response.getBody().getObject();
       Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-      JSONObject errors = jsonObject.getJSONObject("errors");
+      JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
       Assertions.assertEquals(2, errors.length());
       {
         List<String> keystoreFileErrors = jsonArrayToList(errors.getJSONArray("keystoreFile"));
@@ -335,7 +335,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
       log.warn(response.getBody().toPrettyString());
       Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
       JSONObject jsonObject = response.getBody().getObject();
-      Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errors"));
+      Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("inputFieldErrors"));
       List<String> errorMessages = jsonArrayToList(Assertions.assertDoesNotThrow(() -> jsonObject.getJSONArray("errorMessages")));
       Assertions.assertEquals(1, errorMessages.size());
       Assertions.assertEquals("Content type '' not supported", errorMessages.get(0));
@@ -380,7 +380,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     log.warn(response.getBody().toPrettyString());
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
-    Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errors"));
+    Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("inputFieldErrors"));
     List<String> errorMessages = jsonArrayToList(Assertions.assertDoesNotThrow(() -> jsonObject.getJSONArray("errorMessages")));
     Assertions.assertEquals(1, errorMessages.size());
     String errorMessage = "Ups the required stateId parameter was missing in the request...";
@@ -404,7 +404,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(1, errors.length());
     {
       List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -433,7 +433,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(1, errors.length());
     {
       List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -461,7 +461,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     log.warn(response.getBody().toPrettyString());
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
-    Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errors"));
+    Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("inputFieldErrors"));
     List<String> errorMessages = jsonArrayToList(Assertions.assertDoesNotThrow(() -> jsonObject.getJSONArray("errorMessages")));
     Assertions.assertEquals(1, errorMessages.size());
     String errorMessage = "The stateId '" + stateId + "' could not be resolved to a previously uploaded keystore";
@@ -485,7 +485,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(2, errors.length());
     {
       List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -520,7 +520,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(2, errors.length());
     {
       List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -571,7 +571,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(2, errors.length());
     {
       List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -622,7 +622,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
         JSONObject jsonObject = response.getBody().getObject();
         Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-        JSONObject errors = jsonObject.getJSONObject("errors");
+        JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
         Assertions.assertEquals(1, errors.length());
         {
           List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -683,7 +683,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
         JSONObject jsonObject = response.getBody().getObject();
         Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-        JSONObject errors = jsonObject.getJSONObject("errors");
+        JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
         Assertions.assertEquals(1, errors.length());
         {
           List<String> aliases = jsonArrayToList(errors.getJSONArray("aliasOverride"));
@@ -721,7 +721,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(1, errors.length());
     {
       List<String> aliases = jsonArrayToList(errors.getJSONArray("aliases"));
@@ -827,7 +827,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     log.warn(response.getBody().toPrettyString());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(1, errors.length());
     List<String> aliasErrors = jsonArrayToList(errors.getJSONArray("alias"));
     Assertions.assertEquals(1, aliasErrors.size());
@@ -854,7 +854,7 @@ public class KeystoreControllerTest extends AbstractOAuthRestClientTest
     log.warn(response.getBody().toPrettyString());
     JSONObject jsonObject = response.getBody().getObject();
     Assertions.assertThrows(JSONException.class, () -> jsonObject.getJSONArray("errorMessages"));
-    JSONObject errors = jsonObject.getJSONObject("errors");
+    JSONObject errors = jsonObject.getJSONObject("inputFieldErrors");
     Assertions.assertEquals(1, errors.length());
     List<String> aliasErrors = jsonArrayToList(errors.getJSONArray("alias"));
     Assertions.assertEquals(1, aliasErrors.size());

@@ -30,14 +30,14 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * <pre>
  *   {
- *     "errors": {
+ *     "inputFieldErrors": {
  *       "keystorePassword": "Not accepting empty passwords"
  *     }
  *   }
  * </pre>
  * 
- * the key in the "errors" parameter represents the input-field name that also matches the pojo-form-object
- * name. Like this it is easy to map errors directly to fields in the view.<br>
+ * the key in the "inputFieldErrors" parameter represents the input-field name that also matches the
+ * pojo-form-object name. Like this it is easy to map errors directly to fields in the view.<br>
  * <br>
  * in case of unspecific errors like {@link NullPointerException}s or something similiar the response will
  * contain something like this:
@@ -142,7 +142,7 @@ public class ExceptionRequestHandler
     });
     if (!errorNode.isEmpty())
     {
-      responseNode.set("errors", errorNode);
+      responseNode.set("inputFieldErrors", errorNode);
     }
     return Optional.of(responseNode);
   }
