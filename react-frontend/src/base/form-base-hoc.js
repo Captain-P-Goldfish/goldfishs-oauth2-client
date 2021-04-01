@@ -150,9 +150,10 @@ export default function FormBaseHoc(WrappedComponent) {
             }
 
             let buttonText = this.props.buttonText === undefined ? "Submit" : this.props.buttonText;
+            let className = this.props.disabled === undefined || this.props.disabled === false ? "" : "disabled";
 
             return (
-                <Form id={this.props.formId} className={this.props.class} onSubmit={this.submitForm}>
+                <Form id={this.props.formId} className={className} onSubmit={this.submitForm}>
                     <h2>{this.props.header}</h2>
 
                     <Alert variant={"success"} show={this.state.success === true}>

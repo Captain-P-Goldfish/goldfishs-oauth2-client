@@ -31,9 +31,9 @@ class KeystoreAliasForm extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         // this if-condition will only be true once which is when the keystore-form goes into its second state
         // (alias-selection)
-        if (this.props.value !== prevProps.value) {
+        if (this.props.stateId !== prevProps.stateId) {
             // lifting stateId up to higher order component (FormBase)
-            this.props.setFieldParam("stateId", this.props.value);
+            this.props.setFieldParam("stateId", this.props.stateId);
             // lifting the first alias entry up  higher order component (FormBase) since it is the currently selected
             this.props.setFieldParam("aliases", [this.props.aliases[0]]);
         }
@@ -257,8 +257,8 @@ export default class KeystoreForm extends React.Component {
         let uploadFormUrl = "/keystore/upload";
         let aliasFormUrl = "/keystore/select-alias";
 
-        let uploadFormClass = this.state.uploaded === undefined ? "" : "disabled";
-        let aliasFormClass = this.state.uploaded !== undefined ? "" : "disabled";
+        let uploadFormDisabled = this.state.uploaded !== undefined && this.state.uploaded === true;
+        let aliasFormDisabled = this.state.uploaded === undefined || this.state.uploaded === false;
 
         let keystoreAliasList = null;
         if (this.state.keystoreInfos !== undefined) {
@@ -270,7 +270,7 @@ export default class KeystoreForm extends React.Component {
         return (
             <React.Fragment>
                 <WrappedKeystoreUploadForm formId="keystoreUploadForm"
-                                           class={uploadFormClass}
+                                           disabled={uploadFormDisabled}
                                            header="Keystore Upload"
                                            formUrl={uploadFormUrl}
                                            httpMethod="POST"
@@ -278,7 +278,7 @@ export default class KeystoreForm extends React.Component {
                                            buttonText="Upload"
                                            onSubmitSuccess={this.onKeystoreUploadSuccess} />
                 <WrappedKeystoreAliasForm formId="keystoreAliasForm"
-                                          class={aliasFormClass}
+                                          disabled={aliasFormDisabled}
                                           header="Alias Selection"
                                           formUrl={aliasFormUrl}
                                           httpMethod="POST"
