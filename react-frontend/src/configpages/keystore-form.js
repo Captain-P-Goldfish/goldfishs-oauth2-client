@@ -107,6 +107,7 @@ class KeystoreAliasRepresentation extends React.Component {
 
             <Card border={"warning"} bg={"dark"} className={"alias-card"}>
                 <Modal show={this.state.showModal}
+                       title={"Delete '" + this.props.keystoreInfo.alias + "'"}
                        message="Are you sure?"
                        submitButtonText="delete"
                        onSubmit={this.onDeleteClick}

@@ -138,6 +138,11 @@ small.error {
   border-radius: 25px;
 }
 
+.card-modal-content .card-title {
+  text-align: center;
+  text-decoration: underline;
+}
+
 .card-modal-content Button.left {
   float: left;
 }
