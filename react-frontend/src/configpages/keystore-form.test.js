@@ -1,6 +1,6 @@
 import React from 'react';
 import {render, screen, waitFor} from '@testing-library/react';
-import Keystore from "./keystore-upload";
+import Keystore from "./keystore-form";
 
 test('render Keystore and validate form', async () => {
     render(<Keystore myProp={"test"} />);

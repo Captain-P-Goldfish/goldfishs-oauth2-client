@@ -45,7 +45,7 @@ class KeystoreAliasForm extends React.Component {
                 <FormInputfield name="stateId" type="hidden"
                                 handleFieldChange={this.props.setFieldParam}
                                 fieldErrors={this.props.fieldErrors}
-                                value={this.props.value} />
+                                value={this.props.stateId} />
                 <FormSelectfield name="aliases" label="Alias"
                                  handleFieldChange={this.props.setFieldParam}
                                  fieldErrors={this.props.fieldErrors}
@@ -264,6 +264,7 @@ export default class KeystoreForm extends React.Component {
             keystoreAliasList = <KeystoreAliasList keystoreInfos={this.state.keystoreInfos}
                                                    onDeleteSuccess={this.onAliasDeleteSuccess} />;
         }
+        let stateId = this.state.stateId === undefined ? "" : this.state.stateId;
 
         return (
             <React.Fragment>
@@ -280,7 +281,7 @@ export default class KeystoreForm extends React.Component {
                                           header="Alias Selection"
                                           formUrl={aliasFormUrl}
                                           httpMethod="POST"
-                                          value={this.state.stateId}
+                                          stateId={stateId}
                                           aliases={this.state.aliases}
                                           successMessage="Keystore entry was successfully added"
                                           buttonText="Save"
