@@ -1,8 +1,7 @@
 import React from "react";
 import logo from "./logo.svg";
 import {Nav, Navbar} from "react-bootstrap";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import KeystoreForm from "./configpages/keystore-form";
+import KeystoreConfigForm from "./pages/keystore-config-form";
 
 
 class Application extends React.Component {
@@ -35,7 +34,7 @@ class Application extends React.Component {
                 </Navbar>
 
                 <div className="main">
-                    <KeystoreForm />
+                    <KeystoreConfigForm />
                 </div>
             </React.Fragment>
         );

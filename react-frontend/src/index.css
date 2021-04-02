@@ -149,3 +149,18 @@ small.error {
 .card-modal-content Button.right {
   float: right;
 }
+
+ul.error-list {
+  padding: 0;
+  margin: 0;
+}
+
+.error-list-item{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.error-list-item-icon{
+  padding-right: 10px;
+}
