@@ -19,13 +19,13 @@ class KeystoreAliasRepresentation extends React.Component {
 
     onDeleteClick() {
         this.setState({showSpinner: true});
-        let deleteUrl = "/keystore/delete-alias?alias=" + this.props.keystoreInfo.alias;
+        let deleteUrl = "/keystore/delete-alias?alias=" + this.props.alias;
         fetch(deleteUrl, {
             method: "DELETE"
         })
             .then(response => {
                 if (response.status === 204) {
-                    this.props.onDeleteSuccess(this.props.keystoreInfo.alias);
+                    this.props.onDeleteSuccess(this.props.alias);
                 }
             })
     }
@@ -47,44 +47,45 @@ class KeystoreAliasRepresentation extends React.Component {
         }
 
         return (
-
-            <Card border={"warning"} bg={"dark"} className={"alias-card"}>
-                <Modal show={this.state.showModal}
-                       title={"Delete '" + this.props.keystoreInfo.alias + "'"}
+            <Card id={"alias-card-" + this.props.alias} border={"warning"} bg={"dark"} className={"alias-card"}>
+                <Modal id={"delete-dialog-" + this.props.alias}
+                       show={this.state.showModal}
+                       variant="danger"
+                       title={"Delete '" + this.props.alias + "'"}
                        message="Are you sure?"
                        submitButtonText="delete"
                        onSubmit={this.onDeleteClick}
                        cancelButtonText="cancel"
                        onCancel={this.hideModal}>
                 </Modal>
-                <Card.Header>
-                    {this.props.keystoreInfo.alias}
+                <Card.Header id={"alias-name-" + this.props.alias}>
+                    {this.props.alias}
                     <div className="card-delete-icon">
                         {spinner}
-                        <TrashFill className="card-delete-icon" onClick={this.showModal}>
+                        <TrashFill id={"delete-button-" + this.props.alias} onClick={this.showModal}>
                         </TrashFill>
                     </div>
                 </Card.Header>
                 <Card.Body>
                     <Card.Subtitle>Issuer</Card.Subtitle>
-                    <Card.Text>
-                        {this.props.keystoreInfo.certificateInfo.issuerDn}
+                    <Card.Text id={"issuer-dn-" + this.props.alias}>
+                        {this.props.certificateInfo.issuerDn}
                     </Card.Text>
                     <Card.Subtitle>Subject</Card.Subtitle>
-                    <Card.Text>
-                        {this.props.keystoreInfo.certificateInfo.subjectDn}
+                    <Card.Text id={"subject-dn-" + this.props.alias}>
+                        {this.props.certificateInfo.subjectDn}
                     </Card.Text>
                     <Card.Subtitle>SHA-256 Fingerprint</Card.Subtitle>
-                    <Card.Text>
-                        {this.props.keystoreInfo.certificateInfo.sha256fingerprint}
+                    <Card.Text id={"sha-256-" + this.props.alias}>
+                        {this.props.certificateInfo.sha256fingerprint}
                     </Card.Text>
                     <Card.Subtitle>Valid From</Card.Subtitle>
-                    <Card.Text>
-                        {this.props.keystoreInfo.certificateInfo.validFrom}
+                    <Card.Text id={"valid-from-" + this.props.alias}>
+                        {this.props.certificateInfo.validFrom}
                     </Card.Text>
                     <Card.Subtitle>Valid Until</Card.Subtitle>
-                    <Card.Text>
-                        {this.props.keystoreInfo.certificateInfo.validUntil}
+                    <Card.Text id={"valid-until-" + this.props.alias}>
+                        {this.props.certificateInfo.validUntil}
                     </Card.Text>
                 </Card.Body>
             </Card>
@@ -122,27 +123,32 @@ class KeystoreAliasList extends React.Component {
             <React.Fragment>
                 <h2>Current entries of the application keystore</h2>
 
-                <Alert variant={"warning"} show={this.props.keystoreInfos.length === 0}>
+                <Alert id="card-list-alert-no-entries"
+                       variant={"warning"}
+                       show={this.props.keystoreInfos.length === 0}>
                     <Form.Text>
                         <InfoCircle /> No Key entries added yet
+                    </Form.Text>
+                </Alert>
+
+                <Alert id="card-list-deletion-success"
+                       variant={"success"}
+                       show={this.state.deletedAlias !== undefined}>
+                    <Form.Text>
+                        <GoThumbsup /> Alias "{this.state.deletedAlias}" was successfully deleted
                     </Form.Text>
                 </Alert>
                 {
                     this.props.keystoreInfos.length > 0
                     &&
                     <React.Fragment>
-                        <Alert variant={"success"} show={this.state.deletedAlias !== undefined}>
-                            <Form.Text>
-                                <GoThumbsup /> Alias "{this.state.deletedAlias}" was successfully deleted
-                            </Form.Text>
-                        </Alert>
-
-                        <CardDeck>
+                        <CardDeck id="keystore-alias-entries">
                             {
                                 this.props.keystoreInfos.map((keystoreInfo, index) => {
                                     return <KeystoreAliasRepresentation
-                                        key={keystoreInfo.certificateInfo === undefined ? index : keystoreInfo.certificateInfo.sha256fingerprint}
-                                        keystoreInfo={keystoreInfo}
+                                        key={keystoreInfo.certificateInfo === undefined ? index : keystoreInfo.alias}
+                                        alias={keystoreInfo.alias}
+                                        certificateInfo={keystoreInfo.certificateInfo}
                                         onDeleteSuccess={this.onDeleteSuccess} />
                                 })
                             }
@@ -171,7 +177,7 @@ export default class KeystoreConfigForm extends React.Component {
         this.onAliasDeleteSuccess = this.onAliasDeleteSuccess.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         fetch("/keystore/aliases")
             .then(response => {
                 response.json().then(jsonResponse => {
@@ -212,10 +218,12 @@ export default class KeystoreConfigForm extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <ConfigPageForm header="Keystore Upload"
+                <ConfigPageForm formId="uploadForm"
+                                header="Keystore Upload"
                                 httpMethod="POST"
                                 submitUrl="/keystore/upload"
                                 onSubmitSuccess={this.handleUploadSuccess}
+                                buttonId="uploadButton"
                                 buttonText="Upload"
                                 successMessage="Keystore was successfully uploaded"
                                 disabled={this.state.uploadFormDisabled}>
@@ -236,10 +244,12 @@ export default class KeystoreConfigForm extends React.Component {
                         </React.Fragment>
                     )}
                 </ConfigPageForm>
-                <ConfigPageForm header="Alias Selection"
+                <ConfigPageForm formId="aliasSelectionForm"
+                                header="Alias Selection"
                                 httpMethod="POST"
                                 submitUrl="/keystore/select-alias"
                                 onSubmitSuccess={this.handleSelectionSuccess}
+                                buttonId="saveButton"
                                 buttonText="Save"
                                 successMessage="Key Entry was successfully added"
                                 disabled={this.state.selectAliasFormDisabled}>
@@ -275,4 +285,8 @@ export default class KeystoreConfigForm extends React.Component {
             </React.Fragment>
         );
     }
+}
+
+export {
+    KeystoreAliasRepresentation
 }

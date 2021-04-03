@@ -282,16 +282,17 @@ export default class ConfigPageForm extends React.Component {
         let buttonText = this.props.buttonText === undefined ? "Submit" : this.props.buttonText;
 
         return (
-            <Form className={className} onSubmit={this.handleSubmit}>
+            <Form id={this.props.formId} className={className} onSubmit={this.handleSubmit}>
                 <h2>{this.props.header}</h2>
 
-                <Alert variant={"success"} show={this.state.success === true}>
+                <Alert id={this.props.formId + "-alert-success"} variant={"success"} show={this.state.success === true}>
                     <Form.Text>
                         <GoThumbsup /> {this.props.successMessage}
                     </Form.Text>
                 </Alert>
 
-                <Alert variant={"danger"} show={this.state.errorMessages !== undefined}>
+                <Alert id={this.props.formId + "-alert-error"} variant={"danger"}
+                       show={this.state.errorMessages !== undefined}>
                     <ErrorMessageList fieldErrors={this.state.errorMessages} backgroundClass={""} />
                 </Alert>
 
@@ -302,7 +303,7 @@ export default class ConfigPageForm extends React.Component {
 
                 <Form.Group as={Row}>
                     <Col sm={{span: 10, offset: 2}}>
-                        <Button type="submit" onClick={() => this.startSpinner}>
+                        <Button id={this.props.buttonId} type="submit" onClick={() => this.startSpinner}>
                             {spinner} {buttonText}
                         </Button>
                     </Col>

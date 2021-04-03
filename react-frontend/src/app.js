@@ -17,7 +17,7 @@ class Application extends React.Component {
 
         return (
             <React.Fragment>
-                <Navbar bg="navigation" variant="light" expand="md">
+                <Navbar bg="navigation" expand="md">
                     <Navbar.Brand href="#home">OAuth2 Rest Client</Navbar.Brand>
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto" />
