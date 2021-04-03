@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.captaingoldfish.oauthrestclient.commons.FileReferences;
 import de.captaingoldfish.oauthrestclient.commons.exceptions.KeyStoreCreationFailedException;
 import de.captaingoldfish.oauthrestclient.commons.exceptions.KeyStoreEntryException;
+import de.captaingoldfish.oauthrestclient.commons.exceptions.KeystoreEntryExistsException;
 import lombok.SneakyThrows;
 
 
@@ -973,7 +974,7 @@ public class KeyStoreSupporterTest implements FileReferences
                                                                                       new Date(),
                                                                                       new Date(System.currentTimeMillis()
                                                                                                + 1000L * 60 * 60 * 24));
-    Assertions.assertThrows(IllegalArgumentException.class,
+    Assertions.assertThrows(KeystoreEntryExistsException.class,
                             () -> KeyStoreSupporter.addEntryToKeystore(keyStore,
                                                                        alias,
                                                                        keyPair2.getPrivate(),
