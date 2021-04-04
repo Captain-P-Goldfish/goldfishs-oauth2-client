@@ -25,7 +25,7 @@ public class KeystoreTest extends DbBaseTest
 
   @SneakyThrows
   @Test
-  public void testKeystoreTest()
+  public void testSaveAndDeleteKeystore()
   {
     final String alias = "unit-tests";
     final String keystorePassword = "123456";
@@ -53,9 +53,9 @@ public class KeystoreTest extends DbBaseTest
     Keystore loadedKeystore = keystoreDao.findById(1L).get();
     Assertions.assertEquals(1, loadedKeystore.getKeystoreEntries().size());
 
-    Assertions.assertEquals(1, countEntriesOfTable("KEYSTORE_ALIAS_PASSWORDS"));
+    Assertions.assertEquals(1, countEntriesOfTable("KEYSTORE_ENTRIES"));
     keystoreDao.deleteAll();
     Assertions.assertEquals(0, keystoreDao.count());
-    Assertions.assertEquals(0, countEntriesOfTable("KEYSTORE_ALIAS_PASSWORDS"));
+    Assertions.assertEquals(0, countEntriesOfTable("KEYSTORE_ENTRIES"));
   }
 }
