@@ -84,7 +84,6 @@
             <column name="ID" type="BIGINT">
                 <constraints primaryKeyName="TRUSTSTORE_PRIME_KEY" primaryKey="true"/>
             </column>
-            <column name="NAME" type="VARCHAR(255)"/>
             <column name="TRUSTSTORE_BYTES" type="${blob_type}"/>
             <column name="TRUSTSTORE_PASSWORD" type="VARCHAR(255)"/>
             <column name="TRUSTSTORE_TYPE" type="VARCHAR(10)"/>

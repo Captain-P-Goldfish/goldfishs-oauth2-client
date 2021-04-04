@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
@@ -23,6 +22,7 @@ import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyStoreSupporter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -30,6 +30,7 @@ import lombok.SneakyThrows;
  * created at: 29.04.2018 - 22:46 <br>
  * <br>
  */
+@Slf4j
 @Data
 @NoArgsConstructor
 @Entity
@@ -41,15 +42,8 @@ public class Truststore
    * the primary key of this table
    */
   @Id
-  @GeneratedValue
   @Column(name = "ID")
-  private long id;
-
-  /**
-   * a unique identifier for this truststore
-   */
-  @Column(name = "NAME")
-  private String name;
+  private long id = 1L;
 
   /**
    * the bytes representing this keystore
@@ -77,12 +71,10 @@ public class Truststore
   private KeyStore truststore;
 
   @SneakyThrows
-  public Truststore(String name,
-                    InputStream truststoreInputStream,
-                    String truststorePassword,
-                    KeyStoreSupporter.KeyStoreType truststoreType)
+  public Truststore(InputStream truststoreInputStream,
+                    KeyStoreSupporter.KeyStoreType truststoreType,
+                    String truststorePassword)
   {
-    this.name = name;
     this.truststoreBytes = IOUtils.toByteArray(truststoreInputStream);
     this.truststorePassword = truststorePassword;
     this.truststoreType = truststoreType;
@@ -90,43 +82,21 @@ public class Truststore
   }
 
   /**
-   * will load the truststore instance of this class
+   * will load the keystore instance
    */
   @PostLoad
-  public final void loadKTruststore()
+  public final void loadKeystore()
   {
-    if (KeyStoreSupporter.KeyStoreType.PKCS12.equals(truststoreType))
+    try
     {
-      setTruststore(KeyStoreSupporter.readTruststore(getTruststoreBytes(),
-                                                     getTruststoreType(),
-                                                     getTruststorePassword()));
+      this.truststore = KeyStoreSupporter.readKeyStore(getTruststoreBytes(),
+                                                       getTruststoreType(),
+                                                       getTruststorePassword());
     }
-    else
+    catch (Exception ex)
     {
-      setTruststore(KeyStoreSupporter.readTruststore(getTruststoreBytes(),
-                                                     getTruststoreType(),
-                                                     getTruststorePassword()));
+      log.error(ex.getMessage(), ex);
     }
-  }
-
-  /**
-   * will set the values of the keystore based on the given multipartfile
-   *
-   * @param filename the name of the file
-   * @param truststoreFile the keystore file
-   */
-  public void setTruststore(String filename, byte[] truststoreFile)
-  {
-    if (truststoreFile == null || truststoreFile.length == 0)
-    {
-      return;
-    }
-    final KeyStoreSupporter.KeyStoreType defaultType = KeyStoreSupporter.KeyStoreType.JKS;
-    KeyStoreSupporter.KeyStoreType keyStoreType = KeyStoreSupporter.KeyStoreType.byFileExtension(filename)
-                                                                                .orElse(defaultType);
-    this.truststoreType = keyStoreType;
-    this.truststoreBytes = truststoreFile;
-    loadKTruststore();
   }
 
   /**
@@ -146,4 +116,19 @@ public class Truststore
     return aliasList;
   }
 
+  /**
+   * mainly used for unit tests. This method returns the keystore entries that are really present in the
+   * application keystore
+   */
+  @SneakyThrows
+  public List<String> getTruststoreAliases()
+  {
+    Enumeration<String> aliasesEnumeration = truststore.aliases();
+    List<String> aliases = new ArrayList<>();
+    while (aliasesEnumeration.hasMoreElements())
+    {
+      aliases.add(aliasesEnumeration.nextElement());
+    }
+    return aliases;
+  }
 }

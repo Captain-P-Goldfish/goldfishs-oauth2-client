@@ -14,5 +14,6 @@ import de.captaingoldfish.oauthrestclient.database.entities.Truststore;
  * <br>
  * this class represents the database-access from spring to the {@link Truststore}-objects
  */
-public interface TruststoreDao extends JpaRepository<Truststore, Long>, JpaSpecificationExecutor<Truststore>
+public interface TruststoreDao
+  extends JpaRepository<Truststore, Long>, JpaSpecificationExecutor<Truststore>, TruststoreDaoExtension
 {}

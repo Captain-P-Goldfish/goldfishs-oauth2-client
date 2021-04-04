@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.server.LocalServerPort;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.captaingoldfish.oauthrestclient.database.repositories.ClientDao;
 import de.captaingoldfish.oauthrestclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.oauthrestclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.oauthrestclient.database.repositories.ProxyDao;
 import de.captaingoldfish.oauthrestclient.database.repositories.TruststoreDao;
 import kong.unirest.json.JSONArray;
+import lombok.SneakyThrows;
 
 
 /**
@@ -73,5 +76,11 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
     List<String> values = new ArrayList<>();
     jsonArray.forEach(val -> values.add((String)val));
     return values;
+  }
+
+  @SneakyThrows
+  public <T> T getForm(String jsonResponse, Class<T> type)
+  {
+    return new ObjectMapper().readValue(jsonResponse, type);
   }
 }

@@ -30,13 +30,10 @@ public class TruststoreTest extends DbBaseTest implements FileReferences
   {
     try (InputStream inputStream = getResourceStream(truststorePath))
     {
-      final String truststoreName = "unit-test-" + keyStoreType.name();
       final byte[] truststoreBytes = IOUtils.toByteArray(inputStream);
-      Truststore truststore = new Truststore(truststoreName, new ByteArrayInputStream(truststoreBytes), PASSWORD,
-                                             keyStoreType);
+      Truststore truststore = new Truststore(new ByteArrayInputStream(truststoreBytes), keyStoreType, PASSWORD);
       truststore = truststoreDao.save(truststore);
       Assertions.assertNotEquals(0, truststore.getId());
-      Assertions.assertEquals(truststoreName, truststore.getName());
       Assertions.assertArrayEquals(truststoreBytes, truststore.getTruststoreBytes());
       Assertions.assertEquals(keyStoreType, truststore.getTruststoreType());
 

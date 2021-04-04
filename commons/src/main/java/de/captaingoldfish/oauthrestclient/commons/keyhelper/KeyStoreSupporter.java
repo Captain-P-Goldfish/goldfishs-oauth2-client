@@ -224,12 +224,17 @@ public final class KeyStoreSupporter
    * @param alias the alias that will be used for the certificate entry.
    * @return the keystore that was also given as parameter with the added certificate.
    */
+  @SneakyThrows
   public static KeyStore addCertificateEntryToKeyStore(KeyStore keyStore, Certificate certificate, String alias)
   {
     Optional<Certificate> certificateOptional = getCertificate(keyStore, alias);
     if (certificateOptional.isPresent())
     {
       throw new IllegalArgumentException(String.format("certificate entry for alias '%s' does already exist", alias));
+    }
+    else if (keyStore.getCertificateAlias(certificate) != null)
+    {
+      throw new IllegalArgumentException(String.format("certificate entry already present under alias '%s'", alias));
     }
     else
     {
@@ -583,6 +588,28 @@ public final class KeyStoreSupporter
   }
 
   /**
+   * this method will merge all certificate entries of keystore1 and keystore2 into a single keystore
+   *
+   * @param keyStore1 the first keystore
+   * @param password1 the password to access the first keystore
+   * @param keyStore2 the second keystore
+   * @param password2 the password to access the second keystore
+   * @param keyStoreType this will be the type of the keystore that contains the new entries.
+   * @param mergedKeyStoreKeyPassword this will be the password of all added private keys within the merged
+   *          keystore.
+   * @return a new keystore that contains all entries of the two keystores that were directly accessible.
+   */
+  public static KeyStore mergeTruststores(KeyStore keyStore1,
+                                          String password1,
+                                          KeyStore keyStore2,
+                                          String password2,
+                                          KeyStoreType keyStoreType,
+                                          String mergedKeyStoreKeyPassword)
+  {
+    return mergeKeyStores(keyStore1, password1, keyStore2, password2, keyStoreType, mergedKeyStoreKeyPassword, true);
+  }
+
+  /**
    * this method will merge all accessible entries from the given keystores into a single keystore <br>
    * <b>WARNING:</b> <br>
    * It might be that keystore1 and 2 may contain different entries under the same alias. In order for these
@@ -611,6 +638,39 @@ public final class KeyStoreSupporter
                                         KeyStoreType keyStoreType,
                                         String mergedKeyStoreKeyPassword)
   {
+    return mergeKeyStores(keyStore1, password1, keyStore2, password2, keyStoreType, mergedKeyStoreKeyPassword, false);
+  }
+
+  /**
+   * this method will merge all accessible entries from the given keystores into a single keystore <br>
+   * <b>WARNING:</b> <br>
+   * It might be that keystore1 and 2 may contain different entries under the same alias. In order for these
+   * both not to collide with one another the alias from keystore2 will be extended by "_2" <br>
+   * <br>
+   * If keystore 1 and 2 will share the same entry under different aliases the alias from keystore1 is preferred
+   * unless the entry of keystore1 is accessible. Otherwise the entry of keystore2 will be added if it is
+   * accessbile instead. <br>
+   * <br>
+   * If a private key entry cannot be accessed since its password is not matching the keystore password the
+   * entry will be omitted and only be added as a certificate entry.
+   *
+   * @param keyStore1 the first keystore
+   * @param password1 the password to access the first keystore
+   * @param keyStore2 the second keystore
+   * @param password2 the password to access the second keystore
+   * @param keyStoreType this will be the type of the keystore that contains the new entries.
+   * @param mergedKeyStoreKeyPassword this will be the password of all added private keys within the merged
+   *          keystore.
+   * @return a new keystore that contains all entries of the two keystores that were directly accessible.
+   */
+  private static KeyStore mergeKeyStores(KeyStore keyStore1,
+                                         String password1,
+                                         KeyStore keyStore2,
+                                         String password2,
+                                         KeyStoreType keyStoreType,
+                                         String mergedKeyStoreKeyPassword,
+                                         boolean onlyCertificates)
+  {
     log.trace("trying to merge the following keystores {}-{} and {}-{}",
               keyStore1.getType(),
               keyStore1,
@@ -637,20 +697,42 @@ public final class KeyStoreSupporter
     {
       String alias = aliases2.nextElement();
 
-      Optional<Key> key = getKeyEntry(keyStore2, alias, password2);
+      Optional<Key> key;
+      if (onlyCertificates)
+      {
+        key = Optional.empty();
+      }
+      else
+      {
+        key = getKeyEntry(keyStore2, alias, password2);
+      }
 
       if (key.isPresent())
       {
-        getCertificateChain(keyStore2, alias).ifPresent(certificates -> addEntryToKeystore(mergedKeyStore,
-                                                                                           alias,
-                                                                                           key.get(),
-                                                                                           certificates,
-                                                                                           password2));
+        getCertificateChain(keyStore2, alias).ifPresent(certificates -> {
+          try
+          {
+            addEntryToKeystore(mergedKeyStore, alias, key.get(), certificates, password2);
+          }
+          catch (IllegalArgumentException ex)
+          {
+            log.debug(ex.getMessage());
+          }
+        });
       }
       else
       {
         Optional<Certificate> certificate = getCertificate(keyStore2, alias);
-        certificate.ifPresent(cert -> addCertificateEntryToKeyStore(mergedKeyStore, cert, alias));
+        certificate.ifPresent(cert -> {
+          try
+          {
+            addCertificateEntryToKeyStore(mergedKeyStore, cert, alias);
+          }
+          catch (IllegalArgumentException ex)
+          {
+            log.debug(ex.getMessage());
+          }
+        });
       }
     }
     return mergedKeyStore;
