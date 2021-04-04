@@ -320,6 +320,72 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
   }
 
   @SneakyThrows
+  @Test
+  public void testGetTruststoreInfos()
+  {
+    // send upload post request
+    {
+      HttpResponse<JsonNode> response;
+      try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
+      {
+        MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
+                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
+                                             // type
+                                             .field("truststoreFile", inputStream, "unit-test.jks")
+                                             .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
+        response = multipartBody.asJson();
+      }
+      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
+                                                          TruststoreUploadResponseForm.class);
+      Assertions.assertNull(responseForm.getAlias());
+      Assertions.assertNull(responseForm.getDuplicateAliases());
+      Assertions.assertNull(responseForm.getDuplicateCertificates());
+      Assertions.assertEquals(3, truststoreDao.getTruststore().getTruststore().size());
+    }
+
+    {
+      HttpResponse<JsonNode> response = Unirest.get(getApplicationUrl("/truststore/infos")).asJson();
+      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      TruststoreInfoForm truststoreInfoForm = getForm(response.getBody().toString(), TruststoreInfoForm.class);
+      Assertions.assertEquals(3, truststoreInfoForm.getNumberOfEntries());
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  public void testDownloadTruststore()
+  {
+    // send upload post request
+    {
+      HttpResponse<JsonNode> response;
+      try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
+      {
+        MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
+                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
+                                             // type
+                                             .field("truststoreFile", inputStream, "unit-test.jks")
+                                             .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
+        response = multipartBody.asJson();
+      }
+      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
+                                                          TruststoreUploadResponseForm.class);
+      Assertions.assertNull(responseForm.getAlias());
+      Assertions.assertNull(responseForm.getDuplicateAliases());
+      Assertions.assertNull(responseForm.getDuplicateCertificates());
+      Assertions.assertEquals(3, truststoreDao.getTruststore().getTruststore().size());
+    }
+
+    {
+      HttpResponse<byte[]> response = Unirest.get(getApplicationUrl("/truststore/download")).asBytes();
+      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      KeyStore javaTruststore = KeyStoreSupporter.readTruststore(response.getBody(), KeyStoreSupporter.KeyStoreType.JKS);
+      Assertions.assertEquals(3, javaTruststore.size());
+    }
+  }
+
+  @SneakyThrows
   private InputStream getCertificateStreamOfKeystore(String keystorePath, String alias)
   {
     KeyStore keyStore;

@@ -124,4 +124,18 @@ public class TruststoreService
     truststoreDao.save(truststore);
     return TruststoreUploadResponseForm.builder().alias(effectiveAlias).build();
   }
+
+  @SneakyThrows
+  public TruststoreInfoForm getTruststoreInfos()
+  {
+    Truststore truststore = truststoreDao.getTruststore();
+    return new TruststoreInfoForm(truststore.getTruststore().size());
+  }
+
+  public TruststoreDownloadInfo getDownloadInfos()
+  {
+    Truststore truststore = truststoreDao.getTruststore();
+    String filename = "application-truststore." + truststore.getTruststoreType().getFileExtension();
+    return new TruststoreDownloadInfo(truststore.getTruststoreBytes(), filename);
+  }
 }
