@@ -48,7 +48,8 @@ class FormInputField extends React.Component {
                                   onChange={this.bubbleEvent}
                                   value={this.props.value} />
 
-                    <ErrorMessageList fieldErrors={inputFieldErrorMessages} />
+                    <ErrorMessageList controlId={this.props.name + "-error-list"}
+                                      fieldErrors={inputFieldErrorMessages} />
                 </Col>
             </Form.Group>
         );
@@ -85,7 +86,8 @@ function FormFileField(props) {
                     </Form.File.Label>
                 </Form.File>
 
-                <ErrorMessageList fieldErrors={inputFieldErrorMessages} />
+                <ErrorMessageList controlId={props.name + "-error-list"}
+                                  fieldErrors={inputFieldErrorMessages} />
             </Col>
         </Form.Group>
     );
@@ -101,6 +103,12 @@ class FormSelectField extends React.Component {
         this.bubbleEvent = this.bubbleEvent.bind(this);
     }
 
+    componentDidMount() {
+        if (this.props.options !== undefined && this.props.options.length > 0) {
+            this.props.onChange(this.props.name, this.props.options[0]);
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.options !== this.props.options && this.props.options.length > 0) {
             this.props.onChange(this.props.name, this.props.options[0]);
@@ -113,7 +121,7 @@ class FormSelectField extends React.Component {
 
     render() {
         let labelText = this.props.label === undefined ? this.props.name : this.props.label;
-        let inputFieldErrorMessages = this.props.onError[this.props.name];
+        let inputFieldErrorMessages = this.props.onError(this.props.name);
         let inputFieldOptions = this.props.options === undefined ? null :
             this.props.options.map((value) => {
                 return <option key={value}>{value}</option>
@@ -131,7 +139,8 @@ class FormSelectField extends React.Component {
                         {inputFieldOptions}
                     </Form.Control>
 
-                    <ErrorMessageList fieldErrors={inputFieldErrorMessages} />
+                    <ErrorMessageList controlId={this.props.name + "-error-list"}
+                                      fieldErrors={inputFieldErrorMessages} />
                 </Col>
             </Form.Group>
         );
@@ -152,12 +161,10 @@ function ErrorMessageList(props) {
     let backgroundClass = props.backgroundClass === undefined ? "bg-danger" : props.backgroundClass;
 
     return (
-        <div>
-            <ul className="error-list">
-                {props.fieldErrors.map((message, index) =>
-                    <ErrorListItem key={index} backgroundClass={backgroundClass} message={message} />)}
-            </ul>
-        </div>
+        <ul id={props.controlId} className="error-list">
+            {props.fieldErrors.map((message, index) =>
+                <ErrorListItem key={index} backgroundClass={backgroundClass} message={message} />)}
+        </ul>
     );
 }
 

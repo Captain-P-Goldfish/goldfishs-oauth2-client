@@ -3,7 +3,7 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
-import {waitFor} from "@testing-library/react";
+import {fireEvent, waitFor} from "@testing-library/react";
 
 export default class Assertions {
 
@@ -54,6 +54,15 @@ export default class Assertions {
         return this;
     }
 
+    fireChangeEvent(value) {
+        if (value instanceof File) {
+            fireEvent.change(this.element, {target: {files: [value]}});
+        } else {
+            fireEvent.change(this.element, {target: {value: value}});
+        }
+        return this;
+    }
+
     async clickElement(awaitCondition) {
         this.element.dispatchEvent(new MouseEvent('click', {bubbles: true}));
         if (awaitCondition !== undefined) {
@@ -62,6 +71,16 @@ export default class Assertions {
             });
         }
         return this
+    }
+
+    hasErrors(errorMessages) {
+        let fieldErrors = this.element.querySelectorAll(".error-list-item");
+        expect(fieldErrors.length).toBe(errorMessages.length)
+
+        for (let i = 0; i < errorMessages; i++) {
+            const message = errorMessages[i];
+            expect(fieldErrors[i].textContent).toBe(message);
+        }
     }
 }
 
