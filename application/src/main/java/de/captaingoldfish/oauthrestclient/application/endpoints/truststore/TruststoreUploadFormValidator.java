@@ -159,7 +159,7 @@ public class TruststoreUploadFormValidator
         String errormessage = Optional.ofNullable(current.getMessage()).orElse("NullPointerException");
         log.debug(errormessage);
         context.buildConstraintViolationWithTemplate(errormessage)
-               .addPropertyNode("truststoreFile")
+               .addPropertyNode("certificateFile")
                .addConstraintViolation();
         current = current.getCause();
       }
@@ -175,7 +175,7 @@ public class TruststoreUploadFormValidator
                                           truststoreUploadForm.getAlias());
       log.debug(errormessage);
       context.buildConstraintViolationWithTemplate(errormessage)
-             .addPropertyNode("truststoreFile")
+             .addPropertyNode("certificateFile")
              .addConstraintViolation();
       isValid = false;
     }
@@ -192,7 +192,7 @@ public class TruststoreUploadFormValidator
                                           existingCertEntryAlias);
       log.debug(errormessage);
       context.buildConstraintViolationWithTemplate(errormessage)
-             .addPropertyNode("truststoreFile")
+             .addPropertyNode("certificateFile")
              .addConstraintViolation();
       isValid = false;
     }

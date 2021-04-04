@@ -129,7 +129,7 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       }
       Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
       ErrorResponseForm responseForm = getForm(response.getBody().toString(), ErrorResponseForm.class);
-      List<String> truststoreFileErrors = responseForm.getInputFieldErrors().get("truststoreFile");
+      List<String> truststoreFileErrors = responseForm.getInputFieldErrors().get("certificateFile");
       Assertions.assertNotNull(truststoreFileErrors);
       Assertions.assertEquals(2, truststoreFileErrors.size());
       MatcherAssert.assertThat(truststoreFileErrors,
@@ -154,7 +154,7 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       }
       Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
       ErrorResponseForm responseForm = getForm(response.getBody().toString(), ErrorResponseForm.class);
-      List<String> truststoreFileErrors = responseForm.getInputFieldErrors().get("truststoreFile");
+      List<String> truststoreFileErrors = responseForm.getInputFieldErrors().get("certificateFile");
       Assertions.assertNotNull(truststoreFileErrors);
       Assertions.assertEquals(1, truststoreFileErrors.size());
       MatcherAssert.assertThat(truststoreFileErrors,
@@ -257,7 +257,7 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertNull(responseForm.getErrorMessages());
     Assertions.assertEquals(1, responseForm.getInputFieldErrors().size());
 
-    List<String> truststoreFileErrors = responseForm.getInputFieldErrors().get("truststoreFile");
+    List<String> truststoreFileErrors = responseForm.getInputFieldErrors().get("certificateFile");
     Assertions.assertNotNull(truststoreFileErrors);
     Assertions.assertEquals(2, truststoreFileErrors.size());
     MatcherAssert.assertThat(truststoreFileErrors,
@@ -301,8 +301,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("truststoreFile", inputStream, "unit-test.jks")
                                              .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
         response = multipartBody.asJson();
@@ -380,7 +378,8 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
     {
       HttpResponse<byte[]> response = Unirest.get(getApplicationUrl("/truststore/download")).asBytes();
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
-      KeyStore javaTruststore = KeyStoreSupporter.readTruststore(response.getBody(), KeyStoreSupporter.KeyStoreType.JKS);
+      KeyStore javaTruststore = KeyStoreSupporter.readTruststore(response.getBody(),
+                                                                 KeyStoreSupporter.KeyStoreType.JKS);
       Assertions.assertEquals(3, javaTruststore.size());
     }
   }
