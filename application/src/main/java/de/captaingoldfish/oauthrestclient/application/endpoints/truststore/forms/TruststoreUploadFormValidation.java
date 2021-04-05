@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.truststore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

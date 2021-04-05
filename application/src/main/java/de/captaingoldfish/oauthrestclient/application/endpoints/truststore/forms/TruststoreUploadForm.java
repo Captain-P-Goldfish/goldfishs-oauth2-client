@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.truststore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TruststoreUploadFormValidation
-class TruststoreUploadForm
+public class TruststoreUploadForm
 {
 
   /**

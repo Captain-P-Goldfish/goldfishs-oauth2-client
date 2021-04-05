@@ -6,8 +6,6 @@ import java.security.KeyStore;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.oauthrestclient.database.entities.Truststore;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 public class TruststoreDaoImpl implements TruststoreDaoExtension
 {
 
+  private static final String APPLICATION_TRUSTSTORE_PASSWORD = "123456";
+
   private final EntityManager entityManager;
 
   @Transactional
@@ -32,13 +32,11 @@ public class TruststoreDaoImpl implements TruststoreDaoExtension
     {
       return applicationTruststore;
     }
-    final String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`"
-                              + "!@#$%^&*()-_=+[{]}\\|;:\'\",<.>/?";
-    final String randomPassword = RandomStringUtils.random(15, characters);
-    KeyStore javakeyStore = KeyStoreSupporter.createEmptyKeyStore(KeyStoreSupporter.KeyStoreType.JKS, randomPassword);
-    byte[] keystoreBytes = KeyStoreSupporter.getBytes(javakeyStore, randomPassword);
+    KeyStore javakeyStore = KeyStoreSupporter.createEmptyKeyStore(KeyStoreSupporter.KeyStoreType.JKS,
+                                                                  APPLICATION_TRUSTSTORE_PASSWORD);
+    byte[] keystoreBytes = KeyStoreSupporter.getBytes(javakeyStore, APPLICATION_TRUSTSTORE_PASSWORD);
     Truststore truststore = new Truststore(new ByteArrayInputStream(keystoreBytes), KeyStoreSupporter.KeyStoreType.JKS,
-                                           randomPassword);
+                                           APPLICATION_TRUSTSTORE_PASSWORD);
     entityManager.persist(truststore);
     return truststore;
   }

@@ -12,12 +12,19 @@ import org.springframework.http.MediaType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreAliasRequestForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreDownloadInfo;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreUploadForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreUploadResponseForm;
 import de.captaingoldfish.oauthrestclient.application.exceptions.RequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -46,7 +53,7 @@ public class TruststoreController
    * uploads a truststore and validates the given data
    */
   @PostMapping(path = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  public TruststoreUploadResponseForm uploadKeystore(@Valid @ModelAttribute TruststoreUploadForm truststoreUploadForm,
+  public TruststoreUploadResponseForm uploadKeystore(@Valid TruststoreUploadForm truststoreUploadForm,
                                                      BindingResult bindingResult)
   {
     if (bindingResult.hasErrors())
@@ -63,6 +70,25 @@ public class TruststoreController
   public TruststoreInfoForm getTruststoreInfos()
   {
     return truststoreService.getTruststoreInfos();
+  }
+
+  /**
+   * deletes an entry in the truststore
+   */
+  @DeleteMapping("/delete-alias")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteEntry(TruststoreAliasRequestForm truststoreAliasRequestForm)
+  {
+    truststoreService.deleteAlias(truststoreAliasRequestForm);
+  }
+
+  /**
+   * loads the certificate data of an existing certificate entry
+   */
+  @GetMapping("/load-alias")
+  public CertificateInfo loadCertificateInfo(TruststoreAliasRequestForm truststoreAliasRequestForm)
+  {
+    return truststoreService.loadAlias(truststoreAliasRequestForm);
   }
 
   /**

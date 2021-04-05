@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.truststore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms;
 
 import java.util.List;
 

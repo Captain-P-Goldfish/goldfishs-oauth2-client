@@ -12,10 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreUploadResponseForm;
 import de.captaingoldfish.oauthrestclient.application.setup.AbstractOAuthRestClientTest;
 import de.captaingoldfish.oauthrestclient.application.setup.ErrorResponseForm;
 import de.captaingoldfish.oauthrestclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyStoreSupporter;
+import de.captaingoldfish.oauthrestclient.database.entities.Truststore;
 import kong.unirest.HttpResponse;
 import kong.unirest.HttpStatus;
 import kong.unirest.JsonNode;
@@ -47,8 +50,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = readAsInputStream(keystorePath))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("truststoreFile", inputStream, "unit-test.jks")
                                              .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
         response = multipartBody.asJson();
@@ -68,8 +69,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = readAsInputStream(keystorePath))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("truststoreFile", inputStream, "unit-test.jks")
                                              .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
         response = multipartBody.asJson();
@@ -99,8 +98,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = getCertificateStreamOfKeystore(UNIT_TEST_KEYSTORE_JKS, alias))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("certificateFile", inputStream, alias + ".cer")
                                              .field("alias", alias);
         response = multipartBody.asJson();
@@ -111,7 +108,9 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(alias, responseForm.getAlias());
       Assertions.assertNull(responseForm.getDuplicateAliases());
       Assertions.assertNull(responseForm.getDuplicateCertificates());
-      Assertions.assertEquals(1, truststoreDao.getTruststore().getTruststore().size());
+      Truststore truststore = truststoreDao.getTruststore();
+      Assertions.assertEquals(1, truststore.getTruststore().size());
+      Assertions.assertTrue(truststore.getTruststore().containsAlias(alias));
     }
 
     // send request again
@@ -121,8 +120,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = getCertificateStreamOfKeystore(UNIT_TEST_KEYSTORE_JKS, alias))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("certificateFile", inputStream, alias + ".cer")
                                              .field("alias", alias);
         response = multipartBody.asJson();
@@ -146,8 +143,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = getCertificateStreamOfKeystore(UNIT_TEST_KEYSTORE_JKS, "goldfish"))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("certificateFile", inputStream, alias + ".cer")
                                              .field("alias", alias);
         response = multipartBody.asJson();
@@ -280,8 +275,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = getCertificateStreamOfKeystore(UNIT_TEST_KEYSTORE_JKS, "goldfish"))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("certificateFile", inputStream, alias + ".cer")
                                              .field("alias", alias);
         response = multipartBody.asJson();
@@ -327,8 +320,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("truststoreFile", inputStream, "unit-test.jks")
                                              .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
         response = multipartBody.asJson();
@@ -360,8 +351,6 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
       {
         MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
-                                             // for some reason SUN crypto provider is able to resolve PKCS12 under JKS
-                                             // type
                                              .field("truststoreFile", inputStream, "unit-test.jks")
                                              .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
         response = multipartBody.asJson();
@@ -382,6 +371,28 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
                                                                  KeyStoreSupporter.KeyStoreType.JKS);
       Assertions.assertEquals(3, javaTruststore.size());
     }
+  }
+
+  @SneakyThrows
+  @Test
+  public void testUploadCertificateWithoutAlias()
+  {
+    HttpResponse<JsonNode> response;
+    final String alias = "goldfish";
+    try (InputStream inputStream = getCertificateStreamOfKeystore(UNIT_TEST_KEYSTORE_JKS, alias))
+    {
+      MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
+                                           .field("certificateFile", inputStream, alias + ".cer");
+      response = multipartBody.asJson();
+    }
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+    ErrorResponseForm responseForm = getForm(response.getBody().toString(), ErrorResponseForm.class);
+    Assertions.assertNull(responseForm.getErrorMessages());
+    Assertions.assertEquals(1, responseForm.getInputFieldErrors().size());
+    List<String> aliasErrors = responseForm.getInputFieldErrors().get("alias");
+    Assertions.assertNotNull(aliasErrors);
+    Assertions.assertEquals(1, aliasErrors.size());
+    Assertions.assertEquals("Alias must not be blank", aliasErrors.get(0));
   }
 
   @SneakyThrows

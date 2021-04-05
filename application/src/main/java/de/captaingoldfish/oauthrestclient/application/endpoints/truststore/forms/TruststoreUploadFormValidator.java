@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.truststore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms;
 
 import java.security.cert.X509Certificate;
 import java.util.Optional;
@@ -145,6 +145,14 @@ public class TruststoreUploadFormValidator
                                             ConstraintValidatorContext context)
   {
     boolean isValid = true;
+
+    if (StringUtils.isBlank(truststoreUploadForm.getAlias()))
+    {
+      String errormessage = "Alias must not be blank";
+      log.debug(errormessage);
+      context.buildConstraintViolationWithTemplate(errormessage).addPropertyNode("alias").addConstraintViolation();
+      isValid = false;
+    }
 
     X509Certificate certificate = null;
     try

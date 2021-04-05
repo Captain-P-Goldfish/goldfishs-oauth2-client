@@ -11,6 +11,12 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreAliasRequestForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreDownloadInfo;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreUploadForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreUploadResponseForm;
 import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyReader;
 import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.oauthrestclient.database.entities.Truststore;
@@ -117,19 +123,18 @@ public class TruststoreService
   {
     Truststore truststore = truststoreDao.getTruststore();
     X509Certificate certificate = KeyReader.readX509Certificate(certFile.getBytes());
-    String effectiveAlias = Optional.ofNullable(alias).orElse(UUID.randomUUID().toString());
-    KeyStoreSupporter.addCertificateEntry(truststore.getTruststore(), effectiveAlias, certificate);
+    KeyStoreSupporter.addCertificateEntry(truststore.getTruststore(), alias, certificate);
     byte[] truststoreBytes = KeyStoreSupporter.getBytes(truststore.getTruststore(), truststore.getTruststorePassword());
     truststore.setTruststoreBytes(truststoreBytes);
     truststoreDao.save(truststore);
-    return TruststoreUploadResponseForm.builder().alias(effectiveAlias).build();
+    return TruststoreUploadResponseForm.builder().alias(alias).build();
   }
 
   @SneakyThrows
   public TruststoreInfoForm getTruststoreInfos()
   {
     Truststore truststore = truststoreDao.getTruststore();
-    return new TruststoreInfoForm(truststore.getTruststore().size());
+    return new TruststoreInfoForm(truststore.getTruststore().size(), truststore.getTruststoreAliases());
   }
 
   public TruststoreDownloadInfo getDownloadInfos()
@@ -137,5 +142,24 @@ public class TruststoreService
     Truststore truststore = truststoreDao.getTruststore();
     String filename = "application-truststore." + truststore.getTruststoreType().getFileExtension();
     return new TruststoreDownloadInfo(truststore.getTruststoreBytes(), filename);
+  }
+
+  @SneakyThrows
+  public void deleteAlias(TruststoreAliasRequestForm truststoreAliasRequestForm)
+  {
+    Truststore truststore = truststoreDao.getTruststore();
+    truststore.getTruststore().deleteEntry(truststoreAliasRequestForm.getAlias());
+    byte[] truststoreBytes = KeyStoreSupporter.getBytes(truststore.getTruststore(), truststore.getTruststorePassword());
+    truststore.setTruststoreBytes(truststoreBytes);
+    truststoreDao.save(truststore);
+  }
+
+  @SneakyThrows
+  public CertificateInfo loadAlias(TruststoreAliasRequestForm truststoreAliasRequestForm)
+  {
+    Truststore truststore = truststoreDao.getTruststore();
+    X509Certificate certificate = (X509Certificate)truststore.getTruststore()
+                                                             .getCertificate(truststoreAliasRequestForm.getAlias());
+    return new CertificateInfo(certificate);
   }
 }
