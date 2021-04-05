@@ -6,6 +6,7 @@ import Form from "react-bootstrap/Form";
 import CertificateList from "../base/certificate-list";
 import downloadIcon from "../media/secure-download-icon.png";
 import {GoThumbsup} from "react-icons/go";
+import KeystoreRepresentation from "../base/keystore-representation";
 
 export default class KeystoreConfigForm extends React.Component {
 
@@ -137,33 +138,10 @@ export default class KeystoreConfigForm extends React.Component {
                     )}
                 </ConfigPageForm>
 
-                <h2 className="application-certificate-info-header">
-                    <p>Application Key Entries</p>
-                    <Badge className="download-keystore-icon">
-                        <a href={"/keystore/download"}>
-                            <Image src={downloadIcon} fluid />
-                            <p>Download</p>
-                        </a>
-                    </Badge>
-                </h2>
-                <Alert id="keystore-infos-alert"
-                       variant={"info"}
-                       show={this.state.numberOfEntries !== null}>
-                    <Form.Text>
-                        <InfoCircle /> Application Keystore contains "{this.state.numberOfEntries}" entries
-                    </Form.Text>
-                </Alert>
-                <Alert id="card-list-deletion-success"
-                       variant={"success"}
-                       show={this.state.aliasDeleted !== undefined}>
-                    <Form.Text>
-                        <GoThumbsup /> Key entry for alias "{this.state.aliasDeleted}" was successfully deleted
-                    </Form.Text>
-                </Alert>
-                <CertificateList certificateAliases={this.state.certificateAliases}
-                                 loadUrl={"/keystore/load-alias"}
-                                 deleteUrl={"/keystore/delete-alias"}
-                                 onDeleteSuccess={this.onAliasDeleteSuccess} />
+                <KeystoreRepresentation type={"Keystore"}
+                                        basePath={"/keystore"}
+                                        certificateAliases={this.state.certificateAliases} />
+
             </React.Fragment>
         );
     }

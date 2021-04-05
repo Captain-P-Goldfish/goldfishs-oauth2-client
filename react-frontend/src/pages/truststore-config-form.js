@@ -1,11 +1,9 @@
 import React from "react";
 import ConfigPageForm, {FormFileField, FormInputField} from "../base/config-page-form";
 import Form from "react-bootstrap/Form";
-import {InfoCircle} from "react-bootstrap-icons";
-import {Alert, Badge, Image} from "react-bootstrap";
-import downloadIcon from "../media/secure-download-icon.png";
-import CertificateList from "../base/certificate-list";
+import {Alert} from "react-bootstrap";
 import {GoFlame} from "react-icons/go";
+import KeystoreRepresentation from "../base/keystore-representation";
 
 export default class TruststoreConfigForm extends React.Component {
 
@@ -17,14 +15,15 @@ export default class TruststoreConfigForm extends React.Component {
             duplicateAliases: [],
             duplicateCertificates: []
         };
+        this.componentDidMount = this.componentDidMount.bind(this);
         this.handleUploadSuccess = this.handleUploadSuccess.bind(this);
-        this.onCertificateDelete = this.onCertificateDelete.bind(this);
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         fetch("/truststore/infos")
             .then(response => response.json())
             .then(response => {
+                console.log(response)
                 this.setState({
                     numberOfEntries: response.numberOfEntries,
                     certificateAliases: response.certificateAliases.sort()
@@ -32,26 +31,23 @@ export default class TruststoreConfigForm extends React.Component {
             })
     }
 
-    onCertificateDelete(alias) {
-        let certificateAliases = this.state.certificateAliases;
-        const index = certificateAliases.indexOf(alias);
-        if (index > -1) {
-            certificateAliases.splice(index, 1);
-        }
-        this.setState({certificateAliases: certificateAliases.sort()})
-        this.componentDidMount();
-    }
-
     handleUploadSuccess(status, response) {
-
         let duplicateAliases = response.duplicateAliases === undefined ? [] : response.duplicateAliases.sort();
         let duplicateCertificates = response.duplicateCertificates === undefined ? [] : response.duplicateCertificates.sort();
+        let certificateAliases = this.state.certificateAliases;
+        if (response.alias !== undefined) {
+            certificateAliases.push(response.alias);
+        }
 
         this.setState({
             duplicateAliases: duplicateAliases,
-            duplicateCertificates: duplicateCertificates
+            duplicateCertificates: duplicateCertificates,
+            certificateAliases: certificateAliases.sort()
         });
-        this.componentDidMount();
+
+        if (response.alias === undefined) {
+            this.componentDidMount();
+        }
     }
 
     render() {
@@ -123,26 +119,9 @@ export default class TruststoreConfigForm extends React.Component {
                     )}
                 </ConfigPageForm>
 
-                <h2 className="application-certificate-info-header">
-                    <p>Application Truststore Infos</p>
-                    <Badge className="download-keystore-icon">
-                        <a href={"/truststore/download"}>
-                            <Image src={downloadIcon} fluid />
-                            <p>Download</p>
-                        </a>
-                    </Badge>
-                </h2>
-                <Alert id="truststore-infos"
-                       variant={"info"}
-                       show={this.state.numberOfEntries !== null}>
-                    <Form.Text>
-                        <InfoCircle /> Application Truststore contains "{this.state.numberOfEntries}" entries
-                    </Form.Text>
-                </Alert>
-                <CertificateList certificateAliases={this.state.certificateAliases}
-                                 loadUrl={"/truststore/load-alias"}
-                                 deleteUrl={"/truststore/delete-alias"}
-                                 onDeleteSuccess={this.onCertificateDelete} />
+                <KeystoreRepresentation type={"Truststore"}
+                                        basePath={"/truststore"}
+                                        certificateAliases={this.state.certificateAliases} />
 
             </React.Fragment>
         )

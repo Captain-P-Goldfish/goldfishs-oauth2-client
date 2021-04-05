@@ -97,11 +97,14 @@ test("verify certificate data is displayed and deletable", async () => {
             .assertEquals('Application Keystore contains "3" entries');
     });
 
+    // creating a copy of the aliases because we would otherwise pass a reference into the react component that will
+    // be sliced on element deletion causing this array to be effected
+    let aliasArray = [...fakeKeystoreInfos.certificateAliases];
+
     // validate the data content on the card-deck
-    for (let alias of fakeKeystoreInfos.certificateAliases) {
+    for (let alias of aliasArray) {
 
         const cardId = "alias-card-" + alias;
-
         let certInfo = null;
 
         // validate card is displayed without any data but with image and a button to load the data
@@ -134,8 +137,8 @@ test("verify certificate data is displayed and deletable", async () => {
         {
             const baseId = "#delete-dialog-" + alias;
             new Assertions(baseId).isNotPresent();
-            const deleteButtonAssertions = new Assertions("#delete-button-" + alias);
-            await deleteButtonAssertions.clickElement(() => new Assertions(baseId).isPresent().isVisible());
+            const deleteButtonIconAssertion = new Assertions("#delete-button-" + alias);
+            await deleteButtonIconAssertion.clickElement(() => new Assertions(baseId).isPresent().isVisible());
             new Assertions(baseId + "-header").isPresent()
                 .isVisible().assertEquals("Delete '" + alias + "'");
 
@@ -147,7 +150,7 @@ test("verify certificate data is displayed and deletable", async () => {
             }
 
             // show delete dialog again
-            await deleteButtonAssertions.clickElement(() => new Assertions(baseId).isPresent().isVisible());
+            await deleteButtonIconAssertion.clickElement(() => new Assertions(baseId).isPresent().isVisible());
 
             // accept deletion
             {
