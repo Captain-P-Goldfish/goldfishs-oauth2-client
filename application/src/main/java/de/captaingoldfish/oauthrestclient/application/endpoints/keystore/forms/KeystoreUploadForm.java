@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  * This form is used in the first step of uploading a keystore Is is used to upload a {@link MultipartFile}
  * that hopefully contains keystore data that will be validated and cached for the second step
  * 
- * @see KeystoreAliasForm
+ * @see KeystoreSelectAliasForm
  * @author Pascal Knueppel
  * @since 26.03.2021
  */
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @KeystoreUploadFormValidation
-class KeystoreUploadForm
+public class KeystoreUploadForm
 {
 
   /**

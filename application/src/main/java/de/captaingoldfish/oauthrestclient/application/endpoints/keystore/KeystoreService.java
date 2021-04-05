@@ -8,6 +8,11 @@ import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.UUID;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreSelectAliasForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreDownloadInfo;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreEntryInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreUploadForm;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +52,7 @@ class KeystoreService
    * caches an uploaded keystore and returns all aliases of the keystore for key selection
    */
   @SneakyThrows
-  public KeystoreAliasForm uploadKeystore(KeystoreUploadForm keystoreUploadForm)
+  public KeystoreSelectAliasForm uploadKeystore(KeystoreUploadForm keystoreUploadForm)
   {
     final String filename = keystoreUploadForm.getKeystoreFile().getName();
     final byte[] keystoreData = keystoreUploadForm.getKeystoreFile().getBytes();
@@ -57,23 +62,23 @@ class KeystoreService
     final String stateId = UUID.randomUUID().toString();
     Keystore tmpKeystore = new Keystore(new ByteArrayInputStream(keystoreData), type, keystorePassword);
     keystoreFileCache.setKeystoreFile(stateId, tmpKeystore);
-    return new KeystoreAliasForm(stateId, tmpKeystore.getKeyStore());
+    return new KeystoreSelectAliasForm(stateId, tmpKeystore.getKeyStore());
   }
 
   /**
    * merges a new key entry into the application keystore and saves its entry to the database
    */
-  public KeystoreEntryInfoForm mergeNewEntryIntoApplicationKeystore(KeystoreAliasForm keystoreAliasForm)
+  public KeystoreEntryInfoForm mergeNewEntryIntoApplicationKeystore(KeystoreSelectAliasForm keystoreSelectAliasForm)
   {
-    final String stateId = keystoreAliasForm.getStateId();
+    final String stateId = keystoreSelectAliasForm.getStateId();
     Keystore applicationKeystore = keystoreDao.getKeystore();
     Keystore uploadedKeystore = keystoreFileCache.getKeystoreFile(stateId);
 
-    final String aliasToUse = keystoreAliasForm.getAliases().get(0);
-    final String newAlias = Optional.ofNullable(keystoreAliasForm.getAliasOverride())
+    final String aliasToUse = keystoreSelectAliasForm.getAliases().get(0);
+    final String newAlias = Optional.ofNullable(keystoreSelectAliasForm.getAliasOverride())
                                     .map(StringUtils::stripToNull)
-                                    .orElse(keystoreAliasForm.getAliases().get(0));
-    KeystoreEntry aliasEntry = new KeystoreEntry(aliasToUse, keystoreAliasForm.getPrivateKeyPassword());
+                                    .orElse(keystoreSelectAliasForm.getAliases().get(0));
+    KeystoreEntry aliasEntry = new KeystoreEntry(aliasToUse, keystoreSelectAliasForm.getPrivateKeyPassword());
     PrivateKey privateKey = uploadedKeystore.getPrivateKey(aliasEntry);
     Certificate certificate = uploadedKeystore.getCertificate(aliasEntry);
     aliasEntry.setAlias(newAlias);

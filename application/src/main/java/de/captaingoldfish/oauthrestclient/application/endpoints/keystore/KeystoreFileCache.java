@@ -13,7 +13,7 @@ import de.captaingoldfish.oauthrestclient.database.entities.Keystore;
  * @since 26.03.2021
  */
 @Component
-class KeystoreFileCache
+public class KeystoreFileCache
 {
 
   /**

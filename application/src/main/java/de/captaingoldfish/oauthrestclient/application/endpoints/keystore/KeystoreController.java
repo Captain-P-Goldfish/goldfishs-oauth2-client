@@ -14,13 +14,17 @@ import org.springframework.util.StreamUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.captaingoldfish.oauthrestclient.application.endpoints.models.AliasRequestForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreAliasRequestForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreDownloadInfo;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreEntryInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreInfoForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreSelectAliasForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms.KeystoreUploadForm;
 import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
 import de.captaingoldfish.oauthrestclient.application.exceptions.RequestException;
 import lombok.RequiredArgsConstructor;
@@ -51,8 +55,8 @@ public class KeystoreController
    * uploads a keystore and validates the given data
    */
   @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  public KeystoreAliasForm uploadKeystore(@Valid @ModelAttribute KeystoreUploadForm keystoreUploadForm,
-                                          BindingResult bindingResult)
+  public KeystoreSelectAliasForm uploadKeystore(@Valid KeystoreUploadForm keystoreUploadForm,
+                                                BindingResult bindingResult)
   {
     if (bindingResult.hasErrors())
     {
@@ -66,14 +70,14 @@ public class KeystoreController
    */
   @PostMapping(path = "/select-alias", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
-  public KeystoreEntryInfoForm selectAlias(@Valid @ModelAttribute KeystoreAliasForm keystoreAliasForm,
+  public KeystoreEntryInfoForm selectAlias(@Valid KeystoreSelectAliasForm keystoreSelectAliasForm,
                                            BindingResult bindingResult)
   {
     if (bindingResult.hasErrors())
     {
       throw new RequestException("KeystoreUpload validation failed", HttpStatus.BAD_REQUEST.value(), bindingResult);
     }
-    return keystoreService.mergeNewEntryIntoApplicationKeystore(keystoreAliasForm);
+    return keystoreService.mergeNewEntryIntoApplicationKeystore(keystoreSelectAliasForm);
   }
 
   /**
@@ -89,9 +93,15 @@ public class KeystoreController
    * loads the certificate information of the given alias
    */
   @GetMapping(path = "/load-alias", produces = MediaType.APPLICATION_JSON_VALUE)
-  public CertificateInfo loadCertificateInfo(AliasRequestForm aliasRequestForm)
+  public CertificateInfo loadCertificateInfo(@Valid KeystoreAliasRequestForm keystoreAliasRequestForm,
+                                             BindingResult bindingResult)
   {
-    return keystoreService.loadCertificateInfo(aliasRequestForm.getAlias());
+    if (bindingResult.hasErrors())
+    {
+      throw new RequestException("Cannot load keystore information for alias: " + keystoreAliasRequestForm.getAlias(),
+                                 HttpStatus.BAD_REQUEST.value(), bindingResult);
+    }
+    return keystoreService.loadCertificateInfo(keystoreAliasRequestForm.getAlias());
   }
 
   /**
@@ -99,14 +109,14 @@ public class KeystoreController
    */
   @DeleteMapping(path = "/delete-alias", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteAliases(@Valid KeystoreDeleteEntryForm keystoreDeleteEntryForm, BindingResult bindingResult)
+  public void deleteAliases(@Valid KeystoreAliasRequestForm keystoreAliasRequestForm, BindingResult bindingResult)
   {
     if (bindingResult.hasErrors())
     {
-      throw new RequestException("Cannot delete alias: " + keystoreDeleteEntryForm.getAlias(),
+      throw new RequestException("Cannot delete alias: " + keystoreAliasRequestForm.getAlias(),
                                  HttpStatus.BAD_REQUEST.value(), bindingResult);
     }
-    keystoreService.deleteKeystoreEntry(keystoreDeleteEntryForm.getAlias());
+    keystoreService.deleteKeystoreEntry(keystoreAliasRequestForm.getAlias());
   }
 
   /**

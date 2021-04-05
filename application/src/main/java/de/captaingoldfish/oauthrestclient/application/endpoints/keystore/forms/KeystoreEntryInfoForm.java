@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
 import lombok.Getter;

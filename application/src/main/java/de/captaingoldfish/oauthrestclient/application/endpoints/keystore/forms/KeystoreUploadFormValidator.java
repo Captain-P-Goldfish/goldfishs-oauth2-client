@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import java.util.Optional;
 

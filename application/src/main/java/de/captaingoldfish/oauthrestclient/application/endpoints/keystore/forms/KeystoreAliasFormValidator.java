@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -12,6 +12,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.oauthrestclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.oauthrestclient.database.entities.Keystore;
 import de.captaingoldfish.oauthrestclient.database.entities.KeystoreEntry;
@@ -21,26 +22,27 @@ import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * validates the content of {@link KeystoreAliasForm}
+ * validates the content of {@link KeystoreSelectAliasForm}
  * 
  * @author Pascal Knueppel
  * @since 27.03.2021
  */
 @Slf4j
-public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreAliasFormValidation, KeystoreAliasForm>
+public class KeystoreAliasFormValidator
+  implements ConstraintValidator<KeystoreAliasFormValidation, KeystoreSelectAliasForm>
 {
 
   /**
-   * checks that the data in the {@link KeystoreAliasForm} is valid and is able to produce valid results during
-   * further processing
+   * checks that the data in the {@link KeystoreSelectAliasForm} is valid and is able to produce valid results
+   * during further processing
    */
   @SneakyThrows
   @Override
-  public boolean isValid(KeystoreAliasForm keystoreAliasForm, ConstraintValidatorContext context)
+  public boolean isValid(KeystoreSelectAliasForm keystoreSelectAliasForm, ConstraintValidatorContext context)
   {
     boolean isValid = true;
 
-    final String stateId = keystoreAliasForm.getStateId();
+    final String stateId = keystoreSelectAliasForm.getStateId();
     if (StringUtils.isBlank(stateId))
     {
       String errorMessage = "Ups the required stateId parameter was missing in the request...";
@@ -49,7 +51,7 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
       return false;
     }
 
-    List<String> aliases = keystoreAliasForm.getAliases();
+    List<String> aliases = keystoreSelectAliasForm.getAliases();
     if (aliases == null || aliases.isEmpty())
     {
       String errorMessage = "No alias was selected";
@@ -86,7 +88,7 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
       isValid = false;
     }
 
-    final String privateKeyPassword = Optional.ofNullable(keystoreAliasForm.getPrivateKeyPassword())
+    final String privateKeyPassword = Optional.ofNullable(keystoreSelectAliasForm.getPrivateKeyPassword())
                                               .map(StringUtils::stripToNull)
                                               .orElse(keystore.getKeystorePassword());
     PrivateKey privateKey = null;
@@ -121,9 +123,9 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
 
     KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);
     Keystore applicationKeystore = keystoreDao.getKeystore();
-    final String newAlias = Optional.ofNullable(keystoreAliasForm.getAliasOverride())
+    final String newAlias = Optional.ofNullable(keystoreSelectAliasForm.getAliasOverride())
                                     .map(StringUtils::stripToNull)
-                                    .orElse(keystoreAliasForm.getAliases().get(0));
+                                    .orElse(keystoreSelectAliasForm.getAliases().get(0));
     boolean aliasNameAlreadyTaken = applicationKeystore.getKeystoreEntries()
                                                        .stream()
                                                        .map(KeystoreEntry::getAlias)
@@ -132,7 +134,7 @@ public class KeystoreAliasFormValidator implements ConstraintValidator<KeystoreA
     {
       String errorMessage = "Alias '" + newAlias + "' is already used. Please override this alias with another name";
       log.debug(errorMessage);
-      if (newAlias.equals(keystoreAliasForm.getAliasOverride()))
+      if (newAlias.equals(keystoreSelectAliasForm.getAliasOverride()))
       {
         context.buildConstraintViolationWithTemplate(errorMessage)
                .addPropertyNode("aliasOverride")

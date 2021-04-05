@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@KeystoreDeleteEntryValidation
-public class KeystoreDeleteEntryForm
+@KeystoreAliasRequestValidation
+public class KeystoreAliasRequestForm
 {
 
   /**

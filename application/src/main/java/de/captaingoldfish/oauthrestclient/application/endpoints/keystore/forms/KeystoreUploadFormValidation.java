@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,10 +13,10 @@ import javax.validation.Payload;
  * @author Pascal Knueppel
  * @since 27.03.2021
  */
-@Constraint(validatedBy = KeystoreAliasFormValidator.class)
+@Constraint(validatedBy = KeystoreUploadFormValidator.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-public @interface KeystoreAliasFormValidation
+public @interface KeystoreUploadFormValidation
 {
 
   String message() default "";

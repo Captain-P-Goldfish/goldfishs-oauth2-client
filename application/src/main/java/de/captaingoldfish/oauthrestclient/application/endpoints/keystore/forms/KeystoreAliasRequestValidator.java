@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -12,22 +12,22 @@ import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * validates the content of {@link KeystoreDeleteEntryForm}
+ * validates the content of {@link KeystoreAliasRequestForm}
  * 
  * @author Pascal Knueppel
  * @since 31.03.2021
  */
 @Slf4j
-public class KeystoreDeleteEntryValidator
-  implements ConstraintValidator<KeystoreDeleteEntryValidation, KeystoreDeleteEntryForm>
+public class KeystoreAliasRequestValidator
+  implements ConstraintValidator<KeystoreAliasRequestValidation, KeystoreAliasRequestForm>
 {
 
   /**
-   * checks that the data in the {@link KeystoreDeleteEntryForm} is valid and is able to produce valid results
+   * checks that the data in the {@link KeystoreAliasRequestForm} is valid and is able to produce valid results
    * during further processing
    */
   @Override
-  public boolean isValid(KeystoreDeleteEntryForm form, ConstraintValidatorContext context)
+  public boolean isValid(KeystoreAliasRequestForm form, ConstraintValidatorContext context)
   {
     boolean isValid = true;
     if (StringUtils.isBlank(form.getAlias()))

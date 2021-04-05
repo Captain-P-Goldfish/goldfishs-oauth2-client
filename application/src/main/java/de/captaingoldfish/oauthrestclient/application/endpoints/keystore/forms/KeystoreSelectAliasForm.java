@@ -1,4 +1,4 @@
-package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
+package de.captaingoldfish.oauthrestclient.application.endpoints.keystore.forms;
 
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import lombok.SneakyThrows;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @KeystoreAliasFormValidation
-class KeystoreAliasForm
+public class KeystoreSelectAliasForm
 {
 
   /**
@@ -53,13 +53,13 @@ class KeystoreAliasForm
   private String privateKeyPassword;
 
   @SneakyThrows
-  public KeystoreAliasForm(String stateId, KeyStore keyStore)
+  public KeystoreSelectAliasForm(String stateId, KeyStore keyStore)
   {
     this(stateId, null, keyStore);
   }
 
   @SneakyThrows
-  public KeystoreAliasForm(String stateId, String privateKeyPassword, KeyStore keyStore)
+  public KeystoreSelectAliasForm(String stateId, String privateKeyPassword, KeyStore keyStore)
   {
     this.stateId = stateId;
     this.privateKeyPassword = privateKeyPassword;
