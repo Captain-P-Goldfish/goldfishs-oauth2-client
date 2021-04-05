@@ -1,11 +1,16 @@
 package de.captaingoldfish.oauthrestclient.application.endpoints.keystore;
 
-import java.util.List;
+import java.io.OutputStream;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.models.AliasRequestForm;
+import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
 import de.captaingoldfish.oauthrestclient.application.exceptions.RequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -71,24 +79,54 @@ public class KeystoreController
   /**
    * loads the certificate information of the application keystore
    */
-  @GetMapping(path = "/aliases", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<KeystoreEntryInfoForm> getAliases()
+  @GetMapping(path = "/infos", produces = MediaType.APPLICATION_JSON_VALUE)
+  public KeystoreInfoForm getAliases()
   {
     return keystoreService.getKeystoreInfos();
   }
 
   /**
-   * loads the certificate information of the application keystore
+   * loads the certificate information of the given alias
+   */
+  @GetMapping(path = "/load-alias", produces = MediaType.APPLICATION_JSON_VALUE)
+  public CertificateInfo loadCertificateInfo(AliasRequestForm aliasRequestForm)
+  {
+    return keystoreService.loadCertificateInfo(aliasRequestForm.getAlias());
+  }
+
+  /**
+   * deletes the key entry of the given alias
    */
   @DeleteMapping(path = "/delete-alias", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteAliases(@Valid @ModelAttribute KeystoreDeleteEntryForm deleteEntryForm, BindingResult bindingResult)
+  public void deleteAliases(@Valid KeystoreDeleteEntryForm keystoreDeleteEntryForm, BindingResult bindingResult)
   {
     if (bindingResult.hasErrors())
     {
-      throw new RequestException("Cannot delete keystore entry", HttpStatus.BAD_REQUEST.value(), bindingResult);
+      throw new RequestException("Cannot delete alias: " + keystoreDeleteEntryForm.getAlias(),
+                                 HttpStatus.BAD_REQUEST.value(), bindingResult);
     }
-    keystoreService.deleteKeystoreEntry(deleteEntryForm.getAlias());
+    keystoreService.deleteKeystoreEntry(keystoreDeleteEntryForm.getAlias());
   }
 
+  /**
+   * downloads the application keystore
+   */
+  @SneakyThrows
+  @GetMapping("/download")
+  public void downloadTruststore(HttpServletResponse response)
+  {
+    KeystoreDownloadInfo truststoreDownloadInfo = keystoreService.getDownloadInfos();
+    String contentDisposition = ContentDisposition.builder("attachment")
+                                                  .filename(truststoreDownloadInfo.getFilename())
+                                                  .build()
+                                                  .toString();
+    response.addHeader(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
+    response.setContentType(MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE);
+    response.setContentLength(truststoreDownloadInfo.getKeystoreBytes().length);
+    try (OutputStream bodyStream = response.getOutputStream())
+    {
+      StreamUtils.copy(truststoreDownloadInfo.getKeystoreBytes(), bodyStream);
+    }
+  }
 }

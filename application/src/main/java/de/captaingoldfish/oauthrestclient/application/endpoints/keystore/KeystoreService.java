@@ -4,10 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.util.List;
+import java.security.cert.X509Certificate;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -78,8 +77,7 @@ class KeystoreService
     PrivateKey privateKey = uploadedKeystore.getPrivateKey(aliasEntry);
     Certificate certificate = uploadedKeystore.getCertificate(aliasEntry);
     aliasEntry.setAlias(newAlias);
-    aliasEntry.setPrivateKeyPassword(Optional.ofNullable(keystoreAliasForm.getPrivateKeyPassword())
-                                             .orElse(applicationKeystore.getKeystorePassword()));
+    aliasEntry.setPrivateKeyPassword(applicationKeystore.getKeystorePassword());
 
     KeyStore mergedKeystore = KeyStoreSupporter.addEntryToKeystore(applicationKeystore.getKeyStore(),
                                                                    newAlias,
@@ -98,13 +96,11 @@ class KeystoreService
   /**
    * @return all certificate infos from the application keystore to show which private keys are present
    */
-  public List<KeystoreEntryInfoForm> getKeystoreInfos()
+  @SneakyThrows
+  public KeystoreInfoForm getKeystoreInfos()
   {
     Keystore keystore = keystoreDao.getKeystore();
-    return keystore.getKeystoreEntries().stream().map(keystoreAliasPasswords -> {
-      CertificateInfo certificateInfo = new CertificateInfo(keystore.getCertificate(keystoreAliasPasswords));
-      return new KeystoreEntryInfoForm(keystoreAliasPasswords.getAlias(), certificateInfo);
-    }).collect(Collectors.toList());
+    return new KeystoreInfoForm(keystore.getKeyStore().size(), keystore.getKeyStoreAliases());
   }
 
   /**
@@ -129,5 +125,21 @@ class KeystoreService
       keystore.setKeystoreBytes(newKeystoreBytes);
       keystoreDao.save(keystore);
     }
+  }
+
+  @SneakyThrows
+  public CertificateInfo loadCertificateInfo(String alias)
+  {
+    Keystore keystore = keystoreDao.getKeystore();
+    X509Certificate certificate = (X509Certificate)keystore.getKeyStore().getCertificate(alias);
+    return new CertificateInfo(certificate);
+  }
+
+  public KeystoreDownloadInfo getDownloadInfos()
+  {
+    Keystore keystore = keystoreDao.getKeystore();
+    String filename = "application-keystore." + keystore.getKeystoreType().getFileExtension();
+    byte[] keystoreBytes = KeyStoreSupporter.getBytes(keystore.getKeyStore(), "123456");
+    return new KeystoreDownloadInfo(keystoreBytes, filename);
   }
 }

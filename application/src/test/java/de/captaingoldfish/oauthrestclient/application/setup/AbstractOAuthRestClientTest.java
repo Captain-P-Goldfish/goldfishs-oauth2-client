@@ -28,6 +28,9 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
 {
 
   @Autowired
+  protected ObjectMapper objectMapper;
+
+  @Autowired
   protected KeystoreDao keystoreDao;
 
   @Autowired
@@ -81,6 +84,6 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @SneakyThrows
   public <T> T getForm(String jsonResponse, Class<T> type)
   {
-    return new ObjectMapper().readValue(jsonResponse, type);
+    return objectMapper.readValue(jsonResponse, type);
   }
 }

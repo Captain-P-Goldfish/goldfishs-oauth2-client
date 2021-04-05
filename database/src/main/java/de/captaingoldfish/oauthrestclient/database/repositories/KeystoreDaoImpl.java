@@ -6,8 +6,6 @@ import java.security.KeyStore;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import de.captaingoldfish.oauthrestclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.oauthrestclient.database.entities.Keystore;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 public class KeystoreDaoImpl implements KeystoreDaoExtension
 {
 
+  private static final String APPLICATION_KEYSTORE_PASSWORD = "123456";
+
   private final EntityManager entityManager;
 
   @Transactional
@@ -32,14 +32,11 @@ public class KeystoreDaoImpl implements KeystoreDaoExtension
     {
       return applicationKeystore;
     }
-    final String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`"
-                              + "!@#$%^&*()-_=+[{]}\\|;:\'\",<.>/?";
-    final String randomPassword = RandomStringUtils.random(15, characters);
     KeyStore javakeyStore = KeyStoreSupporter.createEmptyKeyStore(KeyStoreSupporter.KeyStoreType.PKCS12,
-                                                                  randomPassword);
-    byte[] keystoreBytes = KeyStoreSupporter.getBytes(javakeyStore, randomPassword);
+                                                                  APPLICATION_KEYSTORE_PASSWORD);
+    byte[] keystoreBytes = KeyStoreSupporter.getBytes(javakeyStore, APPLICATION_KEYSTORE_PASSWORD);
     Keystore keystore = new Keystore(new ByteArrayInputStream(keystoreBytes), KeyStoreSupporter.KeyStoreType.PKCS12,
-                                     randomPassword);
+                                     APPLICATION_KEYSTORE_PASSWORD);
     entityManager.persist(keystore);
     return keystore;
   }
