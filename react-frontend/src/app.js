@@ -2,21 +2,16 @@ import React from "react";
 import logo from "./logo.svg";
 import {Nav, Navbar} from "react-bootstrap";
 import KeystoreConfigForm from "./pages/keystore-config-form";
+import TruststoreConfigForm from "./pages/truststore-config-form";
+import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import {LinkContainer} from 'react-router-bootstrap'
 
 
-class Application extends React.Component {
+function Application(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            errors: undefined
-        };
-    }
-
-    render() {
-
-        return (
-            <React.Fragment>
+    return (
+        <React.Fragment>
+            <Router>
                 <Navbar bg="navigation" expand="md">
                     <Navbar.Brand href="#home">Captain Goldfish's Rest Client</Navbar.Brand>
                     <Navbar.Collapse id="basic-navbar-nav">
@@ -26,19 +21,42 @@ class Application extends React.Component {
                 </Navbar>
 
                 <Navbar bg="navigation-left" className={"navbar-left"} expand="md" variant="dark">
-                    <Nav className="flex-column">
-                        <Nav.Link href="#keystores">Keystores</Nav.Link>
-                        <Nav.Link href="#truststores">Truststores</Nav.Link>
-                        <Nav.Link href="#proxies">Proxies</Nav.Link>
-                    </Nav>
+                    <Navbar.Collapse>
+
+                        <Nav className="flex-column">
+
+                            <LinkContainer exact  to="/">
+                                <Nav.Link>Home</Nav.Link>
+                            </LinkContainer>
+                            <LinkContainer exact  to="/keystore">
+                                <Nav.Link>Keystore</Nav.Link>
+                            </LinkContainer>
+                            <LinkContainer exact  to="/truststore">
+                                <Nav.Link>Truststore</Nav.Link>
+                            </LinkContainer>
+                            {/*<Nav.Link href="#proxies">Proxies</Nav.Link>*/}
+                        </Nav>
+                    </Navbar.Collapse>
                 </Navbar>
 
                 <div className="main">
-                    <KeystoreConfigForm />
+                    {/* A <Switch> looks through its children <Route>s and
+                        renders the first one that matches the current URL. */}
+                    <Switch>
+                        <Route path="/keystore">
+                            <KeystoreConfigForm />
+                        </Route>
+                        <Route path="/truststore">
+                            <TruststoreConfigForm />
+                        </Route>
+                        <Route path="/">
+                            <h2>Welcome</h2>
+                        </Route>
+                    </Switch>
                 </div>
-            </React.Fragment>
-        );
-    }
+            </Router>
+        </React.Fragment>
+    );
 }
 
 

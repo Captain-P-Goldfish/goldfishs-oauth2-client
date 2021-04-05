@@ -113,8 +113,17 @@ small.error {
   margin-top: 5px;
 }
 
-.card-delete-icon:hover{
+.card-load-icon, .card-delete-icon:hover{
   cursor: pointer;
+}
+
+.load-certificate-icon{
+  width: 150px;
+  margin-bottom: 15px;
+}
+
+.load-certificate-icon-container {
+  text-align: center;
 }
 
 .card-modal {
@@ -163,4 +172,22 @@ ul.error-list {
 
 .error-list-item-icon{
   padding-right: 10px;
+}
+
+.application-certificate-info-header {
+  margin-bottom: 15px;
+}
+
+.application-certificate-info-header p{
+  display: inline;
+}
+
+.download-keystore-icon{
+  text-align: center;
+  display: inline-block;
+  float: right;
+}
+
+.download-keystore-icon img {
+  height: 40px;
 }

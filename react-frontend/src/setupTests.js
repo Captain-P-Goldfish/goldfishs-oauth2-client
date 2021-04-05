@@ -5,6 +5,17 @@
 import '@testing-library/jest-dom';
 import {fireEvent, waitFor} from "@testing-library/react";
 
+export function mockFetch(status, fakeResponse) {
+    jest.spyOn(global, "fetch").mockImplementation(() => {
+        return Promise.resolve({
+            status: status,
+            json: () => {
+                return Promise.resolve(fakeResponse)
+            }
+        })
+    });
+}
+
 export default class Assertions {
 
     querySelector;

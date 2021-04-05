@@ -1,7 +1,7 @@
 import React from 'react';
 import KeystoreForm from "./keystore-config-form";
 import {act, fireEvent, render, waitFor} from '@testing-library/react';
-import Assertions from "../setupTests"
+import Assertions, {mockFetch} from "../setupTests"
 import {unmountComponentAtNode} from "react-dom";
 
 let container = null;
@@ -25,19 +25,6 @@ afterEach(() => {
 
 /* ********************************************************************************************************* */
 
-function mockFetch(status, fakeResponse) {
-    jest.spyOn(global, "fetch").mockImplementation(() => {
-        return Promise.resolve({
-            status: status,
-            json: () => {
-                return Promise.resolve(fakeResponse)
-            }
-        })
-    });
-}
-
-/* ********************************************************************************************************* */
-
 function loadPageWithoutEntries() {
     mockFetch(200, []);
     new Assertions("#keystore-alias-entries").isNotPresent();
@@ -46,53 +33,54 @@ function loadPageWithoutEntries() {
         render(<KeystoreForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/keystore/aliases")
+    expect(global.fetch).toBeCalledWith("/keystore/infos")
     global.fetch.mockRestore();
 }
 
 /* ********************************************************************************************************* */
 
-function getFakeCertInfos() {
-    return [
-        {
-            "alias": "goldfish",
-            "certificateInfo": {
-                "issuerDn": "CN=goldfish",
-                "subjectDn": "CN=goldfish",
-                "sha256fingerprint": "eafbea8af66e666310d6f73899d45a39a876b80037af7ae5fac2143ece6c9cee",
-                "validFrom": "2021-03-27T18:42:14Z",
-                "validUntil": "2121-03-27T18:42:14Z"
-            }
+function getFakeKeystoreInfos() {
+    return {
+        "numberOfEntries": 3,
+        "certificateAliases": ["goldfish", "localhost", "unit-test"]
+    };
+}
+
+function getFakeCertInfo(alias) {
+
+    const certificateInfos = {
+        "goldfish": {
+            "issuerDn": "CN=goldfish",
+            "subjectDn": "CN=goldfish",
+            "sha256fingerprint": "eafbea8af66e666310d6f73899d45a39a876b80037af7ae5fac2143ece6c9cee",
+            "validFrom": "2021-03-27T18:42:14Z",
+            "validUntil": "2121-03-27T18:42:14Z"
         },
-        {
-            "alias": "localhost",
-            "certificateInfo": {
-                "issuerDn": "CN=goldfish",
-                "subjectDn": "CN=localhost",
-                "sha256fingerprint": "4226c730a65e6352f214cad920a9a2e7f2e4e4884c7184aab4e25e3413ebdf50",
-                "validFrom": "2021-03-30T18:11:28Z",
-                "validUntil": "2121-03-30T18:11:28Z"
-            }
+        "localhost": {
+            "issuerDn": "CN=goldfish",
+            "subjectDn": "CN=localhost",
+            "sha256fingerprint": "4226c730a65e6352f214cad920a9a2e7f2e4e4884c7184aab4e25e3413ebdf50",
+            "validFrom": "2021-03-30T18:11:28Z",
+            "validUntil": "2121-03-30T18:11:28Z"
         },
-        {
-            "alias": "unit-test",
-            "certificateInfo": {
-                "issuerDn": "CN=goldfish",
-                "subjectDn": "CN=unit-test",
-                "sha256fingerprint": "1e90dcc6e12aecf6529273b9627126d20ac6d14fb2bdd1dcbfd26baf7012c5bb",
-                "validFrom": "2021-03-30T18:12:01Z",
-                "validUntil": "2121-03-30T18:12:01Z"
-            }
+        "unit-test": {
+            "issuerDn": "CN=goldfish",
+            "subjectDn": "CN=unit-test",
+            "sha256fingerprint": "1e90dcc6e12aecf6529273b9627126d20ac6d14fb2bdd1dcbfd26baf7012c5bb",
+            "validFrom": "2021-03-30T18:12:01Z",
+            "validUntil": "2121-03-30T18:12:01Z"
         }
-    ];
+    };
+
+    return certificateInfos[alias];
 }
 
 /* ********************************************************************************************************* */
 
 test("verify certificate data is displayed and deletable", async () => {
-    const fakeCertInfos = getFakeCertInfos();
+    const fakeKeystoreInfos = getFakeKeystoreInfos();
 
-    mockFetch(200, fakeCertInfos);
+    mockFetch(200, fakeKeystoreInfos);
 
     new Assertions("#keystore-alias-entries").isNotPresent();
 
@@ -100,41 +88,56 @@ test("verify certificate data is displayed and deletable", async () => {
         render(<KeystoreForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/keystore/aliases")
+    expect(global.fetch).toBeCalledWith("/keystore/infos")
     global.fetch.mockRestore();
 
     await waitFor(() => {
         new Assertions("#keystore-alias-entries").isPresent();
-        new Assertions("#card-list-alert-no-entries").isNotPresent();
+        new Assertions("#keystore-infos-alert").isPresent().isVisible()
+            .assertEquals('Application Keystore contains "3" entries');
     });
 
-    new Assertions("#card-list-deletion-success").isNotPresent();
-
     // validate the data content on the card-deck
-    for (let cardInfo of fakeCertInfos) {
-        const certInfo = cardInfo.certificateInfo;
+    for (let alias of fakeKeystoreInfos.certificateAliases) {
 
-        const cardId = "alias-card-" + cardInfo.alias;
+        const cardId = "alias-card-" + alias;
+
+        let certInfo = null;
+
+        // validate card is displayed without any data but with image and a button to load the data
+        {
+            const loadCertDataButtonAssertion = new Assertions("#load-certificate-data-button-for-" + alias)
+                .isPresent().isVisible();
+            expect(loadCertDataButtonAssertion.element.previousSibling.tagName).toBe("IMG");
+            certInfo = getFakeCertInfo(alias);
+            mockFetch(200, certInfo);
+            await loadCertDataButtonAssertion.clickElement(() => {
+                new Assertions("#issuer-dn-" + alias).isPresent().isVisible();
+            })
+            expect(global.fetch).toBeCalledTimes(1);
+            expect(global.fetch).toBeCalledWith("/keystore/load-alias?alias=" + alias)
+            global.fetch.mockRestore();
+        }
 
         // validate displayed data
         {
-            new Assertions("#alias-name-" + cardInfo.alias).isVisible().assertEquals(cardInfo.alias);
-            new Assertions("#issuer-dn-" + cardInfo.alias).isVisible().assertEquals(certInfo.issuerDn);
-            new Assertions("#subject-dn-" + cardInfo.alias).isVisible().assertEquals(certInfo.subjectDn);
-            new Assertions("#sha-256-" + cardInfo.alias).isVisible().assertEquals(certInfo.sha256fingerprint);
-            new Assertions("#valid-from-" + cardInfo.alias).isVisible().assertEquals(certInfo.validFrom);
-            new Assertions("#valid-until-" + cardInfo.alias).isVisible().assertEquals(certInfo.validUntil);
+            new Assertions("#alias-name-" + alias).isVisible().assertEquals(alias);
+            new Assertions("#issuer-dn-" + alias).isVisible().assertEquals(certInfo.issuerDn);
+            new Assertions("#subject-dn-" + alias).isVisible().assertEquals(certInfo.subjectDn);
+            new Assertions("#sha-256-" + alias).isVisible().assertEquals(certInfo.sha256fingerprint);
+            new Assertions("#valid-from-" + alias).isVisible().assertEquals(certInfo.validFrom);
+            new Assertions("#valid-until-" + alias).isVisible().assertEquals(certInfo.validUntil);
         }
 
 
         // click the delete button and verify that the delete dialog is shown
         {
-            const baseId = "#delete-dialog-" + cardInfo.alias;
+            const baseId = "#delete-dialog-" + alias;
             new Assertions(baseId).isNotPresent();
-            const deleteButtonAssertions = new Assertions("#delete-button-" + cardInfo.alias);
+            const deleteButtonAssertions = new Assertions("#delete-button-" + alias);
             await deleteButtonAssertions.clickElement(() => new Assertions(baseId).isPresent().isVisible());
             new Assertions(baseId + "-header").isPresent()
-                .isVisible().assertEquals("Delete '" + cardInfo.alias + "'");
+                .isVisible().assertEquals("Delete '" + alias + "'");
 
             // cancel deletion
             {
@@ -154,26 +157,26 @@ test("verify certificate data is displayed and deletable", async () => {
                 await deleteButtonAssertion.clickElement(() => {
                     new Assertions(cardId).isNotPresent();
                     new Assertions("#card-list-deletion-success").isPresent()
-                        .assertEquals('Alias "' + cardInfo.alias + '" was successfully deleted');
+                        .assertEquals('Key entry for alias "' + alias + '" was successfully deleted');
                 });
                 expect(global.fetch).toBeCalledTimes(1);
-                expect(global.fetch).toBeCalledWith("/keystore/delete-alias?alias=" + cardInfo.alias,
+                expect(global.fetch).toBeCalledWith("/keystore/delete-alias?alias=" + alias,
                     {method: "DELETE"})
                 // remove the mock to ensure tests are completely isolated
                 global.fetch.mockRestore();
             }
         }
     }
-    new Assertions("#card-list-alert-no-entries").isPresent().isVisible()
-        .assertEquals("No Key entries added yet");
+    new Assertions("#keystore-infos-alert").isPresent().isVisible()
+        .assertEquals('Application Keystore contains "0" entries');
 });
 
 /* ********************************************************************************************************* */
 
 test("Load page without any key entries", async () => {
     loadPageWithoutEntries();
-    new Assertions("#card-list-alert-no-entries").isPresent().isVisible()
-        .assertEquals("No Key entries added yet");
+    new Assertions("#keystore-infos-alert").isPresent().isVisible()
+        .assertEquals('Application Keystore contains "0" entries');
 });
 
 /* ********************************************************************************************************* */
