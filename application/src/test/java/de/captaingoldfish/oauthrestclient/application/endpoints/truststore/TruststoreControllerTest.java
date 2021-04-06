@@ -57,7 +57,8 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
       TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
                                                           TruststoreUploadResponseForm.class);
-      Assertions.assertNull(responseForm.getAlias());
+      MatcherAssert.assertThat(responseForm.getAliases(),
+                               Matchers.containsInAnyOrder("unit-test", "goldfish", "localhost"));
       Assertions.assertNull(responseForm.getDuplicateAliases());
       Assertions.assertNull(responseForm.getDuplicateCertificates());
       Assertions.assertEquals(3, truststoreDao.getTruststore().getTruststore().size());
@@ -76,7 +77,7 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
       TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
                                                           TruststoreUploadResponseForm.class);
-      Assertions.assertNull(responseForm.getAlias());
+      Assertions.assertNull(responseForm.getAliases());
       MatcherAssert.assertThat(responseForm.getDuplicateAliases(),
                                Matchers.containsInAnyOrder("unit-test", "goldfish", "localhost"));
       Assertions.assertNull(responseForm.getDuplicateCertificates());
@@ -105,7 +106,8 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
       TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
                                                           TruststoreUploadResponseForm.class);
-      Assertions.assertEquals(alias, responseForm.getAlias());
+      Assertions.assertEquals(1, responseForm.getAliases().size());
+      Assertions.assertEquals(alias, responseForm.getAliases().get(0));
       Assertions.assertNull(responseForm.getDuplicateAliases());
       Assertions.assertNull(responseForm.getDuplicateCertificates());
       Truststore truststore = truststoreDao.getTruststore();
@@ -284,7 +286,8 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
                                                           TruststoreUploadResponseForm.class);
       Assertions.assertNull(responseForm.getDuplicateCertificates());
       Assertions.assertNull(responseForm.getDuplicateAliases());
-      Assertions.assertEquals(alias, responseForm.getAlias());
+      Assertions.assertEquals(1, responseForm.getAliases().size());
+      Assertions.assertEquals(alias, responseForm.getAliases().get(0));
       Assertions.assertEquals(1, truststoreDao.getTruststore().getTruststore().size());
     }
 
@@ -301,7 +304,7 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
       TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
                                                           TruststoreUploadResponseForm.class);
-      Assertions.assertNull(responseForm.getAlias());
+      MatcherAssert.assertThat(responseForm.getAliases(), Matchers.containsInAnyOrder("unit-test", "localhost"));
       Assertions.assertNull(responseForm.getDuplicateAliases());
       Assertions.assertNotNull(responseForm.getDuplicateCertificates());
       Assertions.assertEquals(1, responseForm.getDuplicateCertificates().size());
@@ -327,7 +330,8 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
       TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
                                                           TruststoreUploadResponseForm.class);
-      Assertions.assertNull(responseForm.getAlias());
+      MatcherAssert.assertThat(responseForm.getAliases(),
+                               Matchers.containsInAnyOrder("unit-test", "goldfish", "localhost"));
       Assertions.assertNull(responseForm.getDuplicateAliases());
       Assertions.assertNull(responseForm.getDuplicateCertificates());
       Assertions.assertEquals(3, truststoreDao.getTruststore().getTruststore().size());
@@ -358,7 +362,8 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
       Assertions.assertEquals(HttpStatus.OK, response.getStatus());
       TruststoreUploadResponseForm responseForm = getForm(response.getBody().toString(),
                                                           TruststoreUploadResponseForm.class);
-      Assertions.assertNull(responseForm.getAlias());
+      MatcherAssert.assertThat(responseForm.getAliases(),
+                               Matchers.containsInAnyOrder("unit-test", "goldfish", "localhost"));
       Assertions.assertNull(responseForm.getDuplicateAliases());
       Assertions.assertNull(responseForm.getDuplicateCertificates());
       Assertions.assertEquals(3, truststoreDao.getTruststore().getTruststore().size());

@@ -19,11 +19,10 @@ public class TruststoreUploadResponseForm
 {
 
   /**
-   * will be returned in case of a certificate upload. It indicates that adding the certificate under this alias
-   * was successful
+   * will return all added aliases
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private String alias;
+  private List<String> aliases;
 
   /**
    * will be returned in case of a truststore upload. The list contains all aliases that could not be merged
@@ -40,9 +39,11 @@ public class TruststoreUploadResponseForm
   private List<String> duplicateCertificates;
 
   @Builder
-  public TruststoreUploadResponseForm(String alias, List<String> duplicateAliases, List<String> duplicateCertificates)
+  public TruststoreUploadResponseForm(List<String> aliases,
+                                      List<String> duplicateAliases,
+                                      List<String> duplicateCertificates)
   {
-    this.alias = alias;
+    this.aliases = aliases == null || aliases.isEmpty() ? null : aliases;
     this.duplicateAliases = duplicateAliases == null || duplicateAliases.isEmpty() ? null : duplicateAliases;
     this.duplicateCertificates = duplicateCertificates == null || duplicateCertificates.isEmpty() ? null
       : duplicateCertificates;

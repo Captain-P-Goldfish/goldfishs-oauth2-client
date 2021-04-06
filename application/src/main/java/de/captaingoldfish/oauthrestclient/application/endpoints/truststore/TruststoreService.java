@@ -3,10 +3,9 @@ package de.captaingoldfish.oauthrestclient.application.endpoints.truststore;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -88,6 +87,7 @@ public class TruststoreService
   private TruststoreUploadResponseForm getTruststoreUploadResponse(KeyStore keystoreToMergeIn,
                                                                    KeyStore keystoreToMergeFrom)
   {
+    List<String> addedAliases = new ArrayList<>();
     List<String> duplicateAliases = new ArrayList<>();
     List<String> duplicateCertificateAliases = new ArrayList<>();
     Enumeration<String> aliasesToMerge = KeyStoreSupporter.getAliases(keystoreToMergeFrom);
@@ -106,10 +106,15 @@ public class TruststoreService
         {
           duplicateCertificateAliases.add(aliasToMerge);
         }
+        else
+        {
+          addedAliases.add(aliasToMerge);
+        }
       }
     }
 
     return TruststoreUploadResponseForm.builder()
+                                       .aliases(addedAliases)
                                        .duplicateAliases(duplicateAliases)
                                        .duplicateCertificates(duplicateCertificateAliases)
                                        .build();
@@ -127,7 +132,7 @@ public class TruststoreService
     byte[] truststoreBytes = KeyStoreSupporter.getBytes(truststore.getTruststore(), truststore.getTruststorePassword());
     truststore.setTruststoreBytes(truststoreBytes);
     truststoreDao.save(truststore);
-    return TruststoreUploadResponseForm.builder().alias(alias).build();
+    return TruststoreUploadResponseForm.builder().aliases(Collections.singletonList(alias)).build();
   }
 
   @SneakyThrows
