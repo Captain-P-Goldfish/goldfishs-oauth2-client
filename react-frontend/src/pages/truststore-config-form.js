@@ -23,10 +23,13 @@ export default class TruststoreConfigForm extends React.Component {
         fetch("/truststore/infos")
             .then(response => response.json())
             .then(response => {
-                console.log(response)
+                let certificateAliases = this.state.certificateAliases;
+                if (response.certificateAliases !== undefined) {
+                    certificateAliases = certificateAliases.concat(response.certificateAliases).sort();
+                }
                 this.setState({
                     numberOfEntries: response.numberOfEntries,
-                    certificateAliases: response.certificateAliases.sort()
+                    certificateAliases: certificateAliases
                 });
             })
     }
@@ -35,25 +38,21 @@ export default class TruststoreConfigForm extends React.Component {
         let duplicateAliases = response.duplicateAliases === undefined ? [] : response.duplicateAliases.sort();
         let duplicateCertificates = response.duplicateCertificates === undefined ? [] : response.duplicateCertificates.sort();
         let certificateAliases = this.state.certificateAliases;
-        if (response.alias !== undefined) {
-            certificateAliases.push(response.alias);
+        if (response.aliases !== undefined) {
+            certificateAliases = certificateAliases.concat(response.aliases).sort();
         }
 
         this.setState({
             duplicateAliases: duplicateAliases,
             duplicateCertificates: duplicateCertificates,
-            certificateAliases: certificateAliases.sort()
+            certificateAliases: certificateAliases
         });
-
-        if (response.alias === undefined) {
-            this.componentDidMount();
-        }
     }
 
     render() {
         return (
             <React.Fragment>
-                <Alert id={"upload-form-alert-dupliate-aliases"} variant={"warning"}
+                <Alert id={"upload-form-alert-duplicate-aliases"} variant={"warning"}
                        show={this.state.duplicateAliases.length > 0}>
                     <Form.Text>
                         <GoFlame /> The following aliases could not be added because the alias is
@@ -62,11 +61,11 @@ export default class TruststoreConfigForm extends React.Component {
                                     [{this.state.duplicateAliases}]
                     </Form.Text>
                 </Alert>
-                <Alert id={"upoad-form-alert-dupliate-certificates"} variant={"warning"}
+                <Alert id={"upoad-form-alert-duplicate-certificates"} variant={"warning"}
                        show={this.state.duplicateCertificates.length > 0}>
                     <Form.Text>
-                        <GoFlame /> The following aliases could not be added because the alias is
-                                    duplicated {this.state.duplicateCertificates}
+                        <GoFlame /> The following aliases could not be added because the certificate is already
+                                    present: [{this.state.duplicateCertificates}]
                     </Form.Text>
                 </Alert>
 

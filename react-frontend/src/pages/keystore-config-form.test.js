@@ -27,7 +27,7 @@ afterEach(() => {
 
 function loadPageWithoutEntries() {
     mockFetch(200, []);
-    new Assertions("#keystore-alias-entries").isNotPresent();
+    new Assertions("#keystore-certificate-entries").isNotPresent();
 
     act(() => {
         render(<KeystoreForm />, container);
@@ -48,7 +48,7 @@ function getFakeKeystoreInfos() {
 
 /* ********************************************************************************************************* */
 
-test("verify certificate data is displayed and deletable", async () => {
+test("verify certificate data is displayed", async () => {
     const fakeKeystoreInfos = getFakeKeystoreInfos();
 
     mockFetch(200, fakeKeystoreInfos);
@@ -96,14 +96,12 @@ test("upload Keystore entries", async () => {
 
     // handle file input field
     {
-        const keystoreFileAssertion = new Assertions("#keystoreFile").isPresent().isVisible();
-        fireEvent.change(keystoreFileAssertion.element, {target: {files: [keystoreFile]}})
+        new Assertions("#keystoreFile").isPresent().isVisible().fireChangeEvent(keystoreFile)
     }
     // handle keystore password input field
     {
-        const keystorePasswordAssertion = new Assertions("#keystorePassword")
-            .isPresent().isVisible().assertEquals("");
-        fireEvent.change(keystorePasswordAssertion.element, {target: {value: keystorePassword}})
+        new Assertions("#keystorePassword").isPresent().isVisible().assertEquals("")
+            .fireChangeEvent(keystorePassword);
     }
 
     // mock fetch

@@ -135,6 +135,7 @@ export default function CertificateList(props) {
         <React.Fragment>
             <CardDeck id="keystore-certificate-entries">
                 {
+                    props.certificateAliases !== undefined &&
                     props.certificateAliases.map((certAlias) => {
                         return <CertificateCardEntry key={certAlias}
                                                      loadUrl={props.loadUrl + "?alias=" + encodeURI(certAlias)}
