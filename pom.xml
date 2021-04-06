@@ -89,7 +89,7 @@
         <version.maven.enforcer.plugin>3.0.0-M3</version.maven.enforcer.plugin>
         <version.maven.surefire.plugin>3.0.0-M5</version.maven.surefire.plugin>
         <version.maven.jar.plugin>3.2.0</version.maven.jar.plugin>
-        <version.maven.docker.plugin>0.34.1</version.maven.docker.plugin>
+        <version.maven.frontend.plugin>1.11.3</version.maven.frontend.plugin>
     </properties>
 
     <dependencyManagement>
@@ -570,7 +570,7 @@
                     <plugin>
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.11.2</version>
+                        <version>${version.maven.frontend.plugin}</version>
                         <inherited>false</inherited>
                         <executions>
                             <execution>
@@ -615,7 +615,7 @@
                     <plugin>
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.11.2</version>
+                        <version>${version.maven.frontend.plugin}</version>
                         <inherited>false</inherited>
                         <executions>
                             <execution>
@@ -656,7 +656,7 @@
                     <plugin>
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.11.2</version>
+                        <version>${version.maven.frontend.plugin}</version>
                         <inherited>false</inherited>
                         <executions>
                             <execution>
