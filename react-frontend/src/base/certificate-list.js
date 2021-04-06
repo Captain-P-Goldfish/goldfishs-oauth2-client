@@ -7,7 +7,7 @@ import CertIcon from "../media/certificate.png";
 import Button from "react-bootstrap/Button";
 
 
-class CertificateCardEntry extends React.Component {
+export class CertificateCardEntry extends React.Component {
 
     constructor(props) {
         super(props);
@@ -80,7 +80,7 @@ class CertificateCardEntry extends React.Component {
                     {this.props.alias}
                     <div className="card-delete-icon">
                         {spinner}
-                        <TrashFill id={"delete-button-" + this.props.alias} onClick={this.showModal} />
+                        <TrashFill id={"delete-icon-" + this.props.alias} onClick={this.showModal} />
                     </div>
                 </Card.Header>
                 <Card.Body>
@@ -133,7 +133,7 @@ export default function CertificateList(props) {
 
     return (
         <React.Fragment>
-            <CardDeck id="keystore-alias-entries">
+            <CardDeck id="keystore-certificate-entries">
                 {
                     props.certificateAliases.map((certAlias) => {
                         return <CertificateCardEntry key={certAlias}

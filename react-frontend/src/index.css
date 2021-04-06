@@ -174,11 +174,11 @@ ul.error-list {
   padding-right: 10px;
 }
 
-.application-certificate-info-header {
+#application-certificate-info-header {
   margin-bottom: 15px;
 }
 
-.application-certificate-info-header p{
+#application-certificate-info-header p{
   display: inline;
 }
 

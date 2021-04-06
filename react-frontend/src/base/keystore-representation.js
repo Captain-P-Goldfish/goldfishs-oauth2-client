@@ -15,7 +15,7 @@ export default class KeystoreRepresentation extends React.Component {
         }
         let certificateAliases = props.certificateAliases === undefined ? [] : props.certificateAliases;
         this.state = {
-            numberOfEntries: 0,
+            numberOfEntries: certificateAliases.length,
             certificateAliases: certificateAliases
         }
         this.onCertificateDelete = this.onCertificateDelete.bind(this);
@@ -47,16 +47,16 @@ export default class KeystoreRepresentation extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <h2 className="application-certificate-info-header">
+                <h2 id="application-certificate-info-header">
                     <p>Application {this.props.type} Infos</p>
                     <Badge className="download-keystore-icon">
-                        <a href={this.props.basePath + "/download"}>
+                        <a id={"keystore-download-link"} href={this.props.basePath + "/download"}>
                             <Image src={downloadIcon} fluid />
                             <p>Download</p>
                         </a>
                     </Badge>
                 </h2>
-                <Alert id="keystore-infos-alert"
+                <Alert id="card-list-infos-alert"
                        variant={"info"}
                        show={this.state.numberOfEntries !== null}>
                     <Form.Text>

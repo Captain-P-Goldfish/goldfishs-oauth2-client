@@ -2,7 +2,7 @@ import React from 'react';
 import {act, render} from '@testing-library/react';
 import {unmountComponentAtNode} from "react-dom";
 import ConfigPageForm, {FormFileField, FormInputField, FormSelectField} from "./config-page-form";
-import Assertions from "../setupTests";
+import Assertions, {mockFetch} from "../setupTests";
 
 let container = null;
 
@@ -22,19 +22,6 @@ afterEach(() => {
     container.remove();
     container = null;
 });
-
-/* ********************************************************************************************************* */
-
-function mockFetch(status, fakeResponse) {
-    jest.spyOn(global, "fetch").mockImplementation(() => {
-        return Promise.resolve({
-            status: status,
-            json: () => {
-                return Promise.resolve(fakeResponse)
-            }
-        })
-    });
-}
 
 /* ********************************************************************************************************* */
 

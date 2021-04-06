@@ -46,35 +46,6 @@ function getFakeKeystoreInfos() {
     };
 }
 
-function getFakeCertInfo(alias) {
-
-    const certificateInfos = {
-        "goldfish": {
-            "issuerDn": "CN=goldfish",
-            "subjectDn": "CN=goldfish",
-            "sha256fingerprint": "eafbea8af66e666310d6f73899d45a39a876b80037af7ae5fac2143ece6c9cee",
-            "validFrom": "2021-03-27T18:42:14Z",
-            "validUntil": "2121-03-27T18:42:14Z"
-        },
-        "localhost": {
-            "issuerDn": "CN=goldfish",
-            "subjectDn": "CN=localhost",
-            "sha256fingerprint": "4226c730a65e6352f214cad920a9a2e7f2e4e4884c7184aab4e25e3413ebdf50",
-            "validFrom": "2021-03-30T18:11:28Z",
-            "validUntil": "2121-03-30T18:11:28Z"
-        },
-        "unit-test": {
-            "issuerDn": "CN=goldfish",
-            "subjectDn": "CN=unit-test",
-            "sha256fingerprint": "1e90dcc6e12aecf6529273b9627126d20ac6d14fb2bdd1dcbfd26baf7012c5bb",
-            "validFrom": "2021-03-30T18:12:01Z",
-            "validUntil": "2121-03-30T18:12:01Z"
-        }
-    };
-
-    return certificateInfos[alias];
-}
-
 /* ********************************************************************************************************* */
 
 test("verify certificate data is displayed and deletable", async () => {
@@ -82,7 +53,7 @@ test("verify certificate data is displayed and deletable", async () => {
 
     mockFetch(200, fakeKeystoreInfos);
 
-    new Assertions("#keystore-alias-entries").isNotPresent();
+    new Assertions("#keystore-certificate-entries").isNotPresent();
 
     act(() => {
         render(<KeystoreForm />, container);
@@ -92,93 +63,17 @@ test("verify certificate data is displayed and deletable", async () => {
     global.fetch.mockRestore();
 
     await waitFor(() => {
-        new Assertions("#keystore-alias-entries").isPresent();
-        new Assertions("#keystore-infos-alert").isPresent().isVisible()
+        new Assertions("#keystore-certificate-entries").isPresent();
+        new Assertions("#card-list-infos-alert").isPresent().isVisible()
             .assertEquals('Application Keystore contains "3" entries');
     });
-
-    // creating a copy of the aliases because we would otherwise pass a reference into the react component that will
-    // be sliced on element deletion causing this array to be effected
-    let aliasArray = [...fakeKeystoreInfos.certificateAliases];
-
-    // validate the data content on the card-deck
-    for (let alias of aliasArray) {
-
-        const cardId = "alias-card-" + alias;
-        let certInfo = null;
-
-        // validate card is displayed without any data but with image and a button to load the data
-        {
-            const loadCertDataButtonAssertion = new Assertions("#load-certificate-data-button-for-" + alias)
-                .isPresent().isVisible();
-            expect(loadCertDataButtonAssertion.element.previousSibling.tagName).toBe("IMG");
-            certInfo = getFakeCertInfo(alias);
-            mockFetch(200, certInfo);
-            await loadCertDataButtonAssertion.clickElement(() => {
-                new Assertions("#issuer-dn-" + alias).isPresent().isVisible();
-            })
-            expect(global.fetch).toBeCalledTimes(1);
-            expect(global.fetch).toBeCalledWith("/keystore/load-alias?alias=" + alias)
-            global.fetch.mockRestore();
-        }
-
-        // validate displayed data
-        {
-            new Assertions("#alias-name-" + alias).isVisible().assertEquals(alias);
-            new Assertions("#issuer-dn-" + alias).isVisible().assertEquals(certInfo.issuerDn);
-            new Assertions("#subject-dn-" + alias).isVisible().assertEquals(certInfo.subjectDn);
-            new Assertions("#sha-256-" + alias).isVisible().assertEquals(certInfo.sha256fingerprint);
-            new Assertions("#valid-from-" + alias).isVisible().assertEquals(certInfo.validFrom);
-            new Assertions("#valid-until-" + alias).isVisible().assertEquals(certInfo.validUntil);
-        }
-
-
-        // click the delete button and verify that the delete dialog is shown
-        {
-            const baseId = "#delete-dialog-" + alias;
-            new Assertions(baseId).isNotPresent();
-            const deleteButtonIconAssertion = new Assertions("#delete-button-" + alias);
-            await deleteButtonIconAssertion.clickElement(() => new Assertions(baseId).isPresent().isVisible());
-            new Assertions(baseId + "-header").isPresent()
-                .isVisible().assertEquals("Delete '" + alias + "'");
-
-            // cancel deletion
-            {
-                const cancelButtonAssertion = new Assertions(baseId + "-button-cancel").isPresent()
-                    .isVisible().assertEquals("cancel");
-                await cancelButtonAssertion.clickElement(() => new Assertions(baseId).isNotPresent());
-            }
-
-            // show delete dialog again
-            await deleteButtonIconAssertion.clickElement(() => new Assertions(baseId).isPresent().isVisible());
-
-            // accept deletion
-            {
-                const deleteButtonAssertion = new Assertions(baseId + "-button-accept").isPresent()
-                    .isVisible().assertEquals("delete");
-                mockFetch(204, "");
-                await deleteButtonAssertion.clickElement(() => {
-                    new Assertions(cardId).isNotPresent();
-                    new Assertions("#card-list-deletion-success").isPresent()
-                        .assertEquals('Key entry for alias "' + alias + '" was successfully deleted');
-                });
-                expect(global.fetch).toBeCalledTimes(1);
-                expect(global.fetch).toBeCalledWith("/keystore/delete-alias?alias=" + alias,
-                    {method: "DELETE"})
-                // remove the mock to ensure tests are completely isolated
-                global.fetch.mockRestore();
-            }
-        }
-    }
-    new Assertions("#keystore-infos-alert").isPresent().isVisible()
-        .assertEquals('Application Keystore contains "0" entries');
 });
 
 /* ********************************************************************************************************* */
 
 test("Load page without any key entries", async () => {
     loadPageWithoutEntries();
-    new Assertions("#keystore-infos-alert").isPresent().isVisible()
+    new Assertions("#card-list-infos-alert").isPresent().isVisible()
         .assertEquals('Application Keystore contains "0" entries');
 });
 
