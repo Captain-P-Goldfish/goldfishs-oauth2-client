@@ -1,10 +1,9 @@
 package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms;
 
-import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
+import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 
 /**

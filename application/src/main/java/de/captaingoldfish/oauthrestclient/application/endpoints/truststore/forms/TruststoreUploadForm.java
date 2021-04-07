@@ -2,8 +2,6 @@ package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.form
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +15,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 @TruststoreUploadFormValidation
 public class TruststoreUploadForm
 {

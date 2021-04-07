@@ -2,8 +2,6 @@ package de.captaingoldfish.oauthrestclient.application.endpoints.truststore.form
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,21 +19,18 @@ public class TruststoreUploadResponseForm
   /**
    * will return all added aliases
    */
-  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<String> aliases;
 
   /**
    * will be returned in case of a truststore upload. The list contains all aliases that could not be merged
    * into the application keystore because the key did already exist or the alias was already present
    */
-  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<String> duplicateAliases;
 
   /**
    * will be returned in case of a truststore upload. The list contains all the aliases that contain a
    * certificate that is already present within the application keystore under another alias name.
    */
-  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<String> duplicateCertificates;
 
   @Builder

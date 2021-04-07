@@ -3,12 +3,14 @@ package de.captaingoldfish.oauthrestclient.application.setup;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.server.LocalServerPort;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.captaingoldfish.oauthrestclient.database.repositories.ClientDao;
@@ -56,7 +58,9 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @BeforeEach
   public void initializeApplicationUrl()
   {
-    this.applicationUrl = String.format("http://localhost:%s/%s", port, contextPath);
+    this.applicationUrl = String.format("http://localhost:%s%s",
+                                        port,
+                                        StringUtils.isBlank(contextPath) ? "" : "/" + contextPath);
   }
 
   @AfterEach
@@ -85,5 +89,17 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   public <T> T getForm(String jsonResponse, Class<T> type)
   {
     return objectMapper.readValue(jsonResponse, type);
+  }
+
+  @SneakyThrows
+  public <T> T getForm(String jsonResponse, TypeReference<T> type)
+  {
+    return objectMapper.readValue(jsonResponse, type);
+  }
+
+  @SneakyThrows
+  public String toJson(Object object)
+  {
+    return objectMapper.writeValueAsString(object);
   }
 }
