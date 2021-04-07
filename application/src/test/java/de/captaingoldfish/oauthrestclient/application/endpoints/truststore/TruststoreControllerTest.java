@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import de.captaingoldfish.oauthrestclient.application.endpoints.models.CertificateInfo;
 import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreInfoForm;
 import de.captaingoldfish.oauthrestclient.application.endpoints.truststore.forms.TruststoreUploadResponseForm;
 import de.captaingoldfish.oauthrestclient.application.setup.AbstractOAuthRestClientTest;
@@ -398,6 +399,60 @@ public class TruststoreControllerTest extends AbstractOAuthRestClientTest
     Assertions.assertNotNull(aliasErrors);
     Assertions.assertEquals(1, aliasErrors.size());
     Assertions.assertEquals("Alias must not be blank", aliasErrors.get(0));
+  }
+
+  @SneakyThrows
+  @Test
+  public void testLoadSingleAlias()
+  {
+    // send upload post request
+    {
+      HttpResponse<JsonNode> response;
+      try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
+      {
+        MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
+                                             .field("truststoreFile", inputStream, "unit-test.jks")
+                                             .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
+        response = multipartBody.asJson();
+      }
+      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+    }
+
+    HttpResponse<JsonNode> response = Unirest.get(getApplicationUrl("/truststore/load-alias"))
+                                             .queryString("alias", "goldfish")
+                                             .asJson();
+    Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+    CertificateInfo certificateInfo = getForm(response.getBody().toString(), CertificateInfo.class);
+    Assertions.assertEquals("CN=goldfish", certificateInfo.getIssuerDn());
+    Assertions.assertEquals("CN=goldfish", certificateInfo.getSubjectDn());
+    Assertions.assertNotNull(certificateInfo.getSha256fingerprint());
+    Assertions.assertNotNull(certificateInfo.getValidFrom());
+    Assertions.assertNotNull(certificateInfo.getValidUntil());
+  }
+
+  @SneakyThrows
+  @Test
+  public void testDeleteAlias()
+  {
+    // send upload post request
+    {
+      HttpResponse<JsonNode> response;
+      try (InputStream inputStream = readAsInputStream(UNIT_TEST_KEYSTORE_JKS))
+      {
+        MultipartBody multipartBody = Unirest.post(getApplicationUrl("/truststore/add"))
+                                             .field("truststoreFile", inputStream, "unit-test.jks")
+                                             .field("truststorePassword", UNIT_TEST_KEYSTORE_PASSWORD);
+        response = multipartBody.asJson();
+      }
+      Assertions.assertEquals(HttpStatus.OK, response.getStatus());
+      Assertions.assertEquals(3, truststoreDao.getTruststore().getTruststore().size());
+    }
+
+    HttpResponse<JsonNode> response = Unirest.delete(getApplicationUrl("/truststore/delete-alias"))
+                                             .queryString("alias", "goldfish")
+                                             .asJson();
+    Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatus());
+    Assertions.assertEquals(2, truststoreDao.getTruststore().getTruststore().size());
   }
 
   @SneakyThrows
