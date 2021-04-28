@@ -21,6 +21,7 @@
         <module>application</module>
         <module>database</module>
         <module>commons</module>
+        <module>scim-base</module>
     </modules>
 
     <developers>
@@ -47,6 +48,7 @@
         <version.lombok>1.18.18</version.lombok>
 
         <!-- application dependencies -->
+        <version.scim.sdk>1.10.0-SNAPSHOT</version.scim.sdk>
         <version.commons.lang3>3.11</version.commons.lang3>
         <version.commons.io>2.8.0</version.commons.io>
         <version.spring>5.3.5</version.spring>
@@ -133,6 +135,11 @@
                 <groupId>de.captaingoldfish</groupId>
                 <artifactId>frontend</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.captaingoldfish</groupId>
+                <artifactId>scim-sdk-server</artifactId>
+                <version>${version.scim.sdk}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
