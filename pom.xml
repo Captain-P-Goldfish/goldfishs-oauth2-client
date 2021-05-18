@@ -96,6 +96,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>de.captaingoldfish</groupId>
+                <artifactId>scim-base</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- IDE dependencies -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -139,6 +145,11 @@
             <dependency>
                 <groupId>de.captaingoldfish</groupId>
                 <artifactId>scim-sdk-server</artifactId>
+                <version>${version.scim.sdk}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.captaingoldfish</groupId>
+                <artifactId>scim-sdk-client</artifactId>
                 <version>${version.scim.sdk}</version>
             </dependency>
             <dependency>

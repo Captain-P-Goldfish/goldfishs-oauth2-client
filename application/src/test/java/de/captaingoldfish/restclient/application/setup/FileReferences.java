@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
+import lombok.SneakyThrows;
 
 
 /**
@@ -39,6 +40,15 @@ public interface FileReferences
   default InputStream readAsInputStream(String classpathFile)
   {
     return getClass().getResourceAsStream(classpathFile);
+  }
+
+  @SneakyThrows
+  default byte[] readAsBytes(String classpathFile)
+  {
+    try (InputStream inputStream = getClass().getResourceAsStream(classpathFile))
+    {
+      return inputStream.readAllBytes();
+    }
   }
 
   /**

@@ -1,0 +1,88 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo",
+  "name": "CertificateInfo",
+  "description": "Represents a single certificate entry of a keystore / truststore",
+  "attributes": [
+    {
+      "name": "alias",
+      "type": "string",
+      "description": "The alias that holds this certificate entry.",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    },
+    {
+      "name": "info",
+      "type": "complex",
+      "description": "The data of the certificate.",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "issuerDn",
+          "type": "string",
+          "description": "The distinguished name of the issuer",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "subjectDn",
+          "type": "string",
+          "description": "The distinguished name of the subject",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "sha256Fingerprint",
+          "type": "string",
+          "description": "The SHA-256 fingerprint of the certificate",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true
+        },
+        {
+          "name": "validFrom",
+          "type": "dateTime",
+          "description": "The date from which this certificate will be valid",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "validTo",
+          "type": "dateTime",
+          "description": "The date until this certificate will be valid",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
+    }
+  ]
+}

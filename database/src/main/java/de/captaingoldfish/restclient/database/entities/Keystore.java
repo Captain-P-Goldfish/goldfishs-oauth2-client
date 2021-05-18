@@ -167,6 +167,16 @@ public class Keystore
    *
    * @return the certificate under the given keystore entry
    */
+  public X509Certificate getCertificate(String alias)
+  {
+    return getCertificate(new KeystoreEntry(alias, null));
+  }
+
+  /**
+   * will read the certificate from the given alias
+   *
+   * @return the certificate under the given keystore entry
+   */
   public X509Certificate getCertificate(KeystoreEntry keystoreEntry)
   {
     if (keystoreEntryExists(keystoreEntry))
