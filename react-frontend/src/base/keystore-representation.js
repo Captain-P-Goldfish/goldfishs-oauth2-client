@@ -71,8 +71,7 @@ export default class KeystoreRepresentation extends React.Component {
                     </Form.Text>
                 </Alert>
                 <CertificateList certificateAliases={this.state.certificateAliases}
-                                 loadUrl={this.props.basePath + "/load-alias"}
-                                 deleteUrl={this.props.basePath + "/delete-alias"}
+                                 basePath={this.props.basePath}
                                  onDeleteSuccess={this.onCertificateDelete} />
             </React.Fragment>
         )

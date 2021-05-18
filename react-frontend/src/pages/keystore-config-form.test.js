@@ -3,6 +3,10 @@ import KeystoreForm from "./keystore-config-form";
 import {act, fireEvent, render, waitFor} from '@testing-library/react';
 import Assertions, {mockFetch} from "../setupTests"
 import {unmountComponentAtNode} from "react-dom";
+import {toBase64} from "../services/utils";
+
+
+jest.setTimeout(300000)
 
 let container = null;
 
@@ -26,14 +30,16 @@ afterEach(() => {
 /* ********************************************************************************************************* */
 
 function loadPageWithoutEntries() {
-    mockFetch(200, []);
+    mockFetch(200, {
+        Resources: []
+    });
     new Assertions("#keystore-certificate-entries").isNotPresent();
 
     act(() => {
         render(<KeystoreForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/keystore/infos")
+    expect(global.fetch).toBeCalledWith("/scim/v2/Keystore", {method: "GET"})
     global.fetch.mockRestore();
 }
 
@@ -41,8 +47,21 @@ function loadPageWithoutEntries() {
 
 function getFakeKeystoreInfos() {
     return {
-        "numberOfEntries": 3,
-        "certificateAliases": ["goldfish", "localhost", "unit-test"]
+        "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+        "totalResults": 1,
+        "itemsPerPage": 1,
+        "startIndex": 1,
+        "Resources": [{
+            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Keystore"],
+            "id": "1",
+            "aliases": ["unit-test", "goldfish", "localhost"],
+            "meta": {
+                "resourceType": "Keystore",
+                "created": "2021-05-18T19:47:21.210Z",
+                "lastModified": "2021-05-18T19:47:21.210Z",
+                "location": "http://localhost:59478/scim/v2/Keystore/1"
+            }
+        }]
     };
 }
 
@@ -59,7 +78,7 @@ test("verify certificate data is displayed", async () => {
         render(<KeystoreForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/keystore/infos")
+    expect(global.fetch).toBeCalledWith("/scim/v2/Keystore", {method: "GET"})
     global.fetch.mockRestore();
 
     await waitFor(() => {
@@ -82,7 +101,7 @@ test("Load page without any key entries", async () => {
 test("upload Keystore entries", async () => {
     loadPageWithoutEntries();
     const filename = "myKeystore.jks";
-    const keystoreFile = new File(["hello world"], filename);
+    const keystoreFile = new File([new Blob(['hello-world'], {type: 'text/plain'})], filename);
     const keystorePassword = "123456";
     const aliasOverride = "hello-world";
     const privateKeyPassword = "123456";
@@ -96,23 +115,29 @@ test("upload Keystore entries", async () => {
 
     // handle file input field
     {
-        new Assertions("#keystoreFile").isPresent().isVisible().fireChangeEvent(keystoreFile)
+        await new Assertions("#fileUpload\\.keystoreFile").isPresent().isVisible().fireChangeEvent(keystoreFile)
     }
     // handle keystore password input field
     {
-        new Assertions("#keystorePassword").isPresent().isVisible().assertEquals("")
+        await new Assertions("#fileUpload\\.keystorePassword").isPresent().isVisible().assertEquals("")
             .fireChangeEvent(keystorePassword);
     }
 
     // mock fetch
     {
         mockFetch(200, {
-            "stateId": stateId,
-            "aliases": [
-                "unit-test",
-                "goldfish",
-                "localhost"
-            ]
+            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Keystore"],
+            "id": "1",
+            "aliasSelection": {
+                "stateId": stateId,
+                "aliases": ["unit-test", "goldfish", "localhost"]
+            },
+            "meta": {
+                "resourceType": "Keystore",
+                "created": "2021-05-18T19:59:53.912Z",
+                "lastModified": "2021-05-18T19:59:53.912Z",
+                "location": "http://localhost:59926/scim/v2/Keystore/1"
+            }
         });
     }
 
@@ -131,21 +156,26 @@ test("upload Keystore entries", async () => {
                 new Assertions("#uploadForm").hasClass("disabled");
                 new Assertions("#aliasSelectionForm").hasNotClass("disabled");
             });
+
+        let data = {
+            "fileUpload": {
+                "keystoreFile": await toBase64(keystoreFile),
+                "keystorePassword": keystorePassword
+            }
+        };
         expect(global.fetch).toBeCalledTimes(1);
-        let data = new FormData();
-        data.append("keystoreFile", keystoreFile)
-        data.append("keystorePassword", keystorePassword)
-        expect(global.fetch).toBeCalledWith("/keystore/upload",
+        expect(global.fetch).toBeCalledWith("/scim/v2/Keystore",
             {
-                body: data,
-                method: "POST"
+                method: "POST",
+                headers: {'Content-Type': 'application/scim+json'},
+                body: JSON.stringify(data)
             })
         global.fetch.mockRestore();
     }
 
     // check values of alias selection box
     {
-        const aliasesElement = new Assertions("#aliases").isPresent().isVisible().element;
+        const aliasesElement = new Assertions("#aliasSelection\\.aliases").isPresent().isVisible().element;
         expect(aliasesElement.options.length).toBe(3);
         expect(aliasesElement.options[0].textContent).toBe("unit-test");
         expect(aliasesElement.options[1].textContent).toBe("goldfish");
@@ -154,26 +184,37 @@ test("upload Keystore entries", async () => {
 
     // verify that first entry is selected and enter data to input fields
     {
-        new Assertions("#aliases")
+        new Assertions("#aliasSelection\\.aliases")
             .isPresent().isVisible().hasValueSelected("unit-test");
 
-        const aliasOverrideAssertion = new Assertions("#aliasOverride").isPresent().isVisible();
+        const aliasOverrideAssertion = new Assertions("#aliasSelection\\.aliasOverride").isPresent().isVisible();
         fireEvent.change(aliasOverrideAssertion.element, {target: {value: aliasOverride}})
 
-        const privateKeyPasswordAssertion = new Assertions("#privateKeyPassword").isPresent().isVisible();
+        const privateKeyPasswordAssertion = new Assertions("#aliasSelection\\.privateKeyPassword").isPresent().isVisible();
         fireEvent.change(privateKeyPasswordAssertion.element, {target: {value: privateKeyPassword}})
     }
 
     // mock fetch
     {
         mockFetch(201, {
-            "alias": "unit-test",
-            "certificateInfo": {
-                "issuerDn": "CN=goldfish",
-                "subjectDn": "CN=unit-test",
-                "sha256fingerprint": "1e90dcc6e12aecf6529273b9627126d20ac6d14fb2bdd1dcbfd26baf7012c5bb",
-                "validFrom": "2021-03-30T18:12:01Z",
-                "validUntil": "2121-03-30T18:12:01Z"
+            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Keystore",
+                "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo"],
+            "id": "1",
+            "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo": {
+                "alias": "unit-test",
+                "info": {
+                    "issuerDn": "CN=unit-test",
+                    "subjectDn": "CN=unit-test",
+                    "sha256Fingerprint": "1e90dcc6e12aecf6529273b9627126d20ac6d14fb2bdd1dcbfd26baf7012c5bb",
+                    "validFrom": "2021-03-30T18:12:01.000Z",
+                    "validTo": "2121-03-30T18:12:01.000Z"
+                }
+            },
+            "meta": {
+                "resourceType": "Keystore",
+                "created": "2021-05-18T20:26:26.326Z",
+                "lastModified": "2021-05-18T20:26:26.326Z",
+                "location": "http://localhost:60841/scim/v2/Keystore/1"
             }
         });
     }
@@ -186,15 +227,20 @@ test("upload Keystore entries", async () => {
             new Assertions("#alias-card-unit-test").isPresent().isVisible();
         })
         expect(global.fetch).toBeCalledTimes(1);
-        let data = new FormData();
-        data.append("stateId", stateId)
-        data.append("aliases", ["unit-test"])
-        data.append("aliasOverride", aliasOverride)
-        data.append("privateKeyPassword", privateKeyPassword)
-        expect(global.fetch).toBeCalledWith("/keystore/select-alias",
+        let data = {
+            "aliasSelection": {
+                "stateId": stateId,
+                "aliases": "unit-test",
+                "aliasOverride": aliasOverride,
+                "privateKeyPassword": privateKeyPassword
+            }
+        };
+
+        expect(global.fetch).toBeCalledWith("/scim/v2/Keystore",
             {
-                body: data,
-                method: "POST"
+                method: "POST",
+                headers: {'Content-Type': 'application/scim+json'},
+                body: JSON.stringify(data)
             });
         global.fetch.mockRestore();
     }

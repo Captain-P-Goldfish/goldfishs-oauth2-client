@@ -7,6 +7,7 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import bsCustomFileInput from "bs-custom-file-input";
+import {Optional} from "../services/utils";
 
 /**
  * a simple input field that might also display error messages directly bound to this input field
@@ -234,9 +235,9 @@ export default class ConfigPageForm extends React.Component {
      */
     setInputFieldErrors(errors) {
         if (errors !== undefined && errors !== null && typeof errors === 'object') {
-            this.setState({inputFieldErrors: errors})
+            this.setState({inputFieldErrors: errors, errorMessages: undefined})
         } else {
-            this.setState({inputFieldErrors: undefined})
+            this.setState({inputFieldErrors: undefined, errorMessages: undefined})
         }
     }
 
@@ -328,12 +329,20 @@ export default class ConfigPageForm extends React.Component {
      * @see ConfigPageForm ConfigPageForm doc for more information
      */
     onErrorResponse(status, response) {
-        if (response.inputFieldErrors !== undefined) {
-            this.setInputFieldErrors(response.inputFieldErrors);
-        } else if (response.errorMessages !== undefined && response.errorMessages !== null &&
-            response.errorMessages.length > 0) {
+        if (response.errors === undefined || response.errors === null) {
+            let detail = new Optional(response.detail).map(val => [val]).orElse([]);
             this.setState({
-                errorMessages: response.errorMessages,
+                errorMessages: detail,
+                inputFieldErrors: {}
+            });
+            return;
+        }
+        if (response.errors.fieldErrors !== undefined) {
+            this.setInputFieldErrors(response.errors.fieldErrors);
+        } else if (response.errors.errorMessages !== undefined && response.errors.errorMessages !== null &&
+            response.errors.errorMessages.length > 0) {
+            this.setState({
+                errorMessages: response.errors.errorMessages,
                 inputFieldErrors: {}
             });
         } else {

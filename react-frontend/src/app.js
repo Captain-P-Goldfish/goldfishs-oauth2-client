@@ -25,13 +25,13 @@ function Application(props) {
 
                         <Nav className="flex-column">
 
-                            <LinkContainer exact  to="/">
+                            <LinkContainer exact to="/">
                                 <Nav.Link>Home</Nav.Link>
                             </LinkContainer>
-                            <LinkContainer exact  to="/keystore">
+                            <LinkContainer exact to="/keystore">
                                 <Nav.Link>Keystore</Nav.Link>
                             </LinkContainer>
-                            <LinkContainer exact  to="/truststore">
+                            <LinkContainer exact to="/truststore">
                                 <Nav.Link>Truststore</Nav.Link>
                             </LinkContainer>
                             {/*<Nav.Link href="#proxies">Proxies</Nav.Link>*/}

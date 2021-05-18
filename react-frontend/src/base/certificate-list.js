@@ -5,6 +5,8 @@ import Modal from "./modal";
 import {TrashFill} from "react-bootstrap-icons";
 import CertIcon from "../media/certificate.png";
 import Button from "react-bootstrap/Button";
+import ScimClient from "../services/scim-client";
+import * as ScimConstants from "../scim-constants";
 
 
 export class CertificateCardEntry extends React.Component {
@@ -18,33 +20,39 @@ export class CertificateCardEntry extends React.Component {
         this.loadData = this.loadData.bind(this);
     }
 
-    deleteEntry() {
+    async deleteEntry() {
         this.setState({showSpinner: true});
-        let deleteUrl = this.props.deleteUrl;
-        fetch(deleteUrl, {
-            method: "DELETE"
-        })
-            .then(response => {
-                if (response.status === 204) {
-                    if (this.props.onDeleteSuccess !== undefined) {
-                        this.props.onDeleteSuccess(this.props.alias);
-                    }
-                }
-            })
+
+        let scimClient = new ScimClient(this.props.basePath);
+        let response = await scimClient.deleteResource(this.props.alias);
+
+        if (response.success) {
+            if (this.props.onDeleteSuccess !== undefined) {
+                this.props.onDeleteSuccess(this.props.alias);
+            }
+        } else {
+            // TODO
+        }
     }
 
     async loadData() {
         this.setState({showSpinner: true});
-        let loadUrl = this.props.loadUrl;
-        fetch(loadUrl)
-            .then(response => response.json())
-            .then(response => {
+
+        let scimClient = new ScimClient(this.props.basePath);
+        let response = await scimClient.getResource(this.props.alias);
+
+        if (response.success) {
+            response.resource.then(resource => {
+                let certInfo = resource[ScimConstants.CERT_URI];
                 this.setState({
                     showSpinner: false,
                     loaded: true,
-                    certInfo: response
+                    certInfo: certInfo.info
                 });
-            })
+            });
+        } else {
+            // TODO
+        }
     }
 
     showModal() {
@@ -119,7 +127,7 @@ export class CertificateCardEntry extends React.Component {
                             </Card.Text>
                             <Card.Subtitle>Valid Until</Card.Subtitle>
                             <Card.Text id={"valid-until-" + this.props.alias}>
-                                {this.state.certInfo.validUntil}
+                                {this.state.certInfo.validTo}
                             </Card.Text>
                         </React.Fragment>
                     }
@@ -138,8 +146,7 @@ export default function CertificateList(props) {
                     props.certificateAliases !== undefined &&
                     props.certificateAliases.map((certAlias) => {
                         return <CertificateCardEntry key={certAlias}
-                                                     loadUrl={props.loadUrl + "?alias=" + encodeURI(certAlias)}
-                                                     deleteUrl={props.deleteUrl + "?alias=" + encodeURI(certAlias)}
+                                                     basePath={props.basePath}
                                                      alias={certAlias}
                                                      onDeleteSuccess={props.onDeleteSuccess} />
                     })

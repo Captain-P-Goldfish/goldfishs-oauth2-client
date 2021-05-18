@@ -65,11 +65,11 @@ export default class Assertions {
         return this;
     }
 
-    fireChangeEvent(value) {
+    async fireChangeEvent(value) {
         if (value instanceof File) {
-            fireEvent.change(this.element, {target: {files: [value]}});
+            await fireEvent.change(this.element, {target: {files: [value]}});
         } else {
-            fireEvent.change(this.element, {target: {value: value}});
+            await fireEvent.change(this.element, {target: {value: value}});
         }
         return this;
     }
