@@ -37,17 +37,32 @@ export class Optional {
         return this;
     }
 
-    map(handler) {
-        if (this.isPresent()) {
+    map(handler)
+    {
+        if (this.isPresent())
+        {
             this.value = handler(this.value);
         }
         return this;
     }
 
-    orElse(defaultValue) {
-        if (this.isPresent()) {
+    do(handler)
+    {
+        if (this.isPresent())
+        {
+            handler(this.value);
+        }
+        return this;
+    }
+
+    orElse(defaultValue)
+    {
+        if (this.isPresent())
+        {
             return this.value;
-        } else {
+        }
+        else
+        {
             return defaultValue;
         }
     }

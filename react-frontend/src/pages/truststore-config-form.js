@@ -1,13 +1,18 @@
 import React from "react";
-import ConfigPageForm, {FormFileField, FormInputField} from "../base/config-page-form";
+import {FormFileField, FormInputField} from "../base/config-page-form";
 import Form from "react-bootstrap/Form";
 import {Alert} from "react-bootstrap";
 import {GoFlame} from "react-icons/go";
 import KeystoreRepresentation from "../base/keystore-representation";
+import ScimConfigPageForm from "../base/scim-config-page-form";
+import ScimClient from "../services/scim-client";
+import {Optional} from "../services/utils";
 
-export default class TruststoreConfigForm extends React.Component {
+export default class TruststoreConfigForm extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
         this.state = {
             numberOfEntries: null,
@@ -19,37 +24,80 @@ export default class TruststoreConfigForm extends React.Component {
         this.handleUploadSuccess = this.handleUploadSuccess.bind(this);
     }
 
-    componentDidMount() {
-        fetch("/truststore/infos")
-            .then(response => response.json())
-            .then(response => {
-                let certificateAliases = this.state.certificateAliases;
-                if (response.certificateAliases !== undefined) {
-                    certificateAliases = certificateAliases.concat(response.certificateAliases).sort();
+    async componentDidMount()
+    {
+        let scimClient = new ScimClient("/scim/v2/Truststore");
+        let response = await scimClient.listResources();
+
+        if (response.success)
+        {
+            response.resource.then(resource =>
+            {
+                let appTruststore = resource.Resources[0];
+                if (appTruststore === undefined)
+                {
+                    this.setState({
+                        numberOfEntries: 0,
+                        certificateAliases: []
+                    });
                 }
-                this.setState({
-                    numberOfEntries: response.numberOfEntries,
-                    certificateAliases: certificateAliases
-                });
+                else
+                {
+                    this.setState({
+                        numberOfEntries: resource.totalResults,
+                        certificateAliases: appTruststore.aliases === undefined
+                                            ? [] : appTruststore.aliases
+                    });
+                }
             })
+        }
+        else
+        {
+            this.setState({
+                numberOfEntries: 0,
+                certificateAliases: []
+            });
+        }
     }
 
-    handleUploadSuccess(status, response) {
-        let duplicateAliases = response.duplicateAliases === undefined ? [] : response.duplicateAliases.sort();
-        let duplicateCertificates = response.duplicateCertificates === undefined ? [] : response.duplicateCertificates.sort();
+    handleUploadSuccess(status, response)
+    {
+        let truststoreUploadResponse = response.truststoreUploadResponse;
+        let certificateUploadResponse = response.certificateUploadResponse;
+
+        let addedAliases;
+        let duplicateAliases;
+        let duplicateCertificates;
+
+        if (truststoreUploadResponse !== undefined)
+        {
+            addedAliases = truststoreUploadResponse.aliases;
+            duplicateAliases = new Optional(truststoreUploadResponse.duplicateAliases).do(val => val.sort()).orElse([]);
+            duplicateCertificates =
+                new Optional(truststoreUploadResponse.duplicateCertificateAliases).do(val => val.sort()).orElse([])
+        }
+        else
+        {
+            addedAliases = [certificateUploadResponse.alias];
+        }
+
         let certificateAliases = this.state.certificateAliases;
-        if (response.aliases !== undefined) {
-            certificateAliases = certificateAliases.concat(response.aliases).sort();
+        if (addedAliases !== undefined)
+        {
+            certificateAliases = new Optional(certificateAliases).map(val => val.concat(addedAliases))
+                                                                 .do(val => val.sort())
+                                                                 .orElse([]);
         }
 
         this.setState({
-            duplicateAliases: duplicateAliases,
-            duplicateCertificates: duplicateCertificates,
-            certificateAliases: certificateAliases
+            duplicateAliases: new Optional(duplicateAliases).orElse([]),
+            duplicateCertificates: new Optional(duplicateCertificates).orElse([]),
+            certificateAliases: new Optional(certificateAliases).orElse([])
         });
     }
 
-    render() {
+    render()
+    {
         return (
             <React.Fragment>
                 <Alert id={"upload-form-alert-duplicate-aliases"} variant={"warning"}
@@ -69,23 +117,23 @@ export default class TruststoreConfigForm extends React.Component {
                     </Form.Text>
                 </Alert>
 
-                <ConfigPageForm formId="truststoreUploadForm"
-                                header="Truststore Upload"
-                                httpMethod="POST"
-                                submitUrl="/truststore/add"
-                                onSubmitSuccess={this.handleUploadSuccess}
-                                buttonId="truststoreUploadButton"
-                                buttonText="Upload"
-                                successMessage="Truststore was successfully merged into application keystore">
+                <ScimConfigPageForm formId="truststoreUploadForm"
+                                    header="Truststore Upload"
+                                    httpMethod="POST"
+                                    submitUrl="/scim/v2/Truststore"
+                                    onSubmitSuccess={this.handleUploadSuccess}
+                                    buttonId="truststoreUploadButton"
+                                    buttonText="Upload"
+                                    successMessage="Truststore was successfully merged into application keystore">
                     {({onChange, onError}) => (
                         <React.Fragment>
-                            <FormFileField name="truststoreFile"
+                            <FormFileField name="truststoreUpload.truststoreFile"
                                            label="Truststore File"
                                            placeholder="Select a truststore file"
                                            onChange={onChange}
                                            onError={onError}
                             />
-                            <FormInputField name="truststorePassword"
+                            <FormInputField name="truststoreUpload.truststorePassword"
                                             label="Truststore Password"
                                             type="password"
                                             placeholder="Truststore Password"
@@ -93,33 +141,33 @@ export default class TruststoreConfigForm extends React.Component {
                                             onError={onError} />
                         </React.Fragment>
                     )}
-                </ConfigPageForm>
-                <ConfigPageForm formId="certUploadForm"
-                                header="Certificate File Upload"
-                                httpMethod="POST"
-                                submitUrl="/truststore/add"
-                                onSubmitSuccess={this.handleUploadSuccess}
-                                buttonId="certFileUploadButton"
-                                buttonText="Upload"
-                                successMessage="Certificate was successfully added to application keystore">
+                </ScimConfigPageForm>
+                <ScimConfigPageForm formId="certUploadForm"
+                                    header="Certificate File Upload"
+                                    httpMethod="POST"
+                                    submitUrl="/scim/v2/Truststore"
+                                    onSubmitSuccess={this.handleUploadSuccess}
+                                    buttonId="certFileUploadButton"
+                                    buttonText="Upload"
+                                    successMessage="Certificate was successfully added to application keystore">
                     {({onChange, onError}) => (
                         <React.Fragment>
-                            <FormFileField name="certificateFile"
+                            <FormFileField name="certificateUpload.certificateFile"
                                            label="Certificate File"
                                            placeholder="Select a certificate file"
                                            onChange={onChange}
                                            onError={onError} />
-                            <FormInputField name="alias"
+                            <FormInputField name="certificateUpload.alias"
                                             label="Alias"
                                             placeholder="Certificate Alias"
                                             onChange={onChange}
                                             onError={onError} />
                         </React.Fragment>
                     )}
-                </ConfigPageForm>
+                </ScimConfigPageForm>
 
                 <KeystoreRepresentation type={"Truststore"}
-                                        basePath={"/truststore"}
+                                        basePath={"/scim/v2/Truststore"}
                                         certificateAliases={this.state.certificateAliases} />
 
             </React.Fragment>

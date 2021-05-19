@@ -3,12 +3,14 @@ import {act, render, waitFor} from '@testing-library/react';
 import Assertions, {mockFetch} from "../setupTests"
 import {unmountComponentAtNode} from "react-dom";
 import TruststoreConfigForm from "./truststore-config-form";
+import {toBase64} from "../services/utils";
 
 let container = null;
 
 /* ********************************************************************************************************* */
 
-beforeEach(() => {
+beforeEach(() =>
+{
     // setup a DOM element as a render target
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -16,7 +18,8 @@ beforeEach(() => {
 
 /* ********************************************************************************************************* */
 
-afterEach(() => {
+afterEach(() =>
+{
     // cleanup on exiting
     unmountComponentAtNode(container);
     container.remove();
@@ -25,136 +28,192 @@ afterEach(() => {
 
 /* ********************************************************************************************************* */
 
-function loadPageWithoutEntries() {
-    mockFetch(200, []);
+function loadPageWithoutEntries()
+{
+    mockFetch(200, {Resources: []});
     new Assertions("#keystore-certificate-entries").isNotPresent();
 
-    act(() => {
+    act(() =>
+    {
         render(<TruststoreConfigForm />, container);
     });
 
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/truststore/infos")
+    expect(global.fetch).toBeCalledWith("/scim/v2/Truststore", {method: "GET"})
     global.fetch.mockRestore();
 }
 
 /* ********************************************************************************************************* */
 
-function getFakeKeystoreInfos() {
+function getFakeKeystoreInfos()
+{
     return {
-        "numberOfEntries": 3,
-        "certificateAliases": ["goldfish", "localhost", "unit-test"]
+        "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+        "totalResults": 1,
+        "itemsPerPage": 1,
+        "startIndex": 1,
+        "Resources": [{
+            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore"],
+            "id": "1",
+            "aliases": ["unit-test", "goldfish", "localhost"],
+            "meta": {
+                "resourceType": "Truststore",
+                "created": "2021-05-19T14:32:17.952Z",
+                "lastModified": "2021-05-19T14:32:17.952Z",
+                "location": "http://localhost:55402/scim/v2/Truststore/1"
+            }
+        }]
     };
 }
 
 /* ********************************************************************************************************* */
 
-test("verify certificate data is displayed", async () => {
+test("verify certificate data is displayed", async () =>
+{
     const fakeKeystoreInfos = getFakeKeystoreInfos();
 
     mockFetch(200, fakeKeystoreInfos);
 
     new Assertions("#keystore-certificate-entries").isNotPresent();
 
-    act(() => {
+    act(() =>
+    {
         render(<TruststoreConfigForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/truststore/infos")
+    expect(global.fetch).toBeCalledWith("/scim/v2/Truststore", {method: "GET"})
     global.fetch.mockRestore();
 
-    await waitFor(() => {
+    await waitFor(() =>
+    {
         new Assertions("#keystore-certificate-entries").isPresent();
         new Assertions("#card-list-infos-alert").isPresent().isVisible()
-            .assertEquals('Application Truststore contains "3" entries');
+                                                .assertEquals(
+                                                    'Application Truststore contains "3" entries');
     });
 });
 
 /* ********************************************************************************************************* */
 
-test("Upload truststore", async () => {
+test("Upload truststore", async () =>
+{
     loadPageWithoutEntries();
     new Assertions("#card-list-infos-alert").isPresent().isVisible()
-        .assertEquals('Application Truststore contains "0" entries');
+                                            .assertEquals('Application Truststore contains "0" entries');
 
     // handle file input field
     {
         const truststoreFile = new File(["hello world"], "cacerts");
         const truststorePassword = "123456";
-        new Assertions("#truststoreFile").isPresent().isVisible().fireChangeEvent(truststoreFile);
-        new Assertions("#truststorePassword").isPresent().isVisible().fireChangeEvent(truststorePassword);
+        new Assertions("#truststoreUpload\\.truststoreFile").isPresent().isVisible().fireChangeEvent(truststoreFile);
+        new Assertions("#truststoreUpload\\.truststorePassword").isPresent().isVisible().fireChangeEvent(
+            truststorePassword);
 
         mockFetch(200, {
-            aliases: ["goldfish"],
-            duplicateAliases: ["unit-test"],
-            duplicateCertificates: ["localhost"]
+            "id": "1",
+            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore"],
+            "truststoreUploadResponse": {
+                "aliases": ["goldfish"],
+                "duplicateAliases": ["unit-test"],
+                "duplicateCertificateAliases": ["localhost"]
+            },
+            "meta": {
+                "resourceType": "Truststore",
+                "created": "2021-05-19T14:42:14.055Z",
+                "lastModified": "2021-05-19T14:42:14.055Z",
+                "location": "http://localhost:55785/scim/v2/Truststore/1"
+            }
         })
 
-        await new Assertions("#truststoreUploadButton").isPresent().isVisible()
-            .clickElement(() => {
-                new Assertions("#truststoreUploadForm-alert-success").isPresent().isVisible()
-                    .assertEquals("Truststore was successfully merged into application keystore");
-            });
-        new Assertions("#upload-form-alert-duplicate-aliases").isPresent().isVisible()
-            .assertEquals("The following aliases could not be added because the alias is " +
-                "duplicated.Number of not added aliases: 1 [unit-test]");
-        new Assertions("#upoad-form-alert-duplicate-certificates").isPresent().isVisible()
-            .assertEquals("The following aliases could not be added because the certificate is already " +
-                "present: [localhost]");
+        await new Assertions("#truststoreUploadButton").isPresent().isVisible().clickElement(() =>
+        {
+            new Assertions("#truststoreUploadForm-alert-success").isPresent()
+                                                                 .isVisible()
+                                                                 .assertEquals(
+                                                                     "Truststore was successfully merged into application keystore");
+        });
+        new Assertions("#upload-form-alert-duplicate-aliases").isPresent().isVisible().assertEquals(
+            "The following aliases could not be added because the alias is duplicated.Number "
+            + "of not added aliases: 1 [unit-test]");
+        new Assertions("#upoad-form-alert-duplicate-certificates").isPresent().isVisible().assertEquals(
+            "The following aliases could not be added because the certificate is already present: [localhost]");
 
+
+        let data = {
+            "truststoreUpload": {
+                "truststoreFile": await toBase64(truststoreFile),
+                "truststorePassword": truststorePassword
+            }
+        };
         expect(global.fetch).toBeCalledTimes(1);
-        let formData = new FormData();
-        formData.append("truststoreFile", truststoreFile)
-        formData.append("truststorePassword", truststorePassword)
-        expect(global.fetch).toBeCalledWith("/truststore/add", {
-            method: "POST",
-            body: formData
-        })
+        expect(global.fetch).toBeCalledWith("/scim/v2/Truststore",
+            {
+                method: "POST",
+                headers: {'Content-Type': 'application/scim+json'},
+                body: JSON.stringify(data)
+            })
         global.fetch.mockRestore();
 
-       new Assertions("#card-list-infos-alert").isPresent().isVisible()
-           .assertEquals('Application Truststore contains "1" entries');
+        new Assertions("#card-list-infos-alert").isPresent().isVisible()
+                                                .assertEquals('Application Truststore contains "1" entries');
     }
 });
 
 /* ********************************************************************************************************* */
 
-test("Upload certificate", async () => {
+test("Upload certificate", async () =>
+{
     loadPageWithoutEntries();
     new Assertions("#card-list-infos-alert").isPresent().isVisible()
-        .assertEquals('Application Truststore contains "0" entries');
+                                            .assertEquals('Application Truststore contains "0" entries');
 
     // handle file input field
     {
         const certificateFile = new File(["hello world"], "cacerts");
         const alias = "goldfish";
-        new Assertions("#certificateFile").isPresent().isVisible().fireChangeEvent(certificateFile);
-        new Assertions("#alias").isPresent().isVisible().fireChangeEvent(alias);
+        new Assertions("#certificateUpload\\.certificateFile").isPresent().isVisible().fireChangeEvent(certificateFile);
+        new Assertions("#certificateUpload\\.alias").isPresent().isVisible().fireChangeEvent(alias);
 
         mockFetch(200, {
-            aliases: ["goldfish"]
+            "id": "1",
+            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore"],
+            "truststoreUploadResponse": {
+                "aliases": ["goldfish"]
+            },
+            "meta": {
+                "resourceType": "Truststore",
+                "created": "2021-05-19T14:42:14.055Z",
+                "lastModified": "2021-05-19T14:42:14.055Z",
+                "location": "http://localhost:55785/scim/v2/Truststore/1"
+            }
         })
 
-        await new Assertions("#certFileUploadButton").isPresent().isVisible()
-            .clickElement(() => {
-                new Assertions("#certUploadForm-alert-success").isPresent().isVisible()
-                    .assertEquals("Certificate was successfully added to application keystore");
-            });
+        await new Assertions("#certFileUploadButton").isPresent().isVisible().clickElement(() =>
+        {
+            new Assertions("#certUploadForm-alert-success").isPresent().isVisible().assertEquals(
+                "Certificate was successfully added to application keystore");
+        });
         new Assertions("#upload-form-alert-duplicate-aliases").isNotPresent()
         new Assertions("#upoad-form-alert-duplicate-certificates").isNotPresent();
 
+
+        let data = {
+            "certificateUpload": {
+                "certificateFile": await toBase64(certificateFile),
+                "alias": alias
+            }
+        };
         expect(global.fetch).toBeCalledTimes(1);
-        let formData = new FormData();
-        formData.append("certificateFile", certificateFile)
-        formData.append("alias", alias)
-        expect(global.fetch).toBeCalledWith("/truststore/add", {
-            method: "POST",
-            body: formData
-        })
+        expect(global.fetch).toBeCalledWith("/scim/v2/Truststore",
+            {
+                method: "POST",
+                headers: {'Content-Type': 'application/scim+json'},
+                body: JSON.stringify(data)
+            })
         global.fetch.mockRestore();
 
         new Assertions("#card-list-infos-alert").isPresent().isVisible()
-            .assertEquals('Application Truststore contains "1" entries');
+                                                .assertEquals('Application Truststore contains "1" entries');
     }
 });
 

@@ -28,16 +28,20 @@ export default class ScimClient {
     }
 
     async getResource(id) {
-        return await fetch(this.resourcePath + "/" + id, {
+        return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "GET"
-        }).then(response => {
-            if (response.status === 200) {
+        }).then(response =>
+        {
+            if (response.status === 200)
+            {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            } else {
+            }
+            else
+            {
                 return {
                     success: false,
                     status: response.status,
@@ -85,17 +89,21 @@ export default class ScimClient {
     }
 
     async updateResource(resource, id) {
-        return await fetch(this.resourcePath + "/" + id, {
+        return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PUT",
             body: JSON.stringify(resource)
-        }).then(response => {
-            if (response.status === 200) {
+        }).then(response =>
+        {
+            if (response.status === 200)
+            {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            } else {
+            }
+            else
+            {
                 return {
                     success: false,
                     status: response.status,
@@ -106,17 +114,21 @@ export default class ScimClient {
     }
 
     async patchResource(patchBody, id) {
-        return await fetch(this.resourcePath + "/" + id, {
+        return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PATCH",
             body: JSON.stringify(patchBody)
-        }).then(response => {
-            if (response.status === 200) {
+        }).then(response =>
+        {
+            if (response.status === 200)
+            {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            } else {
+            }
+            else
+            {
                 return {
                     success: false,
                     status: response.status,
@@ -127,15 +139,19 @@ export default class ScimClient {
     }
 
     deleteResource(id) {
-        return fetch(this.resourcePath + "/" + id, {
+        return fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "DELETE"
-        }).then(response => {
-            if (response.status === 204) {
+        }).then(response =>
+        {
+            if (response.status === 204)
+            {
                 return {
                     success: true,
                     status: response.status
                 };
-            } else {
+            }
+            else
+            {
                 return {
                     success: false,
                     status: response.status
