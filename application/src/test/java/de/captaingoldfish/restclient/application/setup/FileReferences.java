@@ -51,6 +51,12 @@ public interface FileReferences
     }
   }
 
+  default String getFilename(String classPath)
+  {
+    String[] parts = classPath.split("/");
+    return parts[parts.length - 1];
+  }
+
   /**
    * @return the aliases and passwords of the entries within the keystores.
    */

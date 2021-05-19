@@ -1,0 +1,27 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
+  ],
+  "id": "Truststore",
+  "name": "Truststore",
+  "description": "The application truststore endpoint definition. The application truststore holds certificate entries for TLS trust relationships.",
+  "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore",
+  "endpoint": "/Truststore",
+  "schemaExtensions": [
+    {
+      "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo",
+      "required": false
+    }
+  ],
+  "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
+    "endpointControl": {
+      "disableUpdate": true
+    }
+  },
+  "meta": {
+    "resourceType": "ResourceType",
+    "created": "2021-05-08T22:51:00+02:00",
+    "lastModified": "2021-05-08T22:51:00+02:00",
+    "location": "/ResourceTypes/Keystore"
+  }
+}

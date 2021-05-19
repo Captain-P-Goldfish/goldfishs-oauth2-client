@@ -18,6 +18,10 @@ public final class ClasspathReferences
 
   public static final String KEYSTORE_SCHEMA = BASE_PATH + "/resource/keystore.json";
 
+  public static final String TRUSTSTORE_RESOURCE_TYPE = BASE_PATH + "/resourcetypes/truststore-resource-type.json";
+
+  public static final String TRUSTSTORE_SCHEMA = BASE_PATH + "/resource/truststore.json";
+
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
 
 }

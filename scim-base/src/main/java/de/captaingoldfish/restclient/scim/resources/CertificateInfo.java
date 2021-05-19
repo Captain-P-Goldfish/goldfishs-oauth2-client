@@ -60,6 +60,7 @@ public class CertificateInfo extends ScimObjectNode
   }
 
   /** The data of the certificate. */
+  @NoArgsConstructor
   public static class Info extends ScimObjectNode
   {
 

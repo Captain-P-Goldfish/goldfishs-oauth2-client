@@ -7,8 +7,11 @@ import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
+import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
+import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.TruststoreEndpoint;
 import de.captaingoldfish.scim.sdk.common.resources.ServiceProvider;
 import de.captaingoldfish.scim.sdk.common.resources.complex.BulkConfig;
 import de.captaingoldfish.scim.sdk.common.resources.complex.ChangePasswordConfig;
@@ -19,7 +22,6 @@ import de.captaingoldfish.scim.sdk.common.resources.complex.SortConfig;
 import de.captaingoldfish.scim.sdk.common.resources.multicomplex.AuthenticationScheme;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceEndpoint;
 import de.captaingoldfish.scim.sdk.server.schemas.ResourceType;
-import de.captaingoldfish.scim.sdk.server.schemas.custom.ResourceTypeFeatures;
 
 
 /**
@@ -65,8 +67,7 @@ public class ScimConfig
   }
 
   /**
-   * registers the keystore resourceType under the endpoint /Keystore. We will also activate the auto-filtering
-   * extension so that filtering will work on the fly
+   * registers the keystore resourceType under the endpoint /Keystore.
    *
    * @param resourceEndpoint the resource endpoint that was previously defined
    * @return the keystore resource type
@@ -74,11 +75,24 @@ public class ScimConfig
   @Bean
   public ResourceType keystoreResourceType(ResourceEndpoint resourceEndpoint,
                                            KeystoreFileCache keystoreFileCache,
-                                           KeystoreDao keystoreDa)
+                                           KeystoreDao keystoreDao)
   {
-    KeystoreEndpoint keystoreEndpoint = new KeystoreEndpoint(new KeystoreHandler(keystoreFileCache, keystoreDa));
+    KeystoreEndpoint keystoreEndpoint = new KeystoreEndpoint(new KeystoreHandler(keystoreFileCache, keystoreDao));
     ResourceType keystoreResourceType = resourceEndpoint.registerEndpoint(keystoreEndpoint);
-    keystoreResourceType.setFeatures(ResourceTypeFeatures.builder().autoFiltering(true).autoSorting(true).build());
     return keystoreResourceType;
+  }
+
+  /**
+   * registers the truststore resourceType under the endpoint /Truststore.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the keystore resource type
+   */
+  @Bean
+  public ResourceType truststoreResourceType(ResourceEndpoint resourceEndpoint, TruststoreDao truststoreDao)
+  {
+    TruststoreEndpoint truststoreEndpoint = new TruststoreEndpoint(new TruststoreHandler(truststoreDao));
+    ResourceType truststoreResourceType = resourceEndpoint.registerEndpoint(truststoreEndpoint);
+    return truststoreResourceType;
   }
 }

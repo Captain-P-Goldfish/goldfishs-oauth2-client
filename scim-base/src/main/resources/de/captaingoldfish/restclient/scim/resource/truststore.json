@@ -1,0 +1,174 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore",
+  "name": "Truststore",
+  "description": "Represents the whole endpoint. The application truststore itself is actually a singleton but has several entries. This structure acts as a singleton structure that is used to return different data based on the current request type.",
+  "attributes": [
+    {
+      "name": "aliases",
+      "type": "string",
+      "description": "a list of the entries that are present within the application truststore. Will be returned from the list-endpoint",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": true,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "truststoreUpload",
+      "type": "complex",
+      "description": "Used to upload a truststore whose entries will be merged into the application keystore if possible.",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "truststoreFile",
+          "type": "string",
+          "description": "The truststore file to upload that must be encoded in Base64",
+          "mutability": "writeOnly",
+          "returned": "never",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "truststoreFileName",
+          "type": "string",
+          "description": "The name of the file that is only needed to determine the type of keystore to resolve by its file extension. If missing the JKS keystore type is expected",
+          "mutability": "writeOnly",
+          "returned": "never",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "truststorePassword",
+          "type": "string",
+          "description": "The password to open the truststore. This is only necessary for PKCS12 keystore types",
+          "mutability": "writeOnly",
+          "returned": "never",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false,
+          "minLength": 1
+        }
+      ]
+    },
+    {
+      "name": "truststoreUploadResponse",
+      "type": "complex",
+      "description": "The response that is returned after a successful upload of a truststore.",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "aliases",
+          "type": "string",
+          "description": "The aliases of the truststore that have been added successfully to the application truststore",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": true,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "duplicateAliases",
+          "type": "string",
+          "description": "The aliases that could not be added due to a duplicate alias name that is already present within the application truststore",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": true,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "duplicateCertificateAliases",
+          "type": "string",
+          "description": "The aliases that have not been added because the certificate is already present under another alias",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": true,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    },
+    {
+      "name": "certificateUpload",
+      "type": "complex",
+      "description": "Used to upload a certificate file that will be added into the application keystore if possible.",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "certificateFile",
+          "type": "string",
+          "description": "The certificate file to upload that must be encoded in Base64",
+          "mutability": "writeOnly",
+          "returned": "never",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "The alias under which the certificate entry should be stored.",
+          "mutability": "writeOnly",
+          "returned": "never",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false,
+          "minLength": 1
+        }
+      ]
+    },
+    {
+      "name": "certificateUploadResponse",
+      "type": "complex",
+      "description": "The response that is returned after a successful upload of a certificate file.",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "alias",
+          "type": "string",
+          "description": "The alias of the entry to which the certificate was added",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
+    }
+  ]
+}
