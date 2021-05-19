@@ -12,24 +12,30 @@ import {Optional} from "../services/utils";
 /**
  * a simple input field that might also display error messages directly bound to this input field
  */
-class FormInputField extends React.Component {
+class FormInputField extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
         this.bubbleEvent = this.bubbleEvent.bind(this);
     }
 
-    bubbleEvent(e) {
+    bubbleEvent(e)
+    {
         this.props.onChange(e.target.name, e.target.value);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.value !== this.props.value) {
+    componentDidUpdate(prevProps, prevState, snapshot)
+    {
+        if (prevProps.value !== this.props.value)
+        {
             this.props.onChange(this.props.name, this.props.value);
         }
     }
 
-    render() {
+    render()
+    {
         let controlId = this.props.name;
         let label = this.props.label === undefined ? null : <Form.Label column sm={2}>
             {this.props.label}
@@ -60,11 +66,14 @@ class FormInputField extends React.Component {
 /**
  * a file-input field that might also display error messages directly bound to this input field
  */
-function FormFileField(props) {
+function FormFileField(props)
+{
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         bsCustomFileInput.init();
-        return () => {
+        return () =>
+        {
             bsCustomFileInput.destroy();
         }
     }, [] /* do this only once */)
@@ -97,36 +106,45 @@ function FormFileField(props) {
 /**
  * a select input field that might also display error messages directly bound to this input field
  */
-class FormSelectField extends React.Component {
+class FormSelectField extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
         this.bubbleEvent = this.bubbleEvent.bind(this);
     }
 
-    componentDidMount() {
-        if (this.props.options !== undefined && this.props.options.length > 0) {
+    componentDidMount()
+    {
+        if (this.props.options !== undefined && this.props.options.length > 0)
+        {
             this.props.onChange(this.props.name, this.props.options[0]);
         }
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.options !== this.props.options && this.props.options.length > 0) {
+    componentDidUpdate(prevProps, prevState, snapshot)
+    {
+        if (prevProps.options !== this.props.options && this.props.options.length > 0)
+        {
             this.props.onChange(this.props.name, this.props.options[0]);
         }
     }
 
-    bubbleEvent(e) {
+    bubbleEvent(e)
+    {
         this.props.onChange(e.target.name, e.target.value);
     }
 
-    render() {
+    render()
+    {
         let labelText = this.props.label === undefined ? this.props.name : this.props.label;
         let inputFieldErrorMessages = this.props.onError(this.props.name);
         let inputFieldOptions = this.props.options === undefined ? null :
-            this.props.options.map((value) => {
-                return <option key={value}>{value}</option>
-            });
+                                this.props.options.map((value) =>
+                                {
+                                    return <option key={value}>{value}</option>
+                                });
 
         return (
             <Form.Group as={Row} controlId={this.props.name}>
@@ -151,11 +169,13 @@ class FormSelectField extends React.Component {
 /**
  * displays error messages for a {@link ConfigPageForm} element
  */
-function ErrorMessageList(props) {
+function ErrorMessageList(props)
+{
 
     let doNotRenderComponent = props.fieldErrors === undefined || props.fieldErrors === null;
 
-    if (doNotRenderComponent) {
+    if (doNotRenderComponent)
+    {
         return null;
     }
 
@@ -173,7 +193,8 @@ function ErrorMessageList(props) {
  * a simple error message for either the {@link ErrorMessageList} or an error that is directly bound to an
  * input field
  */
-function ErrorListItem(props) {
+function ErrorListItem(props)
+{
     return (
         <li className="error-list-item">
             <Form.Text className={props.backgroundClass + " error"}>
@@ -201,9 +222,11 @@ function ErrorListItem(props) {
  * }
  *
  */
-export default class ConfigPageForm extends React.Component {
+export default class ConfigPageForm extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
         this.state = {showSpinner: false, inputFields: {}, inputFieldErrors: {}};
         this.startSpinner = this.startSpinner.bind(this);
@@ -219,24 +242,30 @@ export default class ConfigPageForm extends React.Component {
     /**
      * starts the spinner on the submit button
      */
-    startSpinner() {
+    startSpinner()
+    {
         this.setState({showSpinner: true});
     }
 
     /**
      * stops the spinner on the submit button
      */
-    stopSpinner() {
+    stopSpinner()
+    {
         this.setState({showSpinner: false});
     }
 
     /**
      * adds input field errors to the current state
      */
-    setInputFieldErrors(errors) {
-        if (errors !== undefined && errors !== null && typeof errors === 'object') {
+    setInputFieldErrors(errors)
+    {
+        if (errors !== undefined && errors !== null && typeof errors === 'object')
+        {
             this.setState({inputFieldErrors: errors, errorMessages: undefined})
-        } else {
+        }
+        else
+        {
             this.setState({inputFieldErrors: undefined, errorMessages: undefined})
         }
     }
@@ -244,9 +273,11 @@ export default class ConfigPageForm extends React.Component {
     /**
      * returns the input field errors for the underlying input-field components
      */
-    getInputFieldErrors(name) {
+    getInputFieldErrors(name)
+    {
         if (this.state.inputFieldErrors && this.state.inputFieldErrors[name] &&
-            this.state.inputFieldErrors[name] !== null) {
+            this.state.inputFieldErrors[name] !== null)
+        {
             return this.state.inputFieldErrors[name];
         }
     }
@@ -256,7 +287,8 @@ export default class ConfigPageForm extends React.Component {
      * @param fieldName name of the input field
      * @param value value of the input field
      */
-    handleChange(fieldName, value) {
+    handleChange(fieldName, value)
+    {
         let staleState = this.state;
         staleState["inputFields"][fieldName] = value;
         this.setState(staleState);
@@ -266,9 +298,11 @@ export default class ConfigPageForm extends React.Component {
      * the method {@link #handleChange} adds the current values into the state context under the key "inputFields".
      * This method will read this data and add it to the coming request to the backend
      */
-    getFormData() {
+    getFormData()
+    {
         let data = new FormData();
-        for (let [key, value] of Object.entries(this.state.inputFields)) {
+        for (let [key, value] of Object.entries(this.state.inputFields))
+        {
             data.append(key, value);
         }
         return data;
@@ -277,7 +311,8 @@ export default class ConfigPageForm extends React.Component {
     /**
      * send the request to the backend
      */
-    handleSubmit(e) {
+    handleSubmit(e)
+    {
         e.preventDefault();
 
         // get the data to be send in the request body
@@ -292,20 +327,25 @@ export default class ConfigPageForm extends React.Component {
             method: httpMethod,
             body: data
         })
-            .then((response) => {
+            .then((response) =>
+            {
                 // stop the spinner in the button
                 this.stopSpinner()
                 // if the request was successful
-                if (response.status >= 200 && response.status <= 399) {
+                if (response.status >= 200 && response.status <= 399)
+                {
                     // this might still cause an error if the response is not json
-                    response.json().then(json => {
+                    response.json().then(json =>
+                    {
                         this.onSuccessResponse(response.status, json)
                     });
                 }
                 // if the request failed
-                else {
+                else
+                {
                     // this might still cause an error if the response is not json
-                    response.json().then(json => {
+                    response.json().then(json =>
+                    {
                         this.onErrorResponse(response.status, json);
                     });
                 }
@@ -316,9 +356,11 @@ export default class ConfigPageForm extends React.Component {
      * the parent component must add a function within the props that will be executed on successful request since
      * this form has no knowledge of how to handle a successful response
      */
-    onSuccessResponse(status, response) {
+    onSuccessResponse(status, response)
+    {
         this.setState({success: true, inputFieldErrors: {}, errorMessages: undefined});
-        if (this.props.onSubmitSuccess !== undefined) {
+        if (this.props.onSubmitSuccess !== undefined)
+        {
             this.props.onSubmitSuccess(status, response);
         }
     }
@@ -328,8 +370,10 @@ export default class ConfigPageForm extends React.Component {
      * input fields or an unhandled error message.
      * @see ConfigPageForm ConfigPageForm doc for more information
      */
-    onErrorResponse(status, response) {
-        if (response.errors === undefined || response.errors === null) {
+    onErrorResponse(status, response)
+    {
+        if (response.errors === undefined || response.errors === null)
+        {
             let detail = new Optional(response.detail).map(val => [val]).orElse([]);
             this.setState({
                 errorMessages: detail,
@@ -337,19 +381,26 @@ export default class ConfigPageForm extends React.Component {
             });
             return;
         }
-        if (response.errors.fieldErrors !== undefined) {
+        if (response.errors.fieldErrors !== undefined)
+        {
             this.setInputFieldErrors(response.errors.fieldErrors);
-        } else if (response.errors.errorMessages !== undefined && response.errors.errorMessages !== null &&
-            response.errors.errorMessages.length > 0) {
+        }
+        else if (response.errors.errorMessages !== undefined && response.errors.errorMessages !== null &&
+                 response.errors.errorMessages.length > 0)
+        {
             this.setState({
                 errorMessages: response.errors.errorMessages,
                 inputFieldErrors: {}
             });
-        } else {
+        }
+        else
+        {
             let errorMessages = ["[Unexpected error]"];
-            Object.keys(response).forEach(function (key) {
+            Object.keys(response).forEach(function (key)
+            {
                 let value = String(response[key]);
-                if (value !== undefined && value != null && value.length > 0) {
+                if (value !== undefined && value != null && value.length > 0)
+                {
                     errorMessages.push(key + ": " + value);
                 }
             });
@@ -361,10 +412,12 @@ export default class ConfigPageForm extends React.Component {
         this.setState({success: false})
     }
 
-    render() {
+    render()
+    {
         let className = this.props.disabled === undefined || this.props.disabled === false ? "" : "disabled";
         let spinner;
-        if (this.state.showSpinner) {
+        if (this.state.showSpinner)
+        {
             spinner = <span style={{marginRight: 5 + 'px'}}>
                           <Spinner animation="border" variant="warning" size="sm" role="status" />
                       </span>;

@@ -1,10 +1,14 @@
-export function toBase64(file) {
-    return new Promise((resolve, reject) => {
+export function toBase64(file)
+{
+    return new Promise((resolve, reject) =>
+    {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => {
+        reader.onload = () =>
+        {
             let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
-            if ((encoded.length % 4) > 0) {
+            if ((encoded.length % 4) > 0)
+            {
                 encoded += '='.repeat(4 - (encoded.length % 4));
             }
             resolve(encoded);
@@ -13,25 +17,32 @@ export function toBase64(file) {
     });
 }
 
-export class Optional {
-    constructor(value) {
+export class Optional
+{
+    constructor(value)
+    {
         this.value = value;
     }
 
-    get() {
+    get()
+    {
         return this.value;
     }
 
-    isPresent() {
+    isPresent()
+    {
         return this.value !== undefined && this.value !== null;
     }
 
-    isEmpty() {
+    isEmpty()
+    {
         return this.value === undefined || this.value === null;
     }
 
-    filter(handler) {
-        if (this.isPresent() && !handler(this.value)) {
+    filter(handler)
+    {
+        if (this.isPresent() && !handler(this.value))
+        {
             this.value = null;
         }
         return this;

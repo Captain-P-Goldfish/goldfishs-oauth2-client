@@ -9,9 +9,11 @@ import ScimClient from "../services/scim-client";
 import * as ScimConstants from "../scim-constants";
 
 
-export class CertificateCardEntry extends React.Component {
+export class CertificateCardEntry extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
         this.state = {loaded: false};
         this.deleteEntry = this.deleteEntry.bind(this);
@@ -20,29 +22,37 @@ export class CertificateCardEntry extends React.Component {
         this.loadData = this.loadData.bind(this);
     }
 
-    async deleteEntry() {
+    async deleteEntry()
+    {
         this.setState({showSpinner: true});
 
         let scimClient = new ScimClient(this.props.basePath);
         let response = await scimClient.deleteResource(this.props.alias);
 
-        if (response.success) {
-            if (this.props.onDeleteSuccess !== undefined) {
+        if (response.success)
+        {
+            if (this.props.onDeleteSuccess !== undefined)
+            {
                 this.props.onDeleteSuccess(this.props.alias);
             }
-        } else {
+        }
+        else
+        {
             // TODO
         }
     }
 
-    async loadData() {
+    async loadData()
+    {
         this.setState({showSpinner: true});
 
         let scimClient = new ScimClient(this.props.basePath);
         let response = await scimClient.getResource(this.props.alias);
 
-        if (response.success) {
-            response.resource.then(resource => {
+        if (response.success)
+        {
+            response.resource.then(resource =>
+            {
                 let certInfo = resource[ScimConstants.CERT_URI];
                 this.setState({
                     showSpinner: false,
@@ -50,22 +60,28 @@ export class CertificateCardEntry extends React.Component {
                     certInfo: certInfo.info
                 });
             });
-        } else {
+        }
+        else
+        {
             // TODO
         }
     }
 
-    showModal() {
+    showModal()
+    {
         this.setState({showModal: true})
     }
 
-    hideModal() {
+    hideModal()
+    {
         this.setState({showModal: false})
     }
 
-    render() {
+    render()
+    {
         let spinner;
-        if (this.state.showSpinner) {
+        if (this.state.showSpinner)
+        {
             spinner = <span style={{marginRight: 5 + 'px'}}>
                           <Spinner animation="border" variant="warning" size="sm" role="status" />
                       </span>;
@@ -137,14 +153,16 @@ export class CertificateCardEntry extends React.Component {
     }
 }
 
-export default function CertificateList(props) {
+export default function CertificateList(props)
+{
 
     return (
         <React.Fragment>
             <CardDeck id="keystore-certificate-entries">
                 {
                     props.certificateAliases !== undefined &&
-                    props.certificateAliases.map((certAlias) => {
+                    props.certificateAliases.map((certAlias) =>
+                    {
                         return <CertificateCardEntry key={certAlias}
                                                      basePath={props.basePath}
                                                      alias={certAlias}

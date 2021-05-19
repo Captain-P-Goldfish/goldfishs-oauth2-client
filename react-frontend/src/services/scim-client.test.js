@@ -1,7 +1,8 @@
 import ScimClient from "./scim-client";
 import {mockFetch} from "../setupTests";
 
-test("get resource", () => {
+test("get resource", () =>
+{
     const baseUrl = "/Keystore";
     const id = "1"
     let scimClient = new ScimClient(baseUrl);
@@ -15,7 +16,8 @@ test("get resource", () => {
     global.fetch.mockRestore();
 });
 
-test("list without any params", () => {
+test("list without any params", () =>
+{
     const baseUrl = "/Keystore";
     let scimClient = new ScimClient(baseUrl);
 
@@ -28,7 +30,8 @@ test("list without any params", () => {
     global.fetch.mockRestore();
 });
 
-test("list with all params", () => {
+test("list with all params", () =>
+{
     const baseUrl = "/Keystore";
     let scimClient = new ScimClient(baseUrl);
 

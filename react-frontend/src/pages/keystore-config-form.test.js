@@ -12,7 +12,8 @@ let container = null;
 
 /* ********************************************************************************************************* */
 
-beforeEach(() => {
+beforeEach(() =>
+{
     // setup a DOM element as a render target
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -20,7 +21,8 @@ beforeEach(() => {
 
 /* ********************************************************************************************************* */
 
-afterEach(() => {
+afterEach(() =>
+{
     // cleanup on exiting
     unmountComponentAtNode(container);
     container.remove();
@@ -29,13 +31,15 @@ afterEach(() => {
 
 /* ********************************************************************************************************* */
 
-function loadPageWithoutEntries() {
+function loadPageWithoutEntries()
+{
     mockFetch(200, {
         Resources: []
     });
     new Assertions("#keystore-certificate-entries").isNotPresent();
 
-    act(() => {
+    act(() =>
+    {
         render(<KeystoreForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
@@ -45,7 +49,8 @@ function loadPageWithoutEntries() {
 
 /* ********************************************************************************************************* */
 
-function getFakeKeystoreInfos() {
+function getFakeKeystoreInfos()
+{
     return {
         "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
         "totalResults": 1,
@@ -67,38 +72,43 @@ function getFakeKeystoreInfos() {
 
 /* ********************************************************************************************************* */
 
-test("verify certificate data is displayed", async () => {
+test("verify certificate data is displayed", async () =>
+{
     const fakeKeystoreInfos = getFakeKeystoreInfos();
 
     mockFetch(200, fakeKeystoreInfos);
 
     new Assertions("#keystore-certificate-entries").isNotPresent();
 
-    act(() => {
+    act(() =>
+    {
         render(<KeystoreForm />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
     expect(global.fetch).toBeCalledWith("/scim/v2/Keystore", {method: "GET"})
     global.fetch.mockRestore();
 
-    await waitFor(() => {
+    await waitFor(() =>
+    {
         new Assertions("#keystore-certificate-entries").isPresent();
         new Assertions("#card-list-infos-alert").isPresent().isVisible()
-            .assertEquals('Application Keystore contains "3" entries');
+                                                .assertEquals('Application Keystore contains "3" entries');
     });
 });
 
 /* ********************************************************************************************************* */
 
-test("Load page without any key entries", async () => {
+test("Load page without any key entries", async () =>
+{
     loadPageWithoutEntries();
     new Assertions("#card-list-infos-alert").isPresent().isVisible()
-        .assertEquals('Application Keystore contains "0" entries');
+                                            .assertEquals('Application Keystore contains "0" entries');
 });
 
 /* ********************************************************************************************************* */
 
-test("upload Keystore entries", async () => {
+test("upload Keystore entries", async () =>
+{
     loadPageWithoutEntries();
     const filename = "myKeystore.jks";
     const keystoreFile = new File([new Blob(['hello-world'], {type: 'text/plain'})], filename);
@@ -120,7 +130,7 @@ test("upload Keystore entries", async () => {
     // handle keystore password input field
     {
         await new Assertions("#fileUpload\\.keystorePassword").isPresent().isVisible().assertEquals("")
-            .fireChangeEvent(keystorePassword);
+                                                              .fireChangeEvent(keystorePassword);
     }
 
     // mock fetch
@@ -150,9 +160,10 @@ test("upload Keystore entries", async () => {
             .isPresent()
             .isVisible()
             .assertEquals("Upload")
-            .clickElement(() => {
+            .clickElement(() =>
+            {
                 new Assertions("#uploadForm-alert-success").isPresent().isVisible()
-                    .assertEquals("Keystore was successfully uploaded");
+                                                           .assertEquals("Keystore was successfully uploaded");
                 new Assertions("#uploadForm").hasClass("disabled");
                 new Assertions("#aliasSelectionForm").hasNotClass("disabled");
             });
@@ -190,7 +201,8 @@ test("upload Keystore entries", async () => {
         const aliasOverrideAssertion = new Assertions("#aliasSelection\\.aliasOverride").isPresent().isVisible();
         fireEvent.change(aliasOverrideAssertion.element, {target: {value: aliasOverride}})
 
-        const privateKeyPasswordAssertion = new Assertions("#aliasSelection\\.privateKeyPassword").isPresent().isVisible();
+        const privateKeyPasswordAssertion = new Assertions("#aliasSelection\\.privateKeyPassword").isPresent()
+                                                                                                  .isVisible();
         fireEvent.change(privateKeyPasswordAssertion.element, {target: {value: privateKeyPassword}})
     }
 
@@ -198,7 +210,7 @@ test("upload Keystore entries", async () => {
     {
         mockFetch(201, {
             "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Keystore",
-                "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo"],
+                        "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo"],
             "id": "1",
             "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo": {
                 "alias": "unit-test",
@@ -221,9 +233,10 @@ test("upload Keystore entries", async () => {
 
     // click save button
     {
-        await new Assertions("#saveButton").isPresent().isVisible().clickElement(() => {
+        await new Assertions("#saveButton").isPresent().isVisible().clickElement(() =>
+        {
             new Assertions("#aliasSelectionForm-alert-success").isPresent().isVisible()
-                .assertEquals("Key Entry was successfully added");
+                                                               .assertEquals("Key Entry was successfully added");
             new Assertions("#alias-card-unit-test").isPresent().isVisible();
         })
         expect(global.fetch).toBeCalledTimes(1);

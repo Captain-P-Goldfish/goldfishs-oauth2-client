@@ -9,7 +9,8 @@ let container = null;
 
 /* ********************************************************************************************************* */
 
-beforeEach(() => {
+beforeEach(() =>
+{
     // setup a DOM element as a render target
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -17,7 +18,8 @@ beforeEach(() => {
 
 /* ********************************************************************************************************* */
 
-afterEach(() => {
+afterEach(() =>
+{
     // cleanup on exiting
     unmountComponentAtNode(container);
     container.remove();
@@ -26,13 +28,15 @@ afterEach(() => {
 
 /* ********************************************************************************************************* */
 
-test("test certificate-card-entry representation", async () => {
+test("test certificate-card-entry representation", async () =>
+{
     const loadUrl = "/certificate/load";
     const deleteUrl = "/certificate/delete";
     const certAlias = "goldfish";
     const onDeleteSuccess = jest.fn();
 
-    act(() => {
+    act(() =>
+    {
         render(<CertificateCardEntry loadUrl={loadUrl + "?alias=" + encodeURI(certAlias)}
                                      deleteUrl={deleteUrl + "?alias=" + encodeURI(certAlias)}
                                      alias={certAlias}
@@ -64,7 +68,8 @@ test("test certificate-card-entry representation", async () => {
     new Assertions("#valid-until-" + certAlias).isNotPresent();
 
     mockFetch(200, certInfo);
-    await loadCertDataButtonAssertion.clickElement(() => {
+    await loadCertDataButtonAssertion.clickElement(() =>
+    {
         new Assertions("#issuer-dn-" + certAlias).isPresent().isVisible();
     })
     expect(global.fetch).toBeCalledTimes(1);
@@ -82,17 +87,18 @@ test("test certificate-card-entry representation", async () => {
         const baseId = "#delete-dialog-" + certAlias;
         new Assertions(baseId).isNotPresent();
         let deleteIconAssertion = new Assertions("#delete-icon-" + certAlias);
-        await deleteIconAssertion.clickElement(() => {
+        await deleteIconAssertion.clickElement(() =>
+        {
             new Assertions("#delete-dialog-" + certAlias + "-header").isPresent().isVisible()
-                .assertEquals("Delete '" + certAlias + "'");
+                                                                     .assertEquals("Delete '" + certAlias + "'");
             new Assertions("#delete-dialog-" + certAlias + "-text").isPresent().isVisible()
-                .assertEquals("Are you sure?");
+                                                                   .assertEquals("Are you sure?");
         })
 
         // cancel deletion
         {
             const cancelButtonAssertion = new Assertions(baseId + "-button-cancel").isPresent()
-                .isVisible().assertEquals("cancel");
+                                                                                   .isVisible().assertEquals("cancel");
             await cancelButtonAssertion.clickElement(() => new Assertions(baseId).isNotPresent());
         }
 
@@ -102,10 +108,11 @@ test("test certificate-card-entry representation", async () => {
         // accept deletion
         {
             const deleteButtonAssertion = new Assertions(baseId + "-button-accept").isPresent()
-                .isVisible().assertEquals("delete");
+                                                                                   .isVisible().assertEquals("delete");
             mockFetch(204, null);
             expect(onDeleteSuccess).toBeCalledTimes(0);
-            await deleteButtonAssertion.clickElement(() => {
+            await deleteButtonAssertion.clickElement(() =>
+            {
                 new Assertions("alias-card-" + certAlias).isNotPresent();
             });
             expect(global.fetch).toBeCalledTimes(1);
@@ -120,13 +127,15 @@ test("test certificate-card-entry representation", async () => {
 
 /* ********************************************************************************************************* */
 
-test("test certificate-list representation", () => {
+test("test certificate-list representation", () =>
+{
     const loadUrl = "/certificate/load";
     const deleteUrl = "/certificate/delete";
     const certificateAliases = ["goldfish", "localhost", "unit-test"];
     const onDeleteSuccess = jest.fn();
 
-    act(() => {
+    act(() =>
+    {
         render(<CertificateList certificateAliases={[...certificateAliases]}
                                 loadUrl={loadUrl}
                                 deleteUrl={deleteUrl}

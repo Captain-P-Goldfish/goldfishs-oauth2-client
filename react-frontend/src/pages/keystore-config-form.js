@@ -5,9 +5,11 @@ import ScimConfigPageForm from "../base/scim-config-page-form";
 import * as ScimConstants from "../scim-constants";
 import ScimClient from "../services/scim-client";
 
-export default class KeystoreConfigForm extends React.Component {
+export default class KeystoreConfigForm extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
         this.state = {
             stateId: "",
@@ -22,26 +24,34 @@ export default class KeystoreConfigForm extends React.Component {
         this.onAliasDeleteSuccess = this.onAliasDeleteSuccess.bind(this);
     }
 
-    async componentDidMount() {
+    async componentDidMount()
+    {
         let scimClient = new ScimClient("/scim/v2/Keystore");
         let response = await scimClient.listResources();
 
-        if (response.success) {
-            response.resource.then(resource => {
+        if (response.success)
+        {
+            response.resource.then(resource =>
+            {
                 let appKeystore = resource.Resources[0];
-                if (appKeystore === undefined) {
+                if (appKeystore === undefined)
+                {
                     this.setState({
                         numberOfEntries: 0,
                         certificateAliases: []
                     });
-                } else {
+                }
+                else
+                {
                     this.setState({
                         numberOfEntries: resource.totalResults,
                         certificateAliases: appKeystore.aliases === undefined ? [] : appKeystore.aliases
                     });
                 }
             })
-        } else {
+        }
+        else
+        {
             this.setState({
                 numberOfEntries: 0,
                 certificateAliases: []
@@ -49,9 +59,11 @@ export default class KeystoreConfigForm extends React.Component {
         }
     }
 
-    handleUploadSuccess(status, response) {
+    handleUploadSuccess(status, response)
+    {
         let aliasSelection = response.aliasSelection;
-        if (aliasSelection === undefined) {
+        if (aliasSelection === undefined)
+        {
             aliasSelection = {};
         }
         this.setState({
@@ -63,9 +75,11 @@ export default class KeystoreConfigForm extends React.Component {
         });
     }
 
-    handleSelectionSuccess(status, response) {
+    handleSelectionSuccess(status, response)
+    {
         let certificateAliases = [];
-        if (this.state.certificateAliases !== undefined) {
+        if (this.state.certificateAliases !== undefined)
+        {
             this.state.certificateAliases.forEach(certificateAlias => certificateAliases.push(certificateAlias));
         }
         let newCertAlias = response[ScimConstants.CERT_URI];
@@ -77,7 +91,8 @@ export default class KeystoreConfigForm extends React.Component {
         });
     }
 
-    onAliasDeleteSuccess(alias) {
+    onAliasDeleteSuccess(alias)
+    {
         let certificateAliases = this.state.certificateAliases.filter(item => item !== alias);
         this.setState({
             numberOfEntries: this.state.numberOfEntries - 1,
@@ -86,7 +101,8 @@ export default class KeystoreConfigForm extends React.Component {
         });
     }
 
-    render() {
+    render()
+    {
         return (
             <React.Fragment>
                 <ScimConfigPageForm formId="uploadForm"

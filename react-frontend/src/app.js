@@ -7,7 +7,8 @@ import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
 
 
-function Application(props) {
+function Application(props)
+{
 
     return (
         <React.Fragment>
@@ -41,7 +42,7 @@ function Application(props) {
 
                 <div className="main">
                     {/* A <Switch> looks through its children <Route>s and
-                        renders the first one that matches the current URL. */}
+                     renders the first one that matches the current URL. */}
                     <Switch>
                         <Route path="/keystore">
                             <KeystoreConfigForm />

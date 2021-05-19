@@ -8,7 +8,8 @@ let container = null;
 
 /* ********************************************************************************************************* */
 
-beforeEach(() => {
+beforeEach(() =>
+{
     // setup a DOM element as a render target
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -16,7 +17,8 @@ beforeEach(() => {
 
 /* ********************************************************************************************************* */
 
-afterEach(() => {
+afterEach(() =>
+{
     // cleanup on exiting
     unmountComponentAtNode(container);
     container.remove();
@@ -25,13 +27,16 @@ afterEach(() => {
 
 /* ********************************************************************************************************* */
 
-class TestFormBuilder extends React.Component {
+class TestFormBuilder extends React.Component
+{
 
-    handleSuccessResponse() {
+    handleSuccessResponse()
+    {
         // do nothing since we are not testing this. This is implicitly tested with other tests
     }
 
-    render() {
+    render()
+    {
         const options = ["selection-1", "selection-2"];
 
         return (
@@ -68,9 +73,11 @@ class TestFormBuilder extends React.Component {
 
 /* ********************************************************************************************************* */
 
-test("receive 'errorMessages' from server", async () => {
+test("receive 'errorMessages' from server", async () =>
+{
 
-    act(() => {
+    act(() =>
+    {
         render(<TestFormBuilder />, container);
     });
 
@@ -91,7 +98,8 @@ test("receive 'errorMessages' from server", async () => {
     mockFetch(500, errorMessageResponse);
 
     let errorMessageAssertion;
-    await new Assertions("#my-button-id").isPresent().isVisible().clickElement(() => {
+    await new Assertions("#my-button-id").isPresent().isVisible().clickElement(() =>
+    {
         errorMessageAssertion = new Assertions("#my-form-id-alert-error").isPresent().isVisible();
     })
     expect(global.fetch).toBeCalledTimes(1);
@@ -110,11 +118,13 @@ test("receive 'errorMessages' from server", async () => {
 });
 
 /*
-*********************************************************************************************************
-*/
+ *********************************************************************************************************
+ */
 
-test("receive 'inputFieldErrors' from server", async () => {
-    act(() => {
+test("receive 'inputFieldErrors' from server", async () =>
+{
+    act(() =>
+    {
         render(<TestFormBuilder />, container);
     });
 
@@ -149,7 +159,8 @@ test("receive 'inputFieldErrors' from server", async () => {
     let myTextErrorsAssertion;
     let myFileErrorsAssertion;
     let mySelectionErrorsAssertion;
-    await new Assertions("#my-button-id").isPresent().isVisible().clickElement(() => {
+    await new Assertions("#my-button-id").isPresent().isVisible().clickElement(() =>
+    {
         myTextErrorsAssertion = new Assertions("#myText-error-list").isPresent().isVisible();
         myFileErrorsAssertion = new Assertions("#myFile-error-list").isPresent().isVisible();
         mySelectionErrorsAssertion = new Assertions("#mySelection-error-list").isPresent().isVisible();
@@ -171,5 +182,5 @@ test("receive 'inputFieldErrors' from server", async () => {
 });
 
 /*
-*********************************************************************************************************
-*/
+ *********************************************************************************************************
+ */

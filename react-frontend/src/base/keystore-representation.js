@@ -6,11 +6,14 @@ import downloadIcon from "../media/secure-download-icon.png";
 import CertificateList from "../base/certificate-list";
 import {GoThumbsup} from "react-icons/go";
 
-export default class KeystoreRepresentation extends React.Component {
+export default class KeystoreRepresentation extends React.Component
+{
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
-        if (props.basePath === undefined || props.basePath === null) {
+        if (props.basePath === undefined || props.basePath === null)
+        {
             throw new Error("prop 'basePath' is required");
         }
         let certificateAliases = props.certificateAliases === undefined ? [] : props.certificateAliases;
@@ -21,10 +24,12 @@ export default class KeystoreRepresentation extends React.Component {
         this.onCertificateDelete = this.onCertificateDelete.bind(this);
     }
 
-    onCertificateDelete(alias) {
+    onCertificateDelete(alias)
+    {
         let certificateAliases = this.state.certificateAliases;
         const index = certificateAliases.indexOf(alias);
-        if (index > -1) {
+        if (index > -1)
+        {
             certificateAliases.splice(index, 1);
         }
         this.setState({
@@ -34,8 +39,10 @@ export default class KeystoreRepresentation extends React.Component {
         })
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.certificateAliases.length < this.props.certificateAliases.length) {
+    componentDidUpdate(prevProps, prevState, snapshot)
+    {
+        if (prevProps.certificateAliases.length < this.props.certificateAliases.length)
+        {
             this.setState({
                 numberOfEntries: this.props.certificateAliases.length,
                 certificateAliases: this.props.certificateAliases,
@@ -44,7 +51,8 @@ export default class KeystoreRepresentation extends React.Component {
         }
     }
 
-    render() {
+    render()
+    {
         return (
             <React.Fragment>
                 <h2 id="application-certificate-info-header">

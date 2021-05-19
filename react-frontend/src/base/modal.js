@@ -1,9 +1,11 @@
 import React from "react";
 import {Button} from "react-bootstrap";
 
-export default class Modal extends React.Component {
+export default class Modal extends React.Component
+{
 
-    render() {
+    render()
+    {
         return (
             this.props.show === true &&
             <div id={this.props.id} role="dialog" aria-modal="true" tabIndex="-1" className={"card-modal"}>
