@@ -1,7 +1,9 @@
 package de.captaingoldfish.restclient.application.endpoints.keystore.validation;
 
 import java.io.EOFException;
+import java.security.KeyStore;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.Optional;
 
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
@@ -9,6 +11,7 @@ import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -25,6 +28,7 @@ public final class UploadFormValidator
    * validates the the {@link de.captaingoldfish.restclient.scim.resources.ScimKeystore.FileUpload} object
    * contains valid content
    */
+  @SneakyThrows
   public static void validateUploadForm(ScimKeystore.FileUpload fileUpload, ValidationContext validationContext)
   {
     byte[] decodedKeystoreFile;
@@ -45,6 +49,7 @@ public final class UploadFormValidator
       return;
     }
 
+    KeyStore keyStore;
     try
     {
       final byte[] keystoreBytes = decodedKeystoreFile;
@@ -52,7 +57,7 @@ public final class UploadFormValidator
       final KeyStoreSupporter.KeyStoreType keyStoreType = KeyStoreSupporter.KeyStoreType.byFileExtension(fileName)
                                                                                         .orElse(KeyStoreSupporter.KeyStoreType.JKS);
       final String password = fileUpload.getKeystorePassword();
-      KeyStoreSupporter.readKeyStore(keystoreBytes, keyStoreType, password);
+      keyStore = KeyStoreSupporter.readKeyStore(keystoreBytes, keyStoreType, password);
     }
     catch (Exception ex)
     {
@@ -78,7 +83,25 @@ public final class UploadFormValidator
         validationContext.addError("fileUpload.keystoreFile", errormessage);
         current = current.getCause();
       }
+      return;
     }
 
+    Enumeration<String> aliases = keyStore.aliases();
+    boolean aliasErrorFound = false;
+    while (aliases.hasMoreElements())
+    {
+      String alias = aliases.nextElement();
+      if (alias.contains("/"))
+      {
+        if (!aliasErrorFound)
+        {
+          validationContext.addError("fileUpload.keystoreFile",
+                                     "This keystore cannot be handled for illegal character in alias");
+        }
+        aliasErrorFound = true;
+        validationContext.addError("fileUpload.keystoreFile",
+                                   String.format("The alias '%s' contains an illegal character '/'", alias));
+      }
+    }
   }
 }

@@ -888,6 +888,46 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     }
   }
 
+  @Test
+  public void testSelectAliasWithIllegalCharacter()
+  {
+    ServerResponse<ScimKeystore> uploadResponse = uploadKeystore(UNIT_TEST_KEYSTORE_JKS, UNIT_TEST_KEYSTORE_PASSWORD);
+    Assertions.assertEquals(HttpStatus.CREATED, uploadResponse.getHttpStatus());
+    final String stateId = uploadResponse.getResource().getAliasSelection().getStateId();
+
+    List<String> aliases = Arrays.asList("goldfish");
+    String aliasOverride = "bad-alias/";
+    AliasSelection aliasSelection = AliasSelection.builder()
+                                                  .stateId(stateId)
+                                                  .aliases(aliases)
+                                                  .aliasOverride(aliasOverride)
+                                                  .build();
+    ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
+    ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
+                                                              .setResource(scimKeystore)
+                                                              .sendRequest();
+
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+
+    ErrorResponse errorResponse = response.getErrorResponse();
+    List<String> errorMessageList = errorResponse.getErrorMessages();
+    Assertions.assertEquals(0, errorMessageList.size());
+
+    Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(2, fieldErrors.size());
+    {
+      final String aliasesFieldName = String.format("%s.%s",
+                                                    ScimKeystore.FieldNames.ALIAS_SELECTION,
+                                                    ScimKeystore.FieldNames.ALIAS_OVERRIDE);
+      Assertions.assertEquals(1, fieldErrors.get(aliasesFieldName).size());
+
+      String errorMessage1 = "Invalid alias with value 'bad-alias/'. The alias is used as url path-parameter so "
+                             + "please use the aliasOverride field to override the alias with a value that matches "
+                             + "the following pattern: [A-Za-z0-9_-]+";
+      MatcherAssert.assertThat(fieldErrors.get(aliasesFieldName), Matchers.containsInAnyOrder(errorMessage1));
+    }
+  }
+
   private ServerResponse<ScimKeystore> uploadKeystore(String classPathToKeystore, String password)
   {
     FileUpload fileUpload = getFileUpload(classPathToKeystore, password);

@@ -1,6 +1,8 @@
 package de.captaingoldfish.restclient.application.endpoints.truststore.validation;
 
+import java.security.KeyStore;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.Optional;
 
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
@@ -9,6 +11,7 @@ import de.captaingoldfish.restclient.scim.resources.ScimTruststore.TruststoreUpl
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -24,6 +27,7 @@ public final class TruststoreUploadValidator
   /**
    * validates that the truststore that is being uploaded contains valid data
    */
+  @SneakyThrows
   public static void validateTruststoreUpload(TruststoreUpload truststoreUpload, ValidationContext validationContext)
   {
     byte[] decodedTruststoreFile;
@@ -54,10 +58,11 @@ public final class TruststoreUploadValidator
       validationContext.addError("truststoreUpload.truststorePassword", errormessage);
     }
 
+    KeyStore truststore;
     try
     {
       final String password = truststoreUpload.getTruststorePassword().orElse(null);
-      KeyStoreSupporter.readTruststore(decodedTruststoreFile, keyStoreType, password);
+      truststore = KeyStoreSupporter.readTruststore(decodedTruststoreFile, keyStoreType, password);
     }
     catch (Exception ex)
     {
@@ -68,6 +73,25 @@ public final class TruststoreUploadValidator
         log.debug(errormessage);
         validationContext.addError("truststoreUpload.truststoreFile", errormessage);
         current = current.getCause();
+      }
+      return;
+    }
+
+    Enumeration<String> aliases = truststore.aliases();
+    boolean aliasErrorFound = false;
+    while (aliases.hasMoreElements())
+    {
+      String alias = aliases.nextElement();
+      if (alias.contains("/"))
+      {
+        if (!aliasErrorFound)
+        {
+          validationContext.addError("truststoreUpload.truststoreFile",
+                                     "This truststore cannot be handled for illegal character in alias");
+        }
+        aliasErrorFound = true;
+        validationContext.addError("truststoreUpload.truststoreFile",
+                                   String.format("The alias '%s' contains an illegal character '/'", alias));
       }
     }
   }

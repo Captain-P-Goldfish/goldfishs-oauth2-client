@@ -31,6 +31,13 @@ public final class CertificateUploadValidator
   @SneakyThrows
   public static void validateCertificateUpload(CertificateUpload certificateUpload, ValidationContext validationContext)
   {
+    if (certificateUpload.getAlias().contains("/"))
+    {
+      validationContext.addError("certificateUpload.alias",
+                                 String.format("The alias '%s' must not contain '/' characters",
+                                               certificateUpload.getAlias()));
+    }
+
     byte[] decodedCertificateFile;
     try
     {
@@ -48,7 +55,6 @@ public final class CertificateUploadValidator
       validationContext.addError("certificateUpload.certificateFile", "Certificate file must not be empty");
       return;
     }
-
 
     X509Certificate certificate = null;
     try

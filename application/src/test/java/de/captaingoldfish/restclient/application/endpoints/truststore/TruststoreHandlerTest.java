@@ -1,10 +1,12 @@
 package de.captaingoldfish.restclient.application.endpoints.truststore;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -727,7 +729,7 @@ public class TruststoreHandlerTest extends AbstractScimClientConfig
   @Test
   public void testDeleteWithBadlyEncodedAlias()
   {
-    final String badAlias = "$%& _()";
+    final String badAlias = "$%&";
     // upload certificate
     {
       final String goodAlias = "goldfish";
@@ -754,6 +756,108 @@ public class TruststoreHandlerTest extends AbstractScimClientConfig
                                                                   .sendRequest();
       Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
       Assertions.assertEquals(0, truststoreDao.getTruststore().getTruststoreAliases().size());
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  public void testUploadCertificateWithIllegalCharacterInAlias()
+  {
+    // upload certificate without alias
+    final String alias = "goldfish";
+    // the '/' character causes problems in HTTP requests so we do not accept such characters
+    final String illegalAlias = "test/";
+    final byte[] certificateBytes = getCertificateOfKeystore(UNIT_TEST_KEYSTORE_JKS, alias);
+    final String b64Certificate = Base64.getEncoder().encodeToString(certificateBytes);
+    CertificateUpload certificateUpload = CertificateUpload.builder()
+                                                           .certificateFile(b64Certificate)
+                                                           .alias(illegalAlias)
+                                                           .build();
+    ScimTruststore scimTruststore = ScimTruststore.builder().certificateUpload(certificateUpload).build();
+
+    ServerResponse<ScimTruststore> response = scimRequestBuilder.create(ScimTruststore.class, TRUSTSTORE_ENDPOINT)
+                                                                .setResource(scimTruststore)
+                                                                .sendRequest();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+    ErrorResponse errorResponse = response.getErrorResponse();
+
+    List<String> errorMessages = errorResponse.getErrorMessages();
+    MatcherAssert.assertThat(errorMessages, Matchers.emptyIterable());
+    Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrors.size());
+    {
+      final String fieldName = String.format("%s.%s",
+                                             ScimTruststore.FieldNames.CERTIFICATE_UPLOAD,
+                                             ScimTruststore.FieldNames.ALIAS);
+      List<String> fieldErrorMessages = fieldErrors.get(fieldName);
+      Assertions.assertEquals(1, fieldErrorMessages.size());
+
+      String errorMessage = String.format("The alias '%s' must not contain '/' characters", illegalAlias);
+      MatcherAssert.assertThat(fieldErrorMessages, Matchers.containsInAnyOrder(errorMessage));
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  public void testUploadTruststoreWithIllegalCharacterInAlias()
+  {
+    KeyStore truststore = KeyStore.getInstance("JKS");
+    truststore.load(null, UNIT_TEST_KEYSTORE_PASSWORD.toCharArray());
+    {
+      KeyStore keyStore = KeyStore.getInstance("JKS");
+      final byte[] certificateBytes = readAsBytes(UNIT_TEST_KEYSTORE_JKS);
+      keyStore.load(new ByteArrayInputStream(certificateBytes), UNIT_TEST_KEYSTORE_PASSWORD.toCharArray());
+
+      Enumeration<String> aliases = keyStore.aliases();
+      while (aliases.hasMoreElements())
+      {
+        String keystoreAlias = aliases.nextElement();
+        if (keystoreAlias.equals("localhost"))
+        {
+          truststore.setCertificateEntry(keystoreAlias, keyStore.getCertificate(keystoreAlias));
+        }
+        else
+        {
+          truststore.setCertificateEntry(keystoreAlias + "/", keyStore.getCertificate(keystoreAlias));
+        }
+      }
+    }
+
+    final byte[] truststoreBytes = KeyStoreSupporter.getBytes(truststore, UNIT_TEST_KEYSTORE_PASSWORD);
+    final String b64Truststore = Base64.getEncoder().encodeToString(truststoreBytes);
+    final String filename = getFilename(UNIT_TEST_KEYSTORE_JKS);
+
+    TruststoreUpload truststoreUpload = TruststoreUpload.builder()
+                                                        .truststoreFile(b64Truststore)
+                                                        .truststorePassword(UNIT_TEST_KEYSTORE_PASSWORD)
+                                                        .truststoreFileName(filename)
+                                                        .build();
+
+    ScimTruststore scimTruststore = ScimTruststore.builder().truststoreUpload(truststoreUpload).build();
+
+    ServerResponse<ScimTruststore> response = scimRequestBuilder.create(ScimTruststore.class, TRUSTSTORE_ENDPOINT)
+                                                                .setResource(scimTruststore)
+                                                                .sendRequest();
+
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+    ErrorResponse errorResponse = response.getErrorResponse();
+
+    List<String> errorMessages = errorResponse.getErrorMessages();
+    MatcherAssert.assertThat(errorMessages, Matchers.emptyIterable());
+    Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrors.size());
+    {
+      final String fieldName = String.format("%s.%s",
+                                             ScimTruststore.FieldNames.TRUSTSTORE_UPLOAD,
+                                             ScimTruststore.FieldNames.TRUSTSTORE_FILE);
+      List<String> fieldErrorMessages = fieldErrors.get(fieldName);
+      Assertions.assertEquals(3, fieldErrorMessages.size());
+
+      String errorMessage1 = "This truststore cannot be handled for illegal character in alias";
+      String errorMessage2 = String.format("The alias '%s' contains an illegal character '/'", "goldfish/");
+      String errorMessage3 = String.format("The alias '%s' contains an illegal character '/'", "unit-test/");
+      MatcherAssert.assertThat(fieldErrorMessages,
+                               Matchers.containsInAnyOrder(errorMessage1, errorMessage2, errorMessage3));
     }
   }
 
