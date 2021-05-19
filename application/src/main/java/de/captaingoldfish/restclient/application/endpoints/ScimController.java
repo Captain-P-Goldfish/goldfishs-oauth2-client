@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +63,8 @@ public class ScimController
     ScimResponse scimResponse = resourceEndpoint.handleRequest(request.getRequestURL().toString() + query,
                                                                HttpMethod.valueOf(request.getMethod()),
                                                                requestBody,
-                                                               httpHeaders);
+                                                               httpHeaders,
+                                                               Collections::emptySet);
     response.setContentType(HttpHeader.SCIM_CONTENT_TYPE);
     scimResponse.getHttpHeaders().forEach(response::setHeader);
     response.setStatus(scimResponse.getHttpStatus());
