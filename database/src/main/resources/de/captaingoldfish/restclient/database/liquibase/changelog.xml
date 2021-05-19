@@ -9,6 +9,9 @@
     <property name="blob_type" value="BLOB" dbms="oracle"/>
     <property name="blob_type" value="BYTEA" dbms="postgresql"/>
 
+    <property name="datetime" value="datetime"/>
+    <property name="datetime" value="datetime2" dbms="mssql"/>
+
     <changeSet author="pascal_knueppel" id="sequence-table-creation" dbms="mysql">
         <comment>mysql supports sequences only with a workaround by creating a table with a counter</comment>
         <createTable tableName="hibernate_sequence">
@@ -65,6 +68,8 @@
             <column name="KEYSTORE_BYTES" type="${blob_type}"/>
             <column name="KEYSTORE_PASSWORD" type="VARCHAR(255)"/>
             <column name="KEYSTORE_TYPE" type="VARCHAR(10)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
 
         <createTable tableName="KEYSTORE_ENTRIES">
@@ -87,6 +92,20 @@
             <column name="TRUSTSTORE_BYTES" type="${blob_type}"/>
             <column name="TRUSTSTORE_PASSWORD" type="VARCHAR(255)"/>
             <column name="TRUSTSTORE_TYPE" type="VARCHAR(10)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
+
+        <createTable tableName="PROXY">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="PROXY_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="HOST" type="VARCHAR(255)"/>
+            <column name="PORT" type="INTEGER"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="PROXY_PASSWORD" type="VARCHAR(255)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
 
         <createTable tableName="OPENID_PROVIDER">
@@ -99,6 +118,8 @@
             <column name="TOKEN_ENDPOINT" type="VARCHAR(1024)"/>
             <column name="USER_INFO_ENDPOINT" type="VARCHAR(1024)"/>
             <column name="SIGNATURE_VERIFICATION_KEY" type="${blob_type}"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
 
         <createTable tableName="CLIENT">
@@ -115,16 +136,8 @@
             <column name="SIGANTURE_KEYSTORE_ID" type="BIGINT">
                 <constraints foreignKeyName="CLIENT_SIGNATURE_KEYSTORE_FK" referencedColumnNames="ID"/>
             </column>
-        </createTable>
-
-        <createTable tableName="PROXY">
-            <column name="ID" type="BIGINT">
-                <constraints primaryKeyName="PROXY_PRIME_KEY" primaryKey="true"/>
-            </column>
-            <column name="PROXY_HOST" type="VARCHAR(255)"/>
-            <column name="PROXY_PORT" type="INTEGER"/>
-            <column name="PROXY_USERNAME" type="VARCHAR(255)"/>
-            <column name="PROXY_PASSWORD" type="VARCHAR(255)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
 
         <createTable tableName="OAUTH2_LAST_USED_SETTINGS">

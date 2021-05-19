@@ -1,0 +1,68 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:Proxy",
+  "name": "Proxy",
+  "description": "a connection representation to a simple HTTP proxy",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "hostname",
+      "type": "string",
+      "description": "The hostname or IP-address of the proxy",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "minLength": 1
+    },
+    {
+      "name": "port",
+      "type": "integer",
+      "description": "The port of the proxy. If not set the default will be 8888 (Telerik Fiddler Proxy)",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "minimum": 1,
+      "maximum": 65535
+    },
+    {
+      "name": "username",
+      "type": "string",
+      "description": "The username to authenticate at the proxy if the proxy requires authentication",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": true
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "The password to authenticate at the proxy if the proxy requires authentication",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": true
+    }
+  ]
+}

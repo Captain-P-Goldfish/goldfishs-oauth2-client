@@ -8,6 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -23,6 +25,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -83,6 +87,18 @@ public class Keystore
   private List<KeystoreEntry> keystoreEntries = new ArrayList<>();
 
   /**
+   * the moment this instance was created
+   */
+  @Column(name = "CREATED")
+  private Instant created;
+
+  /**
+   * the moment this instance was last modified
+   */
+  @Column(name = "LAST_MODIFIED")
+  private Instant lastModified;
+
+  /**
    * the keystore that is the main object of this class
    */
   @Transient
@@ -97,6 +113,19 @@ public class Keystore
                                                    keystorePassword);
     this.keystoreType = keyStoreType;
     this.keystorePassword = keystorePassword;
+  }
+
+  @PrePersist
+  public final void setCreated()
+  {
+    this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = this.created;
+  }
+
+  @PreUpdate
+  public final void setLastModified()
+  {
+    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
   }
 
   /**

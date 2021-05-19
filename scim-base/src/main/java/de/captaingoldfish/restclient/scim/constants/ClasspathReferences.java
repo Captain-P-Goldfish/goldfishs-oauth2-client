@@ -22,6 +22,10 @@ public final class ClasspathReferences
 
   public static final String TRUSTSTORE_SCHEMA = BASE_PATH + "/resource/truststore.json";
 
+  public static final String PROXY_RESOURCE_TYPE = BASE_PATH + "/resourcetypes/proxy-resource-type.json";
+
+  public static final String PROXY_SCHEMA = BASE_PATH + "/resource/proxy.json";
+
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
 
 }

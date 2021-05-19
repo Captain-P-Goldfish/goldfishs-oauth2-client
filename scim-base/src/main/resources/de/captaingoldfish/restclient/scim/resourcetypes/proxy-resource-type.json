@@ -1,0 +1,16 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
+  ],
+  "id": "Proxy",
+  "name": "Proxy",
+  "description": "A proxy that should be used for HTTP requests.",
+  "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:Proxy",
+  "endpoint": "/Proxy",
+  "meta": {
+    "resourceType": "ResourceType",
+    "created": "2021-05-08T22:51:00+02:00",
+    "lastModified": "2021-05-08T22:51:00+02:00",
+    "location": "/ResourceTypes/Proxy"
+  }
+}

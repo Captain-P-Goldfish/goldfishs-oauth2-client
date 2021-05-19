@@ -3,6 +3,8 @@ package de.captaingoldfish.restclient.database.entities;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -14,6 +16,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -66,6 +70,18 @@ public class Truststore
   private KeyStoreSupporter.KeyStoreType truststoreType;
 
   /**
+   * the moment this instance was created
+   */
+  @Column(name = "CREATED")
+  private Instant created;
+
+  /**
+   * the moment this instance was last modified
+   */
+  @Column(name = "LAST_MODIFIED")
+  private Instant lastModified;
+
+  /**
    * the truststore that is the main object of this class
    */
   @Transient
@@ -80,6 +96,19 @@ public class Truststore
     this.truststorePassword = truststorePassword;
     this.truststoreType = truststoreType;
     this.truststore = KeyStoreSupporter.readTruststore(truststoreBytes, truststoreType, truststorePassword);
+  }
+
+  @PrePersist
+  public final void setCreated()
+  {
+    this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = this.created;
+  }
+
+  @PreUpdate
+  public final void setLastModified()
+  {
+    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
   }
 
   /**

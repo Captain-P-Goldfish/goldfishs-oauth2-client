@@ -2,12 +2,16 @@ package de.captaingoldfish.restclient.database.entities;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import de.captaingoldfish.restclient.commons.keyhelper.KeyReader;
@@ -76,6 +80,18 @@ public class OpenIdProvider
   private byte[] signatureVerificationKey;
 
   /**
+   * the moment this instance was created
+   */
+  @Column(name = "CREATED")
+  private Instant created;
+
+  /**
+   * the moment this instance was last modified
+   */
+  @Column(name = "LAST_MODIFIED")
+  private Instant lastModified;
+
+  /**
    * lombok builder
    */
   @Builder
@@ -92,6 +108,19 @@ public class OpenIdProvider
     this.tokenEndpointUrl = tokenEndpointUrl;
     this.userInfoEndpointUrl = userInfoEndpointUrl;
     this.signatureVerificationKey = signatureVerificationKey;
+  }
+
+  @PrePersist
+  public final void setCreated()
+  {
+    this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = this.created;
+  }
+
+  @PreUpdate
+  public final void setLastModified()
+  {
+    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
   }
 
   /**

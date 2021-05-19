@@ -24,18 +24,13 @@ public class ProxyTest extends DbBaseTest
     final int port = 8888;
     final String username = "username";
     final String password = "password";
-    Proxy proxy = Proxy.builder()
-                       .proxyHost(host)
-                       .proxyPort(port)
-                       .proxyUsername(username)
-                       .proxyPassword(password)
-                       .build();
+    Proxy proxy = Proxy.builder().host(host).port(port).username(username).password(password).build();
     proxy = proxyDao.save(proxy);
     Assertions.assertNotEquals(0, proxy.getId());
-    Assertions.assertEquals(host, proxy.getProxyHost());
-    Assertions.assertEquals(port, proxy.getProxyPort());
-    Assertions.assertEquals(username, proxy.getProxyUsername());
-    Assertions.assertEquals(password, proxy.getProxyPassword());
+    Assertions.assertEquals(host, proxy.getHost());
+    Assertions.assertEquals(port, proxy.getPort());
+    Assertions.assertEquals(username, proxy.getUsername());
+    Assertions.assertEquals(password, proxy.getPassword());
 
     Assertions.assertEquals(1, proxyDao.count());
     proxyDao.deleteAll();

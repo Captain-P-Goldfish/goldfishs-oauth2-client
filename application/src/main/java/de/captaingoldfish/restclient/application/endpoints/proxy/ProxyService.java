@@ -31,10 +31,10 @@ public class ProxyService
   public ProxyResponseForm create(ProxyCreateForm proxyForm)
   {
     Proxy proxy = Proxy.builder()
-                       .proxyHost(proxyForm.getHost())
-                       .proxyPort(Integer.parseInt(proxyForm.getPort()))
-                       .proxyUsername(proxyForm.getUsername())
-                       .proxyPassword(proxyForm.getPassword())
+                       .host(proxyForm.getHost())
+                       .port(Integer.parseInt(proxyForm.getPort()))
+                       .username(proxyForm.getUsername())
+                       .password(proxyForm.getPassword())
                        .build();
     proxy = proxyDao.save(proxy);
     return proxyToResponseForm(proxy);
@@ -49,10 +49,10 @@ public class ProxyService
   {
     // existence already checked by bean validation
     Proxy proxy = proxyDao.findById(Long.parseLong(proxyForm.getId())).get();
-    proxy.setProxyHost(proxyForm.getHost());
-    proxy.setProxyPort(Integer.parseInt(proxyForm.getPort()));
-    proxy.setProxyUsername(proxyForm.getUsername());
-    proxy.setProxyPassword(proxyForm.getPassword());
+    proxy.setHost(proxyForm.getHost());
+    proxy.setPort(Integer.parseInt(proxyForm.getPort()));
+    proxy.setUsername(proxyForm.getUsername());
+    proxy.setPassword(proxyForm.getPassword());
     proxy = proxyDao.save(proxy);
     return proxyToResponseForm(proxy);
   }
@@ -66,10 +66,10 @@ public class ProxyService
   {
     return ProxyResponseForm.builder()
                             .id(String.valueOf(proxy.getId()))
-                            .host(proxy.getProxyHost())
-                            .port(String.valueOf(proxy.getProxyPort()))
-                            .username(proxy.getProxyUsername())
-                            .password(proxy.getProxyPassword())
+                            .host(proxy.getHost())
+                            .port(String.valueOf(proxy.getPort()))
+                            .username(proxy.getUsername())
+                            .password(proxy.getPassword())
                             .build();
   }
 }

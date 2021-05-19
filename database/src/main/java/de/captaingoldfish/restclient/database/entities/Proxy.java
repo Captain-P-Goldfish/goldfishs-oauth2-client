@@ -1,12 +1,15 @@
 package de.captaingoldfish.restclient.database.entities;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 
 import lombok.Builder;
 import lombok.Data;
@@ -36,39 +39,62 @@ public class Proxy
   /**
    * the hostname of the proxy
    */
-  @NotBlank(message = "{proxy.no.hostname}")
-  @Column(name = "PROXY_HOST")
-  private String proxyHost;
+  @Column(name = "HOST")
+  private String host;
 
   /**
    * the port under which the proxy is accessible
    */
-  @Min(value = 1, message = "{proxy.no.port}")
-  @Column(name = "PROXY_PORT")
-  private int proxyPort;
+  @Column(name = "PORT")
+  private int port;
 
   /**
    * the username for basic authentication with the proxy
    */
-  @Column(name = "PROXY_USERNAME")
-  private String proxyUsername;
+  @Column(name = "USERNAME")
+  private String username;
 
   /**
    * the password for basic authentication with the proxy
    */
   @Column(name = "PROXY_PASSWORD")
-  private String proxyPassword;
+  private String password;
+
+  /**
+   * the moment this instance was created
+   */
+  @Column(name = "CREATED")
+  private Instant created;
+
+  /**
+   * the moment this instance was last modified
+   */
+  @Column(name = "LAST_MODIFIED")
+  private Instant lastModified;
 
   /**
    * lombok builder
    */
   @Builder
-  public Proxy(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword)
+  public Proxy(String host, int port, String username, String password)
   {
-    this.proxyHost = proxyHost;
-    this.proxyPort = proxyPort;
-    this.proxyUsername = proxyUsername;
-    this.proxyPassword = proxyPassword;
+    this.host = host;
+    this.port = port;
+    this.username = username;
+    this.password = password;
+  }
+
+  @PrePersist
+  public final void setCreated()
+  {
+    this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = this.created;
+  }
+
+  @PreUpdate
+  public final void setLastModified()
+  {
+    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
   }
 
 }

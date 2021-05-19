@@ -7,10 +7,13 @@ import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
+import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
+import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.ProxyEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TruststoreEndpoint;
 import de.captaingoldfish.scim.sdk.common.resources.ServiceProvider;
 import de.captaingoldfish.scim.sdk.common.resources.complex.BulkConfig;
@@ -86,7 +89,7 @@ public class ScimConfig
    * registers the truststore resourceType under the endpoint /Truststore.
    *
    * @param resourceEndpoint the resource endpoint that was previously defined
-   * @return the keystore resource type
+   * @return the truststore resource type
    */
   @Bean
   public ResourceType truststoreResourceType(ResourceEndpoint resourceEndpoint, TruststoreDao truststoreDao)
@@ -94,5 +97,19 @@ public class ScimConfig
     TruststoreEndpoint truststoreEndpoint = new TruststoreEndpoint(new TruststoreHandler(truststoreDao));
     ResourceType truststoreResourceType = resourceEndpoint.registerEndpoint(truststoreEndpoint);
     return truststoreResourceType;
+  }
+
+  /**
+   * registers the proxy resourceType under the endpoint /Proxy.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the proxy resource type
+   */
+  @Bean
+  public ResourceType proxyResourceType(ResourceEndpoint resourceEndpoint, ProxyDao proxyDao)
+  {
+    ProxyEndpoint proxyEndpoint = new ProxyEndpoint(new ProxyHandler(proxyDao));
+    ResourceType proxyResourceType = resourceEndpoint.registerEndpoint(proxyEndpoint);
+    return proxyResourceType;
   }
 }
