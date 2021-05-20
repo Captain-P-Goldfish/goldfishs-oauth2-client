@@ -5,7 +5,7 @@ import {Alert} from "react-bootstrap";
 import {GoFlame} from "react-icons/go";
 import KeystoreRepresentation from "../base/keystore-representation";
 import ScimConfigPageForm from "../base/scim-config-page-form";
-import ScimClient from "../services/scim-client";
+import ScimClient from "../scim/scim-client";
 import {Optional} from "../services/utils";
 
 export default class TruststoreConfigForm extends React.Component

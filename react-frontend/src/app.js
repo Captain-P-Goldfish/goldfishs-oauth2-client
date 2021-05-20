@@ -5,6 +5,7 @@ import KeystoreConfigForm from "./pages/keystore-config-form";
 import TruststoreConfigForm from "./pages/truststore-config-form";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
+import ProxyConfigForm from "./pages/proxy-config-form";
 
 
 function Application(props)
@@ -35,6 +36,9 @@ function Application(props)
                             <LinkContainer exact to="/truststore">
                                 <Nav.Link>Truststore</Nav.Link>
                             </LinkContainer>
+                            <LinkContainer exact to="/proxy">
+                                <Nav.Link>Proxy</Nav.Link>
+                            </LinkContainer>
                             {/*<Nav.Link href="#proxies">Proxies</Nav.Link>*/}
                         </Nav>
                     </Navbar.Collapse>
@@ -44,6 +48,9 @@ function Application(props)
                     {/* A <Switch> looks through its children <Route>s and
                      renders the first one that matches the current URL. */}
                     <Switch>
+                        <Route path="/proxy">
+                            <ProxyConfigForm />
+                        </Route>
                         <Route path="/keystore">
                             <KeystoreConfigForm />
                         </Route>

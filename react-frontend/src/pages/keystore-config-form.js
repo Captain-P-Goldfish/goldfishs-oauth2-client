@@ -3,7 +3,7 @@ import {FormFileField, FormInputField, FormSelectField} from "../base/config-pag
 import KeystoreRepresentation from "../base/keystore-representation";
 import ScimConfigPageForm from "../base/scim-config-page-form";
 import * as ScimConstants from "../scim-constants";
-import ScimClient from "../services/scim-client";
+import ScimClient from "../scim/scim-client";
 
 export default class KeystoreConfigForm extends React.Component
 {
@@ -112,8 +112,7 @@ export default class KeystoreConfigForm extends React.Component
                                     onSubmitSuccess={this.handleUploadSuccess}
                                     buttonId="uploadButton"
                                     buttonText="Upload"
-                                    successMessage="Keystore was successfully uploaded"
-                                    disabled={this.state.uploadFormDisabled}>
+                                    successMessage="Keystore was successfully uploaded">
                     {({onChange, onError}) => (
                         <React.Fragment>
                             <FormFileField name="fileUpload.keystoreFile"

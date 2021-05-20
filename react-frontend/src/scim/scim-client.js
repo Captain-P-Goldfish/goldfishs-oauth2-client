@@ -1,4 +1,4 @@
-import {Optional} from "./utils"
+import {Optional} from "../services/utils";
 
 export default class ScimClient
 {
@@ -6,6 +6,7 @@ export default class ScimClient
     constructor(resourcePath)
     {
         this.resourcePath = resourcePath;
+        this.inputFields = {}
     }
 
     async createResource(resource)

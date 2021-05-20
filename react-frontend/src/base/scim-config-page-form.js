@@ -1,4 +1,3 @@
-import React from 'react';
 import ConfigPageForm from "./config-page-form";
 import {Optional, toBase64} from "../services/utils";
 
@@ -22,12 +21,6 @@ import {Optional, toBase64} from "../services/utils";
  */
 export default class ScimConfigPageForm extends ConfigPageForm
 {
-
-    constructor(props)
-    {
-        super(props);
-    }
-
     /**
      * the method {@link #handleChange} adds the current values into the state context under the key "inputFields".
      * This method will read this data and add it to the coming request to the backend

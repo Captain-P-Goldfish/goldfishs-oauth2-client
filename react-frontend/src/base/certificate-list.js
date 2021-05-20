@@ -5,7 +5,7 @@ import Modal from "./modal";
 import {TrashFill} from "react-bootstrap-icons";
 import CertIcon from "../media/certificate.png";
 import Button from "react-bootstrap/Button";
-import ScimClient from "../services/scim-client";
+import ScimClient from "../scim/scim-client";
 import * as ScimConstants from "../scim-constants";
 
 
@@ -89,7 +89,7 @@ export class CertificateCardEntry extends React.Component
 
         return (
             <Card id={"alias-card-" + this.props.alias} key={this.props.alias}
-                  border={"warning"} bg={"dark"} className={"alias-card"}>
+                  border={"warning"} bg={"dark"} className={"resource-card"}>
                 <Modal id={"delete-dialog-" + this.props.alias}
                        show={this.state.showModal}
                        variant="danger"

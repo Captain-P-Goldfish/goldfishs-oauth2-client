@@ -97,12 +97,12 @@ small.error {
     display: none !important;
 }
 
-.disabled {
+.disabled, .form-control:disabled, .form-control[readonly] {
     pointer-events: none;
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
-.card.alias-card {
+.card.resource-card {
     min-width: var(--card-width);
     max-width: var(--card-width);
     margin-bottom: 15px !important;

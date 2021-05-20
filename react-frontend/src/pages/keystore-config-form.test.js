@@ -5,9 +5,6 @@ import Assertions, {mockFetch} from "../setupTests"
 import {unmountComponentAtNode} from "react-dom";
 import {toBase64} from "../services/utils";
 
-
-jest.setTimeout(300000)
-
 let container = null;
 
 /* ********************************************************************************************************* */

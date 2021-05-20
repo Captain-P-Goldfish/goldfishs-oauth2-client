@@ -23,7 +23,21 @@ class FormInputField extends React.Component
 
     bubbleEvent(e)
     {
-        this.props.onChange(e.target.name, e.target.value);
+        if (this.props.type === 'number')
+        {
+            if (!isNaN(parseInt(e.target.value)))
+            {
+                this.props.onChange(e.target.name, e.target.valueAsNumber);
+            }
+            else
+            {
+                this.props.onChange(e.target.name, undefined);
+            }
+        }
+        else
+        {
+            this.props.onChange(e.target.name, e.target.value);
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot)
@@ -44,6 +58,8 @@ class FormInputField extends React.Component
         let inputFieldName = this.props.name;
         let inputFieldPlaceholder = this.props.placeholder === undefined ? this.props.name : this.props.placeholder;
         let inputFieldErrorMessages = this.props.onError(this.props.name);
+        let isDisabled = this.props.disabled === true;
+        let isReadOnly = this.props.readOnly === true;
 
         return (
             <Form.Group as={Row} controlId={controlId}>
@@ -51,6 +67,8 @@ class FormInputField extends React.Component
                 <Col sm={10}>
                     <Form.Control type={inputFieldType}
                                   name={inputFieldName}
+                                  disabled={isDisabled}
+                                  readOnly={isReadOnly}
                                   placeholder={inputFieldPlaceholder}
                                   onChange={this.bubbleEvent}
                                   value={this.props.value} />
@@ -290,7 +308,14 @@ export default class ConfigPageForm extends React.Component
     handleChange(fieldName, value)
     {
         let staleState = this.state;
-        staleState["inputFields"][fieldName] = value;
+        if (value === undefined)
+        {
+            delete staleState["inputFields"][fieldName];
+        }
+        else
+        {
+            staleState["inputFields"][fieldName] = value;
+        }
         this.setState(staleState);
     }
 
@@ -450,6 +475,14 @@ export default class ConfigPageForm extends React.Component
                         <Button id={this.props.buttonId} type="submit" onClick={() => this.startSpinner}>
                             {spinner} {buttonText}
                         </Button>
+                        {
+                            this.props.additionalButtons !== undefined &&
+                            this.props.additionalButtons.map(button =>
+                            {
+                                return button
+                            })
+                        }
+
                     </Col>
                 </Form.Group>
             </Form>
