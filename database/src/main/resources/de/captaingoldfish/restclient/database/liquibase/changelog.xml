@@ -109,7 +109,7 @@
         </createTable>
 
         <createTable tableName="OPENID_PROVIDER">
-            <column name="id" type="BIGINT">
+            <column name="ID" type="BIGINT">
                 <constraints primaryKeyName="OIDC_PROVIDER_PRIME_KEY" primaryKey="true"/>
             </column>
             <column name="PROVIDER_NAME" type="VARCHAR(255)"/>

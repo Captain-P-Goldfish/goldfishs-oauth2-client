@@ -192,3 +192,20 @@ ul.error-list {
 .download-keystore-icon img {
     height: 40px;
 }
+
+h1, h2, h3, h4, h5 {
+    color: sandybrown;
+    text-shadow: 2px 2px rgba(255, 215, 0, 0.15);
+}
+
+.nav.nav-tabs[role="tablist"] {
+    margin-bottom: 20px;
+}
+
+.nav.nav-tabs[role="tablist"] a {
+    color: gold;
+}
+
+.nav.nav-tabs[role="tablist"] a.active {
+    background-color: black;
+}

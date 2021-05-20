@@ -1,11 +1,11 @@
 import React from "react";
 import logo from "./logo.svg";
 import {Nav, Navbar} from "react-bootstrap";
-import KeystoreConfigForm from "./pages/keystore-config-form";
-import TruststoreConfigForm from "./pages/truststore-config-form";
+import KeystoreConfigForm from "./system/keystore-config-form";
+import TruststoreConfigForm from "./system/truststore-config-form";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
-import ProxyConfigForm from "./pages/proxy-config-form";
+import SystemOverview from "./system/system-overview";
 
 
 function Application(props)
@@ -30,16 +30,9 @@ function Application(props)
                             <LinkContainer exact to="/">
                                 <Nav.Link>Home</Nav.Link>
                             </LinkContainer>
-                            <LinkContainer exact to="/keystore">
-                                <Nav.Link>Keystore</Nav.Link>
+                            <LinkContainer exact to="/system">
+                                <Nav.Link>System</Nav.Link>
                             </LinkContainer>
-                            <LinkContainer exact to="/truststore">
-                                <Nav.Link>Truststore</Nav.Link>
-                            </LinkContainer>
-                            <LinkContainer exact to="/proxy">
-                                <Nav.Link>Proxy</Nav.Link>
-                            </LinkContainer>
-                            {/*<Nav.Link href="#proxies">Proxies</Nav.Link>*/}
                         </Nav>
                     </Navbar.Collapse>
                 </Navbar>
@@ -48,8 +41,8 @@ function Application(props)
                     {/* A <Switch> looks through its children <Route>s and
                      renders the first one that matches the current URL. */}
                     <Switch>
-                        <Route path="/proxy">
-                            <ProxyConfigForm />
+                        <Route path="/system">
+                            <SystemOverview />
                         </Route>
                         <Route path="/keystore">
                             <KeystoreConfigForm />
