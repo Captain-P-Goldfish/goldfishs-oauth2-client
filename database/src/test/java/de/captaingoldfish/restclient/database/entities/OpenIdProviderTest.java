@@ -3,6 +3,7 @@ package de.captaingoldfish.restclient.database.entities;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.util.Collections;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -39,14 +40,14 @@ public class OpenIdProviderTest extends DbBaseTest
     OpenIdProvider openIdProvider = OpenIdProvider.builder()
                                                   .name(name)
                                                   .discoveryEndpointUrl(discorverEndpointUrl)
-                                                  .signatureVerificationKey(signatureVerificationKey)
+                                                  .signatureVerificationCert(signatureVerificationKey)
                                                   .build();
 
     openIdProvider = openIdProviderDao.save(openIdProvider);
     MatcherAssert.assertThat(openIdProvider.getId(), Matchers.greaterThan(0L));
     Assertions.assertEquals(name, openIdProvider.getName());
-    Assertions.assertEquals(discorverEndpointUrl, openIdProvider.getDiscoveryEndpointUrl());
-    Assertions.assertArrayEquals(signatureVerificationKey, openIdProvider.getSignatureVerificationKey());
+    Assertions.assertEquals(discorverEndpointUrl, openIdProvider.getDiscoveryEndpoint());
+    Assertions.assertArrayEquals(signatureVerificationKey, openIdProvider.getSignatureVerificationCert());
     Assertions.assertEquals(1, openIdProviderDao.count());
     openIdProviderDao.deleteAll();
     Assertions.assertEquals(0, openIdProviderDao.count());
@@ -72,17 +73,17 @@ public class OpenIdProviderTest extends DbBaseTest
                                                   .name(name)
                                                   .authorizationEndpointUrl(authorizationEndpoint)
                                                   .tokenEndpointUrl(tokennEndpoint)
-                                                  .userInfoEndpointUrl(userInfoEndpoint)
-                                                  .signatureVerificationKey(signatureVerificationKey)
+                                                  .resourceEndpoints(Collections.singletonList(userInfoEndpoint))
+                                                  .signatureVerificationCert(signatureVerificationKey)
                                                   .build();
 
     openIdProvider = openIdProviderDao.save(openIdProvider);
     MatcherAssert.assertThat(openIdProvider.getId(), Matchers.greaterThan(0L));
     Assertions.assertEquals(name, openIdProvider.getName());
-    Assertions.assertEquals(authorizationEndpoint, openIdProvider.getAuthorizationEndpointUrl());
-    Assertions.assertEquals(tokennEndpoint, openIdProvider.getTokenEndpointUrl());
-    Assertions.assertEquals(userInfoEndpoint, openIdProvider.getUserInfoEndpointUrl());
-    Assertions.assertArrayEquals(signatureVerificationKey, openIdProvider.getSignatureVerificationKey());
+    Assertions.assertEquals(authorizationEndpoint, openIdProvider.getAuthorizationEndpoint());
+    Assertions.assertEquals(tokennEndpoint, openIdProvider.getTokenEndpoint());
+    Assertions.assertEquals(userInfoEndpoint, openIdProvider.getResourceEndpoints().get(0));
+    Assertions.assertArrayEquals(signatureVerificationKey, openIdProvider.getSignatureVerificationCert());
     Assertions.assertEquals(1, openIdProviderDao.count());
     openIdProviderDao.deleteAll();
     Assertions.assertEquals(0, openIdProviderDao.count());

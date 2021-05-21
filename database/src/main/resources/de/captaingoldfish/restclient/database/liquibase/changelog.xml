@@ -112,15 +112,27 @@
             <column name="ID" type="BIGINT">
                 <constraints primaryKeyName="OIDC_PROVIDER_PRIME_KEY" primaryKey="true"/>
             </column>
-            <column name="PROVIDER_NAME" type="VARCHAR(255)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
             <column name="DISCOVERY_ENDPOINT" type="VARCHAR(1024)"/>
             <column name="AUTHORIZATION_ENDPOINT" type="VARCHAR(1024)"/>
             <column name="TOKEN_ENDPOINT" type="VARCHAR(1024)"/>
-            <column name="USER_INFO_ENDPOINT" type="VARCHAR(1024)"/>
-            <column name="SIGNATURE_VERIFICATION_KEY" type="${blob_type}"/>
+            <column name="SIGNATURE_VERIFICATION_CERT" type="${blob_type}"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
+
+        <createTable tableName="RESOURCE_ENDPOINTS">
+            <column name="OPENID_PROVIDER_ID" type="BIGINT">
+                <constraints referencedTableName="OPENID_PROVIDER"
+                             referencedColumnNames="ID"
+                             foreignKeyName="PROVIDER_ENDPOINT_FK"/>
+            </column>
+            <column name="ENDPOINT" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createIndex tableName="RESOURCE_ENDPOINTS" indexName="PROVIDER_RESOURCE_ENDPOINTS">
+            <column name="OPENID_PROVIDER_ID"/>
+        </createIndex>
 
         <createTable tableName="CLIENT">
             <column name="ID" type="BIGINT">

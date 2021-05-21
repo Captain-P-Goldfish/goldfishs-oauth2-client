@@ -1,20 +1,20 @@
 package de.captaingoldfish.restclient.database.entities;
 
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
+import java.util.List;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
-import de.captaingoldfish.restclient.commons.keyhelper.KeyReader;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,7 +45,7 @@ public class OpenIdProvider
   /**
    * this name can be used to identify this provider in the view
    */
-  @Column(name = "PROVIDER_NAME")
+  @Column(name = "NAME")
   private String name;
 
   /**
@@ -53,31 +53,33 @@ public class OpenIdProvider
    * and user-info-endpoint if present in the configuration
    */
   @Column(name = "DISCOVERY_ENDPOINT")
-  private String discoveryEndpointUrl;
+  private String discoveryEndpoint;
 
   /**
    * the authorization endpoint -> can be used if a discovery endpoint is not provided
    */
   @Column(name = "AUTHORIZATION_ENDPOINT")
-  private String authorizationEndpointUrl;
+  private String authorizationEndpoint;
 
   /**
    * the token endpoint -> can be used if a discovery endpoint is not provided
    */
   @Column(name = "TOKEN_ENDPOINT")
-  private String tokenEndpointUrl;
+  private String tokenEndpoint;
 
   /**
-   * the user-info endpoint -> can be used if a discovery endpoint is not provided
+   * resource endpoints that should be accessible after a token was acquired
    */
-  @Column(name = "USER_INFO_ENDPOINT")
-  private String userInfoEndpointUrl;
+  @ElementCollection
+  @CollectionTable(name = "RESOURCE_ENDPOINTS", joinColumns = @JoinColumn(name = "OPENID_PROVIDER_ID"))
+  @Column(name = "ENDPOINT")
+  private List<String> resourceEndpoints;
 
   /**
    * a public key that can be used to verify the provided signatures of this open id provider
    */
-  @Column(name = "SIGNATURE_VERIFICATION_KEY")
-  private byte[] signatureVerificationKey;
+  @Column(name = "SIGNATURE_VERIFICATION_CERT")
+  private byte[] signatureVerificationCert;
 
   /**
    * the moment this instance was created
@@ -99,15 +101,15 @@ public class OpenIdProvider
                         String discoveryEndpointUrl,
                         String authorizationEndpointUrl,
                         String tokenEndpointUrl,
-                        String userInfoEndpointUrl,
-                        byte[] signatureVerificationKey)
+                        List<String> resourceEndpoints,
+                        byte[] signatureVerificationCert)
   {
     this.name = name;
-    this.discoveryEndpointUrl = discoveryEndpointUrl;
-    this.authorizationEndpointUrl = authorizationEndpointUrl;
-    this.tokenEndpointUrl = tokenEndpointUrl;
-    this.userInfoEndpointUrl = userInfoEndpointUrl;
-    this.signatureVerificationKey = signatureVerificationKey;
+    this.discoveryEndpoint = discoveryEndpointUrl;
+    this.authorizationEndpoint = authorizationEndpointUrl;
+    this.tokenEndpoint = tokenEndpointUrl;
+    this.resourceEndpoints = resourceEndpoints;
+    this.signatureVerificationCert = signatureVerificationCert;
   }
 
   @PrePersist
@@ -123,36 +125,4 @@ public class OpenIdProvider
     this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
   }
 
-  /**
-   * @return the {@link #signatureVerificationKey} as a base64 string
-   */
-  public String getSignatureVerificationKeyString()
-  {
-    if (signatureVerificationKey == null || signatureVerificationKey.length == 0)
-    {
-      return null;
-    }
-    return Base64.getEncoder().encodeToString(signatureVerificationKey);
-  }
-
-  /**
-   * @see #signatureVerificationKey
-   */
-  public void setSignatureVerificationKey(byte[] signatureVerificationKeyFile)
-  {
-    if (signatureVerificationKeyFile != null && signatureVerificationKeyFile.length > 0)
-    {
-      try
-      {
-        X509Certificate certificate = KeyReader.readX509Certificate(signatureVerificationKeyFile);
-        this.signatureVerificationKey = certificate.getPublicKey().getEncoded();
-      }
-      catch (IllegalStateException ex)
-      {
-        log.debug(ex.getMessage(), ex);
-        PublicKey publicKey = KeyReader.readPublicRSAKey(signatureVerificationKeyFile);
-        this.signatureVerificationKey = publicKey.getEncoded();
-      }
-    }
-  }
 }
