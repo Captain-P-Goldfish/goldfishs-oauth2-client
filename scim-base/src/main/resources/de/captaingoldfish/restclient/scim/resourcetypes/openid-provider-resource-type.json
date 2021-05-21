@@ -1,0 +1,16 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
+  ],
+  "id": "OpenIdProvider",
+  "name": "OpenIdProvider",
+  "description": "The endpoint for managing connections to OpenID Providers.",
+  "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdProvider",
+  "endpoint": "/OpenIdProvider",
+  "meta": {
+    "resourceType": "ResourceType",
+    "created": "2021-05-08T22:51:00+02:00",
+    "lastModified": "2021-05-08T22:51:00+02:00",
+    "location": "/ResourceTypes/OpenIdProvider"
+  }
+}

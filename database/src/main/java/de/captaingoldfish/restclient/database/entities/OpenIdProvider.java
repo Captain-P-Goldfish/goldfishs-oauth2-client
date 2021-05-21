@@ -2,12 +2,13 @@ package de.captaingoldfish.restclient.database.entities;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -70,16 +71,16 @@ public class OpenIdProvider
   /**
    * resource endpoints that should be accessible after a token was acquired
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "RESOURCE_ENDPOINTS", joinColumns = @JoinColumn(name = "OPENID_PROVIDER_ID"))
   @Column(name = "ENDPOINT")
-  private List<String> resourceEndpoints;
+  private Set<String> resourceEndpoints;
 
   /**
    * a public key that can be used to verify the provided signatures of this open id provider
    */
-  @Column(name = "SIGNATURE_VERIFICATION_CERT")
-  private byte[] signatureVerificationCert;
+  @Column(name = "SIGNATURE_VERIFICATION_KEY")
+  private byte[] signatureVerificationKey;
 
   /**
    * the moment this instance was created
@@ -98,18 +99,18 @@ public class OpenIdProvider
    */
   @Builder
   public OpenIdProvider(String name,
-                        String discoveryEndpointUrl,
-                        String authorizationEndpointUrl,
-                        String tokenEndpointUrl,
-                        List<String> resourceEndpoints,
-                        byte[] signatureVerificationCert)
+                        String discoveryEndpoint,
+                        String authorizationEndpoint,
+                        String tokenEndpoint,
+                        Set<String> resourceEndpoints,
+                        byte[] signatureVerificationKey)
   {
     this.name = name;
-    this.discoveryEndpoint = discoveryEndpointUrl;
-    this.authorizationEndpoint = authorizationEndpointUrl;
-    this.tokenEndpoint = tokenEndpointUrl;
+    this.discoveryEndpoint = discoveryEndpoint;
+    this.authorizationEndpoint = authorizationEndpoint;
+    this.tokenEndpoint = tokenEndpoint;
     this.resourceEndpoints = resourceEndpoints;
-    this.signatureVerificationCert = signatureVerificationCert;
+    this.signatureVerificationKey = signatureVerificationKey;
   }
 
   @PrePersist

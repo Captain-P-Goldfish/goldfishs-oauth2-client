@@ -1,5 +1,7 @@
 package de.captaingoldfish.restclient.database.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -14,4 +16,10 @@ import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
  * this class represents the database-access from spring to the {@link OpenIdProvider}-objects
  */
 public interface OpenIdProviderDao extends JpaRepository<OpenIdProvider, Long>, JpaSpecificationExecutor<OpenIdProvider>
-{}
+{
+
+  /**
+   * finds a specific open id provider by its name
+   */
+  public Optional<OpenIdProvider> findByName(String name);
+}

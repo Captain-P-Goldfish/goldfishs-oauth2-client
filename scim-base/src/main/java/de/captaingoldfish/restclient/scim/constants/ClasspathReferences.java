@@ -26,6 +26,11 @@ public final class ClasspathReferences
 
   public static final String PROXY_SCHEMA = BASE_PATH + "/resource/proxy.json";
 
+  public static final String OPEN_ID_PROVIDER_RESOURCE_TYPE = BASE_PATH
+                                                              + "/resourcetypes/openid-provider-resource-type.json";
+
+  public static final String OPEN_ID_PROVIDER_SCHEMA = BASE_PATH + "/resource/openid-provider.json";
+
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
 
 }

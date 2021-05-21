@@ -7,12 +7,15 @@ import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
+import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
+import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.ProxyEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TruststoreEndpoint;
 import de.captaingoldfish.scim.sdk.common.resources.ServiceProvider;
@@ -111,5 +114,21 @@ public class ScimConfig
     ProxyEndpoint proxyEndpoint = new ProxyEndpoint(new ProxyHandler(proxyDao));
     ResourceType proxyResourceType = resourceEndpoint.registerEndpoint(proxyEndpoint);
     return proxyResourceType;
+  }
+
+  /**
+   * registers the OpenID Provider resourceType under the endpoint /OpenIdProvider.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the OpenId Provider resource type
+   */
+  @Bean
+  public ResourceType openIdProviderResourceType(ResourceEndpoint resourceEndpoint, OpenIdProviderDao openIdProviderDao)
+  {
+    OpenIdProviderEndpoint openIdEndpoint = new OpenIdProviderEndpoint(new OpenIdProviderHandler(openIdProviderDao));
+    ResourceType openIdProviderResourceType = resourceEndpoint.registerEndpoint(openIdEndpoint);
+    openIdProviderResourceType.getFeatures().setAutoFiltering(true);
+    openIdProviderResourceType.getFeatures().setAutoSorting(true);
+    return openIdProviderResourceType;
   }
 }

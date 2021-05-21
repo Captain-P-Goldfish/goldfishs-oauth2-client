@@ -1,0 +1,100 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdProvider",
+  "name": "OpenIdProvider",
+  "description": "represents the connection details to a specific OpenID provider",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "A name that is used as human readable identifier that will be displayed in the UI",
+      "mutability": "readWrite",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "minLength": 1
+    },
+    {
+      "name": "discoveryEndpoint",
+      "type": "reference",
+      "referenceTypes": [
+        "url"
+      ],
+      "description": "The url to the discovery endpoint of an OpenID Provider",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "authorizationEndpoint",
+      "type": "reference",
+      "referenceTypes": [
+        "url"
+      ],
+      "description": "The url to the authorization endpoint. This is an optional value in case that no discovery endpoint is provided",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "tokenEndpoint",
+      "type": "reference",
+      "referenceTypes": [
+        "url"
+      ],
+      "description": "The url to the token endpoint. This is an optional value in case that no discovery endpoint is provided",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "resourceEndpoints",
+      "type": "reference",
+      "referenceTypes": [
+        "url"
+      ],
+      "description": "A list of urls to defined resource endpoints that may be accessible with an acquired token",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": true,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "signatureVerificationKey",
+      "type": "string",
+      "description": "Base64 encoded public RSA key or X509 certificate that holds the public key for signature verification. This is an optional value in case that no JWKS endpoint is provided via discovery endpoint",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    }
+  ]
+}

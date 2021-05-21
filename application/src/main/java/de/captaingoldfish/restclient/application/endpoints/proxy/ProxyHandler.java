@@ -3,11 +3,11 @@ package de.captaingoldfish.restclient.application.endpoints.proxy;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.Proxy;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.scim.resources.ScimProxy;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
-import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
@@ -50,7 +50,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
                                List<SchemaAttribute> attributes,
                                List<SchemaAttribute> excludedAttributes)
   {
-    long proxyId = parseId(id);
+    long proxyId = Utils.parseId(id);
     Proxy proxy = proxyDao.findById(proxyId).orElseThrow(() -> {
       return new ResourceNotFoundException(String.format("Resource with ID '%s' does not exist", id));
     });
@@ -84,7 +84,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
   @Override
   public ScimProxy updateResource(ScimProxy scimProxy, Authorization authorization)
   {
-    final long id = parseId(scimProxy.getId().get());
+    final long id = Utils.parseId(scimProxy.getId().get());
     Proxy oldProxy = proxyDao.findById(id).orElseThrow(() -> {
       return new ResourceNotFoundException(String.format("Resource with ID '%s' does not exist", id));
     });
@@ -101,25 +101,10 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
   @Override
   public void deleteResource(String id, Authorization authorization)
   {
-    long proxyId = parseId(id);
+    long proxyId = Utils.parseId(id);
     proxyDao.findById(proxyId).orElseThrow(() -> {
       return new ResourceNotFoundException(String.format("Resource with ID '%s' does not exist", id));
     });
     proxyDao.deleteById(proxyId);
-  }
-
-  /**
-   * tries to parse the given id for [get, update, delete] to a long value
-   */
-  private Long parseId(String id)
-  {
-    try
-    {
-      return Long.parseLong(id);
-    }
-    catch (NumberFormatException ex)
-    {
-      throw new BadRequestException("Invalid ID format: " + id);
-    }
   }
 }
