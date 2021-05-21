@@ -114,7 +114,7 @@ public class ProxyHandlerTest extends AbstractScimClientConfig
     Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
     Assertions.assertEquals(1, fieldErrors.size());
     final String fieldName = ScimProxy.FieldNames.PORT;
-    String errorMessage = "The 'INTEGER'-attribute 'port' with value '65536.0' must not be greater than '65535.0'";
+    String errorMessage = "The 'INTEGER'-attribute 'port' with value '65536' must not be greater than '65535'";
     MatcherAssert.assertThat(fieldErrors.get(fieldName), Matchers.containsInAnyOrder(errorMessage));
   }
 
@@ -140,7 +140,7 @@ public class ProxyHandlerTest extends AbstractScimClientConfig
     Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
     Assertions.assertEquals(1, fieldErrors.size());
     final String fieldName = ScimProxy.FieldNames.PORT;
-    String errorMessage = "The 'INTEGER'-attribute 'port' with value '0.0' must have at least a value of '1.0'";
+    String errorMessage = "The 'INTEGER'-attribute 'port' with value '0' must have at least a value of '1'";
     MatcherAssert.assertThat(fieldErrors.get(fieldName), Matchers.containsInAnyOrder(errorMessage));
   }
 
