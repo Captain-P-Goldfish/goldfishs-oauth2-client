@@ -108,12 +108,18 @@ small.error {
     margin-bottom: 15px !important;
 }
 
-.card-delete-icon {
+.card.resource-card.provider-card {
+    min-width: 47%;
+    max-width: 47%;
+    margin-bottom: 15px !important;
+}
+
+.card-control-icons {
     float: right;
     margin-top: 5px;
 }
 
-.card-load-icon, .card-delete-icon:hover {
+.card-load-icon, .card-control-icons:hover {
     cursor: pointer;
 }
 
@@ -208,4 +214,34 @@ h1, h2, h3, h4, h5 {
 
 .nav.nav-tabs[role="tablist"] a.active {
     background-color: black;
+}
+
+input.form-control.card-input-field, input.form-control.card-input-field:focus {
+    color: white;
+    background-color: transparent;
+    border: none;
+    border-bottom: gold dashed thin;
+    padding: 0;
+    outline: none;
+    box-shadow: none;
+    display: inline-block;
+    height: 25px;
+    border-radius: unset;
+}
+
+div.card-name-header {
+    display: inline-block;
+    min-width: 85%;
+    max-width: 85%;
+    padding: 5px 5px 5px 10px;
+}
+
+p.add-new-resource {
+    text-align: center;
+    font-size: larger;
+}
+
+span.add-new-resource {
+    font-size: larger;
+    cursor: pointer;
 }

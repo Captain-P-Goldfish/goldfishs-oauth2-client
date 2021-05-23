@@ -34,6 +34,24 @@ export class Optional
         return this.value !== undefined && this.value !== null;
     }
 
+    ifPresent(handler)
+    {
+        if (this.isPresent())
+        {
+            handler(this.value);
+        }
+        return this;
+    }
+
+    ifNotPresent(handler)
+    {
+        if (!this.isPresent())
+        {
+            handler();
+        }
+        return this;
+    }
+
     isEmpty()
     {
         return this.value === undefined || this.value === null;

@@ -189,8 +189,7 @@ class FormSelectField extends React.Component
  */
 function ErrorMessageList(props)
 {
-
-    let doNotRenderComponent = props.fieldErrors === undefined || props.fieldErrors === null;
+    let doNotRenderComponent = new Optional(props.fieldErrors).map(val => false).orElse(true);
 
     if (doNotRenderComponent)
     {
@@ -494,5 +493,7 @@ export {
     ConfigPageForm,
     FormInputField,
     FormFileField,
-    FormSelectField
+    FormSelectField,
+    ErrorMessageList,
+    ErrorListItem
 }
