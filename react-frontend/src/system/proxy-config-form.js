@@ -1,52 +1,27 @@
 import React from "react";
-import {FormInputField} from "../base/config-page-form";
-import ScimConfigPageForm from "../base/scim-config-page-form";
 import ScimClient from "../scim/scim-client";
 import Modal from "../base/modal";
 import {Alert, Card, CardDeck, Table} from "react-bootstrap";
-import {InfoCircle, PencilSquare, TrashFill} from "react-bootstrap-icons";
+import {FileEarmarkPlus} from "react-bootstrap-icons";
 import Spinner from "react-bootstrap/Spinner";
 import {Optional} from "../services/utils";
 import Form from "react-bootstrap/Form";
 import {GoThumbsup} from "react-icons/go";
-import Button from "react-bootstrap/Button";
+import ScimComponent, {CardControlIcons, CardDateRows} from "../scim/scim-component";
+import {ErrorMessageList} from "../base/config-page-form";
+import {CardInputField} from "../base/card-base";
 
 
-class ProxyCardEntry extends React.Component
+class ProxyCardEntry extends ScimComponent
 {
     constructor(props)
     {
         super(props);
-        this.state = {showModal: false}
-        this.deleteEntry = this.deleteEntry.bind(this);
-        this.edit = this.edit.bind(this);
-        this.showModal = this.showModal.bind(this);
-        this.hideModal = this.hideModal.bind(this);
-    }
-
-    async deleteEntry()
-    {
-        let scimClient = new ScimClient("/scim/v2/Proxy");
-        let response = await scimClient.deleteResource(this.props.proxy.id);
-        if (response.success)
-        {
-            this.props.onDeleteSuccess(this.props.proxy);
+        this.state = {
+            showModal: false,
+            editMode: new Optional(props.proxy).map(val => val.id).map(val => false).orElse(true),
+            resource: props.proxy
         }
-    }
-
-    edit()
-    {
-        this.props.update(this.props.proxy);
-    }
-
-    showModal()
-    {
-        this.setState({showModal: true})
-    }
-
-    hideModal()
-    {
-        this.setState({showModal: false})
     }
 
     render()
@@ -59,29 +34,41 @@ class ProxyCardEntry extends React.Component
                       </span>;
         }
 
+        let errorMessages = this.getErrorMessages();
+
         return (
             <React.Fragment>
-                <Card id={"proxy-card-" + this.props.proxy.id} key={this.props.proxy.id}
-                      border={"warning"} bg={"dark"} className={"resource-card"}>
-                    <Modal id={"delete-dialog-" + this.props.proxy.id}
+                <Card id={"proxy-card-" + this.state.resource.id} key={this.state.resource.id}
+                      border={"warning"} bg={"dark"} className={"resource-card provider-card"}>
+                    <Alert id={this.formId + "-alert-error"} variant={"danger"}
+                           show={errorMessages.length !== 0}>
+                        <ErrorMessageList fieldErrors={errorMessages} backgroundClass={""} />
+                    </Alert>
+                    <Modal id={"delete-dialog-" + this.state.resource.id}
                            show={this.state.showModal}
                            variant="danger"
-                           title={"Delete Proxy '" + this.props.proxy.id + "'"}
+                           title={"Delete Proxy with ID '" + this.state.resource.id + "'"}
                            message="Are you sure?"
                            submitButtonText="delete"
-                           onSubmit={this.deleteEntry}
+                           onSubmit={() => this.deleteEntry(this.state.resource.id)}
                            cancelButtonText="cancel"
                            onCancel={this.hideModal}>
                     </Modal>
-                    <Card.Header id={"proxy-card-header-" + this.props.proxy.id}>
-                        Proxy {this.props.proxy.id}
-                        <div className="card-delete-icon">
-                            {spinner}
-                            <PencilSquare title={"edit"} id={"update-icon-" + this.props.proxy.id}
-                                          onClick={this.edit} style={{marginRight: 5 + 'px'}} />
-                            <TrashFill title={"delete"} id={"delete-icon-" + this.props.proxy.id}
-                                       onClick={this.showModal} />
+                    <Card.Header id={"proxy-card-header-" + this.state.resource.id}>
+                        <div className={"card-name-header"}>
+                            {
+                                this.state.resource.id !== undefined &&
+                                <h5>Proxy '{this.state.resource.id}'</h5>
+                            }
                         </div>
+                        <CardControlIcons resource={this.state.resource}
+                                          spinner={spinner}
+                                          editMode={this.state.editMode}
+                                          createResource={this.createResource}
+                                          updateResource={this.updateResource}
+                                          resetEditMode={this.resetEditMode}
+                                          edit={this.edit}
+                                          showModal={this.showModal} />
                     </Card.Header>
                     <Card.Body>
                         <React.Fragment>
@@ -90,73 +77,187 @@ class ProxyCardEntry extends React.Component
                                     <tr>
                                         <th>Hostname</th>
                                         <td id={"proxy-card-" + this.props.proxy.id + "-hostname"}>
-                                            {this.props.proxy.hostname}
+                                            {
+                                                this.state.editMode &&
+                                                <CardInputField value={this.props.proxy.hostname}
+                                                                name={"hostname"}
+                                                                placeHolder={"The Hostname or IP of the proxy"}
+                                                                onChange={this.onChange}
+                                                                onError={this.getErrors} />
+                                            }
+                                            {
+                                                !this.state.editMode &&
+                                                this.props.proxy.hostname
+                                            }
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Port</th>
                                         <td id={"proxy-card-" + this.props.proxy.id + "-port"}>
-                                            {this.props.proxy.port}
+                                            {
+                                                this.state.editMode &&
+                                                <CardInputField value={this.props.proxy.port}
+                                                                type={"number"}
+                                                                name={"port"}
+                                                                placeHolder={"The port number of the Proxy"}
+                                                                onChange={this.onChange}
+                                                                onError={this.getErrors} />
+                                            }
+                                            {
+                                                !this.state.editMode &&
+                                                this.props.proxy.port
+                                            }
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Username</th>
                                         <td id={"proxy-card-" + this.props.proxy.id + "-username"}>
-                                            {this.props.proxy.username}
+                                            {
+                                                this.state.editMode &&
+                                                <CardInputField value={this.props.proxy.username}
+                                                                name={"username"}
+                                                                placeHolder={"The username to authenticate at the proxy"}
+                                                                onChange={this.onChange}
+                                                                onError={this.getErrors} />
+                                            }
+                                            {
+                                                !this.state.editMode &&
+                                                this.props.proxy.username
+                                            }
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Password</th>
                                         <td id={"proxy-card-" + this.props.proxy.id + "-password"}>
-                                            {this.props.proxy.password}
+                                            {
+                                                this.state.editMode &&
+                                                <CardInputField value={this.props.proxy.password}
+                                                                name={"password"}
+                                                                placeHolder={"The password to authenticate at the Proxy"}
+                                                                onChange={this.onChange}
+                                                                onError={this.getErrors} />
+                                            }
+                                            {
+                                                !this.state.editMode &&
+                                                this.props.proxy.password
+                                            }
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <th>Created</th>
-                                        <td>{new Date(this.props.proxy.meta.created).toUTCString()}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>LastModified</th>
-                                        <td>{new Date(this.props.proxy.meta.lastModified).toUTCString()}</td>
-                                    </tr>
+                                    <CardDateRows resource={this.state.resource} />
                                 </tbody>
                             </Table>
                         </React.Fragment>
                     </Card.Body>
                 </Card>
+
             </React.Fragment>
         );
     }
 }
 
-class ProxyList extends React.Component
+export default class ProxyList extends React.Component
 {
     constructor(props)
     {
         super(props);
-        this.state = {proxies: new Optional(this.props.proxies).orElse([])}
+        this.scimClient = new ScimClient("/scim/v2/Proxy");
+        this.state = {
+            errors: {},
+            proxyList: [],
+            currentPage: 0
+        };
+        this.errorListener = this.errorListener.bind(this);
+        this.scimClient.setErrorListener(this.errorListener);
         this.removeProxy = this.removeProxy.bind(this);
+        this.addNewProxy = this.addNewProxy.bind(this);
+        this.onCreateSuccess = this.onCreateSuccess.bind(this);
+        this.onUpdateSuccess = this.onUpdateSuccess.bind(this);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot)
+    errorListener(errorsObject)
     {
-        if (this.props !== prevProps)
+        this.setState({
+            errors: new Optional(errorsObject).orElse({}),
+            deletedProxyId: undefined
+        })
+    }
+
+    async componentDidMount()
+    {
+        let startIndex = (this.state.currentPage * window.MAX_RESULTS) + 1;
+        let count = window.MAX_RESULTS;
+
+        await this.scimClient.listResources({
+            startIndex: startIndex,
+            count: count,
+            sortBy: 'id'
+        }).then(listResponse =>
+        {
+            listResponse.resource.then(listResponse =>
+            {
+                this.setState({
+                    proxyList: new Optional(listResponse.Resources).orElse([]),
+                    errors: {},
+                    deletedProxyId: undefined
+                })
+            })
+        });
+    }
+
+    addNewProxy()
+    {
+        let proxyList = this.state.proxyList;
+        const resource = proxyList.filter(proxy => proxy.id === undefined);
+        if (resource.length === 0)
+        {
+            proxyList.unshift({});
+            this.setState({
+                proxyList: proxyList,
+                deletedProxyId: undefined
+            })
+        }
+        else
         {
             this.setState({
-                proxies: new Optional(this.props.proxies).orElse([]),
-                deletedProxy: undefined
+                errors: {
+                    errorMessages: ["There is already a new form available in the view."]
+                },
+                deletedProxyId: undefined
             })
         }
     }
 
-    removeProxy(proxy)
+    onUpdateSuccess(proxy)
     {
-        let proxyList = this.state.proxies;
-        const index = proxyList.indexOf(proxy);
-        proxyList.splice(index, 1)
+        this.removeProxy(proxy.id);
+        this.addProxy(proxy);
+    }
+
+    onCreateSuccess(proxy)
+    {
+        this.removeProxy(undefined);
+        this.addProxy(proxy);
+    }
+
+    addProxy(proxy)
+    {
+        let proxyList = this.state.proxyList;
+        proxyList.unshift(proxy);
+
         this.setState({
-            proxies: proxyList,
-            deletedProxy: proxy
+            proxyList: proxyList,
+            deletedProxyId: undefined
+        })
+    }
+
+    removeProxy(id)
+    {
+        let proxyList = this.state.proxyList
+        const newProxyList = proxyList.filter(proxy => proxy.id !== id)
+        this.setState({
+            proxyList: newProxyList,
+            deletedProxyId: id,
+            errors: {}
         })
     }
 
@@ -164,23 +265,31 @@ class ProxyList extends React.Component
     {
         return (
             <React.Fragment>
+                <p className={"add-new-resource"} onClick={this.addNewProxy}>
+                    <span className={"add-new-resource"}>Add new Proxy <br /><FileEarmarkPlus /></span>
+                </p>
                 <h2>Proxies</h2>
                 <Alert id="card-list-deletion-success"
                        variant={"success"}
-                       show={this.state.deletedProxy !== undefined}>
+                       show={this.state.deletedProxyId !== undefined}>
                     <Form.Text>
-                        <GoThumbsup /> Proxy with ID
-                                       "{new Optional(this.state.deletedProxy).map(val => val.id).orElse("")}"
-                                       was successfully deleted
+                        <GoThumbsup /> Proxy with ID "{this.state.deletedProxyId}" was successfully deleted
                     </Form.Text>
+                </Alert>
+                <Alert id={this.props.formId + "-alert-error"} variant={"danger"}
+                       show={new Optional(this.state.errors).map(val => val.errorMessages).map(val => true).orElse(
+                           false)}>
+                    <ErrorMessageList fieldErrors={this.state.errors.errorMessages} backgroundClass={""} />
                 </Alert>
                 <CardDeck>
                     {
-                        this.state.proxies.map((proxy) =>
+                        this.state.proxyList.map((proxy) =>
                         {
-                            return <ProxyCardEntry key={proxy.id}
+                            return <ProxyCardEntry key={new Optional(proxy.id).orElse(-1)}
+                                                   scimResourcePath={"/scim/v2/Proxy"}
                                                    proxy={proxy}
-                                                   update={this.props.update}
+                                                   onCreateSuccess={this.onCreateSuccess}
+                                                   onUpdateSuccess={this.onUpdateSuccess}
                                                    onDeleteSuccess={this.removeProxy} />
                         })
                     }
@@ -189,151 +298,4 @@ class ProxyList extends React.Component
         );
     }
 
-}
-
-export default class ProxyConfigForm extends React.Component
-{
-
-    constructor(props)
-    {
-        super(props);
-        this.state = {
-            proxies: [],
-            updateProxy: {}
-        };
-        this.handleSaveSuccess = this.handleSaveSuccess.bind(this);
-        this.toUpdateMode = this.toUpdateMode.bind(this);
-        this.cancelUpdateMode = this.cancelUpdateMode.bind(this);
-        this.onFieldChange = this.onFieldChange.bind(this);
-    }
-
-    async componentDidMount()
-    {
-        let scimClient = new ScimClient("/scim/v2/Proxy");
-        let response = await scimClient.listResources();
-        response.resource.then(jsonResponse =>
-        {
-            this.setState({
-                proxies: new Optional(jsonResponse.Resources).orElse([])
-            })
-        })
-    }
-
-    handleSaveSuccess(status, response)
-    {
-        let proxyList = this.state.proxies.filter((item) => item.id !== response.id);
-        proxyList.push(response);
-        proxyList.sort((a, b) => a.id < b.id ? -1 : 1)
-        this.setState({
-            proxies: proxyList,
-            updateProxy: {}
-        });
-    }
-
-    toUpdateMode(proxy)
-    {
-        this.setState({
-            updateProxy: proxy,
-            originalProxy: JSON.parse(JSON.stringify(proxy))
-        })
-    }
-
-    cancelUpdateMode()
-    {
-        let originalProxy = this.state.originalProxy;
-        let proxyList = this.state.proxies.filter((item) => item.id !== originalProxy.id);
-        proxyList.push(originalProxy);
-        proxyList.sort((a, b) => a.id < b.id ? -1 : 1)
-
-        this.setState({
-            proxies: proxyList,
-            updateProxy: {}
-        })
-    }
-
-    onFieldChange(name, value, onChange)
-    {
-        onChange(name, value);
-        let updateProxy = this.state.updateProxy;
-        updateProxy[name] = value
-        this.setState({
-            updateProxy: updateProxy
-        });
-    }
-
-    render()
-    {
-        let isUpdateActive = this.state.updateProxy.id !== undefined;
-        let additionalButtons = (
-            isUpdateActive &&
-            <Button id={"cancel"} key={"cancel"} type="cancel" onClick={this.cancelUpdateMode}
-                    style={{marginLeft: 5 + 'px'}}>
-                cancel
-            </Button>
-        );
-        let submitUrl = "/scim/v2/Proxy" + (isUpdateActive ? "/" + this.state.updateProxy.id : "");
-
-        return (
-            <React.Fragment>
-                <ScimConfigPageForm formId="proxyForm"
-                                    header="Proxy Settings"
-                                    httpMethod={isUpdateActive ? "PUT" : "POST"}
-                                    submitUrl={submitUrl}
-                                    onSubmitSuccess={this.handleSaveSuccess}
-                                    buttonId="submitButton"
-                                    buttonText={isUpdateActive ? "update" : "save"}
-                                    successMessage="Proxy was successfully saved"
-                                    additionalButtons={[additionalButtons]}>
-                    {({onChange, onError}) => (
-                        <React.Fragment>
-                            {
-                                isUpdateActive &&
-                                <React.Fragment>
-                                    <Alert id="edit-mode-activated-alert"
-                                           variant={"info"}>
-                                        <Form.Text>
-                                            <InfoCircle /> Updating proxy with id '{this.state.updateProxy.id}'
-                                        </Form.Text>
-                                    </Alert>
-                                    <FormInputField name="Id"
-                                                    label="id"
-                                                    value={this.state.updateProxy.id}
-                                                    readOnly={true}
-                                                    onChange={onChange}
-                                                    onError={onError} />
-                                </React.Fragment>
-                            }
-                            <FormInputField name="hostname"
-                                            label="Hostname"
-                                            value={new Optional(this.state.updateProxy).map(val => val.hostname).orElse(
-                                                "")}
-                                            onChange={(name, value) => this.onFieldChange(name, value, onChange)}
-                                            onError={onError} />
-                            <FormInputField name="port"
-                                            label="Port"
-                                            type="number"
-                                            value={new Optional(this.state.updateProxy).map(val => val.port).orElse("")}
-                                            onChange={(name, value) => this.onFieldChange(name, value, onChange)}
-                                            onError={onError} />
-                            <FormInputField name="username"
-                                            label="Username"
-                                            value={new Optional(this.state.updateProxy).map(val => val.username).orElse(
-                                                "")}
-                                            onChange={(name, value) => this.onFieldChange(name, value, onChange)}
-                                            onError={onError} />
-                            <FormInputField name="password"
-                                            label="Password"
-                                            value={new Optional(this.state.updateProxy).map(val => val.password).orElse(
-                                                "")}
-                                            onChange={(name, value) => this.onFieldChange(name, value, onChange)}
-                                            onError={onError} />
-                        </React.Fragment>
-                    )}
-                </ScimConfigPageForm>
-
-                <ProxyList proxies={this.state.proxies}
-                           update={this.toUpdateMode} />
-            </React.Fragment>
-        )
-    }
 }

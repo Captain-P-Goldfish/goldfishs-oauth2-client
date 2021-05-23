@@ -1,7 +1,7 @@
 import {Tab, Tabs} from "react-bootstrap";
 import KeystoreConfigForm from "./keystore-config-form";
 import TruststoreConfigForm from "./truststore-config-form";
-import ProxyConfigForm from "./proxy-config-form";
+import ProxyList from "./proxy-config-form";
 
 export default function SystemOverview()
 {
@@ -14,7 +14,7 @@ export default function SystemOverview()
                 <TruststoreConfigForm />
             </Tab>
             <Tab eventKey="proxies" title="Proxies">
-                <ProxyConfigForm />
+                <ProxyList />
             </Tab>
         </Tabs>
     )

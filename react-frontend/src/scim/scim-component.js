@@ -1,6 +1,7 @@
 import React from "react";
 import ScimClient from "./scim-client";
 import {Optional, toBase64} from "../services/utils";
+import {PencilSquare, Save, TrashFill, XLg} from "react-bootstrap-icons";
 
 export default class ScimComponent extends React.Component
 {
@@ -21,6 +22,7 @@ export default class ScimComponent extends React.Component
         this.hideModal = this.hideModal.bind(this);
         this.resetErrors = this.resetErrors.bind(this);
         this.getErrorMessages = this.getErrorMessages.bind(this);
+        this.createResource = this.createResource.bind(this);
     }
 
     errorListener(errorsObject)
@@ -110,7 +112,7 @@ export default class ScimComponent extends React.Component
         let response = await this.scimClient.deleteResource(id);
         if (response.success)
         {
-            this.props.onDeleteSuccess(id);
+            new Optional(this.props.onDeleteSuccess).ifPresent(method => method(id));
             this.resetErrors()
         }
     }
@@ -123,10 +125,10 @@ export default class ScimComponent extends React.Component
             response.resource.then(resource =>
             {
                 this.setState({resource: resource})
-                this.props.onCreateSuccess(resource);
+                new Optional(this.props.onCreateSuccess).ifPresent(method => method(resource));
             })
             this.resetEditMode();
-            this.resetErrors()
+            this.resetErrors();
         }
     }
 
@@ -138,9 +140,76 @@ export default class ScimComponent extends React.Component
             response.resource.then(resource =>
             {
                 this.setState({resource: resource})
+                new Optional(this.props.onUpdateSuccess).ifPresent(method => method(resource));
             })
             this.resetEditMode();
             this.resetErrors()
         }
     }
+}
+
+export function CardControlIcons(props)
+{
+    return (
+        <div className="card-control-icons">
+            {props.spinner}
+            {
+                props.editMode &&
+                <React.Fragment>
+                    <Save title={"save"} id={"save-icon-" + props.resource.id}
+                          onClick={() =>
+                          {
+                              if (props.resource.id === undefined)
+                              {
+                                  props.createResource()
+                              }
+                              else
+                              {
+                                  props.updateResource(props.resource.id)
+                              }
+                          }}
+                          style={{marginRight: 5 + 'px'}} />
+                    {
+                        props.resource.id !== undefined &&
+                        <XLg title={"reset-edit"} id={"reset-update-icon-" + props.resource.id}
+                             onClick={props.resetEditMode} style={{marginRight: 5 + 'px'}} />
+                    }
+                </React.Fragment>
+            }
+            {
+                !props.editMode &&
+                <PencilSquare title={"edit"} id={"update-icon-" + props.resource.id}
+                              onClick={props.edit} style={{marginRight: 5 + 'px'}} />
+            }
+            <TrashFill title={"delete"} id={"delete-icon-" + props.resource.id}
+                       onClick={props.showModal} />
+        </div>
+    );
+}
+
+export function CardDateRows(props)
+{
+    return (
+        <React.Fragment>
+            <tr>
+                <th>Created</th>
+                <td>
+                    {
+                        new Optional(props.resource).map(val => val.meta).map(
+                            val => val.created).map(val => new Date(val).toUTCString()).orElse(null)
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>LastModified</th>
+                <td>
+                    {
+                        new Optional(props.resource).map(val => val.meta).map(
+                            val => val.lastModified).map(val => new Date(val).toUTCString()).orElse(
+                            null)
+                    }
+                </td>
+            </tr>
+        </React.Fragment>
+    );
 }

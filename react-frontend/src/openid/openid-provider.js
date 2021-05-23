@@ -4,10 +4,10 @@ import {Optional} from "../services/utils";
 import {ErrorMessageList} from "../base/config-page-form";
 import {Alert, Card, CardDeck, Table} from "react-bootstrap";
 import Modal from "../base/modal";
-import {FileEarmarkPlus, PencilSquare, Save, TrashFill, XLg} from "react-bootstrap-icons";
+import {FileEarmarkPlus} from "react-bootstrap-icons";
 import Spinner from "react-bootstrap/Spinner";
 import {CardInputField} from "../base/card-base";
-import ScimComponent from "../scim/scim-component";
+import ScimComponent, {CardControlIcons, CardDateRows} from "../scim/scim-component";
 
 class ProviderCardEntry extends ScimComponent
 {
@@ -67,39 +67,14 @@ class ProviderCardEntry extends ScimComponent
                                             onError={this.getErrors} />
                         }
                     </div>
-                    <div className="card-control-icons">
-                        {spinner}
-                        {
-                            this.state.editMode &&
-                            <React.Fragment>
-                                <Save title={"save"} id={"save-icon-" + this.state.resource.id}
-                                      onClick={() =>
-                                      {
-                                          if (this.state.resource.id === undefined)
-                                          {
-                                              this.createResource()
-                                          }
-                                          else
-                                          {
-                                              this.updateResource(this.state.resource.id)
-                                          }
-                                      }}
-                                      style={{marginRight: 5 + 'px'}} />
-                                {
-                                    this.state.resource.id !== undefined &&
-                                    <XLg title={"reset-edit"} id={"reset-update-icon-" + this.state.resource.id}
-                                         onClick={this.resetEditMode} style={{marginRight: 5 + 'px'}} />
-                                }
-                            </React.Fragment>
-                        }
-                        {
-                            !this.state.editMode &&
-                            <PencilSquare title={"edit"} id={"update-icon-" + this.state.resource.id}
-                                          onClick={this.edit} style={{marginRight: 5 + 'px'}} />
-                        }
-                        <TrashFill title={"delete"} id={"delete-icon-" + this.state.resource.id}
-                                   onClick={this.showModal} />
-                    </div>
+                    <CardControlIcons resource={this.state.resource}
+                                      spinner={spinner}
+                                      editMode={this.state.editMode}
+                                      createResource={this.createResource}
+                                      updateResource={this.updateResource}
+                                      resetEditMode={this.resetEditMode}
+                                      edit={this.edit}
+                                      showModal={this.showModal} />
                 </Card.Header>
                 <Card.Body>
                     <React.Fragment>
@@ -128,25 +103,7 @@ class ProviderCardEntry extends ScimComponent
                                         {this.state.resource.signatureVerificationKey}
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th>Created</th>
-                                    <td>
-                                        {
-                                            new Optional(this.state.resource).map(val => val.meta).map(
-                                                val => val.created).map(val => new Date(val).toUTCString()).orElse(null)
-                                        }
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>LastModified</th>
-                                    <td>
-                                        {
-                                            new Optional(this.state.resource).map(val => val.meta).map(
-                                                val => val.lastModified).map(val => new Date(val).toUTCString()).orElse(
-                                                null)
-                                        }
-                                    </td>
-                                </tr>
+                                <CardDateRows resource={this.state.resource} />
                             </tbody>
                         </Table>
                     </React.Fragment>
