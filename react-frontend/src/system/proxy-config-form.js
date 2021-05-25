@@ -1,4 +1,4 @@
-import React from "react";
+import React, {createRef} from "react";
 import ScimClient from "../scim/scim-client";
 import Modal from "../base/modal";
 import {Alert, Card, CardDeck, Table} from "react-bootstrap";
@@ -22,6 +22,7 @@ class ProxyCardEntry extends ScimComponent
             editMode: new Optional(props.proxy).map(val => val.id).map(val => false).orElse(true),
             resource: props.proxy
         }
+        this.formReference = createRef();
     }
 
     render()
@@ -37,9 +38,9 @@ class ProxyCardEntry extends ScimComponent
         let errorMessages = this.getErrorMessages();
 
         return (
-            <React.Fragment>
-                <Card id={"proxy-card-" + this.state.resource.id} key={this.state.resource.id}
-                      border={"warning"} bg={"dark"} className={"resource-card provider-card"}>
+            <Card id={"proxy-card-" + this.state.resource.id} key={this.state.resource.id}
+                  border={"warning"} bg={"dark"} className={"resource-card provider-card"}>
+                <Form onSubmit={e => e.preventDefault()} ref={this.formReference}>
                     <Alert id={this.formId + "-alert-error"} variant={"danger"}
                            show={errorMessages.length !== 0}>
                         <ErrorMessageList fieldErrors={errorMessages} backgroundClass={""} />
@@ -82,7 +83,6 @@ class ProxyCardEntry extends ScimComponent
                                                 <CardInputField value={this.props.proxy.hostname}
                                                                 name={"hostname"}
                                                                 placeHolder={"The Hostname or IP of the proxy"}
-                                                                onChange={this.onChange}
                                                                 onError={this.getErrors} />
                                             }
                                             {
@@ -100,7 +100,6 @@ class ProxyCardEntry extends ScimComponent
                                                                 type={"number"}
                                                                 name={"port"}
                                                                 placeHolder={"The port number of the Proxy"}
-                                                                onChange={this.onChange}
                                                                 onError={this.getErrors} />
                                             }
                                             {
@@ -117,7 +116,6 @@ class ProxyCardEntry extends ScimComponent
                                                 <CardInputField value={this.props.proxy.username}
                                                                 name={"username"}
                                                                 placeHolder={"The username to authenticate at the proxy"}
-                                                                onChange={this.onChange}
                                                                 onError={this.getErrors} />
                                             }
                                             {
@@ -134,7 +132,6 @@ class ProxyCardEntry extends ScimComponent
                                                 <CardInputField value={this.props.proxy.password}
                                                                 name={"password"}
                                                                 placeHolder={"The password to authenticate at the Proxy"}
-                                                                onChange={this.onChange}
                                                                 onError={this.getErrors} />
                                             }
                                             {
@@ -148,9 +145,8 @@ class ProxyCardEntry extends ScimComponent
                             </Table>
                         </React.Fragment>
                     </Card.Body>
-                </Card>
-
-            </React.Fragment>
+                </Form>
+            </Card>
         );
     }
 }

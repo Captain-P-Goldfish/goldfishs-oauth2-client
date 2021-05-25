@@ -1,7 +1,7 @@
 import React from "react";
 import Form from "react-bootstrap/Form";
 import {Optional} from "../services/utils";
-import {GoFlame} from "react-icons/go";
+import {ErrorMessageList} from "./error-message-list";
 
 
 export class CardInputField extends React.Component
@@ -60,48 +60,10 @@ export class CardInputField extends React.Component
                               disabled={isDisabled}
                               readOnly={isReadOnly}
                               placeholder={inputFieldPlaceholder}
-                              onChange={this.bubbleEvent}
                               value={this.props.value} />
                 <ErrorMessageList controlId={this.props.name + "-error-list"}
                                   fieldErrors={inputFieldErrorMessages} />
             </React.Fragment>
         )
     }
-}
-
-/**
- * displays error messages for a {@link ConfigPageForm} element
- */
-function ErrorMessageList(props)
-{
-    let doNotRenderComponent = new Optional(props.fieldErrors).map(val => false).orElse(true);
-
-    if (doNotRenderComponent)
-    {
-        return null;
-    }
-
-    let backgroundClass = props.backgroundClass === undefined ? "bg-danger" : props.backgroundClass;
-
-    return (
-        <ul id={props.controlId} className="error-list">
-            {props.fieldErrors.map((message, index) =>
-                <ErrorListItem key={index} backgroundClass={backgroundClass} message={message} />)}
-        </ul>
-    );
-}
-
-/**
- * a simple error message for either the {@link ErrorMessageList} or an error that is directly bound to an
- * input field
- */
-function ErrorListItem(props)
-{
-    return (
-        <li className="error-list-item">
-            <Form.Text className={props.backgroundClass + " error"}>
-                <GoFlame /> {props.message}
-            </Form.Text>
-        </li>
-    );
 }

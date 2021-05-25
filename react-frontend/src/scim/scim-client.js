@@ -3,113 +3,63 @@ import {Optional, toBase64} from "../services/utils";
 export default class ScimClient
 {
 
-    constructor(resourcePath)
+    constructor(resourcePath, setState)
     {
         this.resourcePath = resourcePath;
-        this.inputFields = {}
-        this.onChange = this.onChange.bind(this);
-        this.setErrorListener = this.setErrorListener.bind(this);
+        this.setState = setState;
         this.resetErrors = this.resetErrors.bind(this);
         this.handleError = this.handleError.bind(this);
-        this.getResourceObject = this.getResourceObject.bind(this);
         this.createResource = this.createResource.bind(this);
+        this.getErrors = this.getErrors.bind(this);
+        this.isLoading = this.isLoading.bind(this);
     }
 
-    onChange(name, value)
+    isLoading(value)
     {
-        if (value === undefined)
-        {
-            delete this.inputFields[name];
-        }
-        else
-        {
-            this.inputFields[name] = value;
-        }
+        this.setState({isLoading: value});
     }
 
-    setErrorListener(onError)
+    resetErrors()
     {
-        this.onError = onError;
+        this.setState({errors: {}});
     }
-
-    /**
-     * the method {@link #handleChange} adds the current values into the state context under the key "inputFields".
-     * This method will read this data and add it to the coming request to the backend
-     */
-    async getResourceObject()
-    {
-        let addField = function (jsonObject, objectName)
-        {
-            if (jsonObject[objectName] === undefined || jsonObject[objectName] === null)
-            {
-                return jsonObject[objectName] = {};
-            }
-            return jsonObject[objectName];
-        }
-
-        let scimResource = {};
-
-        for (let [key, value] of Object.entries(this.inputFields))
-        {
-            let parts = key.split(".")
-            let currentObject = scimResource;
-            for (let i = 0; i < parts.length - 1; i++)
-            {
-                currentObject = addField(currentObject, parts[i]);
-            }
-            if (typeof value.name == 'string')
-            {
-                currentObject[parts[parts.length - 1]] = await toBase64(value);
-            }
-            else
-            {
-                currentObject[parts[parts.length - 1]] = value;
-            }
-        }
-
-        return scimResource;
-    }
-
 
     handleError(jsonPromise)
     {
         jsonPromise.then(errorResponse =>
         {
-            this.resetErrors();
+            let errors = {};
             if (errorResponse.errors === undefined)
             {
+                errors.errorMessages = new Optional(errors.errorMessages).orElse([]);
                 if (errorResponse.detail === undefined)
                 {
-                    this.errors.errorMessages.push(JSON.stringify(errorResponse));
+                    errors.errorMessages.push(JSON.stringify(errorResponse));
                 }
                 else
                 {
-                    this.errors.errorMessages.push(errorResponse.detail);
+                    errors.errorMessages.push(errorResponse.detail);
                 }
             }
             else
             {
-                this.errors = errorResponse.errors;
+                errors = errorResponse.errors;
             }
-            new Optional(this.onError).ifPresent(method => method(this.errors));
+            new Optional(this.setState).ifPresent(method => method({errors: errors}));
         })
-    }
-
-    resetErrors()
-    {
-        this.errors = {errorMessages: [], fieldErrors: {}};
     }
 
     async createResource(resource)
     {
+        this.isLoading(true);
         this.resetErrors();
-
         return await fetch(this.resourcePath, {
             method: "POST",
             headers: {'Content-Type': 'application/scim+json'},
             body: JSON.stringify(resource)
         }).then(response =>
         {
+            this.isLoading(false);
             if (response.status === 201)
             {
                 return {
@@ -133,11 +83,13 @@ export default class ScimClient
 
     async getResource(id)
     {
+        this.isLoading(true);
         this.resetErrors();
         return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "GET"
         }).then(response =>
         {
+            this.isLoading(false);
             if (response.status === 200)
             {
                 return {
@@ -161,6 +113,7 @@ export default class ScimClient
 
     listResources({startIndex, count, filter, sortBy, sortOrder, attributes, excludedAttributes} = {})
     {
+        this.isLoading(true);
         this.resetErrors();
         let startIndexParam = new Optional(startIndex).map(val => "startIndex=" + val).orElse(null);
         let countParam = new Optional(count).map(val => "count=" + val).orElse(null);
@@ -184,6 +137,7 @@ export default class ScimClient
             method: "GET"
         }).then(response =>
         {
+            this.isLoading(false);
             if (response.status === 200)
             {
                 return {
@@ -207,6 +161,7 @@ export default class ScimClient
 
     async updateResource(resource, id)
     {
+        this.isLoading(true);
         this.resetErrors();
         return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PUT",
@@ -214,6 +169,7 @@ export default class ScimClient
             body: JSON.stringify(resource)
         }).then(response =>
         {
+            this.isLoading(false);
             if (response.status === 200)
             {
                 return {
@@ -237,12 +193,14 @@ export default class ScimClient
 
     async patchResource(patchBody, id)
     {
+        this.isLoading(true);
         this.resetErrors();
         return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PATCH",
             body: JSON.stringify(patchBody)
         }).then(response =>
         {
+            this.isLoading(false);
             if (response.status === 200)
             {
                 return {
@@ -266,11 +224,13 @@ export default class ScimClient
 
     deleteResource(id)
     {
+        this.isLoading(true);
         this.resetErrors();
         return fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "DELETE"
         }).then(response =>
         {
+            this.isLoading(false);
             if (response.status === 204)
             {
                 return {
@@ -287,6 +247,67 @@ export default class ScimClient
                 }
             }
         })
+    }
+
+    /**
+     * accesses the the form-reference with name "this.formReference" reads its input and select fields and builds a
+     * scim resource from it that will be used in the following request
+     */
+    async getResourceFromFormReference(formReference)
+    {
+        let scimResource = {};
+
+        let addNestedField = function (jsonObject, objectName)
+        {
+            if (new Optional(jsonObject).map(val => val[objectName]).isEmpty())
+            {
+                return jsonObject[objectName] = {};
+            }
+            return jsonObject[objectName];
+        }
+
+        let handleInputField = async function (inputfield)
+        {
+            let name = inputfield.name;
+            let parts = name.split(".")
+            let currentObject = scimResource;
+            for (let i = 0; i < parts.length - 1; i++)
+            {
+                currentObject = addNestedField(currentObject, parts[i]);
+            }
+
+            if (inputfield.type === 'file' && inputfield.files !== undefined && inputfield.files.length === 1)
+            {
+                currentObject[parts[parts.length - 1]] = await toBase64(inputfield.files[0]);
+            }
+            else if (inputfield.type === 'number')
+            {
+                currentObject[parts[parts.length - 1]] = inputfield.valueAsNumber;
+            }
+            else
+            {
+                currentObject[parts[parts.length - 1]] = inputfield.value;
+            }
+        };
+
+        let formInputFields = Array.from(formReference.current.getElementsByTagName('input'));
+        let formSelectFields = Array.from(formReference.current.getElementsByTagName('select'));
+        let allFormFields = formInputFields.concat(formSelectFields);
+
+        for (let inputField of allFormFields)
+        {
+            await handleInputField(inputField);
+        }
+
+        return scimResource;
+    }
+
+    getErrors(state, fieldName)
+    {
+        return new Optional(state).map(val => val.errors)
+                                  .map(val => val.fieldErrors)
+                                  .map(fieldErrors => fieldErrors[fieldName])
+                                  .orElse([]);
     }
 }
 

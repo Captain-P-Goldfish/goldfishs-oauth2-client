@@ -1,9 +1,9 @@
 import React from 'react';
-import KeystoreForm from "./keystore-config-form";
 import {act, fireEvent, render, waitFor} from '@testing-library/react';
-import Assertions, {mockFetch} from "../setupTests"
+import Assertions, {mockFetch} from "../../setupTests"
 import {unmountComponentAtNode} from "react-dom";
-import {toBase64} from "../services/utils";
+import ApplicationKeystore from "./application-keystore";
+import {toBase64} from "../../services/utils";
 
 let container = null;
 
@@ -37,7 +37,7 @@ function loadPageWithoutEntries()
 
     act(() =>
     {
-        render(<KeystoreForm />, container);
+        render(<ApplicationKeystore />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
     expect(global.fetch).toBeCalledWith("/scim/v2/Keystore", {method: "GET"})
@@ -79,7 +79,7 @@ test("verify certificate data is displayed", async () =>
 
     act(() =>
     {
-        render(<KeystoreForm />, container);
+        render(<ApplicationKeystore />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
     expect(global.fetch).toBeCalledWith("/scim/v2/Keystore", {method: "GET"})
@@ -132,7 +132,7 @@ test("upload Keystore entries", async () =>
 
     // mock fetch
     {
-        mockFetch(200, {
+        mockFetch(201, {
             "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Keystore"],
             "id": "1",
             "aliasSelection": {
@@ -153,7 +153,7 @@ test("upload Keystore entries", async () =>
         new Assertions("#uploadForm").isPresent().hasNotClass("disabled");
         new Assertions("#aliasSelectionForm").isPresent().hasClass("disabled");
 
-        await new Assertions("#uploadButton")
+        await new Assertions("#upload")
             .isPresent()
             .isVisible()
             .assertEquals("Upload")
@@ -161,7 +161,6 @@ test("upload Keystore entries", async () =>
             {
                 new Assertions("#uploadForm-alert-success").isPresent().isVisible()
                                                            .assertEquals("Keystore was successfully uploaded");
-                new Assertions("#uploadForm").hasClass("disabled");
                 new Assertions("#aliasSelectionForm").hasNotClass("disabled");
             });
 
@@ -230,19 +229,20 @@ test("upload Keystore entries", async () =>
 
     // click save button
     {
-        await new Assertions("#saveButton").isPresent().isVisible().clickElement(() =>
+        await new Assertions("#save").isPresent().isVisible().clickElement(() =>
         {
+            let expectedText = "Entry with alias 'unit-test' was successfully added";
             new Assertions("#aliasSelectionForm-alert-success").isPresent().isVisible()
-                                                               .assertEquals("Key Entry was successfully added");
+                                                               .assertEquals(expectedText);
             new Assertions("#alias-card-unit-test").isPresent().isVisible();
         })
         expect(global.fetch).toBeCalledTimes(1);
         let data = {
             "aliasSelection": {
                 "stateId": stateId,
-                "aliases": "unit-test",
                 "aliasOverride": aliasOverride,
-                "privateKeyPassword": privateKeyPassword
+                "privateKeyPassword": privateKeyPassword,
+                "aliases": "unit-test"
             }
         };
 

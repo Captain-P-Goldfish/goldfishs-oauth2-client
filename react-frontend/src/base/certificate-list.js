@@ -1,5 +1,4 @@
 import React from "react";
-import Spinner from "react-bootstrap/Spinner";
 import {Card, CardDeck, Image} from "react-bootstrap";
 import Modal from "./modal";
 import {TrashFill} from "react-bootstrap-icons";
@@ -7,6 +6,7 @@ import CertIcon from "../media/certificate.png";
 import Button from "react-bootstrap/Button";
 import ScimClient from "../scim/scim-client";
 import * as ScimConstants from "../scim-constants";
+import {LoadingSpinner} from "./form-base";
 
 
 export class CertificateCardEntry extends React.Component
@@ -16,6 +16,8 @@ export class CertificateCardEntry extends React.Component
     {
         super(props);
         this.state = {loaded: false};
+        this.setState = this.setState.bind(this);
+        this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.deleteEntry = this.deleteEntry.bind(this);
         this.showModal = this.showModal.bind(this);
         this.hideModal = this.hideModal.bind(this);
@@ -24,10 +26,7 @@ export class CertificateCardEntry extends React.Component
 
     async deleteEntry()
     {
-        this.setState({showSpinner: true});
-
-        let scimClient = new ScimClient(this.props.basePath);
-        let response = await scimClient.deleteResource(this.props.alias);
+        let response = await this.scimClient.deleteResource(this.props.alias);
 
         if (response.success)
         {
@@ -46,8 +45,7 @@ export class CertificateCardEntry extends React.Component
     {
         this.setState({showSpinner: true});
 
-        let scimClient = new ScimClient(this.props.basePath);
-        let response = await scimClient.getResource(this.props.alias);
+        let response = await this.scimClient.getResource(this.props.alias);
 
         if (response.success)
         {
@@ -55,7 +53,6 @@ export class CertificateCardEntry extends React.Component
             {
                 let certInfo = resource[ScimConstants.CERT_URI];
                 this.setState({
-                    showSpinner: false,
                     loaded: true,
                     certInfo: certInfo.info
                 });
@@ -79,14 +76,6 @@ export class CertificateCardEntry extends React.Component
 
     render()
     {
-        let spinner;
-        if (this.state.showSpinner)
-        {
-            spinner = <span style={{marginRight: 5 + 'px'}}>
-                          <Spinner animation="border" variant="warning" size="sm" role="status" />
-                      </span>;
-        }
-
         return (
             <Card id={"alias-card-" + this.props.alias} key={this.props.alias}
                   border={"warning"} bg={"dark"} className={"resource-card"}>
@@ -102,8 +91,8 @@ export class CertificateCardEntry extends React.Component
                 </Modal>
                 <Card.Header id={"alias-name-" + this.props.alias}>
                     {this.props.alias}
-                    <div className="card-delete-icon">
-                        {spinner}
+                    <div className="card-control-icons">
+                        <LoadingSpinner show={this.state.isLoading} />
                         <TrashFill id={"delete-icon-" + this.props.alias} onClick={this.showModal} />
                     </div>
                 </Card.Header>
@@ -135,15 +124,15 @@ export class CertificateCardEntry extends React.Component
                             </Card.Text>
                             <Card.Subtitle>SHA-256 Fingerprint</Card.Subtitle>
                             <Card.Text id={"sha-256-" + this.props.alias}>
-                                {this.state.certInfo.sha256fingerprint}
+                                {this.state.certInfo.sha256Fingerprint}
                             </Card.Text>
                             <Card.Subtitle>Valid From</Card.Subtitle>
                             <Card.Text id={"valid-from-" + this.props.alias}>
-                                {this.state.certInfo.validFrom}
+                                {new Date(this.state.certInfo.validFrom).toUTCString()}
                             </Card.Text>
                             <Card.Subtitle>Valid Until</Card.Subtitle>
                             <Card.Text id={"valid-until-" + this.props.alias}>
-                                {this.state.certInfo.validTo}
+                                {new Date(this.state.certInfo.validTo).toUTCString()}
                             </Card.Text>
                         </React.Fragment>
                     }
@@ -164,7 +153,7 @@ export default function CertificateList(props)
                     props.certificateAliases.map((certAlias) =>
                     {
                         return <CertificateCardEntry key={certAlias}
-                                                     basePath={props.basePath}
+                                                     scimResourcePath={props.scimResourcePath}
                                                      alias={certAlias}
                                                      onDeleteSuccess={props.onDeleteSuccess} />
                     })

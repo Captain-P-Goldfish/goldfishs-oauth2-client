@@ -5,7 +5,6 @@ import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./system/system-overview";
 import ScimClient from "./scim/scim-client";
-import OpenidProvider from "./openid/openid-provider";
 
 
 class Application extends React.Component
@@ -15,15 +14,21 @@ class Application extends React.Component
     {
         super(props);
         this.state = {configLoaded: false}
+        this.helloWorld = this.helloWorld.bind(this);
     }
 
-    async loadAppConfig()
+    helloWorld(object)
+    {
+        this.setState(object);
+    }
+
+    async componentDidMount()
     {
         if (this.state.configLoaded)
         {
             return;
         }
-        let scimClient = new ScimClient("/scim/v2/ServiceProviderConfig");
+        let scimClient = new ScimClient("/scim/v2/ServiceProviderConfig", this.helloWorld);
         let serviceProvider = await scimClient.listResources();
         serviceProvider.resource.then(resource =>
         {
@@ -35,8 +40,6 @@ class Application extends React.Component
 
     render()
     {
-        this.loadAppConfig();
-
         return (
             <React.Fragment>
                 <Router>
@@ -73,9 +76,9 @@ class Application extends React.Component
                             <Route path="/system">
                                 <SystemOverview />
                             </Route>
-                            <Route path="/openid">
-                                <OpenidProvider />
-                            </Route>
+                            {/*<Route path="/openid">*/}
+                            {/*    <OpenidProvider />*/}
+                            {/*</Route>*/}
                             <Route path="/">
                                 <h2>Welcome</h2>
                             </Route>
