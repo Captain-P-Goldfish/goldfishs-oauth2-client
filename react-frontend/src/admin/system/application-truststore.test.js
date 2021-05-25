@@ -1,9 +1,9 @@
 import React from 'react';
 import {act, render, waitFor} from '@testing-library/react';
-import Assertions, {mockFetch} from "../setupTests"
+import Assertions, {mockFetch} from "../../setupTests"
 import {unmountComponentAtNode} from "react-dom";
-import TruststoreConfigForm from "./truststore-config-form";
-import {toBase64} from "../services/utils";
+import ApplicationTruststore from "./application-truststore";
+import {toBase64} from "../../services/utils";
 
 let container = null;
 
@@ -35,7 +35,7 @@ function loadPageWithoutEntries()
 
     act(() =>
     {
-        render(<TruststoreConfigForm />, container);
+        render(<ApplicationTruststore />, container);
     });
 
     expect(global.fetch).toBeCalledTimes(1);
@@ -78,7 +78,7 @@ test("verify certificate data is displayed", async () =>
 
     act(() =>
     {
-        render(<TruststoreConfigForm />, container);
+        render(<ApplicationTruststore />, container);
     });
     expect(global.fetch).toBeCalledTimes(1);
     expect(global.fetch).toBeCalledWith("/scim/v2/Truststore", {method: "GET"})
@@ -109,7 +109,7 @@ test("Upload truststore", async () =>
         new Assertions("#truststoreUpload\\.truststorePassword").isPresent().isVisible().fireChangeEvent(
             truststorePassword);
 
-        mockFetch(200, {
+        mockFetch(201, {
             "id": "1",
             "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore"],
             "truststoreUploadResponse": {
@@ -125,12 +125,11 @@ test("Upload truststore", async () =>
             }
         })
 
-        await new Assertions("#truststoreUploadButton").isPresent().isVisible().clickElement(() =>
+        await new Assertions("#uploadTruststore").isPresent().isVisible().clickElement(() =>
         {
-            new Assertions("#truststoreUploadForm-alert-success").isPresent()
-                                                                 .isVisible()
+            new Assertions("#truststoreUploadForm-alert-success").isPresent().isVisible()
                                                                  .assertEquals(
-                                                                     "Truststore was successfully merged into application keystore");
+                                                                     "Truststore was successfully merged");
         });
         new Assertions("#upload-form-alert-duplicate-aliases").isPresent().isVisible().assertEquals(
             "The following aliases could not be added because the alias is duplicated.Number "
@@ -174,11 +173,11 @@ test("Upload certificate", async () =>
         new Assertions("#certificateUpload\\.certificateFile").isPresent().isVisible().fireChangeEvent(certificateFile);
         new Assertions("#certificateUpload\\.alias").isPresent().isVisible().fireChangeEvent(alias);
 
-        mockFetch(200, {
+        mockFetch(201, {
             "id": "1",
             "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Truststore"],
-            "truststoreUploadResponse": {
-                "aliases": ["goldfish"]
+            "certificateUploadResponse": {
+                "alias": "goldfish"
             },
             "meta": {
                 "resourceType": "Truststore",
@@ -188,10 +187,10 @@ test("Upload certificate", async () =>
             }
         })
 
-        await new Assertions("#certFileUploadButton").isPresent().isVisible().clickElement(() =>
+        await new Assertions("#uploadCertificate").isPresent().isVisible().clickElement(() =>
         {
-            new Assertions("#certUploadForm-alert-success").isPresent().isVisible().assertEquals(
-                "Certificate was successfully added to application keystore");
+            new Assertions("#certificateUploadForm-alert-success").isPresent().isVisible().assertEquals(
+                "Entry with alias 'goldfish' was successfully added");
         });
         new Assertions("#upload-form-alert-duplicate-aliases").isNotPresent()
         new Assertions("#upoad-form-alert-duplicate-certificates").isNotPresent();
