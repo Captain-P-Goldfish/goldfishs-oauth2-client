@@ -2,7 +2,7 @@ import React from 'react';
 import {act, render, waitFor} from '@testing-library/react';
 import Assertions, {mockFetch} from "../setupTests"
 import {unmountComponentAtNode} from "react-dom";
-import ProxyConfigForm from "./proxy-config-form";
+import ProxyConfigForm from "./proxy-management";
 import {Optional} from "../services/utils";
 
 let container = null;

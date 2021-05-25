@@ -1,7 +1,7 @@
 import React from "react";
 import Form from "react-bootstrap/Form";
 import {Optional} from "../services/utils";
-import {ErrorMessageList} from "./error-message-list";
+import {ErrorMessageList} from "./form-base";
 
 
 export class CardInputField extends React.Component
@@ -16,21 +16,7 @@ export class CardInputField extends React.Component
 
     bubbleEvent(e)
     {
-        if (this.props.type === 'number')
-        {
-            if (!isNaN(parseInt(e.target.value)))
-            {
-                this.props.onChange(e.target.name, e.target.valueAsNumber);
-            }
-            else
-            {
-                this.props.onChange(e.target.name, undefined);
-            }
-        }
-        else
-        {
-            this.props.onChange(e.target.name, e.target.value);
-        }
+        this.props.onChange(e.target.name, e.target.value);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot)
@@ -60,6 +46,7 @@ export class CardInputField extends React.Component
                               disabled={isDisabled}
                               readOnly={isReadOnly}
                               placeholder={inputFieldPlaceholder}
+                              onChange={this.bubbleEvent}
                               value={this.props.value} />
                 <ErrorMessageList controlId={this.props.name + "-error-list"}
                                   fieldErrors={inputFieldErrorMessages} />

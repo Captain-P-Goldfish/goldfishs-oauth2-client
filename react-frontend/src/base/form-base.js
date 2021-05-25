@@ -14,11 +14,6 @@ import {PencilSquare, Save, TrashFill, XLg} from "react-bootstrap-icons";
 export class FormInputField extends React.Component
 {
 
-    constructor(props)
-    {
-        super(props);
-    }
-
     render()
     {
         let controlId = this.props.name;
@@ -56,11 +51,6 @@ export class FormInputField extends React.Component
  */
 export class FormSelectField extends React.Component
 {
-
-    constructor(props)
-    {
-        super(props);
-    }
 
     render()
     {

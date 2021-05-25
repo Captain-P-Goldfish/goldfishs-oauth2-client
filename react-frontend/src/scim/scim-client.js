@@ -1,4 +1,5 @@
 import {Optional, toBase64} from "../services/utils";
+import * as lodash from "lodash";
 
 export default class ScimClient
 {
@@ -257,37 +258,24 @@ export default class ScimClient
     {
         let scimResource = {};
 
-        let addNestedField = function (jsonObject, objectName)
-        {
-            if (new Optional(jsonObject).map(val => val[objectName]).isEmpty())
-            {
-                return jsonObject[objectName] = {};
-            }
-            return jsonObject[objectName];
-        }
-
         let handleInputField = async function (inputfield)
         {
             let name = inputfield.name;
-            let parts = name.split(".")
-            let currentObject = scimResource;
-            for (let i = 0; i < parts.length - 1; i++)
-            {
-                currentObject = addNestedField(currentObject, parts[i]);
-            }
 
+            let inputFieldValue;
             if (inputfield.type === 'file' && inputfield.files !== undefined && inputfield.files.length === 1)
             {
-                currentObject[parts[parts.length - 1]] = await toBase64(inputfield.files[0]);
+                inputFieldValue = await toBase64(inputfield.files[0]);
             }
             else if (inputfield.type === 'number')
             {
-                currentObject[parts[parts.length - 1]] = inputfield.valueAsNumber;
+                inputFieldValue = inputfield.valueAsNumber;
             }
             else
             {
-                currentObject[parts[parts.length - 1]] = inputfield.value;
+                inputFieldValue = inputfield.value;
             }
+            lodash.set(scimResource, name, inputFieldValue);
         };
 
         let formInputFields = Array.from(formReference.current.getElementsByTagName('input'));
