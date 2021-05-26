@@ -5,7 +5,7 @@ import {TrashFill} from "react-bootstrap-icons";
 import CertIcon from "../media/certificate.png";
 import Button from "react-bootstrap/Button";
 import ScimClient from "../scim/scim-client";
-import * as ScimConstants from "../scim-constants";
+import * as ScimConstants from "../scim/scim-constants";
 import {LoadingSpinner} from "./form-base";
 
 

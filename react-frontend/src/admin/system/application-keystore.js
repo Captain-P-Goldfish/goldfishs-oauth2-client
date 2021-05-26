@@ -11,7 +11,7 @@ import downloadIcon from "../../media/secure-download-icon.png";
 import {InfoCircle} from "react-bootstrap-icons";
 import {GoThumbsup} from "react-icons/go";
 import CertificateList from "../../base/certificate-list";
-import * as ScimConstants from "../../scim-constants";
+import * as ScimConstants from "../../scim/scim-constants";
 
 
 export default class ApplicationKeystore extends React.Component
