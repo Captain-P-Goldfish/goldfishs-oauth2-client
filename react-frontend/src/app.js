@@ -5,6 +5,7 @@ import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
+import OpenidProvider from "./openid/openid-provider";
 
 
 class Application extends React.Component
@@ -76,9 +77,9 @@ class Application extends React.Component
                             <Route path="/system">
                                 <SystemOverview />
                             </Route>
-                            {/*<Route path="/openid">*/}
-                            {/*    <OpenidProvider />*/}
-                            {/*</Route>*/}
+                            <Route path="/openid">
+                                <OpenidProvider />
+                            </Route>
                             <Route path="/">
                                 <h2>Welcome</h2>
                             </Route>

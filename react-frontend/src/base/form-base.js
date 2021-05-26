@@ -5,8 +5,9 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {Optional} from "../services/utils";
 import {GoFlame} from "react-icons/go";
-import {Alert, Spinner} from "react-bootstrap";
-import {PencilSquare, Save, TrashFill, XLg} from "react-bootstrap-icons";
+import {Alert, Button, Spinner} from "react-bootstrap";
+import {PencilSquare, PlusSquare, Save, TrashFill, XLg, XSquare} from "react-bootstrap-icons";
+import {CardInputField} from "./card-base";
 
 /**
  * a simple input field that might also display error messages directly bound to this input field
@@ -235,7 +236,7 @@ export function CardDateRows(props)
         <React.Fragment>
             <tr>
                 <th>Created</th>
-                <td>
+                <td className={"card-value-cell"}>
                     {
                         new Optional(props.resource).map(val => val.meta).map(
                             val => val.created).map(val => new Date(val).toUTCString()).orElse(null)
@@ -244,7 +245,7 @@ export function CardDateRows(props)
             </tr>
             <tr>
                 <th>LastModified</th>
-                <td>
+                <td className={"card-value-cell"}>
                     {
                         new Optional(props.resource).map(val => val.meta).map(
                             val => val.lastModified).map(val => new Date(val).toUTCString()).orElse(
@@ -254,4 +255,118 @@ export function CardDateRows(props)
             </tr>
         </React.Fragment>
     );
+}
+
+export function ModifiableCardEntry(props)
+{
+
+    return <tr>
+        <th>{props.header}</th>
+        <td id={"provider-card-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+            {
+                props.editMode &&
+                <CardInputField value={new Optional(props.resourceValue).orElse("")}
+                                type={props.type}
+                                name={props.name}
+                                placeholder={props.placeholder}
+                                onChange={props.onChange}
+                                onError={props.onError} />
+            }
+            {
+                !props.editMode &&
+                props.resourceValue
+            }
+        </td>
+    </tr>
+}
+
+export function ModifiableCardFileEntry(props)
+{
+
+    return <tr>
+        <th>{props.header}</th>
+        <td id={"provider-card-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+            {
+                props.editMode &&
+                <XSquare key={"remove-key"} type={"button"} className={"remove-index"}
+                         onClick={e => props.onRemove(props.name, undefined)} />
+            }
+            <div className={"public-key-box " + new Optional(props.resourceValue).map(val => "light-border")
+                                                                                 .orElse("")}>
+                {props.resourceValue}
+            </div>
+            {
+                props.editMode &&
+                <CardInputField type={"file"}
+                                name={props.name}
+                                placeholder={props.placeholder}
+                                onChange={props.onChange}
+                                onError={props.onError} />
+            }
+        </td>
+    </tr>
+}
+
+export function ModifiableCardList(props)
+{
+    let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name)).orElse([]);
+
+    return <tr>
+        <th>{props.header}</th>
+        <td id={"provider-card-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+            {
+                props.editMode &&
+                <React.Fragment>
+                    {
+                        new Optional(props.resourceValue)
+                            .map(endpointArray =>
+                            {
+                                return endpointArray.map((endpoint, index) =>
+                                {
+                                    return (
+                                        <div>
+                                            <XSquare key={"remove-" + index} type={"button"} className={"remove-index"}
+                                                     onClick={e => props.onRemove(index)} />
+                                            <CardInputField
+                                                key={index}
+                                                className={"list-item"}
+                                                value={new Optional(endpoint).orElse("")}
+                                                id={props.name + "[" + index + "]"}
+                                                name={props.name + "[" + index + "]"}
+                                                placeholder={props.placeholder}
+                                                onChange={props.onChange}
+                                                onError={props.onError} />
+                                        </div>
+                                    )
+
+                                })
+                            })
+                            .orElse([])
+                    }
+                    <ErrorMessageList controlId={props.name + "-error-list"}
+                                      fieldErrors={inputFieldErrorMessages} />
+                    <Button key={"add"} type={"button"} className={"add-item"} onClick={props.onAdd}>
+                        <PlusSquare /> Add new
+                    </Button>
+                </React.Fragment>
+            }
+            {
+                !props.editMode &&
+                new Optional(props.resourceValue)
+                    .map(endpointArray =>
+                    {
+                        return (
+                            <ul>
+                                {
+                                    endpointArray.map(endpoint =>
+                                    {
+                                        return (<li key={endpoint}>{endpoint}</li>)
+                                    })
+                                }
+                            </ul>
+                        )
+                    }).orElse([])
+            }
+        </td>
+    </tr>
 }

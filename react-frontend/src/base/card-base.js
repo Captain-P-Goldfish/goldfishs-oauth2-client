@@ -40,7 +40,7 @@ export class CardInputField extends React.Component
         return (
             <React.Fragment>
                 <Form.Control id={controlId}
-                              className={"card-input-field"}
+                              className={"card-input-field " + new Optional(this.props.className).orElse("")}
                               type={inputFieldType}
                               name={inputFieldName}
                               disabled={isDisabled}

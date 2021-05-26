@@ -261,11 +261,17 @@ export default class ScimClient
         let handleInputField = async function (inputfield)
         {
             let name = inputfield.name;
-
             let inputFieldValue;
-            if (inputfield.type === 'file' && inputfield.files !== undefined && inputfield.files.length === 1)
+            if (inputfield.type === 'file')
             {
-                inputFieldValue = await toBase64(inputfield.files[0]);
+                if (inputfield.files !== undefined && inputfield.files.length === 1)
+                {
+                    inputFieldValue = await toBase64(inputfield.files[0]);
+                }
+                else
+                {
+                    inputFieldValue = undefined;
+                }
             }
             else if (inputfield.type === 'number')
             {
@@ -273,7 +279,12 @@ export default class ScimClient
             }
             else
             {
-                inputFieldValue = inputfield.value;
+                let val = lodash.trim(inputfield.value);
+                if (lodash.isEmpty(val))
+                {
+                    val = undefined;
+                }
+                inputFieldValue = val;
             }
             lodash.set(scimResource, name, inputFieldValue);
         };

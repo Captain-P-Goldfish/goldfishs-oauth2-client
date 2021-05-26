@@ -3,14 +3,14 @@ import ScimClient from "../../scim/scim-client";
 import Modal from "../../base/modal";
 import {Alert, Card, CardDeck, Table} from "react-bootstrap";
 import {FileEarmarkPlus} from "react-bootstrap-icons";
-import Spinner from "react-bootstrap/Spinner";
 import {Optional} from "../../services/utils";
 import Form from "react-bootstrap/Form";
 import {GoThumbsup} from "react-icons/go";
-import {CardControlIcons, CardDateRows, ErrorMessagesAlert} from "../../base/form-base";
+import {CardControlIcons, CardDateRows, ErrorMessagesAlert, LoadingSpinner} from "../../base/form-base";
 import {CardInputField} from "../../base/card-base";
 import * as lodash from "lodash";
 import Button from "react-bootstrap/Button";
+import ScimComponentBasics from "../../scim/scim-component-basics";
 
 
 export default class ProxyManagement extends React.Component
@@ -184,111 +184,26 @@ class ProxyCardEntry extends React.Component
         this.setState = this.setState.bind(this);
         this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.formReference = createRef();
-        this.onSubmit = this.onSubmit.bind(this);
-        this.createProxy = this.createProxy.bind(this);
-        this.updateProxy = this.updateProxy.bind(this);
-        this.deleteProxy = this.deleteProxy.bind(this);
-        this.setStateValue = this.setStateValue.bind(this);
-        this.resetEditMode = this.resetEditMode.bind(this);
-        this.updateInput = this.updateInput.bind(this);
-    }
 
-    onSubmit(e)
-    {
-        e.preventDefault();
-        if (new Optional(this.state.proxy.id).isPresent())
-        {
-            this.updateProxy();
-        }
-        else
-        {
-            this.createProxy();
-        }
-    }
-
-    async createProxy()
-    {
-        let resource = await this.scimClient.getResourceFromFormReference(this.formReference);
-        let response = await this.scimClient.createResource(resource);
-        this.handleCreateOrUpdateResponse(response, this.props.onCreateSuccess);
-    }
-
-    async updateProxy()
-    {
-        let resource = await this.scimClient.getResourceFromFormReference(this.formReference);
-        let response = await this.scimClient.updateResource(resource, this.props.proxy.id);
-        this.handleCreateOrUpdateResponse(response, this.props.onUpdateSuccess);
-    }
-
-    handleCreateOrUpdateResponse(response, callback)
-    {
-        if (response.success)
-        {
-            response.resource.then(resource =>
-            {
-                this.setState({
-                    proxy: resource,
-                    editMode: false,
-                    success: true
-                });
-                callback(resource);
-            })
-        }
-    }
-
-    deleteProxy()
-    {
-        new Optional(this.props.proxy.id).ifNotPresent(id =>
-        {
-            this.props.onDeleteSuccess(undefined);
-        }).ifPresent(async id =>
-        {
-            await this.scimClient.deleteResource(id);
-            this.props.onDeleteSuccess(id);
-        })
-    }
-
-    setStateValue(name, value)
-    {
-        this.setState({
-            [name]: value,
-            success: false
-        });
-    }
-
-    resetEditMode()
-    {
-        this.setState({
-            editMode: false,
-            proxy: this.props.proxy,
-            success: false
-        });
-    }
-
-    updateInput(fieldname, value)
-    {
-        let object = this.state.proxy;
-        object = lodash.set(object, fieldname, value);
-        this.setState({
-            proxy: object,
-            success: false
+        this.scimComponentBasics = new ScimComponentBasics({
+            scimClient: this.scimClient,
+            formReference: this.formReference,
+            getOriginalResource: () => this.props.proxy,
+            getCurrentResource: () => this.state.proxy,
+            setCurrentResource: resource => this.setState({proxy: resource}),
+            setState: this.setState,
+            onCreateSuccess: this.props.onCreateSuccess,
+            onUpdateSuccess: this.props.onUpdateSuccess,
+            onDeleteSuccess: this.props.onDeleteSuccess
         });
     }
 
     render()
     {
-        let spinner;
-        if (this.state.showSpinner)
-        {
-            spinner = <span style={{marginRight: 5 + 'px'}}>
-                          <Spinner animation="border" variant="warning" size="sm" role="status" />
-                      </span>;
-        }
-
         return (
             <Card id={"proxy-card-" + this.state.proxy.id} key={this.state.proxy.id}
                   border={"warning"} bg={"dark"} className={"resource-card provider-card"}>
-                <Form onSubmit={this.onSubmit} ref={this.formReference}>
+                <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
 
                     <Modal id={"delete-dialog-" + this.state.proxy.id}
                            show={this.state.showModal}
@@ -296,9 +211,9 @@ class ProxyCardEntry extends React.Component
                            title={"Delete Proxy with ID '" + this.state.proxy.id + "'"}
                            message="Are you sure?"
                            submitButtonText="delete"
-                           onSubmit={this.deleteProxy}
+                           onSubmit={this.scimComponentBasics.deleteResource}
                            cancelButtonText="cancel"
-                           onCancel={() => this.setStateValue("showModal", false)}>
+                           onCancel={() => this.scimComponentBasics.setStateValue("showModal", false)}>
                     </Modal>
 
                     <Alert id={"save-alert-success"} variant={"success"}
@@ -316,13 +231,13 @@ class ProxyCardEntry extends React.Component
                             }
                         </div>
                         <CardControlIcons resource={this.state.proxy}
-                                          spinner={spinner}
+                                          spinner={<LoadingSpinner show={this.state.showSpinner} />}
                                           editMode={this.state.editMode}
-                                          createResource={this.createProxy}
-                                          updateResource={this.updateProxy}
-                                          resetEditMode={this.resetEditMode}
-                                          edit={() => this.setStateValue("editMode", true)}
-                                          showModal={() => this.setStateValue("showModal", true)} />
+                                          createResource={this.scimComponentBasics.createResource}
+                                          updateResource={this.scimComponentBasics.updateResource}
+                                          resetEditMode={this.scimComponentBasics.resetEditMode}
+                                          edit={() => this.scimComponentBasics.setStateValue("editMode", true)}
+                                          showModal={() => this.scimComponentBasics.setStateValue("showModal", true)} />
                         {/* this button enables pressing enter in the edit form */}
                         <Button id={"upload"} type="submit" hidden={true} />
                     </Card.Header>
@@ -340,7 +255,7 @@ class ProxyCardEntry extends React.Component
                                                     value={new Optional(this.state.proxy.hostname).orElse("")}
                                                     name={"hostname"}
                                                     placeHolder={"The Hostname or IP of the proxy"}
-                                                    onChange={this.updateInput}
+                                                    onChange={this.scimComponentBasics.updateInput}
                                                     onError={fieldName => this.scimClient.getErrors(
                                                         this.state, fieldName)} />
                                             }
@@ -359,7 +274,7 @@ class ProxyCardEntry extends React.Component
                                                                 type={"number"}
                                                                 name={"port"}
                                                                 placeHolder={"The port number of the Proxy"}
-                                                                onChange={this.updateInput}
+                                                                onChange={this.scimComponentBasics.updateInput}
                                                                 onError={fieldName => this.scimClient.getErrors(
                                                                     this.state, fieldName)} />
                                             }
@@ -378,7 +293,7 @@ class ProxyCardEntry extends React.Component
                                                     value={new Optional(this.state.proxy.username).orElse("")}
                                                     name={"username"}
                                                     placeHolder={"The username to authenticate at the proxy"}
-                                                    onChange={this.updateInput}
+                                                    onChange={this.scimComponentBasics.updateInput}
                                                     onError={fieldName => this.scimClient.getErrors(
                                                         this.state, fieldName)} />
                                             }
@@ -397,7 +312,7 @@ class ProxyCardEntry extends React.Component
                                                     value={new Optional(this.state.proxy.password).orElse("")}
                                                     name={"password"}
                                                     placeHolder={"The password to authenticate at the Proxy"}
-                                                    onChange={this.updateInput}
+                                                    onChange={this.scimComponentBasics.updateInput}
                                                     onError={fieldName => this.scimClient.getErrors(
                                                         this.state, fieldName)} />
                                             }

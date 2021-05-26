@@ -102,6 +102,56 @@ small.error {
     opacity: 0.5;
 }
 
+.card-deck table th {
+    min-width: 33%;
+    max-width: 33%;
+}
+
+.card-deck table td.card-value-cell {
+    word-wrap: anywhere;
+}
+
+.card-deck table input.list-item {
+    min-width: 90%;
+    max-width: 90%;
+    margin-bottom: 5px;
+}
+
+.light-border {
+    box-shadow: 2px 1px 1px 1px lightgoldenrodyellow;
+    margin: 5px;
+}
+
+.public-key-box {
+    min-width: 90%;
+    max-width: 90%;
+}
+
+.card-deck table button.add-item {
+    min-width: 90%;
+    max-width: 90%;
+    margin-top: 5px;
+    background-color: transparent;
+    border: none;
+    box-shadow: 2px 1px 1px 1px lightgoldenrodyellow;
+}
+
+.card-deck table button.add-item:focus {
+    min-width: 90%;
+    max-width: 90%;
+    margin-top: 5px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+}
+
+.card-deck table .remove-index {
+    float: right;
+    width: 20px;
+    height: 20px;
+    margin-top: 5px;
+}
+
 .card.resource-card {
     min-width: var(--card-width);
     max-width: var(--card-width);
