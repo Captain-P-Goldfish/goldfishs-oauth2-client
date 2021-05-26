@@ -3,7 +3,7 @@ import logo from "./logo.svg";
 import {Nav, Navbar} from "react-bootstrap";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
-import SystemOverview from "./system/system-overview";
+import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
 
 

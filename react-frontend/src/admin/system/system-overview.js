@@ -1,7 +1,7 @@
 import {Tab, Tabs} from "react-bootstrap";
-import ApplicationKeystore from "../admin/system/application-keystore";
-import ApplicationTruststore from "../admin/system/application-truststore";
-import ProxyManagement from "../admin/system/proxy-management";
+import ApplicationKeystore from "./application-keystore";
+import ApplicationTruststore from "./application-truststore";
+import ProxyManagement from "./proxy-management";
 
 export default function SystemOverview()
 {
