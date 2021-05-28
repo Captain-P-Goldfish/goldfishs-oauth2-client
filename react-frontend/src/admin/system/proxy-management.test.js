@@ -128,10 +128,6 @@ test("create proxy", async () =>
     expect(global.fetch).toBeCalledTimes(1);
     expect(global.fetch).toBeCalledWith("/scim/v2/Proxy?startIndex=1&sortBy=id", {method: "GET"})
     global.fetch.mockRestore();
-    await waitFor(() =>
-    {
-        expect(new Assertions(".card-deck").isPresent().isVisible().element.children).toHaveLength(3);
-    })
 
     await new Assertions("p.add-new-resource").assertEquals("Add new Proxy").clickElement(() =>
     {

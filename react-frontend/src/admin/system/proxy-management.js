@@ -51,8 +51,11 @@ export default class ProxyManagement extends React.Component
         {
             listResponse.resource.then(listResponse =>
             {
+                let newResources = new Optional(listResponse.Resources).orElse([]);
+                let oldResources = new Optional(this.state.proxyList).orElse([]);
+                let concatedResources = lodash.concat(oldResources, newResources);
                 this.setState({
-                    proxyList: new Optional(listResponse.Resources).orElse([]),
+                    proxyList: concatedResources,
                     errors: {},
                     newProxy: undefined,
                     deletedProxyId: undefined
