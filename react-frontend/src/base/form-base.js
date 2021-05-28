@@ -142,7 +142,7 @@ export function ErrorMessageList(props)
     return (
         <ul id={props.controlId} className="error-list">
             {props.fieldErrors.map((message, index) =>
-                <ErrorListItem key={index} backgroundClass={backgroundClass} message={message} />)}
+                <ErrorListItem key={"error-message-" + index} backgroundClass={backgroundClass} message={message} />)}
         </ul>
     );
 }
@@ -299,6 +299,7 @@ export function ModifiableCardFileEntry(props)
             {
                 props.editMode &&
                 <CardInputField type={"file"}
+                                id={props.name + "-" + props.resourceId}
                                 name={props.name}
                                 placeholder={props.placeholder}
                                 onChange={props.onChange}
@@ -325,14 +326,15 @@ export function ModifiableCardList(props)
                                 return endpointArray.map((endpoint, index) =>
                                 {
                                     return (
-                                        <div>
-                                            <XSquare key={"remove-" + index} type={"button"} className={"remove-index"}
+                                        <div key={props.name + "-container-" + props.resourceId + "-" + index}>
+                                            <XSquare key={"remove-" + props.resourceId + "-" + index} type={"button"}
+                                                     className={"remove-index"}
                                                      onClick={e => props.onRemove(index)} />
                                             <CardInputField
-                                                key={index}
+                                                key={props.name + "-" + props.resourceId + "-" + index}
                                                 className={"list-item"}
                                                 value={new Optional(endpoint).orElse("")}
-                                                id={props.name + "[" + index + "]"}
+                                                id={props.name + "-" + props.resourceId + "-" + index}
                                                 name={props.name + "[" + index + "]"}
                                                 placeholder={props.placeholder}
                                                 onChange={props.onChange}

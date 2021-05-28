@@ -54,8 +54,11 @@ export default class OpenidProvider extends React.Component
         {
             listResponse.resource.then(listResponse =>
             {
+                let newResources = new Optional(listResponse.Resources).orElse([]);
+                let oldResources = new Optional(this.state.providerList).orElse([]);
+                let concatedResources = lodash.concat(oldResources, newResources);
                 this.setState({
-                    providerList: new Optional(listResponse.Resources).orElse([]),
+                    providerList: concatedResources,
                     errors: {}
                 })
             })
@@ -233,7 +236,9 @@ class OpenIdProviderCardEntry extends React.Component
                                 <CardInputField
                                     value={new Optional(this.state.provider.name).orElse("")}
                                     type={"text"}
+                                    id={"name-" + this.state.provider.id}
                                     name={"name"}
+                                    placeholder={"OpenID Provider identifier"}
                                     onChange={this.scimComponentBasics.updateInput}
                                     onError={fieldName => this.scimClient.getErrors(
                                         this.state, fieldName)} />

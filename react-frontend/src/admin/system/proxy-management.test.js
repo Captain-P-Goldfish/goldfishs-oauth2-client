@@ -208,6 +208,8 @@ test("create proxy", async () =>
     {
         expect(new Assertions(".card-deck").isPresent().isVisible().element.children).toHaveLength(4);
     });
+
+    console.log(document.documentElement.innerHTML)
 });
 
 /* ************************************************************************************************** */
