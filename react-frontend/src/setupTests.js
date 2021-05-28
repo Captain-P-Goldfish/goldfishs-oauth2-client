@@ -56,7 +56,21 @@ export default class Assertions
 
     assertEquals(expectedText)
     {
-        expect(this.element.textContent.trim()).toBe(expectedText);
+        if (this.element.textContent.trim() === "")
+        {
+            if (expectedText === undefined)
+            {
+                expect(undefined).toBe(expectedText);
+            }
+            else
+            {
+                expect(this.element.textContent.trim()).toBe(expectedText);
+            }
+        }
+        else
+        {
+            expect(this.element.textContent.trim()).toBe(expectedText);
+        }
         return this;
     }
 

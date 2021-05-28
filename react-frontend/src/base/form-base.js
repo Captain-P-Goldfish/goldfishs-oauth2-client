@@ -286,7 +286,7 @@ export function ModifiableCardFileEntry(props)
 
     return <tr>
         <th>{props.header}</th>
-        <td id={"provider-card-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+        <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
             {
                 props.editMode &&
                 <XSquare key={"remove-key"} type={"button"} className={"remove-index"}
@@ -314,7 +314,7 @@ export function ModifiableCardList(props)
 
     return <tr>
         <th>{props.header}</th>
-        <td id={"provider-card-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+        <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
             {
                 props.editMode &&
                 <React.Fragment>
