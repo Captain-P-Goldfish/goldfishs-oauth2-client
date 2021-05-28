@@ -31,6 +31,13 @@ public final class ClasspathReferences
 
   public static final String OPEN_ID_PROVIDER_SCHEMA = BASE_PATH + "/resource/openid-provider.json";
 
+  public static final String OPEN_ID_CLIENT_RESOURCE_TYPE = BASE_PATH
+                                                            + "/resourcetypes/openid-client-resource-type.json";
+
+  public static final String OPEN_ID_CLIENT_SCHEMA = BASE_PATH + "/resource/openid-client.json";
+
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
+
+
 
 }
