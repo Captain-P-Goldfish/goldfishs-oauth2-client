@@ -6,8 +6,13 @@ import {FileEarmarkPlus} from "react-bootstrap-icons";
 import {Optional} from "../../services/utils";
 import Form from "react-bootstrap/Form";
 import {GoThumbsup} from "react-icons/go";
-import {CardControlIcons, CardDateRows, ErrorMessagesAlert, LoadingSpinner} from "../../base/form-base";
-import {CardInputField} from "../../base/card-base";
+import {
+    CardControlIcons,
+    CardDateRows,
+    ErrorMessagesAlert,
+    LoadingSpinner,
+    ModifiableCardEntry
+} from "../../base/form-base";
 import * as lodash from "lodash";
 import Button from "react-bootstrap/Button";
 import ScimComponentBasics from "../../scim/scim-component-basics";
@@ -216,7 +221,7 @@ class ProxyCardEntry extends React.Component
                            onCancel={() => this.scimComponentBasics.setStateValue("showModal", false)}>
                     </Modal>
 
-                    <Alert id={"save-alert-success"} variant={"success"}
+                    <Alert id={"save-alert-success-" + this.state.proxy.id} variant={"success"}
                            show={new Optional(this.state.success).orElse(false)}>
                         <Form.Text><GoThumbsup /> Proxy was successfully updated</Form.Text>
                     </Alert>
@@ -246,82 +251,43 @@ class ProxyCardEntry extends React.Component
                         <React.Fragment>
                             <Table size="sm" variant="dark" borderless striped>
                                 <tbody>
-                                    <tr>
-                                        <th>Hostname</th>
-                                        <td id={"proxy-card-" + this.state.proxy.id + "-hostname"}>
-                                            {
-                                                this.state.editMode &&
-                                                <CardInputField
-                                                    value={new Optional(this.state.proxy.hostname).orElse("")}
-                                                    name={"hostname"}
-                                                    placeHolder={"The Hostname or IP of the proxy"}
-                                                    onChange={this.scimComponentBasics.updateInput}
-                                                    onError={fieldName => this.scimClient.getErrors(
-                                                        this.state, fieldName)} />
-                                            }
-                                            {
-                                                !this.state.editMode &&
-                                                this.state.proxy.hostname
-                                            }
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Port</th>
-                                        <td id={"proxy-card-" + this.state.proxy.id + "-port"}>
-                                            {
-                                                this.state.editMode &&
-                                                <CardInputField value={new Optional(this.state.proxy.port).orElse("")}
-                                                                type={"number"}
-                                                                name={"port"}
-                                                                placeHolder={"The port number of the Proxy"}
-                                                                onChange={this.scimComponentBasics.updateInput}
-                                                                onError={fieldName => this.scimClient.getErrors(
-                                                                    this.state, fieldName)} />
-                                            }
-                                            {
-                                                !this.state.editMode &&
-                                                this.state.proxy.port
-                                            }
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Username</th>
-                                        <td id={"proxy-card-" + this.state.proxy.id + "-username"}>
-                                            {
-                                                this.state.editMode &&
-                                                <CardInputField
-                                                    value={new Optional(this.state.proxy.username).orElse("")}
-                                                    name={"username"}
-                                                    placeHolder={"The username to authenticate at the proxy"}
-                                                    onChange={this.scimComponentBasics.updateInput}
-                                                    onError={fieldName => this.scimClient.getErrors(
-                                                        this.state, fieldName)} />
-                                            }
-                                            {
-                                                !this.state.editMode &&
-                                                this.state.proxy.username
-                                            }
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Password</th>
-                                        <td id={"proxy-card-" + this.state.proxy.id + "-password"}>
-                                            {
-                                                this.state.editMode &&
-                                                <CardInputField
-                                                    value={new Optional(this.state.proxy.password).orElse("")}
-                                                    name={"password"}
-                                                    placeHolder={"The password to authenticate at the Proxy"}
-                                                    onChange={this.scimComponentBasics.updateInput}
-                                                    onError={fieldName => this.scimClient.getErrors(
-                                                        this.state, fieldName)} />
-                                            }
-                                            {
-                                                !this.state.editMode &&
-                                                this.state.proxy.password
-                                            }
-                                        </td>
-                                    </tr>
+                                    <ModifiableCardEntry header={"Hostname"}
+                                                         name={"hostname"}
+                                                         resourceId={this.state.proxy.id}
+                                                         editMode={this.state.editMode}
+                                                         resourceValue={this.state.proxy.hostname}
+                                                         placeholder={"The URL to the OpenID Providers discovery endpoint"}
+                                                         onChange={this.scimComponentBasics.updateInput}
+                                                         onError={fieldName => this.scimClient.getErrors(
+                                                             this.state, fieldName)} />
+                                    <ModifiableCardEntry header={"Port"}
+                                                         name={"port"}
+                                                         type={"number"}
+                                                         resourceId={this.state.proxy.id}
+                                                         editMode={this.state.editMode}
+                                                         resourceValue={this.state.proxy.port}
+                                                         placeholder={"The port number of the Proxy"}
+                                                         onChange={this.scimComponentBasics.updateInput}
+                                                         onError={fieldName => this.scimClient.getErrors(
+                                                             this.state, fieldName)} />
+                                    <ModifiableCardEntry header={"Username"}
+                                                         name={"username"}
+                                                         resourceId={this.state.proxy.id}
+                                                         editMode={this.state.editMode}
+                                                         resourceValue={this.state.proxy.username}
+                                                         placeholder={"The username to authenticate at the proxy"}
+                                                         onChange={this.scimComponentBasics.updateInput}
+                                                         onError={fieldName => this.scimClient.getErrors(
+                                                             this.state, fieldName)} />
+                                    <ModifiableCardEntry header={"Password"}
+                                                         name={"password"}
+                                                         resourceId={this.state.proxy.id}
+                                                         editMode={this.state.editMode}
+                                                         resourceValue={this.state.proxy.password}
+                                                         placeholder={"The password to authenticate at the Proxy"}
+                                                         onChange={this.scimComponentBasics.updateInput}
+                                                         onError={fieldName => this.scimClient.getErrors(
+                                                             this.state, fieldName)} />
                                     <CardDateRows resource={this.state.proxy} />
                                 </tbody>
                             </Table>

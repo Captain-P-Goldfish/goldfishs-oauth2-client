@@ -29,7 +29,7 @@ export class CardInputField extends React.Component
 
     render()
     {
-        let controlId = this.props.name;
+        let controlId = new Optional(this.props.id).orElse(this.props.name);
         let inputFieldType = this.props.type === undefined ? "text" : this.props.type;
         let inputFieldName = this.props.name;
         let inputFieldPlaceholder = this.props.placeholder === undefined ? this.props.name : this.props.placeholder;

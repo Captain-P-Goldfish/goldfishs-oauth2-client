@@ -262,10 +262,11 @@ export function ModifiableCardEntry(props)
 
     return <tr>
         <th>{props.header}</th>
-        <td id={"provider-card-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+        <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
             {
                 props.editMode &&
                 <CardInputField value={new Optional(props.resourceValue).orElse("")}
+                                id={props.name + "-" + props.resourceId}
                                 type={props.type}
                                 name={props.name}
                                 placeholder={props.placeholder}

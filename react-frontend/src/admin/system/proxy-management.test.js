@@ -1,9 +1,10 @@
 import React from 'react';
 import {act, render, waitFor} from '@testing-library/react';
-import Assertions, {mockFetch} from "../setupTests"
+import Assertions, {mockFetch} from "../../setupTests"
 import {unmountComponentAtNode} from "react-dom";
 import ProxyConfigForm from "./proxy-management";
-import {Optional} from "../services/utils";
+import ProxyManagement from "./proxy-management";
+import {Optional} from "../../services/utils";
 
 let container = null;
 
@@ -26,32 +27,14 @@ afterEach(() =>
     container = null;
 });
 
-/* *********
- * ************************************************************************************************ */
-
-function loadPageWithoutEntries()
-{
-    mockFetch(200, {
-        Resources: []
-    });
-
-    act(() =>
-    {
-        render(<ProxyConfigForm />, container);
-    });
-    expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy", {method: "GET"})
-    global.fetch.mockRestore();
-}
-
 /* ********************************************************************************************************* */
 
 function getFakeProxies()
 {
     return {
         "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-        "totalResults": 1,
-        "itemsPerPage": 1,
+        "totalResults": 3,
+        "itemsPerPage": 3,
         "startIndex": 1,
         "Resources": [{
             "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Proxy"],
@@ -104,10 +87,11 @@ test("verify proxies are displayed", async () =>
 
     act(() =>
     {
-        render(<ProxyConfigForm />, container);
+        render(<ProxyManagement />, container);
     });
+
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy", {method: "GET"})
+    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy?startIndex=1&sortBy=id", {method: "GET"})
     global.fetch.mockRestore();
 
     await waitFor(() =>
@@ -119,11 +103,11 @@ test("verify proxies are displayed", async () =>
 
     for (let resource of fakeProxies.Resources)
     {
-        new Assertions("#proxy-card-" + resource.id + "-hostname").assertEquals(resource.hostname)
-        new Assertions("#proxy-card-" + resource.id + "-port").assertEquals(resource.port.toString())
-        new Assertions("#proxy-card-" + resource.id + "-username").assertEquals(
+        new Assertions("#card-cell-" + resource.id + "-hostname").assertEquals(resource.hostname)
+        new Assertions("#card-cell-" + resource.id + "-port").assertEquals(resource.port.toString())
+        new Assertions("#card-cell-" + resource.id + "-username").assertEquals(
             new Optional(resource.username).orElse(""))
-        new Assertions("#proxy-card-" + resource.id + "-password").assertEquals(
+        new Assertions("#card-cell-" + resource.id + "-password").assertEquals(
             new Optional(resource.password).orElse(""))
     }
 });
@@ -133,20 +117,48 @@ test("verify proxies are displayed", async () =>
 test("create proxy", async () =>
 {
 
-    loadPageWithoutEntries();
+    const fakeProxies = getFakeProxies();
 
-    await new Assertions("#hostname").fireChangeEvent("localhost");
-    await new Assertions("#port").fireChangeEvent(3344);
-    await new Assertions("#username").fireChangeEvent("goldfish");
-    await new Assertions("#password").fireChangeEvent("123456");
+    mockFetch(200, fakeProxies);
 
-    mockFetch(200, {
+    act(() =>
+    {
+        render(<ProxyManagement />, container);
+    });
+    expect(global.fetch).toBeCalledTimes(1);
+    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy?startIndex=1&sortBy=id", {method: "GET"})
+    global.fetch.mockRestore();
+    await waitFor(() =>
+    {
+        expect(new Assertions(".card-deck").isPresent().isVisible().element.children).toHaveLength(3);
+    })
+
+    await new Assertions("p.add-new-resource").assertEquals("Add new Proxy").clickElement(() =>
+    {
+        new Assertions("#reset-update-icon-undefined").isNotPresent();
+        new Assertions("#update-icon-undefined").isNotPresent();
+        new Assertions("#save-icon-undefined").isPresent().isVisible();
+        new Assertions("#delete-icon-undefined").isPresent().isVisible();
+    });
+
+    const id = 4;
+    const hostname = "localhost";
+    const port = 3344
+    const username = "goldfish";
+    const password = "123456";
+
+    await new Assertions("#hostname-undefined").fireChangeEvent(hostname);
+    await new Assertions("#port-undefined").fireChangeEvent(port);
+    await new Assertions("#username-undefined").fireChangeEvent(username);
+    await new Assertions("#password-undefined").fireChangeEvent(password);
+
+    mockFetch(201, {
         "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Proxy"],
-        "id": "1",
-        "hostname": "localhost",
-        "port": 3344,
-        "username": "goldlfish",
-        "password": "123456",
+        "id": id,
+        "hostname": hostname,
+        "port": port,
+        "username": username,
+        "password": password,
         "meta": {
             "resourceType": "Proxy",
             "created": "2021-05-19T19:49:07.000Z",
@@ -155,17 +167,18 @@ test("create proxy", async () =>
         }
     });
 
-    await new Assertions("#submitButton").assertEquals("save").clickElement(() =>
+    let data = {
+        "hostname": hostname,
+        "port": port,
+        "username": username,
+        "password": password
+    };
+
+    await new Assertions("#save-icon-undefined").isPresent().isVisible().clickElement(() =>
     {
-        new Assertions("#proxy-card-1").isPresent().isVisible();
+        new Assertions("#proxy-card-" + id).isPresent().isVisible();
     });
 
-    let data = {
-        "hostname": "localhost",
-        "port": 3344,
-        "username": "goldfish",
-        "password": "123456"
-    };
     expect(global.fetch).toBeCalledTimes(1);
     expect(global.fetch).toBeCalledWith("/scim/v2/Proxy",
         {
@@ -175,142 +188,126 @@ test("create proxy", async () =>
         })
     global.fetch.mockRestore();
 
-    await new Assertions("#hostname").assertEquals("");
-    await new Assertions("#port").assertEquals("");
-    await new Assertions("#username").assertEquals("");
-    await new Assertions("#password").assertEquals("");
+    new Assertions("#reset-update-icon-undefined").isNotPresent();
+    new Assertions("#save-icon-undefined").isNotPresent();
+    new Assertions("#update-icon-undefined").isNotPresent();
+    new Assertions("#delete-icon-undefined").isNotPresent();
+
+    new Assertions("#reset-update-icon-" + id).isNotPresent();
+    new Assertions("#save-icon-" + id).isNotPresent();
+    new Assertions("#update-icon-" + id).isPresent().isVisible();
+    new Assertions("#delete-icon-" + id).isPresent().isVisible();
+
+    new Assertions("#save-alert-success").isPresent().isVisible()
+                                         .assertEquals("Proxy with id '" + id + "' was successfully created");
+
+    new Assertions("#proxy-card-header-" + id + " h5").isPresent().isVisible()
+                                                      .assertEquals("Proxy '" + id + "'");
+    new Assertions("#card-cell-" + id + "-hostname").isPresent().isVisible().assertEquals(hostname);
+    new Assertions("#card-cell-" + id + "-port").isPresent().isVisible().assertEquals(port.toString());
+    new Assertions("#card-cell-" + id + "-username").isPresent().isVisible().assertEquals(username);
+    new Assertions("#card-cell-" + id + "-password").isPresent().isVisible().assertEquals(password);
+
+    await waitFor(() =>
+    {
+        expect(new Assertions(".card-deck").isPresent().isVisible().element.children).toHaveLength(4);
+    });
 });
+
+/* ************************************************************************************************** */
 
 test("update proxy", async () =>
 {
-    const fakeProxies = {
-        "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-        "totalResults": 1,
-        "itemsPerPage": 1,
-        "startIndex": 1,
-        "Resources": [{
-            "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Proxy"],
-            "id": "1",
-            "hostname": "localhost",
-            "port": 8888,
-            "meta": {
-                "resourceType": "Proxy",
-                "created": "2021-05-19T19:49:07.000Z",
-                "lastModified": "2021-05-20T09:23:26.000Z",
-                "location": "http://localhost:8080/scim/v2/Proxy/10"
-            }
-        }]
-    }
+    const fakeProxies = getFakeProxies();
 
     mockFetch(200, fakeProxies);
 
     act(() =>
     {
-        render(<ProxyConfigForm />, container);
+        render(<ProxyManagement />, container);
     });
+    expect(global.fetch).toBeCalledTimes(1);
+    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy?startIndex=1&sortBy=id", {method: "GET"})
     global.fetch.mockRestore();
-
     await waitFor(() =>
     {
-        new Assertions("#proxy-card-1").isPresent().isVisible();
+        expect(new Assertions(".card-deck").isPresent().isVisible().element.children).toHaveLength(3);
     });
 
-    let resource = fakeProxies.Resources[0];
+    const id = 1;
+    const hostname = "fiddler";
+    const port = 6666
+    const username = "mario";
+    const password = "654321";
 
-    // click update icon
-    await new Assertions("#update-icon-" + resource.id).isPresent().isVisible().clickElement(() =>
+    await new Assertions("#update-icon-" + id).clickElement(() =>
     {
-        new Assertions("#edit-mode-activated-alert").assertEquals(
-            "Updating proxy with id '" + resource.id + "'");
-        new Assertions("#hostname").hasValueSelected(resource.hostname);
-        new Assertions("#port").hasValueSelected(resource.port.toString());
-        new Assertions("#username").hasValueSelected(new Optional(resource.username).orElse(""));
-        new Assertions("#password").hasValueSelected(new Optional(resource.password).orElse(""));
-
-        new Assertions("#cancel").isPresent().isVisible().assertEquals("cancel");
-        new Assertions("#submitButton").isPresent().isVisible().assertEquals("update");
-    })
-
-    // click cancel button
-    await new Assertions("#cancel").isPresent().isVisible().clickElement(() =>
-    {
-        new Assertions("#edit-mode-activated-alert").isNotPresent();
-        new Assertions("#hostname").assertEquals("");
-        new Assertions("#port").assertEquals("");
-        new Assertions("#username").assertEquals("");
-        new Assertions("#password").assertEquals("");
-
-        new Assertions("#cancel").isNotPresent();
-        new Assertions("#submitButton").isPresent().isVisible().assertEquals("save");
+        new Assertions("#update-icon-" + id).isNotPresent();
+        new Assertions("#reset-update-icon-" + id).isPresent().isVisible();
+        new Assertions("#save-icon-" + id).isPresent().isVisible();
+        new Assertions("#delete-icon-" + id).isPresent().isVisible();
     });
 
-    // click update icon again
-    await new Assertions("#update-icon-" + resource.id).isPresent().isVisible().clickElement(() =>
-    {
-        new Assertions("#edit-mode-activated-alert").assertEquals(
-            "Updating proxy with id '" + resource.id + "'");
-    })
+    await new Assertions("#hostname-" + id).fireChangeEvent(hostname);
+    await new Assertions("#port-" + id).fireChangeEvent(port);
+    await new Assertions("#username-" + id).fireChangeEvent(username);
+    await new Assertions("#password-" + id).fireChangeEvent(password);
 
-    // modify values
-    let newProxy = {
-        hostname: "new-host-name",
-        port: 6666,
-        username: "new-username",
-        password: "new-password"
-    }
-    await new Assertions("#hostname").fireChangeEvent(newProxy.hostname);
-    await new Assertions("#port").fireChangeEvent(newProxy.port);
-    await new Assertions("#username").fireChangeEvent(newProxy.username);
-    await new Assertions("#password").fireChangeEvent(newProxy.password);
-
-    new Assertions("#proxy-card-" + resource.id + "-hostname").assertEquals(newProxy.hostname)
-    new Assertions("#proxy-card-" + resource.id + "-port").assertEquals(newProxy.port.toString())
-    new Assertions("#proxy-card-" + resource.id + "-username").assertEquals(newProxy.username)
-    new Assertions("#proxy-card-" + resource.id + "-password").assertEquals(newProxy.password)
-
-    // prepare update response
     mockFetch(200, {
         "schemas": ["urn:ietf:params:scim:schemas:captaingoldfish:2.0:Proxy"],
-        "id": resource.id,
-        "hostname": newProxy.hostname,
-        "port": newProxy.port,
-        "username": newProxy.username,
-        "password": newProxy.password,
+        "id": id,
+        "hostname": hostname,
+        "port": port,
+        "username": username,
+        "password": password,
         "meta": {
             "resourceType": "Proxy",
             "created": "2021-05-19T19:49:07.000Z",
             "lastModified": "2021-05-20T09:23:26.000Z",
             "location": "http://localhost:8080/scim/v2/Proxy/10"
         }
-    })
+    });
 
-    // do update
-    await new Assertions("#submitButton").isPresent().isVisible().assertEquals("update").clickElement(() =>
+    let data = {
+        "hostname": hostname,
+        "port": port,
+        "username": username,
+        "password": password
+    };
+
+    await new Assertions("#save-icon-" + id).isPresent().isVisible().clickElement(() =>
     {
-        new Assertions("#proxyForm-alert-success").isPresent().isVisible().assertEquals(
-            "Proxy was successfully saved")
-        new Assertions("#edit-mode-activated-alert").isNotPresent();
-        new Assertions("#proxy-card-" + resource.id + "-hostname").assertEquals(newProxy.hostname)
-        new Assertions("#proxy-card-" + resource.id + "-port").assertEquals(newProxy.port.toString())
-        new Assertions("#proxy-card-" + resource.id + "-username").assertEquals(newProxy.username)
-        new Assertions("#proxy-card-" + resource.id + "-password").assertEquals(newProxy.password)
-        new Assertions("#cancel").isNotPresent();
-        new Assertions("#submitButton").isPresent().isVisible().assertEquals("save");
+        new Assertions("#proxy-card-" + id).isPresent().isVisible();
+        new Assertions("#reset-update-icon-" + id).isNotPresent();
+        new Assertions("#save-icon-" + id).isNotPresent();
+        new Assertions("#update-icon-" + id).isPresent().isVisible();
+        new Assertions("#delete-icon-" + id).isPresent().isVisible();
     });
 
     expect(global.fetch).toBeCalledTimes(1);
-    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy/" + resource.id,
+    expect(global.fetch).toBeCalledWith("/scim/v2/Proxy/" + id,
         {
             method: "PUT",
             headers: {'Content-Type': 'application/scim+json'},
-            body: JSON.stringify(newProxy)
+            body: JSON.stringify(data)
         })
     global.fetch.mockRestore();
 
-    // make sure that no new element is displayed in the card-deck
-    let childrenOfCardDeck = new Assertions(".card-deck").isPresent().isVisible().element.childNodes;
-    expect(childrenOfCardDeck).toHaveLength(1);
+
+    new Assertions("#save-alert-success-" + id).isPresent().isVisible()
+                                               .assertEquals("Proxy was successfully updated");
+
+    new Assertions("#proxy-card-header-" + id + " h5").isPresent().isVisible()
+                                                      .assertEquals("Proxy '" + id + "'");
+    new Assertions("#card-cell-" + id + "-hostname").isPresent().isVisible().assertEquals(hostname);
+    new Assertions("#card-cell-" + id + "-port").isPresent().isVisible().assertEquals(port.toString());
+    new Assertions("#card-cell-" + id + "-username").isPresent().isVisible().assertEquals(username);
+    new Assertions("#card-cell-" + id + "-password").isPresent().isVisible().assertEquals(password);
+
+    expect(new Assertions(".card-deck").isPresent().isVisible().element.children).toHaveLength(3);
 });
+
+/* ************************************************************************************************** */
 
 test("delete proxy", async () =>
 {
@@ -352,7 +349,7 @@ test("delete proxy", async () =>
     await new Assertions("#delete-icon-" + resource.id).isPresent().isVisible().clickElement(() =>
     {
         new Assertions("#delete-dialog-" + resource.id + "-header").assertEquals(
-            "Delete Proxy '" + resource.id + "'");
+            "Delete Proxy with ID '" + resource.id + "'");
     })
 
     // click cancel button
@@ -365,7 +362,7 @@ test("delete proxy", async () =>
     await new Assertions("#delete-icon-" + resource.id).isPresent().isVisible().clickElement(() =>
     {
         new Assertions("#delete-dialog-" + resource.id + "-header").assertEquals(
-            "Delete Proxy '" + resource.id + "'");
+            "Delete Proxy with ID '" + resource.id + "'");
     })
 
     mockFetch(204, "");
