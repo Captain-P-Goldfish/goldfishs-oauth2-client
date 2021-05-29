@@ -127,7 +127,7 @@
                              referencedColumnNames="ID"
                              foreignKeyName="PROVIDER_ENDPOINT_FK"/>
             </column>
-            <column name="ENDPOINT" type="VARCHAR(255)"/>
+            <column name="ENDPOINT" type="VARCHAR(1024)"/>
         </createTable>
 
         <createIndex tableName="RESOURCE_ENDPOINTS" indexName="PROVIDER_RESOURCE_ENDPOINTS">

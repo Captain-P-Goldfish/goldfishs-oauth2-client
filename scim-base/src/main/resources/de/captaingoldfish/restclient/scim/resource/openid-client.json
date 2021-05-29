@@ -26,7 +26,8 @@
       "uniqueness": "none",
       "multiValued": false,
       "required": true,
-      "caseExact": false
+      "caseExact": false,
+      "minimum": 1
     },
     {
       "name": "clientId",
@@ -38,7 +39,8 @@
       "multiValued": false,
       "required": true,
       "caseExact": false,
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 255
     },
     {
       "name": "clientSecret",
@@ -49,7 +51,8 @@
       "uniqueness": "none",
       "multiValued": false,
       "required": false,
-      "caseExact": false
+      "caseExact": false,
+      "maxLength": 255
     },
     {
       "name": "audience",
@@ -60,7 +63,8 @@
       "uniqueness": "none",
       "multiValued": false,
       "required": false,
-      "caseExact": false
+      "caseExact": false,
+      "maxLength": 1024
     }
   ]
 }

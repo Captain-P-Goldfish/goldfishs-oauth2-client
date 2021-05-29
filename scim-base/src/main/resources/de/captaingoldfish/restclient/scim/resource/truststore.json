@@ -15,7 +15,9 @@
       "uniqueness": "none",
       "multiValued": true,
       "required": false,
-      "caseExact": false
+      "caseExact": false,
+      "minLength": 1,
+      "maxLength": 64
     },
     {
       "name": "truststoreUpload",
@@ -60,7 +62,8 @@
           "multiValued": false,
           "required": false,
           "caseExact": false,
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 255
         }
       ]
     },
@@ -84,7 +87,9 @@
           "uniqueness": "none",
           "multiValued": true,
           "required": false,
-          "caseExact": false
+          "caseExact": false,
+          "minLength": 1,
+          "maxLength": 64
         },
         {
           "name": "duplicateAliases",
@@ -95,7 +100,9 @@
           "uniqueness": "none",
           "multiValued": true,
           "required": false,
-          "caseExact": false
+          "caseExact": false,
+          "minLength": 1,
+          "maxLength": 64
         },
         {
           "name": "duplicateCertificateAliases",
@@ -106,7 +113,9 @@
           "uniqueness": "none",
           "multiValued": true,
           "required": false,
-          "caseExact": false
+          "caseExact": false,
+          "minLength": 1,
+          "maxLength": 64
         }
       ]
     },
@@ -142,7 +151,8 @@
           "multiValued": false,
           "required": true,
           "caseExact": false,
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 64
         }
       ]
     },
@@ -166,7 +176,9 @@
           "uniqueness": "none",
           "multiValued": false,
           "required": true,
-          "caseExact": false
+          "caseExact": false,
+          "minLength": 1,
+          "maxLength": 64
         }
       ]
     }

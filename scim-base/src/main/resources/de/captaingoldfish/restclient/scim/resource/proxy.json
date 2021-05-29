@@ -27,7 +27,8 @@
       "multiValued": false,
       "required": true,
       "caseExact": false,
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 255
     },
     {
       "name": "port",
@@ -51,7 +52,8 @@
       "uniqueness": "server",
       "multiValued": false,
       "required": false,
-      "caseExact": true
+      "caseExact": true,
+      "maxLength": 255
     },
     {
       "name": "password",
@@ -62,7 +64,8 @@
       "uniqueness": "server",
       "multiValued": false,
       "required": false,
-      "caseExact": true
+      "caseExact": true,
+      "maxLength": 255
     }
   ]
 }
