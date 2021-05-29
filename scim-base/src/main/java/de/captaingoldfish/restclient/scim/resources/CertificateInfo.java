@@ -28,11 +28,14 @@ public class CertificateInfo extends ScimObjectNode
   public CertificateInfo(String alias, X509Certificate certificate)
   {
     setAlias(alias);
-    Info info = new Info(certificate.getIssuerDN().toString(), certificate.getSubjectDN().toString(),
-                         HexUtils.toHexString(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()))
-                                 .toLowerCase(),
-                         certificate.getNotBefore().toInstant(), certificate.getNotAfter().toInstant());
-    setInfo(info);
+    if (certificate != null)
+    {
+      Info info = new Info(certificate.getIssuerDN().toString(), certificate.getSubjectDN().toString(),
+                           HexUtils.toHexString(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()))
+                                   .toLowerCase(),
+                           certificate.getNotBefore().toInstant(), certificate.getNotAfter().toInstant());
+      setInfo(info);
+    }
   }
 
   /** The alias that holds this certificate entry. */

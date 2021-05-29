@@ -20,51 +20,63 @@ public class ClientTest extends DbBaseTest
   @Test
   public void testSaveAndDeleteClient()
   {
+    final OpenIdProvider openIdProvider = createOpenIdProvider();
     final String clientId = "goldfish";
     final String clientSecret = "123456";
-    final String redirectUri = "http://localhost:9543/authcode";
 
-    Client client = Client.builder().clientId(clientId).clientSecret(clientSecret).redirectUri(redirectUri).build();
-    client = clientDao.save(client);
+    OpenIdClient openIdClient = OpenIdClient.builder()
+                                            .openIdProvider(openIdProvider)
+                                            .clientId(clientId)
+                                            .clientSecret(clientSecret)
+                                            .build();
+    openIdClient = openIdClientDao.save(openIdClient);
 
-    MatcherAssert.assertThat(client.getId(), Matchers.greaterThan(0L));
-    Assertions.assertEquals(clientId, client.getClientId());
-    Assertions.assertEquals(clientSecret, client.getClientSecret());
-    Assertions.assertEquals(redirectUri, client.getRedirectUri());
+    Assertions.assertEquals(openIdProvider, openIdClient.getOpenIdProvider());
+    MatcherAssert.assertThat(openIdClient.getId(), Matchers.greaterThan(0L));
+    Assertions.assertEquals(clientId, openIdClient.getClientId());
+    Assertions.assertEquals(clientSecret, openIdClient.getClientSecret());
 
+    Assertions.assertEquals(1, openIdProviderDao.count());
+    Assertions.assertEquals(1, openIdClientDao.count());
+    openIdClientDao.deleteAll();
     Assertions.assertEquals(0, keystoreDao.count());
-    Assertions.assertEquals(1, clientDao.count());
-    clientDao.deleteAll();
-    Assertions.assertEquals(0, keystoreDao.count());
-    Assertions.assertEquals(0, clientDao.count());
+    Assertions.assertEquals(1, openIdProviderDao.count());
   }
 
   @Test
   public void testSaveAndDeleteClient2()
   {
+    final OpenIdProvider openIdProvider = createOpenIdProvider();
     final String clientId = "goldfish";
-    final String redirectUri = "http://localhost:9543/authcode";
-    final Keystore keystore = getUnitTestKeystore();
     final String audience = "http://localhost/trustful/idp";
+    final String signatureKeyRef = "any-alias";
 
-    Client client = Client.builder()
-                          .clientId(clientId)
-                          .redirectUri(redirectUri)
-                          .signatureKeystore(keystore)
-                          .audience(audience)
-                          .build();
-    client = clientDao.save(client);
+    OpenIdClient openIdClient = OpenIdClient.builder()
+                                            .openIdProvider(openIdProvider)
+                                            .clientId(clientId)
+                                            .signatureKeyRef(signatureKeyRef)
+                                            .audience(audience)
+                                            .build();
+    openIdClient = openIdClientDao.save(openIdClient);
 
-    MatcherAssert.assertThat(client.getId(), Matchers.greaterThan(0L));
-    Assertions.assertEquals(clientId, client.getClientId());
-    Assertions.assertEquals(redirectUri, client.getRedirectUri());
-    Assertions.assertEquals(audience, client.getAudience());
-    Assertions.assertArrayEquals(keystore.getKeystoreBytes(), client.getSignatureKeystore().getKeystoreBytes());
+    MatcherAssert.assertThat(openIdClient.getId(), Matchers.greaterThan(0L));
+    Assertions.assertEquals(openIdProvider, openIdClient.getOpenIdProvider());
+    Assertions.assertEquals(clientId, openIdClient.getClientId());
+    Assertions.assertEquals(audience, openIdClient.getAudience());
+    Assertions.assertEquals(signatureKeyRef, openIdClient.getSignatureKeyRef());
 
-    Assertions.assertEquals(1, keystoreDao.count());
-    Assertions.assertEquals(1, clientDao.count());
-    clientDao.deleteAll();
-    Assertions.assertEquals(1, keystoreDao.count());
-    Assertions.assertEquals(0, clientDao.count());
+    Assertions.assertEquals(1, openIdProviderDao.count());
+    Assertions.assertEquals(1, openIdClientDao.count());
+    openIdClientDao.deleteAll();
+    Assertions.assertEquals(0, openIdClientDao.count());
+    Assertions.assertEquals(1, openIdProviderDao.count());
+  }
+
+  private OpenIdProvider createOpenIdProvider()
+  {
+    return openIdProviderDao.save(OpenIdProvider.builder()
+                                                .name("keycloak")
+                                                .discoveryEndpoint("http://localhost:8080/")
+                                                .build());
   }
 }

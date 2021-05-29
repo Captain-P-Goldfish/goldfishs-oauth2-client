@@ -61,17 +61,6 @@
       "multiValued": false,
       "required": false,
       "caseExact": false
-    },
-    {
-      "name": "applicationKeystoreAlias",
-      "type": "string",
-      "description": "The alias of the application keystore that should be used for signing JWTs.",
-      "mutability": "readWrite",
-      "returned": "default",
-      "uniqueness": "none",
-      "multiValued": false,
-      "required": false,
-      "caseExact": false
     }
   ]
 }

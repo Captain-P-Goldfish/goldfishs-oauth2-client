@@ -83,7 +83,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
    * @return the response for the client with the aliases and a stateId that references the uploaded keystore
    */
   @SneakyThrows
-  protected ScimKeystore handleKeystoreUpload(ScimKeystore.FileUpload fileUpload)
+  public ScimKeystore handleKeystoreUpload(ScimKeystore.FileUpload fileUpload)
   {
     final String filename = fileUpload.getKeystoreFileName().orElse(null);
     final byte[] keystoreData = Base64.getDecoder().decode(fileUpload.getKeystoreFile());
@@ -121,7 +121,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
    * @return the response for the client with the certificate information of the entry that was added to the
    *         keystore
    */
-  protected ScimKeystore handleAliasSelection(ScimKeystore.AliasSelection aliasSelection)
+  public ScimKeystore handleAliasSelection(ScimKeystore.AliasSelection aliasSelection)
   {
     final String stateId = aliasSelection.getStateId();
     Keystore applicationKeystore = keystoreDao.getKeystore();
@@ -214,12 +214,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
     {
       throw new ResourceNotFoundException(String.format("No entry found with alias %s", alias));
     }
-    KeystoreEntry keystoreEntry = keystoreEntryOptional.get();
-    keystore.getKeystoreEntries().remove(keystoreEntry);
-    keystore.getKeyStore().deleteEntry(alias);
-    byte[] newKeystoreBytes = KeyStoreSupporter.getBytes(keystore.getKeyStore(), keystore.getKeystorePassword());
-    keystore.setKeystoreBytes(newKeystoreBytes);
-    keystoreDao.save(keystore);
+    keystoreDao.deleteKeystoreAlias(alias);
   }
 
   @Override

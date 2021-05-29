@@ -134,23 +134,24 @@
             <column name="OPENID_PROVIDER_ID"/>
         </createIndex>
 
-        <createTable tableName="CLIENT">
+        <createTable tableName="OPENID_CLIENT">
             <column name="ID" type="BIGINT">
                 <constraints primaryKeyName="CLIENT_PRIME_KEY" primaryKey="true"/>
             </column>
-            <column name="CLIENT_ID" type="VARCHAR(255)"/>
-            <column name="CLIENT_SECRET" type="VARCHAR(255)"/>
-            <column name="REDIRECT_URI" type="VARCHAR(1024)"/>
-            <column name="AUDIENCE" type="VARCHAR(1024)"/>
             <column name="OPENID_PROVIDER_ID" type="BIGINT">
                 <constraints foreignKeyName="CLIENT_OPENID_PROVIDER_FK" referencedColumnNames="ID"/>
             </column>
-            <column name="SIGANTURE_KEYSTORE_ID" type="BIGINT">
-                <constraints foreignKeyName="CLIENT_SIGNATURE_KEYSTORE_FK" referencedColumnNames="ID"/>
-            </column>
+            <column name="CLIENT_ID" type="VARCHAR(255)"/>
+            <column name="CLIENT_SECRET" type="VARCHAR(255)"/>
+            <column name="AUDIENCE" type="VARCHAR(1024)"/>
+            <column name="SIGNATURE_KEY_REF" type="VARCHAR(64)"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
+
+        <createIndex tableName="OPENID_CLIENT" indexName="OPENID_CLIENT_PROVIDER_IDX">
+            <column name="OPENID_PROVIDER_ID"/>
+        </createIndex>
 
     </changeSet>
 

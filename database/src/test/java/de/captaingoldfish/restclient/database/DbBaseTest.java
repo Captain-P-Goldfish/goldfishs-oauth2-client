@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
-import de.captaingoldfish.restclient.database.repositories.ClientDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
+import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
@@ -39,7 +39,7 @@ public abstract class DbBaseTest implements FileReferences
   protected ProxyDao proxyDao;
 
   @Autowired
-  protected ClientDao clientDao;
+  protected OpenIdClientDao openIdClientDao;
 
   @Autowired
   protected OpenIdProviderDao openIdProviderDao;
@@ -50,7 +50,7 @@ public abstract class DbBaseTest implements FileReferences
   @AfterEach
   public void clearTables()
   {
-    clientDao.deleteAll();
+    openIdClientDao.deleteAll();
     openIdProviderDao.deleteAll();
     proxyDao.deleteAll();
     truststoreDao.deleteAll();

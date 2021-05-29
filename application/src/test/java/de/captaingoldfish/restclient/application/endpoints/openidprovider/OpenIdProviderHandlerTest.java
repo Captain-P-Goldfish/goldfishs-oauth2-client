@@ -396,8 +396,9 @@ public class OpenIdProviderHandlerTest extends AbstractScimClientConfig
     Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
     Assertions.assertEquals(1, fieldErrors.size());
     List<String> discoveryUrlErrors = fieldErrors.get(ScimOpenIdProvider.FieldNames.DISCOVERY_ENDPOINT);
-    String errorMessage = String.format("Given value is not a valid reference type. The value '%s' is expected to "
-                                        + "be of one of the following types: [URL]",
+    String errorMessage = String.format("Attribute 'urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdProvider:discoveryEndpoint'"
+                                        + " is a referenceType and must apply to one of the following types '[URL]' "
+                                        + "but value is '%s'",
                                         discoveryUrl);
     MatcherAssert.assertThat(discoveryUrlErrors, Matchers.containsInAnyOrder(errorMessage));
   }
@@ -433,14 +434,16 @@ public class OpenIdProviderHandlerTest extends AbstractScimClientConfig
     Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
     Assertions.assertEquals(2, fieldErrors.size());
     List<String> authUrlErrors = fieldErrors.get(ScimOpenIdProvider.FieldNames.AUTHORIZATION_ENDPOINT);
-    String errorMessage1 = String.format("Given value is not a valid reference type. The value '%s' is expected to "
-                                         + "be of one of the following types: [URL]",
+    String errorMessage1 = String.format("Attribute 'urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdProvider:authorizationEndpoint'"
+                                         + " is a referenceType and must apply to one of the following types '[URL]' "
+                                         + "but value is '%s'",
                                          authorizationUrl);
     MatcherAssert.assertThat(authUrlErrors, Matchers.containsInAnyOrder(errorMessage1));
 
     List<String> tokenUrlErrors = fieldErrors.get(ScimOpenIdProvider.FieldNames.TOKEN_ENDPOINT);
-    String errorMessage2 = String.format("Given value is not a valid reference type. The value '%s' is expected to "
-                                         + "be of one of the following types: [URL]",
+    String errorMessage2 = String.format("Attribute 'urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdProvider:tokenEndpoint'"
+                                         + " is a referenceType and must apply to one of the following types '[URL]' "
+                                         + "but value is '%s'",
                                          tokenUrl);
     MatcherAssert.assertThat(tokenUrlErrors, Matchers.containsInAnyOrder(errorMessage2));
   }

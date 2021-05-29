@@ -7,14 +7,17 @@ import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
+import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
+import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.ProxyEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TruststoreEndpoint;
@@ -127,6 +130,22 @@ public class ScimConfig
   {
     OpenIdProviderEndpoint openIdEndpoint = new OpenIdProviderEndpoint(new OpenIdProviderHandler(openIdProviderDao));
     ResourceType openIdProviderResourceType = resourceEndpoint.registerEndpoint(openIdEndpoint);
+    openIdProviderResourceType.getFeatures().setAutoFiltering(true);
+    openIdProviderResourceType.getFeatures().setAutoSorting(true);
+    return openIdProviderResourceType;
+  }
+
+  /**
+   * registers the OpenID Client resourceType under the endpoint /OpenIdClient.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the OpenId Client resource type
+   */
+  @Bean
+  public ResourceType openIdClientResourceType(ResourceEndpoint resourceEndpoint, OpenIdClientDao openIdClientDao)
+  {
+    OpenIdClientEndpoint openIdClientEndpoint = new OpenIdClientEndpoint(new OpenIdClientHandler(openIdClientDao));
+    ResourceType openIdProviderResourceType = resourceEndpoint.registerEndpoint(openIdClientEndpoint);
     openIdProviderResourceType.getFeatures().setAutoFiltering(true);
     openIdProviderResourceType.getFeatures().setAutoSorting(true);
     return openIdProviderResourceType;

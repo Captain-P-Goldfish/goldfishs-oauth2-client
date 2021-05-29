@@ -2,6 +2,7 @@ package de.captaingoldfish.restclient.database.entities;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,9 +13,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.validation.constraints.AssertTrue;
-
-import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
 import lombok.Data;
@@ -29,8 +27,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "CLIENT")
-public class Client
+@Table(name = "OPENID_CLIENT")
+public class OpenIdClient
 {
 
   /**
@@ -40,6 +38,13 @@ public class Client
   @GeneratedValue
   @Column(name = "ID")
   private long id;
+
+  /**
+   * the openid provider on which this client was registered
+   */
+  @OneToOne
+  @JoinColumn(name = "OPENID_PROVIDER_ID", referencedColumnName = "ID")
+  private OpenIdProvider openIdProvider;
 
   /**
    * the client_id to authenticate against the {@link OpenIdProvider}
@@ -54,29 +59,15 @@ public class Client
   private String clientSecret;
 
   /**
-   * the redirect URI to send in the request
-   */
-  @Column(name = "REDIRECT_URI")
-  private String redirectUri;
-
-  /**
-   * the openid provider on which this client was registered
-   */
-  @OneToOne
-  @JoinColumn(name = "OPENID_PROVIDER_ID", referencedColumnName = "ID")
-  private OpenIdProvider openIdProvider;
-
-  /**
    * an optional keystore to provide signatures that can be used in case of JWT authentication or SSL client
    * authentication
    */
-  @OneToOne
-  @JoinColumn(name = "SIGANTURE_KEYSTORE_ID", referencedColumnName = "ID")
-  private Keystore signatureKeystore;
+  @Column(name = "SIGNATURE_KEY_REF")
+  private String signatureKeyRef;
 
   /**
-   * the audience is an optional field that becomes necessary if the {@link #signatureKeystore} is present and
-   * the client is going to use JWT authentication
+   * the audience is an optional field that becomes necessary if the {@link #signatureKeyRef} is present and the
+   * client is going to use JWT authentication
    */
   @Column(name = "AUDIENCE")
   private String audience;
@@ -94,16 +85,23 @@ public class Client
   private Instant lastModified;
 
 
+
   /**
    * lombok builder
    */
   @Builder
-  public Client(String clientId, String clientSecret, String redirectUri, Keystore signatureKeystore, String audience)
+  public OpenIdClient(Long id,
+                      OpenIdProvider openIdProvider,
+                      String clientId,
+                      String clientSecret,
+                      String signatureKeyRef,
+                      String audience)
   {
+    this.id = Optional.ofNullable(id).orElse(0L);
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    this.redirectUri = redirectUri;
-    this.signatureKeystore = signatureKeystore;
+    this.openIdProvider = openIdProvider;
+    this.signatureKeyRef = signatureKeyRef;
     this.audience = audience;
   }
 
@@ -118,16 +116,6 @@ public class Client
   public final void setLastModified()
   {
     this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-  }
-
-  /**
-   * adds a bean validation that requires the {@link #audience} value to be not empty if the
-   * {@link #signatureKeystore} is not null
-   */
-  @AssertTrue(message = "{validation.database.entity.client.audience.not.blank}")
-  public boolean isAudienceValid()
-  {
-    return signatureKeystore == null || StringUtils.isNotBlank(audience);
   }
 
 }

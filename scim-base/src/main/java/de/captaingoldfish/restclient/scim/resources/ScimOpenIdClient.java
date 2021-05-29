@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import de.captaingoldfish.scim.sdk.common.resources.ResourceNode;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
+import lombok.Builder;
 
 
 /**
@@ -20,12 +21,13 @@ public class ScimOpenIdClient extends ResourceNode
   public ScimOpenIdClient()
   {}
 
+  @Builder
   public ScimOpenIdClient(String id,
                           Long openIdProviderId,
                           String clientId,
                           String clientSecret,
                           String audience,
-                          String applicationKeystoreAlias,
+                          CertificateInfo certificateInfo,
                           Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -34,7 +36,7 @@ public class ScimOpenIdClient extends ResourceNode
     setClientId(clientId);
     setClientSecret(clientSecret);
     setAudience(audience);
-    setApplicationKeystoreAlias(applicationKeystoreAlias);
+    setCertificateInfo(certificateInfo);
     setMeta(meta);
   }
 
@@ -98,18 +100,6 @@ public class ScimOpenIdClient extends ResourceNode
     setAttribute(FieldNames.AUDIENCE, audience);
   }
 
-  /** The alias of the application keystore that should be used for signing JWTs. */
-  public Optional<String> getApplicationKeystoreAlias()
-  {
-    return getStringAttribute(FieldNames.APPLICATION_KEYSTORE_ALIAS);
-  }
-
-  /** The alias of the application keystore that should be used for signing JWTs. */
-  public void setApplicationKeystoreAlias(String applicationKeystoreAlias)
-  {
-    setAttribute(FieldNames.APPLICATION_KEYSTORE_ALIAS, applicationKeystoreAlias);
-  }
-
   /**
    * Represents a single certificate entry of a keystore / truststore
    */
@@ -140,7 +130,5 @@ public class ScimOpenIdClient extends ResourceNode
     public static final String OPEN_ID_PROVIDER_ID = "openIdProviderId";
 
     public static final String CLIENT_SECRET = "clientSecret";
-
-    public static final String APPLICATION_KEYSTORE_ALIAS = "applicationKeystoreAlias";
   }
 }

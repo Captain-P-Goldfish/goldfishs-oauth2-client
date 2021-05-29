@@ -10,12 +10,13 @@
       "name": "alias",
       "type": "string",
       "description": "The alias that holds this certificate entry.",
-      "mutability": "readOnly",
+      "mutability": "readWrite",
       "returned": "default",
       "uniqueness": "server",
       "multiValued": false,
       "required": true,
-      "caseExact": false
+      "caseExact": false,
+      "maxLength": 64
     },
     {
       "name": "info",

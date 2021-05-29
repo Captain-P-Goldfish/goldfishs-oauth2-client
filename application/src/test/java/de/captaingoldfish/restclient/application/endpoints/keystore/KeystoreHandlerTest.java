@@ -31,6 +31,8 @@ import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
+import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.CertificateInfo;
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore.AliasSelection;
@@ -925,6 +927,46 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                              + "please use the aliasOverride field to override the alias with a value that matches "
                              + "the following pattern: [A-Za-z0-9_-]+";
       MatcherAssert.assertThat(fieldErrors.get(aliasesFieldName), Matchers.containsInAnyOrder(errorMessage1));
+    }
+  }
+
+  @Test
+  public void testDeleteAliasReferencedByOpenIdClient()
+  {
+    addDefaultEntriesToApplicationKeystore();
+    Keystore keystore = keystoreDao.getKeystore();
+    Assertions.assertEquals(3, keystore.getKeystoreEntries().size());
+    OpenIdProvider openIdProvider = openIdProviderDao.save(OpenIdProvider.builder()
+                                                                         .name(UUID.randomUUID().toString())
+                                                                         .discoveryEndpoint("http://localhost:8080")
+                                                                         .build());
+    OpenIdClient openIdClient = openIdClientDao.save(OpenIdClient.builder()
+                                                                 .openIdProvider(openIdProvider)
+                                                                 .clientId(UUID.randomUUID().toString())
+                                                                 .build());
+
+    List<KeystoreEntry> testKeystoreEntryAccess = getUnitTestKeystoreEntryAccess();
+    for ( int i = 0 ; i < testKeystoreEntryAccess.size() ; i++ )
+    {
+      KeystoreEntry unitTestKeystoreEntryAccess = testKeystoreEntryAccess.get(i);
+      openIdClient.setSignatureKeyRef(unitTestKeystoreEntryAccess.getAlias());
+      openIdClient = openIdClientDao.save(openIdClient);
+
+      Assertions.assertEquals(1, openIdClientDao.count());
+      openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
+      Assertions.assertEquals(unitTestKeystoreEntryAccess.getAlias(), openIdClient.getSignatureKeyRef());
+
+      ServerResponse<ScimKeystore> response = scimRequestBuilder.delete(ScimKeystore.class,
+                                                                        KEYSTORE_ENDPOINT,
+                                                                        unitTestKeystoreEntryAccess.getAlias())
+                                                                .sendRequest();
+      Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
+      keystore = keystoreDao.getKeystore();
+      Assertions.assertEquals(3 - (i + 1), keystore.getKeystoreEntries().size());
+
+      Assertions.assertEquals(1, openIdClientDao.count());
+      openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
+      Assertions.assertNull(openIdClient.getSignatureKeyRef());
     }
   }
 
