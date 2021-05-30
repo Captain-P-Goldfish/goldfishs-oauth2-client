@@ -9,7 +9,6 @@ import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
-import de.captaingoldfish.restclient.scim.resources.CertificateInfo;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
@@ -33,7 +32,8 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
     {
       return;
     }
-    validateCertificateInfo(resource, validationContext);
+    validateAliasReferences(resource, validationContext);
+
     Optional<OpenIdProvider> provider = validateOpenIdProvider(resource, validationContext);
     if (provider.isEmpty())
     {
@@ -61,7 +61,8 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
       return;
     }
 
-    validateCertificateInfo(newResource, validationContext);
+    validateAliasReferences(newResource, validationContext);
+
     Optional<OpenIdProvider> provider = validateOpenIdProvider(newResource, validationContext);
     if (provider.isEmpty())
     {
@@ -103,23 +104,46 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
   }
 
   /**
-   * checks if the referenced alias from the certificate info does exist within the application keystore. If not
-   * an error will be returned
+   * checks if the referenced aliases in from the resource do exist and can be used
+   * 
+   * @param resource the resource that may contain alias references to the application keystore
    */
-  private void validateCertificateInfo(ScimOpenIdClient resource, ValidationContext validationContext)
+  private void validateAliasReferences(ScimOpenIdClient resource, ValidationContext validationContext)
   {
-    if (resource.getCertificateInfo().isPresent())
+    KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);
+    Keystore applicationKeystore = keystoreDao.getKeystore();
+    validateAliasReference(applicationKeystore,
+                           resource.getSigningKeyRef(),
+                           ScimOpenIdClient.FieldNames.SIGNING_KEY_REF,
+                           validationContext);
+    validateAliasReference(applicationKeystore,
+                           resource.getDecryptionKeyRef(),
+                           ScimOpenIdClient.FieldNames.DECRYPTION_KEY_REF,
+                           validationContext);
+    validateAliasReference(applicationKeystore,
+                           resource.getTlsClientAuthKeyRef(),
+                           ScimOpenIdClient.FieldNames.TLS_CLIENT_AUTH_KEY_REF,
+                           validationContext);
+  }
+
+  /**
+   * checks if the referenced alias does exist within the application keystore. If not an error will be returned
+   */
+  private void validateAliasReference(Keystore applicationKeystore,
+                                      Optional<String> aliasReference,
+                                      String fieldNameForError,
+                                      ValidationContext validationContext)
+  {
+    if (aliasReference.isEmpty())
     {
-      CertificateInfo certificateInfo = resource.getCertificateInfo().get();
-      final String alias = certificateInfo.getAlias();
-      KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);
-      Keystore applicationKeystore = keystoreDao.getKeystore();
-      final boolean hasAlias = applicationKeystore.getKeyStoreAliases().contains(alias);
-      if (!hasAlias)
-      {
-        validationContext.addError("alias",
-                                   String.format("Alias '%s' does not exist within application keystore", alias));
-      }
+      return;
+    }
+    final String alias = aliasReference.get();
+    final boolean hasAlias = applicationKeystore.getKeyStoreAliases().contains(alias);
+    if (!hasAlias)
+    {
+      validationContext.addError(fieldNameForError,
+                                 String.format("Alias '%s' does not exist within application keystore", alias));
     }
   }
 }

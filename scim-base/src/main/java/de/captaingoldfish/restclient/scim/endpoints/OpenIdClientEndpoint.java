@@ -1,8 +1,5 @@
 package de.captaingoldfish.restclient.scim.endpoints;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import de.captaingoldfish.restclient.scim.constants.ClasspathReferences;
@@ -20,7 +17,7 @@ public class OpenIdClientEndpoint extends EndpointDefinition
 
   public OpenIdClientEndpoint(ResourceHandler resourceHandler)
   {
-    super(getResourceTypeSchema(), getResourceSchemaNode(), getResourceSchemaExtensionsSchema(), resourceHandler);
+    super(getResourceTypeSchema(), getResourceSchemaNode(), null, resourceHandler);
   }
 
   /**
@@ -37,13 +34,5 @@ public class OpenIdClientEndpoint extends EndpointDefinition
   private static JsonNode getResourceSchemaNode()
   {
     return JsonHelper.loadJsonDocument(ClasspathReferences.OPEN_ID_CLIENT_SCHEMA);
-  }
-
-  /**
-   * @return the extension of the keystore resource type endpoint definition
-   */
-  private static List<JsonNode> getResourceSchemaExtensionsSchema()
-  {
-    return Collections.singletonList(JsonHelper.loadJsonDocument(ClasspathReferences.CERTIFICATE_INFO_SCHEMA));
   }
 }

@@ -949,12 +949,14 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     for ( int i = 0 ; i < testKeystoreEntryAccess.size() ; i++ )
     {
       KeystoreEntry unitTestKeystoreEntryAccess = testKeystoreEntryAccess.get(i);
-      openIdClient.setSignatureKeyRef(unitTestKeystoreEntryAccess.getAlias());
+      openIdClient.setSigningKeyRef(unitTestKeystoreEntryAccess.getAlias());
+      openIdClient.setDecryptionKeyRef(unitTestKeystoreEntryAccess.getAlias());
+      openIdClient.setTlsClientAuthKeyRef(unitTestKeystoreEntryAccess.getAlias());
       openIdClient = openIdClientDao.save(openIdClient);
 
       Assertions.assertEquals(1, openIdClientDao.count());
       openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
-      Assertions.assertEquals(unitTestKeystoreEntryAccess.getAlias(), openIdClient.getSignatureKeyRef());
+      Assertions.assertEquals(unitTestKeystoreEntryAccess.getAlias(), openIdClient.getSigningKeyRef());
 
       ServerResponse<ScimKeystore> response = scimRequestBuilder.delete(ScimKeystore.class,
                                                                         KEYSTORE_ENDPOINT,
@@ -966,7 +968,9 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
 
       Assertions.assertEquals(1, openIdClientDao.count());
       openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
-      Assertions.assertNull(openIdClient.getSignatureKeyRef());
+      Assertions.assertNull(openIdClient.getSigningKeyRef());
+      Assertions.assertNull(openIdClient.getDecryptionKeyRef());
+      Assertions.assertNull(openIdClient.getTlsClientAuthKeyRef());
     }
   }
 

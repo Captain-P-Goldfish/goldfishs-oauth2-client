@@ -54,7 +54,7 @@ public class ClientTest extends DbBaseTest
     OpenIdClient openIdClient = OpenIdClient.builder()
                                             .openIdProvider(openIdProvider)
                                             .clientId(clientId)
-                                            .signatureKeyRef(signatureKeyRef)
+                                            .signingKeyRef(signatureKeyRef)
                                             .audience(audience)
                                             .build();
     openIdClient = openIdClientDao.save(openIdClient);
@@ -63,7 +63,7 @@ public class ClientTest extends DbBaseTest
     Assertions.assertEquals(openIdProvider, openIdClient.getOpenIdProvider());
     Assertions.assertEquals(clientId, openIdClient.getClientId());
     Assertions.assertEquals(audience, openIdClient.getAudience());
-    Assertions.assertEquals(signatureKeyRef, openIdClient.getSignatureKeyRef());
+    Assertions.assertEquals(signatureKeyRef, openIdClient.getSigningKeyRef());
 
     Assertions.assertEquals(1, openIdProviderDao.count());
     Assertions.assertEquals(1, openIdClientDao.count());

@@ -1,7 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.openidclient;
 
-import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Optional;
 
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.Keystore;
@@ -9,7 +9,6 @@ import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
-import de.captaingoldfish.restclient.scim.resources.CertificateInfo;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import lombok.AccessLevel;
@@ -31,7 +30,9 @@ public final class OpenIdClientConverter
   {
     OpenIdProviderDao providerDao = WebAppConfig.getApplicationContext().getBean(OpenIdProviderDao.class);
     OpenIdProvider openIdProvider = providerDao.findById(scimOpenIdClient.getOpenIdProviderId()).orElseThrow();
-    String aliasKeyReference = scimOpenIdClient.getCertificateInfo().map(CertificateInfo::getAlias).orElse(null);
+    String signingKeyReference = scimOpenIdClient.getSigningKeyRef().orElse(null);
+    String decryptionKeyReference = scimOpenIdClient.getDecryptionKeyRef().orElse(null);
+    String tlsClientAuthKeyReference = scimOpenIdClient.getTlsClientAuthKeyRef().orElse(null);
 
     return OpenIdClient.builder()
                        .id(scimOpenIdClient.getId().map(Long::parseLong).orElse(0L))
@@ -39,7 +40,9 @@ public final class OpenIdClientConverter
                        .clientId(scimOpenIdClient.getClientId())
                        .clientSecret(scimOpenIdClient.getClientSecret().orElse(null))
                        .audience(scimOpenIdClient.getAudience().orElse(null))
-                       .signatureKeyRef(aliasKeyReference)
+                       .signingKeyRef(signingKeyReference)
+                       .decryptionKeyRef(decryptionKeyReference)
+                       .tlsClientAuthKeyRef(tlsClientAuthKeyReference)
                        .build();
   }
 
@@ -51,12 +54,15 @@ public final class OpenIdClientConverter
     KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);
     Keystore applicationKeystore = keystoreDao.getKeystore();
     List<String> appKeystoreAliases = applicationKeystore.getKeyStoreAliases();
-    CertificateInfo certificateInfo = null;
-    if (appKeystoreAliases.contains(openIdClient.getSignatureKeyRef()))
-    {
-      X509Certificate certificate = applicationKeystore.getCertificate(openIdClient.getSignatureKeyRef());
-      certificateInfo = new CertificateInfo(openIdClient.getSignatureKeyRef(), certificate);
-    }
+    String signingKeyReference = Optional.ofNullable(openIdClient.getSigningKeyRef())
+                                         .filter(appKeystoreAliases::contains)
+                                         .orElse(null);
+    String decryptionKeyReference = Optional.ofNullable(openIdClient.getDecryptionKeyRef())
+                                            .filter(appKeystoreAliases::contains)
+                                            .orElse(null);
+    String tlsClientAuthKeyReference = Optional.ofNullable(openIdClient.getTlsClientAuthKeyRef())
+                                               .filter(appKeystoreAliases::contains)
+                                               .orElse(null);
 
     return ScimOpenIdClient.builder()
                            .id(String.valueOf(openIdClient.getId()))
@@ -64,7 +70,9 @@ public final class OpenIdClientConverter
                            .clientId(openIdClient.getClientId())
                            .clientSecret(openIdClient.getClientSecret())
                            .audience(openIdClient.getAudience())
-                           .certificateInfo(certificateInfo)
+                           .signingKeyRef(signingKeyReference)
+                           .decryptionKeyRef(decryptionKeyReference)
+                           .tlsClientAuthKeyRef(tlsClientAuthKeyReference)
                            .meta(Meta.builder()
                                      .created(openIdClient.getCreated())
                                      .lastModified(openIdClient.getLastModified())

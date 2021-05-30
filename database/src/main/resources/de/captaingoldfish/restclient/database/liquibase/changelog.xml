@@ -144,7 +144,9 @@
             <column name="CLIENT_ID" type="VARCHAR(255)"/>
             <column name="CLIENT_SECRET" type="VARCHAR(255)"/>
             <column name="AUDIENCE" type="VARCHAR(1024)"/>
-            <column name="SIGNATURE_KEY_REF" type="VARCHAR(64)"/>
+            <column name="SIGNING_KEY_REF" type="VARCHAR(64)"/>
+            <column name="DECRYPTION_KEY_REF" type="VARCHAR(64)"/>
+            <column name="TLS_CLIENT_AUTH_KEY_REF" type="VARCHAR(64)"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>

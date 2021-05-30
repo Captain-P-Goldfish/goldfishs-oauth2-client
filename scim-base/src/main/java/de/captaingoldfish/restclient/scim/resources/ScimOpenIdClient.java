@@ -27,7 +27,9 @@ public class ScimOpenIdClient extends ResourceNode
                           String clientId,
                           String clientSecret,
                           String audience,
-                          CertificateInfo certificateInfo,
+                          String signingKeyRef,
+                          String decryptionKeyRef,
+                          String tlsClientAuthKeyRef,
                           Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -36,7 +38,9 @@ public class ScimOpenIdClient extends ResourceNode
     setClientId(clientId);
     setClientSecret(clientSecret);
     setAudience(audience);
-    setCertificateInfo(certificateInfo);
+    setSigningKeyRef(signingKeyRef);
+    setDecryptionKeyRef(decryptionKeyRef);
+    setTlsClientAuthKeyRef(tlsClientAuthKeyRef);
     setMeta(meta);
   }
 
@@ -100,28 +104,59 @@ public class ScimOpenIdClient extends ResourceNode
     setAttribute(FieldNames.AUDIENCE, audience);
   }
 
-  /**
-   * Represents a single certificate entry of a keystore / truststore
-   */
-  public Optional<CertificateInfo> getCertificateInfo()
+  /** The alias of the key reference within the application keystore to sign JWTs for authentication. */
+  public Optional<String> getSigningKeyRef()
   {
-    return getObjectAttribute(CertificateInfo.FieldNames.SCHEMA_ID, CertificateInfo.class);
+    return getStringAttribute(FieldNames.SIGNING_KEY_REF);
+  }
+
+  /** The alias of the key reference within the application keystore to sign JWTs for authentication. */
+  public void setSigningKeyRef(String signingKeyRef)
+  {
+    setAttribute(FieldNames.SIGNING_KEY_REF, signingKeyRef);
   }
 
   /**
-   * Represents a single certificate entry of a keystore / truststore
+   * The alias of the key reference within the application keystore to decrypt JWTs on responses e.g. the ID
+   * Token.
    */
-  public void setCertificateInfo(CertificateInfo certificateInfo)
+  public Optional<String> getDecryptionKeyRef()
   {
-    setAttribute(CertificateInfo.FieldNames.SCHEMA_ID, certificateInfo);
+    return getStringAttribute(FieldNames.DECRYPTION_KEY_REF);
   }
+
+  /**
+   * The alias of the key reference within the application keystore to decrypt JWTs on responses e.g. the ID
+   * Token.
+   */
+  public void setDecryptionKeyRef(String decryptionKeyRef)
+  {
+    setAttribute(FieldNames.DECRYPTION_KEY_REF, decryptionKeyRef);
+  }
+
+  /**
+   * The alias of the key reference within the application keystore to authenticate with alternative TLS client
+   * authentication instead of JWT of basic authentication.
+   */
+  public Optional<String> getTlsClientAuthKeyRef()
+  {
+    return getStringAttribute(FieldNames.TLS_CLIENT_AUTH_KEY_REF);
+  }
+
+  /**
+   * The alias of the key reference within the application keystore to authenticate with alternative TLS client
+   * authentication instead of JWT of basic authentication.
+   */
+  public void setTlsClientAuthKeyRef(String tlsClientAuthKeyRef)
+  {
+    setAttribute(FieldNames.TLS_CLIENT_AUTH_KEY_REF, tlsClientAuthKeyRef);
+  }
+
 
   public static class FieldNames
   {
 
     public static final String SCHEMA_ID = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdClient";
-
-    public static final String ID = "id";
 
     public static final String AUDIENCE = "audience";
 
@@ -129,6 +164,14 @@ public class ScimOpenIdClient extends ResourceNode
 
     public static final String OPEN_ID_PROVIDER_ID = "openIdProviderId";
 
+    public static final String DECRYPTION_KEY_REF = "decryptionKeyRef";
+
+    public static final String TLS_CLIENT_AUTH_KEY_REF = "tlsClientAuthKeyRef";
+
     public static final String CLIENT_SECRET = "clientSecret";
+
+    public static final String ID = "id";
+
+    public static final String SIGNING_KEY_REF = "signingKeyRef";
   }
 }

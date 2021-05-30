@@ -59,18 +59,31 @@ public class OpenIdClient
   private String clientSecret;
 
   /**
-   * an optional keystore to provide signatures that can be used in case of JWT authentication or SSL client
-   * authentication
-   */
-  @Column(name = "SIGNATURE_KEY_REF")
-  private String signatureKeyRef;
-
-  /**
-   * the audience is an optional field that becomes necessary if the {@link #signatureKeyRef} is present and the
+   * the audience is an optional field that becomes necessary if the {@link #signingKeyRef} is present and the
    * client is going to use JWT authentication
    */
   @Column(name = "AUDIENCE")
   private String audience;
+
+  /**
+   * The alias of the key reference within the application keystore to sign JWTs for authentication.
+   */
+  @Column(name = "SIGNING_KEY_REF")
+  private String signingKeyRef;
+
+  /**
+   * The alias of the key reference within the application keystore to decrypt JWTs on responses e.g. the ID
+   * Token.
+   */
+  @Column(name = "DECRYPTION_KEY_REF")
+  private String decryptionKeyRef;
+
+  /**
+   * The alias of the key reference within the application keystore to authenticate with alternative TLS client
+   * authentication instead of JWT of basic authentication.
+   */
+  @Column(name = "TLS_CLIENT_AUTH_KEY_REF")
+  private String tlsClientAuthKeyRef;
 
   /**
    * the moment this instance was created
@@ -94,15 +107,19 @@ public class OpenIdClient
                       OpenIdProvider openIdProvider,
                       String clientId,
                       String clientSecret,
-                      String signatureKeyRef,
-                      String audience)
+                      String audience,
+                      String signingKeyRef,
+                      String decryptionKeyRef,
+                      String tlsClientAuthKeyRef)
   {
     this.id = Optional.ofNullable(id).orElse(0L);
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.openIdProvider = openIdProvider;
-    this.signatureKeyRef = signatureKeyRef;
     this.audience = audience;
+    this.signingKeyRef = signingKeyRef;
+    this.decryptionKeyRef = decryptionKeyRef;
+    this.tlsClientAuthKeyRef = tlsClientAuthKeyRef;
   }
 
   @PrePersist

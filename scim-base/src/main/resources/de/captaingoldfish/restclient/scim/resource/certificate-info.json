@@ -10,7 +10,7 @@
       "name": "alias",
       "type": "string",
       "description": "The alias that holds this certificate entry.",
-      "mutability": "readWrite",
+      "mutability": "readOnly",
       "returned": "default",
       "uniqueness": "server",
       "multiValued": false,

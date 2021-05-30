@@ -71,8 +71,20 @@ public class KeystoreDaoImpl implements KeystoreDaoExtension
   private void setOpenIdClientReferencesToNull(String alias)
   {
     Query updateQuery = entityManager.createQuery("update  " + OpenIdClient.class.getSimpleName() + " client "
-                                                  + "set client.signatureKeyRef = null "
-                                                  + "where client.signatureKeyRef = :alias");
+                                                  + "set client.signingKeyRef = null "
+                                                  + "where client.signingKeyRef = :alias");
+    updateQuery.setParameter("alias", alias);
+    updateQuery.executeUpdate();
+
+    updateQuery = entityManager.createQuery("update  " + OpenIdClient.class.getSimpleName() + " client "
+                                            + "set client.decryptionKeyRef = null "
+                                            + "where client.decryptionKeyRef = :alias");
+    updateQuery.setParameter("alias", alias);
+    updateQuery.executeUpdate();
+
+    updateQuery = entityManager.createQuery("update  " + OpenIdClient.class.getSimpleName() + " client "
+                                            + "set client.tlsClientAuthKeyRef = null "
+                                            + "where client.tlsClientAuthKeyRef = :alias");
     updateQuery.setParameter("alias", alias);
     updateQuery.executeUpdate();
   }
