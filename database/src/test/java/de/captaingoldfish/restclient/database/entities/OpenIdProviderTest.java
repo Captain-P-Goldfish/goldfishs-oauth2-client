@@ -5,6 +5,7 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -88,5 +89,39 @@ public class OpenIdProviderTest extends DbBaseTest
     Assertions.assertEquals(1, openIdProviderDao.count());
     openIdProviderDao.deleteAll();
     Assertions.assertEquals(0, openIdProviderDao.count());
+  }
+
+  @Test
+  public void testDeleteOpenIdProviderWithReferences()
+  {
+    OpenIdProvider openIdProvider = openIdProviderDao.save(OpenIdProvider.builder()
+                                                                         .name(UUID.randomUUID().toString())
+                                                                         .discoveryEndpoint("http://localhost:8080")
+                                                                         .build());
+
+    OpenIdClient openIdClient1 = openIdClientDao.save(OpenIdClient.builder()
+                                                                  .openIdProvider(openIdProvider)
+                                                                  .clientId(UUID.randomUUID().toString())
+                                                                  .clientSecret(UUID.randomUUID().toString())
+                                                                  .build());
+    httpClientSettingsDao.save(HttpClientSettings.builder().openIdClient(openIdClient1).build());
+
+    OpenIdClient openIdClient2 = openIdClientDao.save(OpenIdClient.builder()
+                                                                  .openIdProvider(openIdProvider)
+                                                                  .clientId(UUID.randomUUID().toString())
+                                                                  .clientSecret(UUID.randomUUID().toString())
+                                                                  .build());
+    httpClientSettingsDao.save(HttpClientSettings.builder().openIdClient(openIdClient2).build());
+
+
+    Assertions.assertEquals(1, openIdProviderDao.count());
+    Assertions.assertEquals(2, openIdClientDao.count());
+    Assertions.assertEquals(2, httpClientSettingsDao.count());
+
+    openIdProviderDao.deleteById(openIdProvider.getId());
+
+    Assertions.assertEquals(0, openIdProviderDao.count());
+    Assertions.assertEquals(0, openIdClientDao.count());
+    Assertions.assertEquals(0, httpClientSettingsDao.count());
   }
 }

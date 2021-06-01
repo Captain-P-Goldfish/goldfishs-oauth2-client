@@ -1,10 +1,9 @@
 package de.captaingoldfish.restclient.database.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
+import de.captaingoldfish.restclient.database.ScimCrudRepository;
 import de.captaingoldfish.restclient.database.entities.Truststore;
-
 
 
 /**
@@ -14,6 +13,8 @@ import de.captaingoldfish.restclient.database.entities.Truststore;
  * <br>
  * this class represents the database-access from spring to the {@link Truststore}-objects
  */
-public interface TruststoreDao
-  extends JpaRepository<Truststore, Long>, JpaSpecificationExecutor<Truststore>, TruststoreDaoExtension
-{}
+@Repository
+public interface TruststoreDao extends ScimCrudRepository<Truststore, Long>, TruststoreDaoExtension
+{
+
+}

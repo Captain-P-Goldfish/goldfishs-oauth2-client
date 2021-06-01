@@ -36,4 +36,31 @@ public class ProxyTest extends DbBaseTest
     proxyDao.deleteAll();
     Assertions.assertEquals(0, proxyDao.count());
   }
+
+  @Test
+  public void testDeleteProxyWithReferenceOnHttpClientSettings()
+  {
+    final String host = "localhost";
+    final int port = 8888;
+    final String username = "username";
+    final String password = "password";
+    Proxy proxy = Proxy.builder().host(host).port(port).username(username).password(password).build();
+    proxy = proxyDao.save(proxy);
+
+    HttpClientSettings httpClientSettings = httpClientSettingsDao.save(HttpClientSettings.builder()
+                                                                                         .proxy(proxy)
+                                                                                         .build());
+
+    httpClientSettings = httpClientSettingsDao.findById(httpClientSettings.getId()).orElseThrow();
+    Assertions.assertNotNull(httpClientSettings.getProxy());
+
+    Assertions.assertEquals(1, proxyDao.count());
+    Assertions.assertEquals(1, httpClientSettingsDao.count());
+    proxyDao.deleteById(proxy.getId());
+    Assertions.assertEquals(0, proxyDao.count());
+    Assertions.assertEquals(1, httpClientSettingsDao.count());
+
+    httpClientSettings = httpClientSettingsDao.findById(httpClientSettings.getId()).orElseThrow();
+    Assertions.assertNull(httpClientSettings.getProxy());
+  }
 }

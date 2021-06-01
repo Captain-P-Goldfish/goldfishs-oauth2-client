@@ -1,0 +1,90 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpClientSettings",
+  "name": "HttpClientSettings",
+  "description": "Represents the default settings used by the internal HTTP client",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "requestTimeout",
+      "type": "integer",
+      "description": "The request timeout in seconds.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "minimum": 1
+    },
+    {
+      "name": "connectionTimeout",
+      "type": "integer",
+      "description": "The connection timeout in seconds.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "minimum": 1
+    },
+    {
+      "name": "socketTimeout",
+      "type": "integer",
+      "description": "The socket timeout in seconds.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "minimum": 1
+    },
+    {
+      "name": "useHostnameVerifier",
+      "type": "boolean",
+      "description": "If the hostname verifier should be activated or deactivated.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "openIdClientReference",
+      "type": "integer",
+      "description": "The id of an OpenID Client that acts as parent of this configuration.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "proxyReference",
+      "type": "integer",
+      "description": "The id of a created proxy configuration.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    }
+  ]
+}

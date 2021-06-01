@@ -5,17 +5,20 @@ import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsHandler;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
+import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
+import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
@@ -149,5 +152,23 @@ public class ScimConfig
     openIdProviderResourceType.getFeatures().setAutoFiltering(true);
     openIdProviderResourceType.getFeatures().setAutoSorting(true);
     return openIdProviderResourceType;
+  }
+
+  /**
+   * registers the HTTP client settings resourceType under the endpoint /HttpClientSettings.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the HTTP client setting resource type
+   */
+  @Bean
+  public ResourceType httpClientSettingsResourceType(ResourceEndpoint resourceEndpoint,
+                                                     HttpClientSettingsDao httpClientSettingsDao)
+  {
+    HttpClientSettingsHandler httpClientHandler = new HttpClientSettingsHandler(httpClientSettingsDao);
+    HttpClientSettingsEndpoint httpclientSettingsEndpoint = new HttpClientSettingsEndpoint(httpClientHandler);
+    ResourceType httpClientSettingsResourceType = resourceEndpoint.registerEndpoint(httpclientSettingsEndpoint);
+    httpClientSettingsResourceType.getFeatures().setAutoFiltering(true);
+    httpClientSettingsResourceType.getFeatures().setAutoSorting(true);
+    return httpClientSettingsResourceType;
   }
 }

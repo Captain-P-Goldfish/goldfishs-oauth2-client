@@ -1,8 +1,8 @@
 package de.captaingoldfish.restclient.database.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
+import de.captaingoldfish.restclient.database.ScimCrudRepository;
 import de.captaingoldfish.restclient.database.entities.Proxy;
 
 
@@ -13,5 +13,15 @@ import de.captaingoldfish.restclient.database.entities.Proxy;
  * <br>
  * this class represents the database-access from spring to the {@link Proxy}-objects
  */
-public interface ProxyDao extends JpaRepository<Proxy, Long>, JpaSpecificationExecutor<Proxy>
-{}
+@Repository
+public interface ProxyDao extends ScimCrudRepository<Proxy, Long>
+{
+
+  /**
+   * Deletes the entity with the given id.
+   *
+   * @param id must not be {@literal null}.
+   * @throws IllegalArgumentException in case the given {@literal id} is {@literal null}
+   */
+  void deleteById(Long id);
+}

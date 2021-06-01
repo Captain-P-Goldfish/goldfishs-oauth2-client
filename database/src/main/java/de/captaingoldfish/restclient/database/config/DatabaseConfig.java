@@ -41,15 +41,18 @@ import lombok.extern.slf4j.Slf4j;
 @Order(2)
 @Slf4j
 @Configuration
-@EnableJpaRepositories(basePackages = {DatabaseConfig.PACKAGE_TO_SCAN})
+@EnableJpaRepositories(basePackages = {DatabaseConfig.REPOSITORY_PACKAGE})
 @EnableTransactionManagement
 public class DatabaseConfig
 {
 
+  protected static final String REPOSITORY_PACKAGE = "de.captaingoldfish.restclient.database.repositories";
+
   /**
    * this variable declares the package that should be scanned by this bean for repositories and entities
    */
-  protected static final String PACKAGE_TO_SCAN = "de.captaingoldfish.restclient.database";
+  protected static final String[] PACKAGE_TO_SCAN = new String[]{"de.captaingoldfish.restclient.database.entities",
+                                                                 REPOSITORY_PACKAGE};
 
   /**
    * the database URL

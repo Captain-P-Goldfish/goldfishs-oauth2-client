@@ -139,7 +139,8 @@
                 <constraints primaryKeyName="CLIENT_PRIME_KEY" primaryKey="true"/>
             </column>
             <column name="OPENID_PROVIDER_ID" type="BIGINT">
-                <constraints foreignKeyName="CLIENT_OPENID_PROVIDER_FK" referencedColumnNames="ID"/>
+                <constraints foreignKeyName="CLIENT_OPENID_PROVIDER_FK" referencedTableName="OPENID_PROVIDER"
+                             referencedColumnNames="ID"/>
             </column>
             <column name="CLIENT_ID" type="VARCHAR(255)"/>
             <column name="CLIENT_SECRET" type="VARCHAR(255)"/>
@@ -154,6 +155,27 @@
         <createIndex tableName="OPENID_CLIENT" indexName="OPENID_CLIENT_PROVIDER_IDX">
             <column name="OPENID_PROVIDER_ID"/>
         </createIndex>
+
+        <createTable tableName="HTTP_CLIENT_SETTINGS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="HTTP_CLIENT_SETTINGS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="OPENID_CLIENT_ID" type="BIGINT">
+                <constraints foreignKeyName="CUSTOM_SETTINGS_CLIENT_ID_FK" referencedTableName="OPENID_CLIENT"
+                             referencedColumnNames="ID" unique="true"
+                             uniqueConstraintName="HTTP_CLIENT_OIDC_CLIENT_UQ"/>
+            </column>
+            <column name="PROXY_ID" type="BIGINT">
+                <constraints foreignKeyName="CUSTOM_SETTINGS_PROXY_ID_FK" referencedTableName="PROXY"
+                             referencedColumnNames="ID"/>
+            </column>
+            <column name="REQUEST_TIMEOUT" type="INTEGER"/>
+            <column name="CONNECTION_TIMEOUT" type="INTEGER"/>
+            <column name="SOCKET_TIMEOUT" type="INTEGER"/>
+            <column name="USE_HOSTNAME_VERIFIER" type="BOOLEAN"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
 
     </changeSet>
 

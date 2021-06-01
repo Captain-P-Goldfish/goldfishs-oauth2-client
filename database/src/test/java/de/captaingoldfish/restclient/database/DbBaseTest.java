@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
+import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
@@ -45,11 +46,15 @@ public abstract class DbBaseTest implements FileReferences
   protected OpenIdProviderDao openIdProviderDao;
 
   @Autowired
+  protected HttpClientSettingsDao httpClientSettingsDao;
+
+  @Autowired
   private EntityManager entityManager;
 
   @AfterEach
   public void clearTables()
   {
+    httpClientSettingsDao.deleteAll();
     openIdClientDao.deleteAll();
     openIdProviderDao.deleteAll();
     proxyDao.deleteAll();

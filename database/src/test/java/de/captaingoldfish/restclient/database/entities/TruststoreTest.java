@@ -2,6 +2,7 @@ package de.captaingoldfish.restclient.database.entities;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
@@ -38,6 +39,9 @@ public class TruststoreTest extends DbBaseTest implements FileReferences
       Assertions.assertEquals(keyStoreType, truststore.getTruststoreType());
 
       Assertions.assertEquals(1, truststore.getCertificates().size());
+
+      List<Truststore> truststoreList = truststoreDao.findAll();
+      Assertions.assertEquals(1, truststoreList.size());
 
       Assertions.assertEquals(1, truststoreDao.count());
       truststoreDao.deleteAll();
