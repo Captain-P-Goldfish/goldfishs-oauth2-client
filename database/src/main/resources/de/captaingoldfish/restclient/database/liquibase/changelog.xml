@@ -12,7 +12,7 @@
     <property name="datetime" value="datetime"/>
     <property name="datetime" value="datetime2" dbms="mssql"/>
 
-    <changeSet author="pascal_knueppel" id="sequence-table-creation" dbms="mysql">
+    <changeSet author="pascal_knueppel" id="sequence-table-creation" dbms="mysql,mariadb">
         <comment>mysql supports sequences only with a workaround by creating a table with a counter</comment>
         <createTable tableName="hibernate_sequence">
             <column name="next_val" type="BIGINT"/>
@@ -20,32 +20,6 @@
         <insert tableName="hibernate_sequence">
             <column name="next_val" valueNumeric="1"/>
         </insert>
-    </changeSet>
-
-    <changeSet author="pascal_knueppel" id="sequence-table-creation" dbms="mariadb">
-        <preConditions onFail="CONTINUE">
-            <customPrecondition
-                    className="MariaDbBefore10_3PreCondition"/>
-        </preConditions>
-        <comment>the sequence table creation is necessary before mariadb 10.3</comment>
-        <createTable tableName="hibernate_sequence">
-            <column name="next_val" type="BIGINT"/>
-        </createTable>
-        <insert tableName="hibernate_sequence">
-            <column name="next_val" valueNumeric="1"/>
-        </insert>
-    </changeSet>
-
-    <changeSet author="pascal_knueppel" id="sequence-creation" dbms="mariadb">
-        <preConditions onFail="CONTINUE">
-            <not>
-                <customPrecondition
-                        className="MariaDbBefore10_3PreCondition"/>
-            </not>
-        </preConditions>
-        <comment>the sequence-table is not supported anymore since mariadb 10.3</comment>
-        <createSequence startValue="1" sequenceName="hibernate_sequence"
-                        incrementBy="1"/>
     </changeSet>
 
     <changeSet author="pascal_knueppel" id="sequence-creation" dbms="mssql,hsqldb,postgresql,oracle">
