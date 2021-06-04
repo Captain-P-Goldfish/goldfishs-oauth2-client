@@ -14,6 +14,8 @@ import lombok.Builder;
  * @author Pascal Knueppel
  * @since 31.05.2021
  */
+
+/** Represents the default settings used by the internal HTTP client */
 public class ScimHttpClientSettings extends ResourceNode
 {
 
@@ -28,6 +30,7 @@ public class ScimHttpClientSettings extends ResourceNode
                                 Boolean useHostnameVerifier,
                                 Long openIdClientReference,
                                 Long proxyReference,
+                                String tlsClientAuthAliasReference,
                                 Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -38,6 +41,7 @@ public class ScimHttpClientSettings extends ResourceNode
     setUseHostnameVerifier(useHostnameVerifier);
     setOpenIdClientReference(openIdClientReference);
     setProxyReference(proxyReference);
+    setTlsClientAuthAliasReference(tlsClientAuthAliasReference);
     setMeta(meta);
   }
 
@@ -113,6 +117,17 @@ public class ScimHttpClientSettings extends ResourceNode
     setAttribute(FieldNames.PROXY_REFERENCE, proxyReference);
   }
 
+  /** The id of a created proxy configuration. */
+  public Optional<String> getTlsClientAuthAliasReference()
+  {
+    return getStringAttribute(FieldNames.TLS_CLIENT_AUTH_ALIAS_REFERENCE);
+  }
+
+  /** The id of a created proxy configuration. */
+  public void setTlsClientAuthAliasReference(String tlsClientAuthAliasReference)
+  {
+    setAttribute(FieldNames.TLS_CLIENT_AUTH_ALIAS_REFERENCE, tlsClientAuthAliasReference);
+  }
 
   public static class FieldNames
   {
@@ -126,6 +141,10 @@ public class ScimHttpClientSettings extends ResourceNode
     public static final String OPEN_ID_CLIENT_REFERENCE = "openIdClientReference";
 
     public static final String SOCKET_TIMEOUT = "socketTimeout";
+
+    public static final String ID = "id";
+
+    public static final String TLS_CLIENT_AUTH_ALIAS_REFERENCE = "tlsClientAuthAliasReference";
 
     public static final String CONNECTION_TIMEOUT = "connectionTimeout";
 

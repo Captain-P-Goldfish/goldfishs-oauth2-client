@@ -951,7 +951,6 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
       KeystoreEntry unitTestKeystoreEntryAccess = testKeystoreEntryAccess.get(i);
       openIdClient.setSigningKeyRef(unitTestKeystoreEntryAccess.getAlias());
       openIdClient.setDecryptionKeyRef(unitTestKeystoreEntryAccess.getAlias());
-      openIdClient.setTlsClientAuthKeyRef(unitTestKeystoreEntryAccess.getAlias());
       openIdClient = openIdClientDao.save(openIdClient);
 
       Assertions.assertEquals(1, openIdClientDao.count());
@@ -970,7 +969,6 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
       openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
       Assertions.assertNull(openIdClient.getSigningKeyRef());
       Assertions.assertNull(openIdClient.getDecryptionKeyRef());
-      Assertions.assertNull(openIdClient.getTlsClientAuthKeyRef());
     }
   }
 

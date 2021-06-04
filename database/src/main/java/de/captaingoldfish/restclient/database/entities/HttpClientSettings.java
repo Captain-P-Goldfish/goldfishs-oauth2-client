@@ -78,6 +78,13 @@ public class HttpClientSettings
   private boolean useHostnameVerifier;
 
   /**
+   * The alias of the key reference within the application keystore to authenticate with TLS client
+   * authentication.
+   */
+  @Column(name = "TLS_CLIENT_AUTH_KEY_REF")
+  private String tlsClientAuthKeyRef;
+
+  /**
    * the moment this instance was created
    */
   @Column(name = "CREATED")
@@ -96,7 +103,8 @@ public class HttpClientSettings
                             Integer requestTimeout,
                             Integer connectionTimeout,
                             Integer socketTimeout,
-                            boolean useHostnameVerifier)
+                            boolean useHostnameVerifier,
+                            String tlsClientAuthKeyRef)
   {
     this.id = id;
     this.openIdClient = openIdClient;
@@ -105,6 +113,7 @@ public class HttpClientSettings
     this.connectionTimeout = Optional.ofNullable(connectionTimeout).orElse(30);
     this.socketTimeout = Optional.ofNullable(socketTimeout).orElse(30);
     this.useHostnameVerifier = useHostnameVerifier;
+    this.tlsClientAuthKeyRef = tlsClientAuthKeyRef;
   }
 
   @PrePersist

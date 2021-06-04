@@ -79,13 +79,6 @@ public class OpenIdClient
   private String decryptionKeyRef;
 
   /**
-   * The alias of the key reference within the application keystore to authenticate with alternative TLS client
-   * authentication instead of JWT of basic authentication.
-   */
-  @Column(name = "TLS_CLIENT_AUTH_KEY_REF")
-  private String tlsClientAuthKeyRef;
-
-  /**
    * the moment this instance was created
    */
   @Column(name = "CREATED")
@@ -97,8 +90,6 @@ public class OpenIdClient
   @Column(name = "LAST_MODIFIED")
   private Instant lastModified;
 
-
-
   /**
    * lombok builder
    */
@@ -109,8 +100,7 @@ public class OpenIdClient
                       String clientSecret,
                       String audience,
                       String signingKeyRef,
-                      String decryptionKeyRef,
-                      String tlsClientAuthKeyRef)
+                      String decryptionKeyRef)
   {
     this.id = Optional.ofNullable(id).orElse(0L);
     this.clientId = clientId;
@@ -119,7 +109,6 @@ public class OpenIdClient
     this.audience = audience;
     this.signingKeyRef = signingKeyRef;
     this.decryptionKeyRef = decryptionKeyRef;
-    this.tlsClientAuthKeyRef = tlsClientAuthKeyRef;
   }
 
   @PrePersist

@@ -81,11 +81,5 @@ public class KeystoreDaoImpl implements KeystoreDaoExtension
                                             + "where client.decryptionKeyRef = :alias");
     updateQuery.setParameter("alias", alias);
     updateQuery.executeUpdate();
-
-    updateQuery = entityManager.createQuery("update  " + OpenIdClient.class.getSimpleName() + " client "
-                                            + "set client.tlsClientAuthKeyRef = null "
-                                            + "where client.tlsClientAuthKeyRef = :alias");
-    updateQuery.setParameter("alias", alias);
-    updateQuery.executeUpdate();
   }
 }

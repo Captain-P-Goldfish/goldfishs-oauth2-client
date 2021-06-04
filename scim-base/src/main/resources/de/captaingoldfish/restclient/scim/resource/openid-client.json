@@ -89,18 +89,6 @@
       "required": false,
       "caseExact": false,
       "maxLength": 64
-    },
-    {
-      "name": "tlsClientAuthKeyRef",
-      "type": "string",
-      "description": "The alias of the key reference within the application keystore to authenticate with alternative TLS client authentication instead of JWT of basic authentication.",
-      "mutability": "readWrite",
-      "returned": "default",
-      "uniqueness": "none",
-      "multiValued": false,
-      "required": false,
-      "caseExact": false,
-      "maxLength": 64
     }
   ]
 }

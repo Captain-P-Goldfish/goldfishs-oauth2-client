@@ -46,6 +46,7 @@ public final class HttpClientSettingsConverter
                              .useHostnameVerifier(scimHttpClientSettings.getUseHostnameVerifier().orElse(true))
                              .proxy(proxy)
                              .openIdClient(openIdClient)
+                             .tlsClientAuthKeyRef(scimHttpClientSettings.getTlsClientAuthAliasReference().orElse(null))
                              .build();
   }
 
@@ -66,6 +67,7 @@ public final class HttpClientSettingsConverter
                                  .openIdClientReference(Optional.ofNullable(httpClientSettings.getOpenIdClient())
                                                                 .map(OpenIdClient::getId)
                                                                 .orElse(null))
+                                 .tlsClientAuthAliasReference(httpClientSettings.getTlsClientAuthKeyRef())
                                  .meta(Meta.builder()
                                            .created(httpClientSettings.getCreated())
                                            .lastModified(httpClientSettings.getLastModified())

@@ -85,6 +85,18 @@
       "multiValued": false,
       "required": false,
       "caseExact": false
+    },
+    {
+      "name": "tlsClientAuthAliasReference",
+      "type": "reference",
+      "description": "The id of a created proxy configuration.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "maxLength": 64
     }
   ]
 }

@@ -120,10 +120,6 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
                            resource.getDecryptionKeyRef(),
                            ScimOpenIdClient.FieldNames.DECRYPTION_KEY_REF,
                            validationContext);
-    validateAliasReference(applicationKeystore,
-                           resource.getTlsClientAuthKeyRef(),
-                           ScimOpenIdClient.FieldNames.TLS_CLIENT_AUTH_KEY_REF,
-                           validationContext);
   }
 
   /**

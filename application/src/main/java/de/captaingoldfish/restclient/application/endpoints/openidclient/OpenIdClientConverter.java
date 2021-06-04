@@ -32,7 +32,6 @@ public final class OpenIdClientConverter
     OpenIdProvider openIdProvider = providerDao.findById(scimOpenIdClient.getOpenIdProviderId()).orElseThrow();
     String signingKeyReference = scimOpenIdClient.getSigningKeyRef().orElse(null);
     String decryptionKeyReference = scimOpenIdClient.getDecryptionKeyRef().orElse(null);
-    String tlsClientAuthKeyReference = scimOpenIdClient.getTlsClientAuthKeyRef().orElse(null);
 
     return OpenIdClient.builder()
                        .id(scimOpenIdClient.getId().map(Long::parseLong).orElse(0L))
@@ -42,7 +41,6 @@ public final class OpenIdClientConverter
                        .audience(scimOpenIdClient.getAudience().orElse(null))
                        .signingKeyRef(signingKeyReference)
                        .decryptionKeyRef(decryptionKeyReference)
-                       .tlsClientAuthKeyRef(tlsClientAuthKeyReference)
                        .build();
   }
 
@@ -60,9 +58,6 @@ public final class OpenIdClientConverter
     String decryptionKeyReference = Optional.ofNullable(openIdClient.getDecryptionKeyRef())
                                             .filter(appKeystoreAliases::contains)
                                             .orElse(null);
-    String tlsClientAuthKeyReference = Optional.ofNullable(openIdClient.getTlsClientAuthKeyRef())
-                                               .filter(appKeystoreAliases::contains)
-                                               .orElse(null);
 
     return ScimOpenIdClient.builder()
                            .id(String.valueOf(openIdClient.getId()))
@@ -72,7 +67,6 @@ public final class OpenIdClientConverter
                            .audience(openIdClient.getAudience())
                            .signingKeyRef(signingKeyReference)
                            .decryptionKeyRef(decryptionKeyReference)
-                           .tlsClientAuthKeyRef(tlsClientAuthKeyReference)
                            .meta(Meta.builder()
                                      .created(openIdClient.getCreated())
                                      .lastModified(openIdClient.getLastModified())

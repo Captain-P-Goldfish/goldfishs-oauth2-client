@@ -6,8 +6,10 @@ import java.util.function.Supplier;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
+import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
+import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
@@ -60,6 +62,7 @@ public class HttpClientSettingsValidator implements RequestValidator<ScimHttpCli
     }
 
     validateProxyReference(resource, validationContext);
+    validateTlsClientAuthAliasReference(resource.getTlsClientAuthAliasReference(), validationContext);
   }
 
   /**
@@ -99,6 +102,7 @@ public class HttpClientSettingsValidator implements RequestValidator<ScimHttpCli
       return;
     }
     validateProxyReference(newResource, validationContext);
+    validateTlsClientAuthAliasReference(newResource.getTlsClientAuthAliasReference(), validationContext);
   }
 
   /**
@@ -116,6 +120,26 @@ public class HttpClientSettingsValidator implements RequestValidator<ScimHttpCli
         String errorMessage = String.format("No Proxy with ID '%s' does exist", proxyReference.get());
         validationContext.addError(ScimHttpClientSettings.FieldNames.PROXY_REFERENCE, errorMessage);
       }
+    }
+  }
+
+  /**
+   * checks if the referenced alias does exist within the application keystore. If not an error will be returned
+   */
+  private void validateTlsClientAuthAliasReference(Optional<String> aliasReference, ValidationContext validationContext)
+  {
+    KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);
+    Keystore applicationKeystore = keystoreDao.getKeystore();
+    if (aliasReference.isEmpty())
+    {
+      return;
+    }
+    final String alias = aliasReference.get();
+    final boolean hasAlias = applicationKeystore.getKeyStoreAliases().contains(alias);
+    if (!hasAlias)
+    {
+      validationContext.addError(ScimHttpClientSettings.FieldNames.TLS_CLIENT_AUTH_ALIAS_REFERENCE,
+                                 String.format("Alias '%s' does not exist within application keystore", alias));
     }
   }
 }

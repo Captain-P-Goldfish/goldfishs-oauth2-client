@@ -58,10 +58,7 @@ public class OpenIdProviderDaoImpl implements OpenIdProviderDaoExtension
 
   private void deleteOpenIdProvider(Long id)
   {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-    CriteriaDelete<OpenIdProvider> criteriaDelete = criteriaBuilder.createCriteriaDelete(OpenIdProvider.class);
-    Root<OpenIdProvider> root = criteriaDelete.from(OpenIdProvider.class);
-    criteriaDelete.where(criteriaBuilder.equal(root.get("id"), id));
-    entityManager.createQuery(criteriaDelete).executeUpdate();
+    OpenIdProvider openIdProvider = entityManager.find(OpenIdProvider.class, id);
+    entityManager.remove(openIdProvider);
   }
 }

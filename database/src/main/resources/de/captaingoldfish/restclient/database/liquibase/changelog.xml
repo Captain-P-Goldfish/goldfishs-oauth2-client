@@ -147,7 +147,6 @@
             <column name="AUDIENCE" type="VARCHAR(1024)"/>
             <column name="SIGNING_KEY_REF" type="VARCHAR(64)"/>
             <column name="DECRYPTION_KEY_REF" type="VARCHAR(64)"/>
-            <column name="TLS_CLIENT_AUTH_KEY_REF" type="VARCHAR(64)"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
@@ -173,6 +172,7 @@
             <column name="CONNECTION_TIMEOUT" type="INTEGER"/>
             <column name="SOCKET_TIMEOUT" type="INTEGER"/>
             <column name="USE_HOSTNAME_VERIFIER" type="BOOLEAN"/>
+            <column name="TLS_CLIENT_AUTH_KEY_REF" type="VARCHAR(64)"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>

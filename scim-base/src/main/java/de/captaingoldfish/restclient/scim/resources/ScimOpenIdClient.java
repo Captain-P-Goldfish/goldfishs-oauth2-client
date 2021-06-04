@@ -29,7 +29,6 @@ public class ScimOpenIdClient extends ResourceNode
                           String audience,
                           String signingKeyRef,
                           String decryptionKeyRef,
-                          String tlsClientAuthKeyRef,
                           Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -40,7 +39,6 @@ public class ScimOpenIdClient extends ResourceNode
     setAudience(audience);
     setSigningKeyRef(signingKeyRef);
     setDecryptionKeyRef(decryptionKeyRef);
-    setTlsClientAuthKeyRef(tlsClientAuthKeyRef);
     setMeta(meta);
   }
 
@@ -134,25 +132,6 @@ public class ScimOpenIdClient extends ResourceNode
     setAttribute(FieldNames.DECRYPTION_KEY_REF, decryptionKeyRef);
   }
 
-  /**
-   * The alias of the key reference within the application keystore to authenticate with alternative TLS client
-   * authentication instead of JWT of basic authentication.
-   */
-  public Optional<String> getTlsClientAuthKeyRef()
-  {
-    return getStringAttribute(FieldNames.TLS_CLIENT_AUTH_KEY_REF);
-  }
-
-  /**
-   * The alias of the key reference within the application keystore to authenticate with alternative TLS client
-   * authentication instead of JWT of basic authentication.
-   */
-  public void setTlsClientAuthKeyRef(String tlsClientAuthKeyRef)
-  {
-    setAttribute(FieldNames.TLS_CLIENT_AUTH_KEY_REF, tlsClientAuthKeyRef);
-  }
-
-
   public static class FieldNames
   {
 
@@ -165,8 +144,6 @@ public class ScimOpenIdClient extends ResourceNode
     public static final String OPEN_ID_PROVIDER_ID = "openIdProviderId";
 
     public static final String DECRYPTION_KEY_REF = "decryptionKeyRef";
-
-    public static final String TLS_CLIENT_AUTH_KEY_REF = "tlsClientAuthKeyRef";
 
     public static final String CLIENT_SECRET = "clientSecret";
 

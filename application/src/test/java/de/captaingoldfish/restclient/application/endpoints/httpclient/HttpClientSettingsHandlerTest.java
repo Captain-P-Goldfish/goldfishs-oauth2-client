@@ -1,5 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.httpclient;
 
+import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -8,18 +10,25 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
+import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.entities.Proxy;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
+import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
 import de.captaingoldfish.scim.sdk.common.response.ListResponse;
+import de.captaingoldfish.scim.sdk.server.schemas.ResourceType;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -37,6 +46,10 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
    */
   private static final String HTTP_CLIENT_SETTINGS_ENDPOINT = "/HttpClientSettings";
 
+  @Qualifier("keystoreResourceType")
+  @Autowired
+  private ResourceType keystoreResourceType;
+
   @Test
   public void testCreateHttpClientSettings()
   {
@@ -44,6 +57,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
     final Long connectionTimeout = 180L;
     final Long socketTimeout = 240L;
     final boolean useHostnameVerifier = true;
+    final KeystoreEntry keystoreEntry = addDefaultEntriesToApplicationKeystore("goldfish");
 
     OpenIdClient openIdClient = openIdClientDao.save(createOpenIdClient());
     Proxy proxy = createProxy();
@@ -55,6 +69,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
                                                                           .useHostnameVerifier(useHostnameVerifier)
+                                                                          .tlsClientAuthAliasReference(keystoreEntry.getAlias())
                                                                           .build();
     ServerResponse<ScimHttpClientSettings> response = scimRequestBuilder.create(ScimHttpClientSettings.class,
                                                                                 HTTP_CLIENT_SETTINGS_ENDPOINT)
@@ -68,6 +83,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(useHostnameVerifier, returnedResource.getUseHostnameVerifier().get());
     Assertions.assertEquals(openIdClient.getId(), returnedResource.getOpenIdClientReference().get());
     Assertions.assertEquals(proxy.getId(), returnedResource.getProxyReference().get());
+    Assertions.assertEquals(keystoreEntry.getAlias(), returnedResource.getTlsClientAuthAliasReference().get());
 
     Assertions.assertEquals(1, httpClientSettingsDao.count());
     HttpClientSettings httpClientSettings = httpClientSettingsDao.findById(Long.valueOf(returnedResource.getId().get()))
@@ -78,6 +94,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(useHostnameVerifier, httpClientSettings.isUseHostnameVerifier());
     Assertions.assertEquals(openIdClient.getId(), httpClientSettings.getOpenIdClient().getId());
     Assertions.assertEquals(proxy.getId(), httpClientSettings.getProxy().getId());
+    Assertions.assertEquals(keystoreEntry.getAlias(), httpClientSettings.getTlsClientAuthKeyRef());
   }
 
   @Test
@@ -299,6 +316,42 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(1, fieldErrorsMap.size());
 
     List<String> fieldErrors = fieldErrorsMap.get(ScimHttpClientSettings.FieldNames.PROXY_REFERENCE);
+    Assertions.assertEquals(1, fieldErrors.size());
+    MatcherAssert.assertThat(fieldErrors, Matchers.containsInAnyOrder(errorMessage));
+  }
+
+  @Test
+  public void testCreateHttpClientSettingsWithInvalidKeyAliasReference()
+  {
+    final Long requestTimeout = 120L;
+    final Long connectionTimeout = 180L;
+    final Long socketTimeout = 240L;
+    final boolean useHostnameVerifier = true;
+    OpenIdClient openIdClient = openIdClientDao.save(createOpenIdClient());
+    final String invalidKeyAlias = "invalid-alias";
+
+    ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
+                                                                          .openIdClientReference(openIdClient.getId())
+                                                                          .requestTimeout(requestTimeout)
+                                                                          .connectionTimeout(connectionTimeout)
+                                                                          .socketTimeout(socketTimeout)
+                                                                          .useHostnameVerifier(useHostnameVerifier)
+                                                                          .tlsClientAuthAliasReference(invalidKeyAlias)
+                                                                          .build();
+    ServerResponse<ScimHttpClientSettings> response = scimRequestBuilder.create(ScimHttpClientSettings.class,
+                                                                                HTTP_CLIENT_SETTINGS_ENDPOINT)
+                                                                        .setResource(scimHttpClientSettings)
+                                                                        .sendRequest();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+    ErrorResponse errorResponse = response.getErrorResponse();
+    String errorMessage = String.format("Alias '%s' does not exist within application keystore", invalidKeyAlias);
+    Assertions.assertEquals(errorMessage, errorResponse.getDetail().get());
+    Assertions.assertEquals(0, errorResponse.getErrorMessages().size());
+
+    Map<String, List<String>> fieldErrorsMap = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrorsMap.size());
+
+    List<String> fieldErrors = fieldErrorsMap.get(ScimHttpClientSettings.FieldNames.TLS_CLIENT_AUTH_ALIAS_REFERENCE);
     Assertions.assertEquals(1, fieldErrors.size());
     MatcherAssert.assertThat(fieldErrors, Matchers.containsInAnyOrder(errorMessage));
   }
@@ -833,6 +886,61 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
     MatcherAssert.assertThat(fieldErrors, Matchers.containsInAnyOrder(errorMessage));
   }
 
+  @Test
+  public void testUpdateWithInvalidTlsAuthReference()
+  {
+    final Integer requestTimeout = 120;
+    final Integer connectionTimeout = 180;
+    final Integer socketTimeout = 240;
+    final boolean useHostnameVerifier = true;
+    OpenIdClient openIdClient = openIdClientDao.save(createOpenIdClient());
+    Proxy proxy = createProxy();
+
+    HttpClientSettings httpClientSettings = HttpClientSettings.builder()
+                                                              .openIdClient(openIdClient)
+                                                              .proxy(proxy)
+                                                              .requestTimeout(requestTimeout)
+                                                              .connectionTimeout(connectionTimeout)
+                                                              .socketTimeout(socketTimeout)
+                                                              .useHostnameVerifier(useHostnameVerifier)
+                                                              .build();
+    httpClientSettings = httpClientSettingsDao.save(httpClientSettings);
+
+    final Long newRequestTimeout = 120L;
+    final Long newConnectionTimeout = 180L;
+    final Long newSocketTimeout = 240L;
+    final boolean newUseHostnameVerifier = false;
+    final String invalidKeyAlias = "unknown-alias";
+
+    ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
+                                                                          .openIdClientReference(openIdClient.getId())
+                                                                          .proxyReference(proxy.getId())
+                                                                          .requestTimeout(newRequestTimeout)
+                                                                          .connectionTimeout(newConnectionTimeout)
+                                                                          .socketTimeout(newSocketTimeout)
+                                                                          .useHostnameVerifier(newUseHostnameVerifier)
+                                                                          .tlsClientAuthAliasReference(invalidKeyAlias)
+                                                                          .build();
+
+    ServerResponse<ScimHttpClientSettings> response = scimRequestBuilder.update(ScimHttpClientSettings.class,
+                                                                                HTTP_CLIENT_SETTINGS_ENDPOINT,
+                                                                                String.valueOf(httpClientSettings.getId()))
+                                                                        .setResource(scimHttpClientSettings)
+                                                                        .sendRequest();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+    ErrorResponse errorResponse = response.getErrorResponse();
+    String errorMessage = String.format("Alias '%s' does not exist within application keystore", invalidKeyAlias);
+    Assertions.assertEquals(errorMessage, errorResponse.getDetail().get());
+    Assertions.assertEquals(0, errorResponse.getErrorMessages().size());
+
+    Map<String, List<String>> fieldErrorsMap = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrorsMap.size());
+
+    List<String> fieldErrors = fieldErrorsMap.get(ScimHttpClientSettings.FieldNames.TLS_CLIENT_AUTH_ALIAS_REFERENCE);
+    Assertions.assertEquals(1, fieldErrors.size());
+    MatcherAssert.assertThat(fieldErrors, Matchers.containsInAnyOrder(errorMessage));
+  }
+
   private Proxy createProxy()
   {
     return proxyDao.save(Proxy.builder().host("localhost").build());
@@ -854,5 +962,33 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
                                                 .name(UUID.randomUUID().toString())
                                                 .discoveryEndpoint("http://localhost:8080")
                                                 .build());
+  }
+
+  /**
+   * adds all entries from the unit-keystore of type jks into the application keystore
+   */
+  @SneakyThrows
+  private KeystoreEntry addDefaultEntriesToApplicationKeystore(String alias)
+  {
+    KeystoreEntry keystoreEntry = getUnitTestKeystoreEntryAccess(alias);
+
+    KeystoreHandler keystoreHandler = (KeystoreHandler)keystoreResourceType.getResourceHandlerImpl();
+
+    String b64Keystore = Base64.getEncoder().encodeToString(readAsBytes(UNIT_TEST_KEYSTORE_JKS));
+    ScimKeystore.FileUpload fileUpload = ScimKeystore.FileUpload.builder()
+                                                                .keystoreFile(b64Keystore)
+                                                                .keystoreFileName("test.jks")
+                                                                .keystorePassword(UNIT_TEST_KEYSTORE_PASSWORD)
+                                                                .build();
+    ScimKeystore uploadResponse = keystoreHandler.handleKeystoreUpload(fileUpload);
+
+    ScimKeystore.AliasSelection aliasSelection = ScimKeystore.AliasSelection.builder()
+                                                                            .stateId(uploadResponse.getAliasSelection()
+                                                                                                   .getStateId())
+                                                                            .aliases(Collections.singletonList(keystoreEntry.getAlias()))
+                                                                            .privateKeyPassword(keystoreEntry.getPrivateKeyPassword())
+                                                                            .build();
+    keystoreHandler.handleAliasSelection(aliasSelection);
+    return keystoreEntry;
   }
 }
