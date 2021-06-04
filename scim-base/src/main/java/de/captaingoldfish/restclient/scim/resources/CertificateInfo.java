@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 
-import org.apache.tomcat.util.buf.HexUtils;
+import org.apache.commons.codec.binary.Hex;
 
 import de.captaingoldfish.scim.sdk.common.resources.base.ScimObjectNode;
 import lombok.Builder;
@@ -31,8 +31,8 @@ public class CertificateInfo extends ScimObjectNode
     if (certificate != null)
     {
       Info info = new Info(certificate.getIssuerDN().toString(), certificate.getSubjectDN().toString(),
-                           HexUtils.toHexString(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()))
-                                   .toLowerCase(),
+                           Hex.encodeHexString(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()))
+                              .toLowerCase(),
                            certificate.getNotBefore().toInstant(), certificate.getNotAfter().toInstant());
       setInfo(info);
     }

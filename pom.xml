@@ -51,22 +51,21 @@
         <version.scim.sdk>1.10.0</version.scim.sdk>
         <version.commons.lang3>3.11</version.commons.lang3>
         <version.commons.io>2.8.0</version.commons.io>
-        <version.spring>5.3.5</version.spring>
+        <version.commons.codec>1.15</version.commons.codec>
+        <version.spring>5.3.7</version.spring>
         <version.springboot>2.4.3</version.springboot>
         <version.spring.data>2.4.3</version.spring.data>
         <version.hsqldb>2.5.1</version.hsqldb>
-        <version.sqlserver.driver>9.2.0.jre11</version.sqlserver.driver>
-        <version.mysql.driver>8.0.23</version.mysql.driver>
-        <version.mariadb.driver>2.7.2</version.mariadb.driver>
-        <version.postgres.driver>42.2.19</version.postgres.driver>
+        <version.sqlserver.driver>9.2.1.jre11</version.sqlserver.driver>
+        <version.mysql.driver>8.0.25</version.mysql.driver>
+        <version.mariadb.driver>2.7.3</version.mariadb.driver>
+        <version.postgres.driver>42.2.20</version.postgres.driver>
         <version.oracle.driver>19.10.0.0</version.oracle.driver>
-        <version.liquibase>4.3.1</version.liquibase>
+        <version.liquibase>4.3.5</version.liquibase>
         <version.bouncy.castle>1.68</version.bouncy.castle>
         <version.validation.api>2.0.1.Final</version.validation.api>
-        <version.hibernate>5.4.27.Final</version.hibernate>
-        <version.hibernate.validator>6.2.0.Final</version.hibernate.validator>
-        <version.nimbus>9.4.2</version.nimbus>
-        <version.caffeine>3.0.1</version.caffeine>
+        <version.nimbus>9.9.3</version.nimbus>
+        <version.caffeine>3.0.2</version.caffeine>
         <version.commons.fileupload>1.4</version.commons.fileupload>
         <version.unirest>3.11.11</version.unirest>
 
@@ -95,13 +94,8 @@
     </properties>
 
     <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>de.captaingoldfish</groupId>
-                <artifactId>scim-base</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
+        <dependencies>
             <!-- IDE dependencies -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -127,6 +121,11 @@
             </dependency>
 
             <!-- application dependencies -->
+            <dependency>
+                <groupId>de.captaingoldfish</groupId>
+                <artifactId>scim-base</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>de.captaingoldfish</groupId>
                 <artifactId>database</artifactId>
@@ -161,6 +160,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${version.commons.io}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${version.commons.codec}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -213,16 +217,6 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-core</artifactId>
                 <version>${version.liquibase}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate.validator</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${version.hibernate.validator}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-java8</artifactId>
-                <version>${version.hibernate}</version>
             </dependency>
             <dependency>
                 <groupId>javax.validation</groupId>
@@ -350,7 +344,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!-- application dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -359,75 +352,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                    <groupId>org.springframework.boot</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- database -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc10</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-java8</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-        </dependency>
-
 
         <!-- logging dependencies -->
         <dependency>
