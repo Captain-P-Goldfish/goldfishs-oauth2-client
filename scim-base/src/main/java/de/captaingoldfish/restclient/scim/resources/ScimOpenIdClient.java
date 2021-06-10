@@ -26,8 +26,9 @@ public class ScimOpenIdClient extends ResourceNode
                           Long openIdProviderId,
                           String clientId,
                           String clientSecret,
-                          String audience,
                           String signingKeyRef,
+                          String authenticationType,
+                          String audience,
                           String decryptionKeyRef,
                           Meta meta)
   {
@@ -36,8 +37,9 @@ public class ScimOpenIdClient extends ResourceNode
     setOpenIdProviderId(openIdProviderId);
     setClientId(clientId);
     setClientSecret(clientSecret);
-    setAudience(audience);
+    setAuthenticationType(authenticationType);
     setSigningKeyRef(signingKeyRef);
+    setAudience(audience);
     setDecryptionKeyRef(decryptionKeyRef);
     setMeta(meta);
   }
@@ -76,12 +78,28 @@ public class ScimOpenIdClient extends ResourceNode
   }
 
   /**
-   * The password of the client. This is an optional value that may be used as an alternative to JWT
-   * authentication
+   * An enumeration that tells us the type of authentication that is configured with this client
    */
   public void setClientSecret(String clientSecret)
   {
     setAttribute(FieldNames.CLIENT_SECRET, clientSecret);
+  }
+
+  /**
+   * An enumeration that tells us the type of authentication that is configured with this client
+   */
+  public String getAuthenticationType()
+  {
+    return getStringAttribute(FieldNames.AUTHENTICATION_TYPE).orElse(null);
+  }
+
+  /**
+   * The password of the client. This is an optional value that may be used as an alternative to JWT
+   * authentication
+   */
+  public void setAuthenticationType(String authenticationType)
+  {
+    setAttribute(FieldNames.AUTHENTICATION_TYPE, authenticationType);
   }
 
   /**
@@ -144,6 +162,8 @@ public class ScimOpenIdClient extends ResourceNode
     public static final String OPEN_ID_PROVIDER_ID = "openIdProviderId";
 
     public static final String DECRYPTION_KEY_REF = "decryptionKeyRef";
+
+    public static final String AUTHENTICATION_TYPE = "authenticationType";
 
     public static final String CLIENT_SECRET = "clientSecret";
 

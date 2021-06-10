@@ -3,7 +3,7 @@ package de.captaingoldfish.restclient.application.endpoints.openidclient;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.captaingoldfish.restclient.application.endpoints.openidclient.validation.OpenIdProviderRequestValidator;
+import de.captaingoldfish.restclient.application.endpoints.openidclient.validation.OpenIdClientRequestValidator;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
@@ -116,6 +116,6 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
   @Override
   public RequestValidator<ScimOpenIdClient> getRequestValidator()
   {
-    return new OpenIdProviderRequestValidator();
+    return new OpenIdClientRequestValidator();
   }
 }

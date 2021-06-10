@@ -70,6 +70,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "jwt";
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
                                                         .openIdProviderId(openIdProvider.getId())
@@ -78,6 +79,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
     Assertions.assertEquals(0, openIdClientDao.count());
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
@@ -92,6 +94,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(audience, createdResource.getAudience().get());
     Assertions.assertEquals(signingKeyRef, createdResource.getSigningKeyRef().get());
     Assertions.assertEquals(decryptionKeyRef, createdResource.getDecryptionKeyRef().get());
+    Assertions.assertEquals(authenticationType, createdResource.getAuthenticationType());
 
     Assertions.assertEquals(1, openIdClientDao.count());
     OpenIdClient openIdClient = openIdClientDao.findById(Long.valueOf(createdResource.getId().get())).get();
@@ -100,17 +103,61 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(audience, openIdClient.getAudience());
     Assertions.assertEquals(signingKeyRef, openIdClient.getSigningKeyRef());
     Assertions.assertEquals(decryptionKeyRef, openIdClient.getDecryptionKeyRef());
+    Assertions.assertEquals(authenticationType, openIdClient.getAuthenticationType());
     Assertions.assertEquals(1, openIdClientDao.count());
   }
 
   @Test
-  public void testCreateOpenIdClientWithOptionalValuesLeftEmpty()
+  public void testCreateOpenIdClientWithBasicAuthOnly()
   {
     final String clientId = "goldfish";
+    final String clientSecret = "123456";
+    final String authenticationType = "basic";
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
                                                         .openIdProviderId(openIdProvider.getId())
                                                         .clientId(clientId)
+                                                        .clientSecret(clientSecret)
+                                                        .authenticationType(authenticationType)
+                                                        .build();
+    Assertions.assertEquals(0, openIdClientDao.count());
+    ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
+                                                                          OPENID_CLIENT_ENDPOINT)
+                                                                  .setResource(scimOpenIdClient)
+                                                                  .sendRequest();
+    Assertions.assertEquals(HttpStatus.CREATED, response.getHttpStatus());
+
+    ScimOpenIdClient createdResource = response.getResource();
+    Assertions.assertEquals(clientId, createdResource.getClientId());
+    Assertions.assertTrue(createdResource.getClientSecret().isPresent());
+    Assertions.assertFalse(createdResource.getAudience().isPresent());
+    Assertions.assertFalse(createdResource.getSigningKeyRef().isPresent());
+    Assertions.assertFalse(createdResource.getDecryptionKeyRef().isPresent());
+
+    Assertions.assertEquals(1, openIdClientDao.count());
+    OpenIdClient openIdClient = openIdClientDao.findById(Long.valueOf(createdResource.getId().get())).get();
+    Assertions.assertEquals(clientId, openIdClient.getClientId());
+    Assertions.assertEquals(clientSecret, openIdClient.getClientSecret());
+    Assertions.assertEquals(authenticationType, openIdClient.getAuthenticationType());
+    Assertions.assertEquals(clientSecret, openIdClient.getClientSecret());
+    Assertions.assertNull(openIdClient.getAudience());
+    Assertions.assertNull(openIdClient.getSigningKeyRef());
+    Assertions.assertNull(openIdClient.getDecryptionKeyRef());
+    Assertions.assertEquals(1, openIdClientDao.count());
+  }
+
+  @Test
+  public void testCreateOpenIdClientWithJwtAuthOnly()
+  {
+    final String clientId = "goldfish";
+    final String signingKeyRef = "localhost";
+    final String authenticationType = "jwt";
+
+    ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
+                                                        .openIdProviderId(openIdProvider.getId())
+                                                        .clientId(clientId)
+                                                        .signingKeyRef(signingKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
     Assertions.assertEquals(0, openIdClientDao.count());
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
@@ -123,17 +170,76 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(clientId, createdResource.getClientId());
     Assertions.assertFalse(createdResource.getClientSecret().isPresent());
     Assertions.assertFalse(createdResource.getAudience().isPresent());
-    Assertions.assertFalse(createdResource.getSigningKeyRef().isPresent());
+    Assertions.assertTrue(createdResource.getSigningKeyRef().isPresent());
     Assertions.assertFalse(createdResource.getDecryptionKeyRef().isPresent());
 
     Assertions.assertEquals(1, openIdClientDao.count());
     OpenIdClient openIdClient = openIdClientDao.findById(Long.valueOf(createdResource.getId().get())).get();
     Assertions.assertEquals(clientId, openIdClient.getClientId());
+    Assertions.assertEquals(signingKeyRef, openIdClient.getSigningKeyRef());
+    Assertions.assertEquals(authenticationType, openIdClient.getAuthenticationType());
     Assertions.assertNull(openIdClient.getClientSecret());
     Assertions.assertNull(openIdClient.getAudience());
-    Assertions.assertNull(openIdClient.getSigningKeyRef());
     Assertions.assertNull(openIdClient.getDecryptionKeyRef());
     Assertions.assertEquals(1, openIdClientDao.count());
+  }
+
+  @Test
+  public void testCreateOpenIdClientWithJwtAndMissingSigningKey()
+  {
+    final String clientId = "goldfish";
+    final String authenticationType = "jwt";
+
+    ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
+                                                        .openIdProviderId(openIdProvider.getId())
+                                                        .clientId(clientId)
+                                                        .authenticationType(authenticationType)
+                                                        .build();
+    Assertions.assertEquals(0, openIdClientDao.count());
+    ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
+                                                                          OPENID_CLIENT_ENDPOINT)
+                                                                  .setResource(scimOpenIdClient)
+                                                                  .sendRequest();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+
+    ErrorResponse errorResponse = response.getErrorResponse();
+    Assertions.assertEquals(0, errorResponse.getErrorMessages().size());
+
+    Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrors.size());
+    List<String> clientIdErrors = fieldErrors.get(ScimOpenIdClient.FieldNames.SIGNING_KEY_REF);
+    Assertions.assertEquals(1, clientIdErrors.size());
+    String errorMessage = "SigningKey must be present";
+    MatcherAssert.assertThat(clientIdErrors, Matchers.containsInAnyOrder(errorMessage));
+  }
+
+  @Test
+  public void testCreateOpenIdClientWithBasicAndMissingClientSecret()
+  {
+    final String clientId = "goldfish";
+    final String authenticationType = "basic";
+
+    ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
+                                                        .openIdProviderId(openIdProvider.getId())
+                                                        .clientId(clientId)
+                                                        .authenticationType(authenticationType)
+                                                        .build();
+    Assertions.assertEquals(0, openIdClientDao.count());
+    ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
+                                                                          OPENID_CLIENT_ENDPOINT)
+                                                                  .setResource(scimOpenIdClient)
+                                                                  .sendRequest();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+
+    ErrorResponse errorResponse = response.getErrorResponse();
+    Assertions.assertEquals(0, errorResponse.getErrorMessages().size());
+
+    Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrors.size());
+    List<String> clientIdErrors = fieldErrors.get(ScimOpenIdClient.FieldNames.CLIENT_SECRET);
+    Assertions.assertEquals(1, clientIdErrors.size());
+    String errorMessage = "ClientSecret must be present";
+    MatcherAssert.assertThat(clientIdErrors, Matchers.containsInAnyOrder(errorMessage));
   }
 
   @Test
@@ -144,6 +250,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "jwt";
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
                                                         .openIdProviderId(openIdProvider.getId())
@@ -152,6 +259,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
 
     OpenIdClient openIdClient = OpenIdClientConverter.toOpenIdClient(scimOpenIdClient);
@@ -181,6 +289,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "basic";
 
     final Long unknownId = 999999L;
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
@@ -190,6 +299,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
 
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
@@ -216,6 +326,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "basic";
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
                                                         .clientId(clientId)
@@ -223,6 +334,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
 
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
@@ -248,6 +360,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String clientId = "goldfish";
     final String clientSecret = "blubb";
     final String audience = "pond";
+    final String authenticationType = "jwt";
     final String unknownAlias = "unknown";
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
@@ -257,6 +370,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(unknownAlias)
                                                         .decryptionKeyRef(unknownAlias)
+                                                        .authenticationType(authenticationType)
                                                         .build();
 
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
@@ -295,6 +409,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType("basic")
                                                         .build();
 
     OpenIdClient openIdClient = OpenIdClientConverter.toOpenIdClient(scimOpenIdClient);
@@ -311,6 +426,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(audience, returnedResource.getAudience().get());
     Assertions.assertEquals(signingKeyRef, returnedResource.getSigningKeyRef().get());
     Assertions.assertEquals(decryptionKeyRef, returnedResource.getDecryptionKeyRef().get());
+    Assertions.assertEquals("basic", returnedResource.getAuthenticationType());
   }
 
   @Test
@@ -342,6 +458,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                      .audience(audience)
                                      .signingKeyRef(signingKeyRef)
                                      .decryptionKeyRef(decryptionKeyRef)
+                                     .authenticationType("jwt")
                                      .build());
 
 
@@ -361,6 +478,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(audience, scimOpenIdClient.getAudience().get());
     Assertions.assertEquals(signingKeyRef, scimOpenIdClient.getSigningKeyRef().get());
     Assertions.assertEquals(decryptionKeyRef, scimOpenIdClient.getDecryptionKeyRef().get());
+    Assertions.assertEquals("jwt", scimOpenIdClient.getAuthenticationType());
   }
 
   @Test
@@ -413,6 +531,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "basic";
 
     OpenIdClient openIdClient = openIdClientDao.save(OpenIdClient.builder()
                                                                  .openIdProvider(openIdProvider)
@@ -421,6 +540,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                                  .audience(audience)
                                                                  .signingKeyRef(signingKeyRef)
                                                                  .decryptionKeyRef(decryptionKeyRef)
+                                                                 .authenticationType(authenticationType)
                                                                  .build());
 
     final String newClientId = "cup";
@@ -428,6 +548,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String newAudience = "key";
     final String newSigningKeyRef = "unit-test";
     final String newDecryptionKeyRef = "goldfish";
+    final String newAuthenticationType = "jwt";
     addDefaultEntriesToApplicationKeystore(newSigningKeyRef);
     addDefaultEntriesToApplicationKeystore(newDecryptionKeyRef);
 
@@ -438,6 +559,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(newAudience)
                                                         .signingKeyRef(newSigningKeyRef)
                                                         .decryptionKeyRef(newDecryptionKeyRef)
+                                                        .authenticationType(newAuthenticationType)
                                                         .build();
     Assertions.assertEquals(1, openIdClientDao.count());
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.update(ScimOpenIdClient.class,
@@ -453,6 +575,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(newAudience, updatedResource.getAudience().get());
     Assertions.assertEquals(newSigningKeyRef, scimOpenIdClient.getSigningKeyRef().get());
     Assertions.assertEquals(newDecryptionKeyRef, scimOpenIdClient.getDecryptionKeyRef().get());
+    Assertions.assertEquals(newAuthenticationType, scimOpenIdClient.getAuthenticationType());
     Assertions.assertEquals(1, openIdClientDao.count());
 
     openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
@@ -461,6 +584,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(newAudience, openIdClient.getAudience());
     Assertions.assertEquals(newSigningKeyRef, openIdClient.getSigningKeyRef());
     Assertions.assertEquals(newDecryptionKeyRef, openIdClient.getDecryptionKeyRef());
+    Assertions.assertEquals(newAuthenticationType, openIdClient.getAuthenticationType());
   }
 
   @Test
@@ -471,6 +595,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "basic";
 
     OpenIdClient openIdClient = openIdClientDao.save(OpenIdClient.builder()
                                                                  .openIdProvider(openIdProvider)
@@ -479,6 +604,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                                  .audience(audience)
                                                                  .signingKeyRef(signingKeyRef)
                                                                  .decryptionKeyRef(decryptionKeyRef)
+                                                                 .authenticationType(authenticationType)
                                                                  .build());
     final String otherClientId = "fish";
 
@@ -489,6 +615,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                      .audience(audience)
                                      .signingKeyRef(signingKeyRef)
                                      .decryptionKeyRef(decryptionKeyRef)
+                                     .authenticationType(authenticationType)
                                      .build());
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
@@ -498,6 +625,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.update(ScimOpenIdClient.class,
                                                                           OPENID_CLIENT_ENDPOINT,
@@ -528,6 +656,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                                  .audience(audience)
                                                                  .signingKeyRef(signingKeyRef)
                                                                  .decryptionKeyRef(decryptionKeyRef)
+                                                                 .authenticationType("jwt")
                                                                  .build());
     final String otherClientId = "fish";
 
@@ -543,6 +672,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                      .audience(audience)
                                      .signingKeyRef(signingKeyRef)
                                      .decryptionKeyRef(decryptionKeyRef)
+                                     .authenticationType("jwt")
                                      .build());
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
@@ -552,6 +682,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType("jwt")
                                                         .build();
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.update(ScimOpenIdClient.class,
                                                                           OPENID_CLIENT_ENDPOINT,
@@ -565,6 +696,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(audience, updatedResource.getAudience().get());
     Assertions.assertEquals(signingKeyRef, updatedResource.getSigningKeyRef().get());
     Assertions.assertEquals(decryptionKeyRef, updatedResource.getDecryptionKeyRef().get());
+    Assertions.assertEquals("jwt", updatedResource.getAuthenticationType());
   }
 
   @Test
@@ -575,6 +707,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "basic";
 
     OpenIdClient openIdClient = openIdClientDao.save(OpenIdClient.builder()
                                                                  .openIdProvider(openIdProvider)
@@ -583,6 +716,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                                  .audience(audience)
                                                                  .signingKeyRef(signingKeyRef)
                                                                  .decryptionKeyRef(decryptionKeyRef)
+                                                                 .authenticationType(authenticationType)
                                                                  .build());
 
     final Long unknownProviderId = 99999999999L;
@@ -593,6 +727,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.update(ScimOpenIdClient.class,
                                                                           OPENID_CLIENT_ENDPOINT,
@@ -619,6 +754,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String audience = "pond";
     final String signingKeyRef = "localhost";
     final String decryptionKeyRef = "localhost";
+    final String authenticationType = "jwt";
 
     OpenIdClient openIdClient = openIdClientDao.save(OpenIdClient.builder()
                                                                  .openIdProvider(openIdProvider)
@@ -627,6 +763,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                                  .audience(audience)
                                                                  .signingKeyRef(signingKeyRef)
                                                                  .decryptionKeyRef(decryptionKeyRef)
+                                                                 .authenticationType(authenticationType)
                                                                  .build());
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
@@ -635,6 +772,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
                                                         .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
                                                         .build();
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.update(ScimOpenIdClient.class,
                                                                           OPENID_CLIENT_ENDPOINT,
@@ -668,6 +806,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                                  .openIdProvider(openIdProvider)
                                                                  .clientId(clientId)
                                                                  .clientSecret(clientSecret)
+                                                                 .authenticationType("jwt")
                                                                  .audience(audience)
                                                                  .signingKeyRef(signingKeyRef)
                                                                  .decryptionKeyRef(decryptionKeyRef)
@@ -677,6 +816,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .openIdProviderId(openIdProvider.getId())
                                                         .clientId(clientId)
                                                         .clientSecret(clientSecret)
+                                                        .authenticationType("basic")
                                                         .audience(audience)
                                                         .build();
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.update(ScimOpenIdClient.class,
@@ -689,6 +829,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(clientId, updatedResource.getClientId());
     Assertions.assertEquals(clientSecret, updatedResource.getClientSecret().get());
     Assertions.assertEquals(audience, updatedResource.getAudience().get());
+    Assertions.assertEquals("basic", updatedResource.getAuthenticationType());
     Assertions.assertFalse(updatedResource.getSigningKeyRef().isPresent());
     Assertions.assertFalse(updatedResource.getDecryptionKeyRef().isPresent());
   }

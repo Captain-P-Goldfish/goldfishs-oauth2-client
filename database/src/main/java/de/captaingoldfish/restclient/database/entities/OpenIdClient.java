@@ -59,17 +59,24 @@ public class OpenIdClient
   private String clientSecret;
 
   /**
-   * the audience is an optional field that becomes necessary if the {@link #signingKeyRef} is present and the
-   * client is going to use JWT authentication
+   * the configured type of authentication that is to be used by this client. Either one of ["basic", "jwt",
+   * "other"]
    */
-  @Column(name = "AUDIENCE")
-  private String audience;
+  @Column(name = "AUTHENTICATION_TYPE")
+  private String authenticationType;
 
   /**
    * The alias of the key reference within the application keystore to sign JWTs for authentication.
    */
   @Column(name = "SIGNING_KEY_REF")
   private String signingKeyRef;
+
+  /**
+   * the audience is an optional field that becomes necessary if the {@link #signingKeyRef} is present and the
+   * client is going to use JWT authentication
+   */
+  @Column(name = "AUDIENCE")
+  private String audience;
 
   /**
    * The alias of the key reference within the application keystore to decrypt JWTs on responses e.g. the ID
@@ -98,16 +105,18 @@ public class OpenIdClient
                       OpenIdProvider openIdProvider,
                       String clientId,
                       String clientSecret,
-                      String audience,
+                      String authenticationType,
                       String signingKeyRef,
+                      String audience,
                       String decryptionKeyRef)
   {
     this.id = Optional.ofNullable(id).orElse(0L);
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.openIdProvider = openIdProvider;
-    this.audience = audience;
     this.signingKeyRef = signingKeyRef;
+    this.authenticationType = authenticationType;
+    this.audience = audience;
     this.decryptionKeyRef = decryptionKeyRef;
   }
 

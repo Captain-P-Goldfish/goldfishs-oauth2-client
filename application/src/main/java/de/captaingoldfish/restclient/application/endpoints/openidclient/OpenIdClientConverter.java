@@ -38,8 +38,9 @@ public final class OpenIdClientConverter
                        .openIdProvider(openIdProvider)
                        .clientId(scimOpenIdClient.getClientId())
                        .clientSecret(scimOpenIdClient.getClientSecret().orElse(null))
-                       .audience(scimOpenIdClient.getAudience().orElse(null))
+                       .authenticationType(scimOpenIdClient.getAuthenticationType())
                        .signingKeyRef(signingKeyReference)
+                       .audience(scimOpenIdClient.getAudience().orElse(null))
                        .decryptionKeyRef(decryptionKeyReference)
                        .build();
   }
@@ -64,8 +65,9 @@ public final class OpenIdClientConverter
                            .openIdProviderId(openIdClient.getOpenIdProvider().getId())
                            .clientId(openIdClient.getClientId())
                            .clientSecret(openIdClient.getClientSecret())
-                           .audience(openIdClient.getAudience())
+                           .authenticationType(openIdClient.getAuthenticationType())
                            .signingKeyRef(signingKeyReference)
+                           .audience(openIdClient.getAudience())
                            .decryptionKeyRef(decryptionKeyReference)
                            .meta(Meta.builder()
                                      .created(openIdClient.getCreated())

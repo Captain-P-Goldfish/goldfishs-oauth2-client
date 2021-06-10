@@ -19,7 +19,7 @@ import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext
  * @author Pascal Knueppel
  * @since 28.05.2021
  */
-public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpenIdClient>
+public class OpenIdClientRequestValidator implements RequestValidator<ScimOpenIdClient>
 {
 
   /**
@@ -46,6 +46,7 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
                                  String.format("A client with this clientId '%s' was already registered",
                                                resource.getClientId()));
     });
+    validateAuthenticationDetails(resource, validationContext);
   }
 
   /**
@@ -83,6 +84,7 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
                                                                 newResource.getClientId()));
                      });
     }
+    validateAuthenticationDetails(newResource, validationContext);
   }
 
   /**
@@ -140,6 +142,30 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
     {
       validationContext.addError(fieldNameForError,
                                  String.format("Alias '%s' does not exist within application keystore", alias));
+    }
+  }
+
+  /**
+   * checks that the setup authentication details are valid
+   * 
+   * @param resource the resource to create or update
+   */
+  private void validateAuthenticationDetails(ScimOpenIdClient resource, ValidationContext validationContext)
+  {
+    if ("basic".equals(resource.getAuthenticationType()))
+    {
+      if (resource.getClientSecret().isEmpty())
+      {
+        validationContext.addError(ScimOpenIdClient.FieldNames.CLIENT_SECRET, "ClientSecret must be present");
+      }
+    }
+
+    if ("jwt".equals(resource.getAuthenticationType()))
+    {
+      if (resource.getSigningKeyRef().isEmpty())
+      {
+        validationContext.addError(ScimOpenIdClient.FieldNames.SIGNING_KEY_REF, "SigningKey must be present");
+      }
     }
   }
 }

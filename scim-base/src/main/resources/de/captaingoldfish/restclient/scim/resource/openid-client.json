@@ -43,6 +43,22 @@
       "maxLength": 255
     },
     {
+      "name": "authenticationType",
+      "type": "string",
+      "description": "An enumeration that tells us the type of authentication that is configured with this client",
+      "mutability": "readWrite",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "canonicalTypes": [
+        "basic",
+        "jwt",
+        "other"
+      ]
+    },
+    {
       "name": "clientSecret",
       "type": "string",
       "description": "The password of the client. This is an optional value that may be used as an alternative to JWT authentication",
@@ -52,19 +68,8 @@
       "multiValued": false,
       "required": false,
       "caseExact": false,
+      "minLength": 1,
       "maxLength": 255
-    },
-    {
-      "name": "audience",
-      "type": "string",
-      "description": "The audience is an optional field that becomes necessary if JWT authentication is used. This field will be entered into the created JWTs audience value.",
-      "mutability": "readWrite",
-      "returned": "default",
-      "uniqueness": "none",
-      "multiValued": false,
-      "required": false,
-      "caseExact": false,
-      "maxLength": 1024
     },
     {
       "name": "signingKeyRef",
@@ -77,6 +82,18 @@
       "required": false,
       "caseExact": false,
       "maxLength": 64
+    },
+    {
+      "name": "audience",
+      "type": "string",
+      "description": "The audience is an optional field that becomes necessary if JWT authentication is used. This field will be entered into the created JWTs audience value.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "maxLength": 1024
     },
     {
       "name": "decryptionKeyRef",
