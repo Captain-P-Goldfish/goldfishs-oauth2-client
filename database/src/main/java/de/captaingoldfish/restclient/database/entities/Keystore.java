@@ -2,12 +2,18 @@ package de.captaingoldfish.restclient.database.entities;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -144,16 +150,48 @@ public class Keystore
     }
   }
 
-  public KeystoreEntry addAliasEntry(KeystoreEntry aliasEntry)
+  public KeystoreEntry addKeyEntry(KeystoreEntry aliasEntry)
   {
-    return this.addAliasEntry(aliasEntry.getAlias(), aliasEntry.getPrivateKeyPassword());
+    return this.addKeyEntry(aliasEntry.getAlias(), aliasEntry.getPrivateKeyPassword());
   }
 
-  public KeystoreEntry addAliasEntry(String alias, String keyPassword)
+  public KeystoreEntry addKeyEntry(String alias, String keyPassword)
   {
+    String keyAlgorithm = getCertificate(alias).getPublicKey().getAlgorithm();
     KeystoreEntry keystoreEntry = new KeystoreEntry(alias, keyPassword);
+    keystoreEntry.setKeyAlgorithm(keyAlgorithm);
+    keystoreEntry.setKeyLength(getKeyLength(alias));
     getKeystoreEntries().add(keystoreEntry);
     return keystoreEntry;
+  }
+
+  /**
+   * gets a key pair by its alias entry
+   * 
+   * @param alias the alias of the keypair
+   * @return the public and private key of the given entry
+   */
+  public KeyPair getKeyPair(String alias)
+  {
+    return getKeystoreEntries().stream()
+                               .filter(entry -> entry.getAlias().equals(alias))
+                               .findAny()
+                               .map(this::getKeyPair)
+                               .orElseThrow();
+  }
+
+  /**
+   * retrieves the private and the public key of a specific keystore entry
+   * 
+   * @param keystoreEntry the keystore entry for which we would like to get the public and private key
+   * @return the private and public key of the given entry
+   */
+  @SneakyThrows
+  public KeyPair getKeyPair(KeystoreEntry keystoreEntry)
+  {
+    PrivateKey privateKey = getPrivateKey(keystoreEntry);
+    PublicKey publicKey = keyStore.getCertificate(keystoreEntry.getAlias()).getPublicKey();
+    return new KeyPair(publicKey, privateKey);
   }
 
   /**
@@ -250,5 +288,37 @@ public class Keystore
       aliases.add(aliasesEnumeration.nextElement());
     }
     return aliases;
+  }
+
+  /**
+   * gets the key length of a specific key entry
+   * 
+   * @param alias the key entry of which the keylength should be determined
+   * @return the length of the key.
+   */
+  private Integer getKeyLength(String alias)
+  {
+    Certificate certificate = getCertificate(alias);
+    PublicKey publicKey = certificate.getPublicKey();
+    switch (publicKey.getAlgorithm())
+    {
+      case "RSA":
+        return ((RSAPublicKey)publicKey).getModulus().bitLength();
+      case "DSA":
+        return ((DSAPublicKey)publicKey).getParams().getP().bitLength();
+      case "EC":
+        return ((ECPublicKey)publicKey).getParams().getOrder().bitLength();
+      default:
+        // keys of other types should never be stored so this should not happen
+        return null;
+    }
+  }
+
+  /**
+   * gets the keystore entry infos for the given alias
+   */
+  public KeystoreEntry getKeystoreEntry(String alias)
+  {
+    return getKeystoreEntries().stream().filter(entry -> entry.getAlias().equals(alias)).findAny().orElseThrow();
   }
 }

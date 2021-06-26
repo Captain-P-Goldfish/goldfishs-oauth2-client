@@ -3,7 +3,6 @@ package de.captaingoldfish.restclient.scim.resources;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import de.captaingoldfish.scim.sdk.common.resources.ResourceNode;
 import de.captaingoldfish.scim.sdk.common.resources.base.ScimObjectNode;
@@ -13,6 +12,9 @@ import lombok.NoArgsConstructor;
 
 
 /**
+ * Structure to load and modify the application keystore. The entries can be used to encrypt, sign or for TLS
+ * client authentication
+ * 
  * @author Pascal Knueppel
  * @since 28.04.2021
  */
@@ -21,7 +23,7 @@ public class ScimKeystore extends ResourceNode
 {
 
   @Builder
-  public ScimKeystore(List<String> aliasesList,
+  public ScimKeystore(List<KeyInfos> keyInfosList,
                       FileUpload fileUpload,
                       AliasSelection aliasSelection,
                       CertificateInfo certificateInfo,
@@ -29,40 +31,32 @@ public class ScimKeystore extends ResourceNode
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId("1");
-    setAliases(aliasesList);
+    setKeyInfos(keyInfosList);
     setFileUpload(fileUpload);
     setAliasSelection(aliasSelection);
     setCertificateInfo(certificateInfo);
     setMeta(meta);
   }
 
-  /**
-   * Contains all aliases present within the application keystore.
-   */
-  public Set<String> getAliases()
+  /** A list of all key entries with some minor infos that are present within this keystore. */
+  public List<KeyInfos> getKeyInfos()
   {
-    return getSimpleArrayAttributeSet(FieldNames.ALIASES);
+    return getArrayAttribute(FieldNames.KEY_INFOS, KeyInfos.class);
   }
 
-  /**
-   * Contains all aliases present within the application keystore.
-   */
-  public void setAliases(List<String> aliasesList)
+  /** A list of all key entries with some minor infos that are present within this keystore. */
+  public void setKeyInfos(List<KeyInfos> keyInfosList)
   {
-    setAttributeList(FieldNames.ALIASES, aliasesList);
+    setAttribute(FieldNames.KEY_INFOS, keyInfosList);
   }
 
-  /**
-   * Used to upload an existing keystore that will be merged with the application keystore.
-   */
+  /** Used to upload an existing keystore that will be merged with the application keystore. */
   public FileUpload getFileUpload()
   {
     return getObjectAttribute(FieldNames.FILE_UPLOAD, FileUpload.class).orElse(null);
   }
 
-  /**
-   * Used to upload an existing keystore that will be merged with the application keystore.
-   */
+  /** Used to upload an existing keystore that will be merged with the application keystore. */
   public void setFileUpload(FileUpload fileUpload)
   {
     setAttribute(FieldNames.FILE_UPLOAD, fileUpload);
@@ -106,10 +100,79 @@ public class ScimKeystore extends ResourceNode
     setAttribute(CertificateInfo.FieldNames.SCHEMA_ID, certificateInfo);
   }
 
+  /** A list of all key entries with some minor infos that are present within this keystore. */
+  public static class KeyInfos extends ScimObjectNode
+  {
+
+    public KeyInfos()
+    {}
+
+    @Builder
+    public KeyInfos(String alias, String keyAlgorithm, Boolean hasPrivateKey, Integer keyLength)
+    {
+      setAlias(alias);
+      setKeyAlgorithm(keyAlgorithm);
+      setKeyLength(keyLength);
+      setHasPrivateKey(hasPrivateKey);
+    }
+
+    /** The key length of this key entry. */
+    public Integer getKeyLength()
+    {
+      return getIntegerAttribute(FieldNames.KEY_LENGTH).orElse(null);
+    }
+
+    /** The key length of this key entry. */
+    public void setKeyLength(Integer keyLength)
+    {
+      setAttribute(FieldNames.KEY_LENGTH, keyLength);
+    }
+
+    /** The alias under which this specific key is stored. */
+    public String getAlias()
+    {
+      return getStringAttribute(FieldNames.ALIAS).orElse(null);
+    }
+
+    /** The alias under which this specific key is stored. */
+    public void setAlias(String alias)
+    {
+      setAttribute(FieldNames.ALIAS, alias);
+    }
+
+    /** The key algorithm of this key. */
+    public String getKeyAlgorithm()
+    {
+      return getStringAttribute(FieldNames.KEY_ALGORITHM).orElse(null);
+    }
+
+    /** The key algorithm of this key. */
+    public void setKeyAlgorithm(String keyAlgorithm)
+    {
+      setAttribute(FieldNames.KEY_ALGORITHM, keyAlgorithm);
+    }
+
+    /** If this entry has also a private key entry or a certificate only. */
+    public Boolean getHasPrivateKey()
+    {
+      return getBooleanAttribute(FieldNames.HAS_PRIVATE_KEY).orElse(false);
+    }
+
+    /** If this entry has also a private key entry or a certificate only. */
+    public void setHasPrivateKey(Boolean hasPrivateKey)
+    {
+      setAttribute(FieldNames.HAS_PRIVATE_KEY, hasPrivateKey);
+    }
+
+
+  }
+
   /** Used to upload an existing keystore that will be merged with the application keystore. */
-  @NoArgsConstructor
   public static class FileUpload extends ScimObjectNode
   {
+
+    public FileUpload()
+    {}
 
     @Builder
     public FileUpload(String keystorePassword, String keystoreFileName, String keystoreFile)
@@ -161,6 +224,7 @@ public class ScimKeystore extends ResourceNode
       setAttribute(FieldNames.KEYSTORE_FILE, keystoreFile);
     }
 
+
   }
 
   /**
@@ -169,15 +233,17 @@ public class ScimKeystore extends ResourceNode
    * be merged into the application keystore and the request that tells the application what the user wants to
    * merge into the application keystore.
    */
-  @NoArgsConstructor
   public static class AliasSelection extends ScimObjectNode
   {
 
+    public AliasSelection()
+    {}
+
     @Builder
-    public AliasSelection(String stateId, List<String> aliases, String aliasOverride, String privateKeyPassword)
+    public AliasSelection(String stateId, List<String> aliasesList, String aliasOverride, String privateKeyPassword)
     {
       setStateId(stateId);
-      setAliases(aliases);
+      setAliases(aliasesList);
       setAliasOverride(aliasOverride);
       setPrivateKeyPassword(privateKeyPassword);
     }
@@ -217,9 +283,9 @@ public class ScimKeystore extends ResourceNode
      * application keystore. In a response this array holds all aliases that are present within the uploaded
      * keystore.
      */
-    public void setAliases(List<String> aliasOverride)
+    public void setAliases(List<String> aliasesList)
     {
-      setAttributeList(FieldNames.ALIASES, aliasOverride);
+      setAttributeList(FieldNames.ALIASES, aliasesList);
     }
 
     /**
@@ -261,6 +327,7 @@ public class ScimKeystore extends ResourceNode
     {
       setAttribute(FieldNames.PRIVATE_KEY_PASSWORD, privateKeyPassword);
     }
+
   }
 
   public static class FieldNames
@@ -270,21 +337,31 @@ public class ScimKeystore extends ResourceNode
 
     public static final String ALIAS_SELECTION = "aliasSelection";
 
+    public static final String KEY_INFOS = "keyInfos";
+
+    public static final String KEY_ALGORITHM = "keyAlgorithm";
+
     public static final String ALIASES = "aliases";
 
     public static final String KEYSTORE_PASSWORD = "keystorePassword";
 
+    public static final String STATE_ID = "stateId";
+
+    public static final String FILE_UPLOAD = "fileUpload";
+
+    public static final String HAS_PRIVATE_KEY = "hasPrivateKey";
+
     public static final String PRIVATE_KEY_PASSWORD = "privateKeyPassword";
 
-    public static final String STATE_ID = "stateId";
+    public static final String ALIAS = "alias";
+
+    public static final String KEY_LENGTH = "keyLength";
 
     public static final String KEYSTORE_FILE = "keystoreFile";
 
     public static final String ID = "id";
 
     public static final String ALIAS_OVERRIDE = "aliasOverride";
-
-    public static final String FILE_UPLOAD = "fileUpload";
 
     public static final String KEYSTORE_FILE_NAME = "keystoreFileName";
   }

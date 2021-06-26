@@ -19,6 +19,17 @@
       "maxLength": 64
     },
     {
+      "name": "keyType",
+      "type": "string",
+      "description": "Gives us the type of key that is represented.",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "info",
       "type": "complex",
       "description": "The data of the certificate.",

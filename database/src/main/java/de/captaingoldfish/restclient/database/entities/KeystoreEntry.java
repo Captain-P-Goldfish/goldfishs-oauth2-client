@@ -29,10 +29,31 @@ public class KeystoreEntry
   @Column(name = "PRIVATE_KEY_PASSWORD")
   private String privateKeyPassword;
 
+  /**
+   * the key type that might be RSA or EC
+   */
+  @Column(name = "KEY_ALGORITHM")
+  private String keyAlgorithm;
+
+  /**
+   * the length of the specific key entry
+   */
+  @Column(name = "KEY_LENGTH")
+  private Integer keyLength;
+
 
   public KeystoreEntry(String alias, String privateKeyPassword)
   {
     this.alias = alias;
     this.privateKeyPassword = privateKeyPassword;
+  }
+
+
+  public KeystoreEntry(String alias, String privateKeyPassword, String keyAlgorithm, Integer keyLength)
+  {
+    this.alias = alias;
+    this.privateKeyPassword = privateKeyPassword;
+    this.keyAlgorithm = keyAlgorithm;
+    this.keyLength = keyLength;
   }
 }

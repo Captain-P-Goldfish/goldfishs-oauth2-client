@@ -37,6 +37,7 @@ import de.captaingoldfish.restclient.scim.resources.CertificateInfo;
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore.AliasSelection;
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore.FileUpload;
+import de.captaingoldfish.restclient.scim.resources.ScimKeystore.KeyInfos;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
@@ -143,7 +144,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                  Matchers.containsInAnyOrder("goldfish", "unit-test", "localhost"));
         Assertions.assertNull(response.getResource().getAliasSelection().getAliasOverride());
         Assertions.assertNull(response.getResource().getAliasSelection().getPrivateKeyPassword());
-        MatcherAssert.assertThat(response.getResource().getAliases(), Matchers.emptyIterable());
+        MatcherAssert.assertThat(response.getResource().getKeyInfos(), Matchers.emptyIterable());
         Assertions.assertNull(response.getResource().getFileUpload());
         Assertions.assertNull(response.getResource().getCertificateInfo());
       }
@@ -179,7 +180,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
       AliasSelection aliasSelection = AliasSelection.builder()
                                                     .stateId(currentStateId.get())
                                                     .privateKeyPassword(privateKeyPassword)
-                                                    .aliases(aliasToSelect)
+                                                    .aliasesList(aliasToSelect)
                                                     .build();
       ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
       ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
@@ -187,7 +188,13 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                                                 .sendRequest();
       Assertions.assertEquals(HttpStatus.CREATED, response.getHttpStatus());
       ScimKeystore returnedKeystore = response.getResource();
-      MatcherAssert.assertThat(response.getResource().getAliases(), Matchers.emptyIterable());
+      KeyInfos expectedKeyInfo = KeyInfos.builder()
+                                         .alias(unitTestKeystoreEntryAccess.getAlias())
+                                         .keyAlgorithm(unitTestKeystoreEntryAccess.getKeyAlgorithm())
+                                         .keyLength(unitTestKeystoreEntryAccess.getKeyLength())
+                                         .hasPrivateKey(unitTestKeystoreEntryAccess.getPrivateKeyPassword() != null)
+                                         .build();
+      MatcherAssert.assertThat(response.getResource().getKeyInfos(), Matchers.containsInAnyOrder(expectedKeyInfo));
       Assertions.assertNull(returnedKeystore.getFileUpload());
       Assertions.assertNull(returnedKeystore.getAliasSelection());
       Assertions.assertNotNull(returnedKeystore.getCertificateInfo());
@@ -208,7 +215,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(3, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
 
     ServerResponse<ListResponse<ScimKeystore>> response = scimRequestBuilder.list(ScimKeystore.class, KEYSTORE_ENDPOINT)
                                                                             .get()
@@ -223,10 +230,22 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     Assertions.assertNull(appKeystore.getFileUpload());
     Assertions.assertNull(appKeystore.getAliasSelection());
     Assertions.assertNull(appKeystore.getCertificateInfo());
-    Assertions.assertNotNull(appKeystore.getAliases());
-    Assertions.assertEquals(3, appKeystore.getAliases().size());
-    MatcherAssert.assertThat(appKeystore.getAliases(),
-                             Matchers.containsInAnyOrder("goldfish", "unit-test", "localhost"));
+    Assertions.assertNotNull(appKeystore.getKeyInfos());
+    Assertions.assertEquals(10, appKeystore.getKeyInfos().size());
+    appKeystore.getKeyInfos().forEach(keyInfo -> {
+      KeystoreEntry keystoreEntry = getExtendedUnitTestKeystoreEntryAccess(keyInfo.getAlias());
+      Assertions.assertEquals(keystoreEntry.getAlias(), keyInfo.getAlias());
+      Assertions.assertEquals(keystoreEntry.getKeyAlgorithm(), keyInfo.getKeyAlgorithm());
+      Assertions.assertEquals(keystoreEntry.getKeyLength(), keyInfo.getKeyLength());
+      if (keyInfo.getAlias().startsWith("cert-"))
+      {
+        Assertions.assertFalse(keyInfo.getHasPrivateKey());
+      }
+      else
+      {
+        Assertions.assertTrue(keyInfo.getHasPrivateKey());
+      }
+    });
   }
 
   /**
@@ -237,9 +256,9 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(3, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
 
-    for ( KeystoreEntry unitTestKeystoreEntryAccess : getUnitTestKeystoreEntryAccess() )
+    for ( KeystoreEntry unitTestKeystoreEntryAccess : getExtendedUnitTestKeystoreEntryAccess() )
     {
       ServerResponse<ScimKeystore> response = scimRequestBuilder.get(ScimKeystore.class,
                                                                      KEYSTORE_ENDPOINT,
@@ -249,7 +268,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
       ScimKeystore scimKeystore = response.getResource();
       Assertions.assertNull(scimKeystore.getFileUpload());
       Assertions.assertNull(scimKeystore.getAliasSelection());
-      MatcherAssert.assertThat(scimKeystore.getAliases(), Matchers.emptyIterable());
+      MatcherAssert.assertThat(scimKeystore.getKeyInfos(), Matchers.emptyIterable());
 
       Assertions.assertNotNull(scimKeystore.getCertificateInfo());
       X509Certificate storedCertificate = keystoreDao.getKeystore().getCertificate(unitTestKeystoreEntryAccess);
@@ -266,9 +285,9 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(3, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
 
-    List<KeystoreEntry> testKeystoreEntryAccess = getUnitTestKeystoreEntryAccess();
+    List<KeystoreEntry> testKeystoreEntryAccess = getExtendedUnitTestKeystoreEntryAccess();
     for ( int i = 0 ; i < testKeystoreEntryAccess.size() ; i++ )
     {
       KeystoreEntry unitTestKeystoreEntryAccess = testKeystoreEntryAccess.get(i);
@@ -278,7 +297,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                                                 .sendRequest();
       Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
       keystore = keystoreDao.getKeystore();
-      Assertions.assertEquals(3 - (i + 1), keystore.getKeystoreEntries().size());
+      Assertions.assertEquals(10 - (i + 1), keystore.getKeystoreEntries().size());
     }
   }
 
@@ -290,7 +309,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     KeystoreHandler keystoreHandler = (KeystoreHandler)keystoreResourceType.getResourceHandlerImpl();
 
-    String b64Keystore = Base64.getEncoder().encodeToString(readAsBytes(UNIT_TEST_KEYSTORE_JKS));
+    String b64Keystore = Base64.getEncoder().encodeToString(readAsBytes(UNIT_TEST_KEYSTORE_JKS_EXTENDED));
     FileUpload fileUpload = FileUpload.builder()
                                       .keystoreFile(b64Keystore)
                                       .keystoreFileName("test.jks")
@@ -298,11 +317,11 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                       .build();
     ScimKeystore uploadResponse = keystoreHandler.handleKeystoreUpload(fileUpload);
 
-    for ( KeystoreEntry unitTestKeystoreEntryAccess : getUnitTestKeystoreEntryAccess() )
+    for ( KeystoreEntry unitTestKeystoreEntryAccess : getExtendedUnitTestKeystoreEntryAccess() )
     {
       AliasSelection aliasSelection = AliasSelection.builder()
                                                     .stateId(uploadResponse.getAliasSelection().getStateId())
-                                                    .aliases(Collections.singletonList(unitTestKeystoreEntryAccess.getAlias()))
+                                                    .aliasesList(Collections.singletonList(unitTestKeystoreEntryAccess.getAlias()))
                                                     .privateKeyPassword(unitTestKeystoreEntryAccess.getPrivateKeyPassword())
                                                     .build();
       keystoreHandler.handleAliasSelection(aliasSelection);
@@ -535,7 +554,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     FileUpload fileUpload = getFileUpload(UNIT_TEST_KEYSTORE_JKS, UNIT_TEST_KEYSTORE_PASSWORD);
     AliasSelection aliasSelection = AliasSelection.builder()
                                                   .stateId(UUID.randomUUID().toString())
-                                                  .aliases(Collections.singletonList("goldfish"))
+                                                  .aliasesList(Collections.singletonList("goldfish"))
                                                   .build();
     ScimKeystore scimKeystore = ScimKeystore.builder().fileUpload(fileUpload).aliasSelection(aliasSelection).build();
     ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
@@ -566,7 +585,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     final String stateId = UUID.randomUUID().toString();
     AliasSelection aliasSelection = AliasSelection.builder()
                                                   .stateId(stateId)
-                                                  .aliases(Collections.singletonList(keystoreEntry.getAlias()))
+                                                  .aliasesList(Collections.singletonList(keystoreEntry.getAlias()))
                                                   .build();
     ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
     ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
@@ -601,7 +620,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     aliasSelection.set(ScimKeystore.FieldNames.ALIASES, aliasesNode);
     ScimKeystore scimKeystore = ScimKeystore.builder()
                                             .aliasSelection(aliasSelection)
-                                            .aliasesList(Collections.emptyList())
+                                            .keyInfosList(Collections.emptyList())
                                             .build();
     ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
                                                               .setResource(scimKeystore)
@@ -630,7 +649,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
 
     final String stateId = UUID.randomUUID().toString();
     List<String> aliases = Arrays.asList("goldfish", "localhost");
-    AliasSelection aliasSelection = AliasSelection.builder().stateId(stateId).aliases(aliases).build();
+    AliasSelection aliasSelection = AliasSelection.builder().stateId(stateId).aliasesList(aliases).build();
     ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
     ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
                                                               .setResource(scimKeystore)
@@ -661,7 +680,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     final String stateId = uploadResponse.getResource().getAliasSelection().getStateId();
 
     List<String> aliases = Arrays.asList("unknownAlias");
-    AliasSelection aliasSelection = AliasSelection.builder().stateId(stateId).aliases(aliases).build();
+    AliasSelection aliasSelection = AliasSelection.builder().stateId(stateId).aliasesList(aliases).build();
     ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
     ServerResponse<ScimKeystore> response = scimRequestBuilder.create(ScimKeystore.class, KEYSTORE_ENDPOINT)
                                                               .setResource(scimKeystore)
@@ -674,21 +693,11 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(0, errorMessageList.size());
 
     Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrors.size());
     final String aliasesFieldName = String.format("%s.%s",
                                                   ScimKeystore.FieldNames.ALIAS_SELECTION,
                                                   ScimKeystore.FieldNames.ALIASES);
-    Assertions.assertEquals(2, fieldErrors.size());
     Assertions.assertEquals(1, fieldErrors.get(aliasesFieldName).size());
-
-    String errorMessage1 = String.format("Unknown alias selected: %s", aliases.get(0));
-    MatcherAssert.assertThat(fieldErrors.get(aliasesFieldName), Matchers.containsInAnyOrder(errorMessage1));
-
-    final String privateKeyFieldName = String.format("%s.%s",
-                                                     ScimKeystore.FieldNames.ALIAS_SELECTION,
-                                                     ScimKeystore.FieldNames.PRIVATE_KEY_PASSWORD);
-    Assertions.assertEquals(1, fieldErrors.get(privateKeyFieldName).size());
-    String errorMessage2 = String.format("Could not access private key of alias '%s'", aliases.get(0));
-    MatcherAssert.assertThat(fieldErrors.get(privateKeyFieldName), Matchers.containsInAnyOrder(errorMessage2));
   }
 
   @Test
@@ -702,7 +711,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     List<String> aliases = Arrays.asList("goldfish");
     AliasSelection aliasSelection = AliasSelection.builder()
                                                   .stateId(stateId)
-                                                  .aliases(aliases)
+                                                  .aliasesList(aliases)
                                                   .privateKeyPassword(password)
                                                   .build();
     ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
@@ -723,16 +732,14 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(2, fieldErrors.size());
     Assertions.assertEquals(1, fieldErrors.get(aliasesFieldName).size());
 
-    String errorMessage1 = "Cannot recover key";
-    MatcherAssert.assertThat(fieldErrors.get(aliasesFieldName), Matchers.containsInAnyOrder(errorMessage1));
+    String errorMessage = "Cannot recover key";
+    MatcherAssert.assertThat(fieldErrors.get(aliasesFieldName), Matchers.containsInAnyOrder(errorMessage));
 
     final String privateKeyFieldName = String.format("%s.%s",
                                                      ScimKeystore.FieldNames.ALIAS_SELECTION,
                                                      ScimKeystore.FieldNames.PRIVATE_KEY_PASSWORD);
-    Assertions.assertEquals(2, fieldErrors.get(privateKeyFieldName).size());
-    String errorMessage2 = String.format("Could not access private key of alias '%s'", aliases.get(0));
-    MatcherAssert.assertThat(fieldErrors.get(privateKeyFieldName),
-                             Matchers.containsInAnyOrder(errorMessage1, errorMessage2));
+    Assertions.assertEquals(1, fieldErrors.get(privateKeyFieldName).size());
+    MatcherAssert.assertThat(fieldErrors.get(privateKeyFieldName), Matchers.containsInAnyOrder(errorMessage));
   }
 
   @Test
@@ -746,7 +753,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     String aliasOverride = "$%&";
     AliasSelection aliasSelection = AliasSelection.builder()
                                                   .stateId(stateId)
-                                                  .aliases(aliases)
+                                                  .aliasesList(aliases)
                                                   .aliasOverride(aliasOverride)
                                                   .build();
     ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
@@ -794,7 +801,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
       List<String> aliases = Arrays.asList(alias);
       AliasSelection aliasSelection = AliasSelection.builder()
                                                     .stateId(stateId)
-                                                    .aliases(aliases)
+                                                    .aliasesList(aliases)
                                                     .aliasOverride(aliasOverride)
                                                     .privateKeyPassword(privateKeyPassword.get())
                                                     .build();
@@ -857,7 +864,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
       List<String> aliases = Arrays.asList(alias);
       AliasSelection aliasSelection = AliasSelection.builder()
                                                     .stateId(stateId)
-                                                    .aliases(aliases)
+                                                    .aliasesList(aliases)
                                                     .aliasOverride(aliasOverride)
                                                     .build();
       ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
@@ -901,7 +908,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     String aliasOverride = "bad-alias/";
     AliasSelection aliasSelection = AliasSelection.builder()
                                                   .stateId(stateId)
-                                                  .aliases(aliases)
+                                                  .aliasesList(aliases)
                                                   .aliasOverride(aliasOverride)
                                                   .build();
     ScimKeystore scimKeystore = ScimKeystore.builder().aliasSelection(aliasSelection).build();
@@ -935,7 +942,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(3, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
     OpenIdProvider openIdProvider = openIdProviderDao.save(OpenIdProvider.builder()
                                                                          .name(UUID.randomUUID().toString())
                                                                          .discoveryEndpoint("http://localhost:8080")
@@ -945,7 +952,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                                                  .clientId(UUID.randomUUID().toString())
                                                                  .build());
 
-    List<KeystoreEntry> testKeystoreEntryAccess = getUnitTestKeystoreEntryAccess();
+    List<KeystoreEntry> testKeystoreEntryAccess = getExtendedUnitTestKeystoreEntryAccess();
     for ( int i = 0 ; i < testKeystoreEntryAccess.size() ; i++ )
     {
       KeystoreEntry unitTestKeystoreEntryAccess = testKeystoreEntryAccess.get(i);
@@ -963,7 +970,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                                                 .sendRequest();
       Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
       keystore = keystoreDao.getKeystore();
-      Assertions.assertEquals(3 - (i + 1), keystore.getKeystoreEntries().size());
+      Assertions.assertEquals(10 - (i + 1), keystore.getKeystoreEntries().size());
 
       Assertions.assertEquals(1, openIdClientDao.count());
       openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();

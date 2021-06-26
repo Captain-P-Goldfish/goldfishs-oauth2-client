@@ -36,6 +36,8 @@ public interface FileReferences
    */
   public static final String UNIT_TEST_KEYSTORE_PKCS12 = BASE_PATH + "/files/unit-test.p12";
 
+  public static final String UNIT_TEST_KEYSTORE_JKS_EXTENDED = BASE_PATH + "/files/unit-test-extended.jks";
+
 
   default InputStream readAsInputStream(String classpathFile)
   {
@@ -62,9 +64,26 @@ public interface FileReferences
    */
   default List<KeystoreEntry> getUnitTestKeystoreEntryAccess()
   {
-    return Arrays.asList(new KeystoreEntry("unit-test", "unit-test"),
-                         new KeystoreEntry("goldfish", "123456"),
-                         new KeystoreEntry("localhost", "123456"));
+    return Arrays.asList(new KeystoreEntry("unit-test", "unit-test", "RSA", 512),
+                         new KeystoreEntry("goldfish", "123456", "RSA", 512),
+                         new KeystoreEntry("localhost", "123456", "RSA", 512));
+  }
+
+  /**
+   * @return the aliases and passwords of the entries within the keystores.
+   */
+  default List<KeystoreEntry> getExtendedUnitTestKeystoreEntryAccess()
+  {
+    return Arrays.asList(new KeystoreEntry("unit-test-rsa", "unit-test", "RSA", 2048),
+                         new KeystoreEntry("goldfish-rsa", "123456", "RSA", 2048),
+                         new KeystoreEntry("localhost-rsa", "123456", "RSA", 2048),
+                         new KeystoreEntry("unit-test-ec", "unit-test", "EC", 521),
+                         new KeystoreEntry("goldfish-ec", "123456", "EC", 256),
+                         new KeystoreEntry("localhost-ec", "123456", "EC", 384),
+                         new KeystoreEntry("hello-dsa", "123456", "DSA", 2048),
+                         new KeystoreEntry("cert-dsa", null, "DSA", 2048),
+                         new KeystoreEntry("cert-ec", null, "EC", 256),
+                         new KeystoreEntry("cert-rsa", null, "RSA", 2048));
   }
 
   /**
@@ -75,6 +94,17 @@ public interface FileReferences
     return getUnitTestKeystoreEntryAccess().stream()
                                            .filter(keystoreEntry -> keystoreEntry.getAlias().equals(alias))
                                            .findAny()
-                                           .get();
+                                           .orElseThrow();
+  }
+
+  /**
+   * @return the entry for the given alias.
+   */
+  default KeystoreEntry getExtendedUnitTestKeystoreEntryAccess(String alias)
+  {
+    return getExtendedUnitTestKeystoreEntryAccess().stream()
+                                                   .filter(keystoreEntry -> keystoreEntry.getAlias().equals(alias))
+                                                   .findAny()
+                                                   .orElseThrow();
   }
 }

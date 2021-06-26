@@ -281,6 +281,21 @@ export function ModifiableCardEntry(props)
     </tr>
 }
 
+export function HiddenCardEntry(props)
+{
+    return <tr style={{display: "none"}}>
+        <td>
+            <CardInputField value={new Optional(props.value).orElse("")}
+                            id={props.name + "-" + props.resourceId}
+                            type={props.type}
+                            name={props.name}
+                            placeholder={props.placeholder}
+                            onChange={props.onChange}
+                            onError={props.onError} />
+        </td>
+    </tr>
+}
+
 export function ModifiableCardFileEntry(props)
 {
 
@@ -305,6 +320,84 @@ export function ModifiableCardFileEntry(props)
                                 onChange={props.onChange}
                                 onError={props.onError} />
             }
+        </td>
+    </tr>
+}
+
+export function CardRadioSelector(props)
+{
+    let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name)).orElse([]);
+
+    return <tr>
+        <th>{props.header}</th>
+        <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+            <fieldset>
+                {
+                    !props.editMode &&
+                    props.selected
+                }
+                {
+                    props.editMode &&
+                    props.selections.map((value, index) =>
+                    {
+                        return (
+                            <Form.Check
+                                key={index}
+                                type="radio"
+                                label={value}
+                                value={value}
+                                checked={props.selected === value}
+                                onChange={props.onChange}
+                                name={props.name}
+                                id={props.name + "-" + value}
+                            />
+                        )
+                    })
+                }
+            </fieldset>
+            <ErrorMessageList controlId={props.name + "-error-list"}
+                              fieldErrors={inputFieldErrorMessages} />
+        </td>
+    </tr>
+}
+
+export function CardListSelector(props)
+{
+    let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name)).orElse([]);
+
+    return <tr>
+        <th>{props.header}</th>
+        <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
+            <fieldset>
+                {
+                    !props.editMode &&
+                    props.selected
+                }
+                {
+                    props.editMode &&
+                    <Form.Control as="select"
+                                  size="sm"
+                                  custom
+                                  name={props.name}
+                                  id={props.name}
+                                  onChange={props.onChange}
+                    >
+                        {
+                            props.selections.map((value, index) =>
+                            {
+                                return (
+                                    <option key={index}
+                                            defaultValue={props.selected === value}>
+                                        {value}
+                                    </option>
+                                )
+                            })
+                        }
+                    </Form.Control>
+                }
+            </fieldset>
+            <ErrorMessageList controlId={props.name + "-error-list"}
+                              fieldErrors={inputFieldErrorMessages} />
         </td>
     </tr>
 }

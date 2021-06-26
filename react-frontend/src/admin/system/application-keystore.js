@@ -6,12 +6,11 @@ import Button from "react-bootstrap/Button";
 import {ErrorMessagesAlert, FormFileField, FormInputField, FormSelectField, LoadingSpinner} from "../../base/form-base";
 import {Optional} from "../../services/utils";
 import ScimClient from "../../scim/scim-client";
-import {Alert, Badge, Image} from "react-bootstrap";
+import {Alert, Badge, CardDeck, Image} from "react-bootstrap";
 import downloadIcon from "../../media/secure-download-icon.png";
 import {InfoCircle} from "react-bootstrap-icons";
 import {GoThumbsup} from "react-icons/go";
-import CertificateList from "../../base/certificate-list";
-import * as ScimConstants from "../../scim/scim-constants";
+import {CertificateCardEntry} from "../../base/certificate-list";
 
 
 export default class ApplicationKeystore extends React.Component
@@ -34,7 +33,7 @@ export default class ApplicationKeystore extends React.Component
 
     onAliasSelectionSuccess(resource)
     {
-        this.setState({newAlias: {value: resource[ScimConstants.CERT_URI].alias}})
+        this.setState({newKeyInfo: {value: resource.keyInfos[0]}})
     }
 
     render()
@@ -47,7 +46,7 @@ export default class ApplicationKeystore extends React.Component
                                 aliasSelectionResponse={this.state.aliasSelectionResponse}
                                 onCreateSuccess={this.onAliasSelectionSuccess} />
                 <KeystoreEntryList scimResourcePath={this.scimResourcePath}
-                                   newAlias={this.state.newAlias} />
+                                   newKeyInfo={this.state.newKeyInfo} />
             </React.Fragment>
         )
     }
@@ -148,12 +147,12 @@ class AliasSelection extends React.Component
             response.resource.then(resource =>
             {
                 this.props.onCreateSuccess(resource);
-                this.setState({newAlias: resource[ScimConstants.CERT_URI].alias});
+                this.setState({newKeyInfo: resource.keyInfos[0]});
             })
         }
         else
         {
-            this.setState({newAlias: undefined});
+            this.setState({newKeyInfo: undefined});
         }
     }
 
@@ -171,9 +170,11 @@ class AliasSelection extends React.Component
                 <h2>Alias Selection</h2>
                 <Alert id={"aliasSelectionForm-alert-success"}
                        variant={"success"}
-                       show={new Optional(this.state.newAlias).isPresent()}>
-                    <Form.Text><GoThumbsup /> Entry with alias '{this.state.newAlias}' was successfully
-                                              added</Form.Text>
+                       show={new Optional(this.state.newKeyInfo).isPresent()}>
+                    <Form.Text><GoThumbsup /> Entry with alias
+                                              '{new Optional(this.state.newKeyInfo).map(info => info.alias)
+                                                                                   .orElse("")}'
+                                              was successfully added</Form.Text>
                 </Alert>
                 <ErrorMessagesAlert errors={this.state.errors} />
                 <Form id={"aliasSelectionForm"} onSubmit={this.save} ref={this.formReference} className={className}>
@@ -213,7 +214,7 @@ class KeystoreEntryList extends React.Component
     constructor(props)
     {
         super(props);
-        this.state = {aliases: []};
+        this.state = {keyInfos: []};
         this.setState = this.setState.bind(this);
         this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
@@ -227,8 +228,8 @@ class KeystoreEntryList extends React.Component
             response.resource.then(listResponse =>
             {
                 this.setState({
-                    aliases: new Optional(listResponse.Resources[0]).map(val => val.aliases)
-                                                                    .orElse([])
+                    keyInfos: new Optional(listResponse.Resources[0]).map(val => val.keyInfos)
+                                                                     .orElse([])
                 })
             })
         }
@@ -236,27 +237,42 @@ class KeystoreEntryList extends React.Component
 
     componentDidUpdate(prevProps, prevState, snapshot)
     {
-        if (prevProps.newAlias !== this.props.newAlias && new Optional(this.props.newAlias).map(val => val.value)
-                                                                                           .isPresent())
+        if (prevProps.newKeyInfo !== this.props.newKeyInfo &&
+            new Optional(this.props.newKeyInfo).map(info => info.value).isPresent())
         {
-            let aliases = [...this.state.aliases, this.props.newAlias.value];
-            aliases.sort();
-            this.setState({aliases: [...this.state.aliases, this.props.newAlias.value], aliasDeleted: undefined});
+            this.setState(
+                {
+                    keyInfos: [...this.state.keyInfos, this.props.newKeyInfo.value],
+                    aliasDeleted: undefined
+                });
 
         }
     }
 
     onDeleteSuccess(alias)
     {
-        let aliases = this.state.aliases;
-        const indexOfAlias = aliases.indexOf(alias)
+        let keyInfos = this.state.keyInfos;
+
+        let findIndexOf = function findWithAttr(array, attr, value)
+        {
+            for (var i = 0; i < array.length; i += 1)
+            {
+                if (array[i][attr] === value)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        const indexOfAlias = findIndexOf(keyInfos, "alias", alias)
         if (indexOfAlias > -1)
         {
-            aliases.splice(indexOfAlias, 1);
+            keyInfos.splice(indexOfAlias, 1);
         }
         this.setState({
             aliasDeleted: alias,
-            aliases: aliases
+            keyInfos: keyInfos
         })
     }
 
@@ -277,8 +293,8 @@ class KeystoreEntryList extends React.Component
                        variant={"info"}>
                     <Form.Text>
                         <InfoCircle /> Application Keystore contains
-                                       "{new Optional(this.state.aliases).map(val => val.length)
-                                                                         .orElse(0)}"
+                                       "{new Optional(this.state.keyInfos).map(val => val.length)
+                                                                          .orElse(0)}"
                                        entries
                     </Form.Text>
                 </Alert>
@@ -289,9 +305,18 @@ class KeystoreEntryList extends React.Component
                         <GoThumbsup /> Key entry for alias "{this.state.aliasDeleted}" was successfully deleted
                     </Form.Text>
                 </Alert>
-                <CertificateList certificateAliases={this.state.aliases}
-                                 scimResourcePath={this.props.scimResourcePath}
-                                 onDeleteSuccess={this.onDeleteSuccess} />
+                <CardDeck id="keystore-certificate-entries">
+                    {
+                        this.state.keyInfos.map(keyInfo =>
+                        {
+                            return <CertificateCardEntry key={keyInfo.alias}
+                                                         scimResourcePath={this.props.scimResourcePath}
+                                                         alias={keyInfo.alias}
+                                                         keyInfo={keyInfo}
+                                                         onDeleteSuccess={this.onDeleteSuccess} />
+                        })
+                    }
+                </CardDeck>
             </React.Fragment>
         );
     }

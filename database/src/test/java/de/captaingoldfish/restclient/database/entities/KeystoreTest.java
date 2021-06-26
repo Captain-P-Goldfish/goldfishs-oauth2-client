@@ -37,7 +37,7 @@ public class KeystoreTest extends DbBaseTest
     }
     InputStream inputStream = new ByteArrayInputStream(keystoreBytes);
     Keystore keystore = new Keystore(inputStream, KeyStoreSupporter.KeyStoreType.JKS, keystorePassword);
-    keystore.addAliasEntry(alias, privateKeyPassword);
+    keystore.addKeyEntry(alias, privateKeyPassword);
     Assertions.assertDoesNotThrow(() -> keystoreDao.save(keystore));
     Assertions.assertEquals(KeyStoreSupporter.KeyStoreType.JKS, keystore.getKeystoreType());
     Assertions.assertEquals(keystorePassword, keystore.getKeystorePassword());

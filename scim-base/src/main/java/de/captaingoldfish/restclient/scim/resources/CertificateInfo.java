@@ -35,6 +35,7 @@ public class CertificateInfo extends ScimObjectNode
                               .toLowerCase(),
                            certificate.getNotBefore().toInstant(), certificate.getNotAfter().toInstant());
       setInfo(info);
+      setKeyType(certificate.getPublicKey().getAlgorithm());
     }
   }
 
@@ -48,6 +49,18 @@ public class CertificateInfo extends ScimObjectNode
   public void setAlias(String alias)
   {
     setAttribute(FieldNames.ALIAS, alias);
+  }
+
+  /** Gives us the type of key that is represented. */
+  public String getKeyType()
+  {
+    return getStringAttribute(FieldNames.KEY_TYPE).orElse(null);
+  }
+
+  /** Gives us the type of key that is represented. */
+  public void setKeyType(String keyType)
+  {
+    setAttribute(FieldNames.KEY_TYPE, keyType);
   }
 
   /** The data of the certificate. */
@@ -147,6 +160,8 @@ public class CertificateInfo extends ScimObjectNode
     public static final String SHA256_FINGERPRINT = "sha256Fingerprint";
 
     public static final String ALIAS = "alias";
+
+    public static final String KEY_TYPE = "keyType";
 
     public static final String VALID_FROM = "validFrom";
 

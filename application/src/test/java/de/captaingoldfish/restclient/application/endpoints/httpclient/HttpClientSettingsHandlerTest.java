@@ -23,6 +23,7 @@ import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.entities.Proxy;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
+import de.captaingoldfish.restclient.scim.resources.ScimKeystore.AliasSelection;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
@@ -982,12 +983,11 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
                                                                 .build();
     ScimKeystore uploadResponse = keystoreHandler.handleKeystoreUpload(fileUpload);
 
-    ScimKeystore.AliasSelection aliasSelection = ScimKeystore.AliasSelection.builder()
-                                                                            .stateId(uploadResponse.getAliasSelection()
-                                                                                                   .getStateId())
-                                                                            .aliases(Collections.singletonList(keystoreEntry.getAlias()))
-                                                                            .privateKeyPassword(keystoreEntry.getPrivateKeyPassword())
-                                                                            .build();
+    AliasSelection aliasSelection = AliasSelection.builder()
+                                                  .stateId(uploadResponse.getAliasSelection().getStateId())
+                                                  .aliasesList(Collections.singletonList(keystoreEntry.getAlias()))
+                                                  .privateKeyPassword(keystoreEntry.getPrivateKeyPassword())
+                                                  .build();
     keystoreHandler.handleAliasSelection(aliasSelection);
     return keystoreEntry;
   }

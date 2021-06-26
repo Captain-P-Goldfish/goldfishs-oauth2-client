@@ -152,13 +152,22 @@ small.error {
     margin-top: 5px;
 }
 
-.card.resource-card {
+.card.alias-card {
     min-width: var(--card-width);
     max-width: var(--card-width);
     margin-bottom: 15px !important;
 }
 
-.card.resource-card.provider-card {
+.card.alias-card .keyInfo {
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 0.8em;
+}
+
+.card.alias-card .public-cert-icon {
+    max-height: 15px;
+}
+
+.card.resource-card {
     min-width: 47%;
     max-width: 47%;
     margin-bottom: 15px !important;
@@ -252,6 +261,18 @@ ul.error-list {
 h1, h2, h3, h4, h5 {
     color: sandybrown;
     text-shadow: 2px 2px rgba(255, 215, 0, 0.15);
+}
+
+a h5 {
+    color: gold;
+    padding: 5px;
+    background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(58, 62, 66, 1) 100%);
+}
+
+a h5:hover {
+    color: gold;
+    padding: 5px;
+    background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(121, 127, 135, 0.42) 100%);
 }
 
 .nav.nav-tabs[role="tablist"] {

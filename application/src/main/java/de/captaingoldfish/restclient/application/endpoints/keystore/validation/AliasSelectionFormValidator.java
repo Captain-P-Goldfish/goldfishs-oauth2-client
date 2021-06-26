@@ -1,7 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.keystore.validation;
 
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
@@ -81,11 +80,10 @@ public final class AliasSelectionFormValidator
     final String privateKeyPassword = Optional.ofNullable(aliasSelection.getPrivateKeyPassword())
                                               .map(StringUtils::stripToNull)
                                               .orElse(keystore.getKeystorePassword());
-    PrivateKey privateKey = null;
     try
     {
       char[] password = Optional.ofNullable(privateKeyPassword).map(String::toCharArray).orElse(new char[0]);
-      privateKey = (PrivateKey)javaKeystore.getKey(alias, password);
+      javaKeystore.getKey(alias, password);
     }
     catch (Exception ex)
     {
@@ -94,13 +92,6 @@ public final class AliasSelectionFormValidator
         validationContext.addError("aliasSelection.aliases", ex.getMessage());
         validationContext.addError("aliasSelection.privateKeyPassword", ex.getMessage());
       });
-    }
-
-    if (privateKey == null)
-    {
-      String errorMessage = String.format("Could not access private key of alias '%s'", alias);
-      log.debug(errorMessage);
-      validationContext.addError("aliasSelection.privateKeyPassword", errorMessage);
     }
 
     KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);

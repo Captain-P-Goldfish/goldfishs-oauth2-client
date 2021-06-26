@@ -1,6 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.keystore;
 
 import java.io.ByteArrayInputStream;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -8,10 +9,12 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -105,7 +108,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
 
     ScimKeystore.AliasSelection aliasSelection = ScimKeystore.AliasSelection.builder()
                                                                             .stateId(stateId)
-                                                                            .aliases(aliases)
+                                                                            .aliasesList(aliases)
                                                                             .build();
     return ScimKeystore.builder()
                        .aliasSelection(aliasSelection)
@@ -144,13 +147,20 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
                                                                    aliasEntry.getPrivateKeyPassword());
     byte[] newKeystoreBytes = KeyStoreSupporter.getBytes(mergedKeystore, applicationKeystore.getKeystorePassword());
     applicationKeystore.setKeystoreBytes(newKeystoreBytes);
-    KeystoreEntry aliasPasswords = applicationKeystore.addAliasEntry(aliasEntry);
+    KeystoreEntry keystoreEntry = applicationKeystore.addKeyEntry(aliasEntry);
     keystoreDao.save(applicationKeystore);
 
-    X509Certificate x509Certificate = applicationKeystore.getCertificate(aliasPasswords);
+    X509Certificate x509Certificate = applicationKeystore.getCertificate(keystoreEntry);
     CertificateInfo certificateInfo = CertificateInfo.builder().alias(newAlias).certificate(x509Certificate).build();
 
+    ScimKeystore.KeyInfos keyInfos = ScimKeystore.KeyInfos.builder()
+                                                          .alias(keystoreEntry.getAlias())
+                                                          .keyAlgorithm(keystoreEntry.getKeyAlgorithm())
+                                                          .keyLength(keystoreEntry.getKeyLength())
+                                                          .hasPrivateKey(Optional.ofNullable(privateKey).isPresent())
+                                                          .build();
     return ScimKeystore.builder()
+                       .keyInfosList(Collections.singletonList(keyInfos))
                        .certificateInfo(certificateInfo)
                        .meta(Meta.builder().created(Instant.now()).lastModified(Instant.now()).build())
                        .build();
@@ -181,10 +191,22 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
                                                          List<SchemaAttribute> excludedAttributes,
                                                          Authorization authorization)
   {
-    Keystore keystore = keystoreDao.getKeystore();
+    Keystore applicationKeystore = keystoreDao.getKeystore();
     List<ScimKeystore> keystoreList = new ArrayList<>();
     Meta meta = Meta.builder().created(Instant.now()).lastModified(Instant.now()).build();
-    ScimKeystore scimKeystore = ScimKeystore.builder().aliasesList(keystore.getKeyStoreAliases()).meta(meta).build();
+    List<ScimKeystore.KeyInfos> keyInfosList = applicationKeystore.getKeyStoreAliases().stream().map(alias -> {
+      KeystoreEntry keystoreEntry = applicationKeystore.getKeystoreEntry(alias);
+      KeyPair keyPair = applicationKeystore.getKeyPair(keystoreEntry);
+      String keyAlgorithm = keyPair.getPublic().getAlgorithm();
+      boolean hasPrivateKey = Optional.ofNullable(keyPair.getPrivate()).isPresent();
+      return ScimKeystore.KeyInfos.builder()
+                                  .alias(alias)
+                                  .keyAlgorithm(keyAlgorithm)
+                                  .keyLength(keystoreEntry.getKeyLength())
+                                  .hasPrivateKey(hasPrivateKey)
+                                  .build();
+    }).collect(Collectors.toList());
+    ScimKeystore scimKeystore = ScimKeystore.builder().keyInfosList(keyInfosList).meta(meta).build();
     keystoreList.add(scimKeystore);
     return PartialListResponse.<ScimKeystore> builder().totalResults(1).resources(keystoreList).build();
   }

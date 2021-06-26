@@ -1,12 +1,13 @@
 import React from "react";
-import {Card, CardDeck, Image} from "react-bootstrap";
+import {Card, CardDeck, Image, OverlayTrigger, Tooltip} from "react-bootstrap";
 import Modal from "./modal";
-import {TrashFill} from "react-bootstrap-icons";
+import {AwardFill, KeyFill, TrashFill} from "react-bootstrap-icons";
 import CertIcon from "../media/certificate.png";
 import Button from "react-bootstrap/Button";
 import ScimClient from "../scim/scim-client";
 import * as ScimConstants from "../scim/scim-constants";
 import {LoadingSpinner} from "./form-base";
+import {Optional} from "../services/utils";
 
 
 export class CertificateCardEntry extends React.Component
@@ -54,6 +55,7 @@ export class CertificateCardEntry extends React.Component
                 let certInfo = resource[ScimConstants.CERT_URI];
                 this.setState({
                     loaded: true,
+                    cert: certInfo,
                     certInfo: certInfo.info
                 });
             });
@@ -76,9 +78,20 @@ export class CertificateCardEntry extends React.Component
 
     render()
     {
+        const certificateTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+                Certificate
+            </Tooltip>
+        );
+        const privateKeyTooltip = (props) => (
+            <Tooltip id="button-tooltip" {...props}>
+                Private Key and Certificate
+            </Tooltip>
+        );
+
         return (
             <Card id={"alias-card-" + this.props.alias} key={this.props.alias}
-                  border={"warning"} bg={"dark"} className={"resource-card"}>
+                  border={"warning"} bg={"dark"} className={"alias-card"}>
                 <Modal id={"delete-dialog-" + this.props.alias}
                        show={this.state.showModal}
                        variant="danger"
@@ -90,7 +103,34 @@ export class CertificateCardEntry extends React.Component
                        onCancel={this.hideModal}>
                 </Modal>
                 <Card.Header id={"alias-name-" + this.props.alias}>
-                    {this.props.alias}
+                    {this.props.alias} {new Optional(this.props.keyInfo).map(info =>
+                    <React.Fragment>
+                        <br />
+                        (
+                        <span className={"keyInfo"}>
+                            {info.keyAlgorithm + ": "
+                             + info.keyLength + "-bit "}
+                            {
+                                info.hasPrivateKey &&
+                                <OverlayTrigger placement="right"
+                                                delay={{show: 250, hide: 400}}
+                                                overlay={privateKeyTooltip}>
+                                    <KeyFill />
+                                </OverlayTrigger>
+                            }
+                            {
+                                !info.hasPrivateKey &&
+                                <OverlayTrigger placement="right"
+                                                delay={{show: 250, hide: 400}}
+                                                overlay={certificateTooltip}>
+                                    <AwardFill />
+                                </OverlayTrigger>
+                            }
+                        </span>
+                        )
+                    </React.Fragment>
+                )
+                                                                        .orElse(null)}
                     <div className="card-control-icons">
                         <LoadingSpinner show={this.state.isLoading} />
                         <TrashFill id={"delete-icon-" + this.props.alias} onClick={this.showModal} />

@@ -109,6 +109,7 @@ export default class ScimComponentBasics
 
     updateInput(fieldname, value)
     {
+        console.log("fieldname: " + fieldname)
         let object = this.getCurrentResource();
         object = lodash.set(object, fieldname, value);
         this.setCurrentResource(object);

@@ -6,6 +6,7 @@ import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
 import OpenidProvider from "./openid/openid-provider";
+import OpenidClients from "./openid/openid-clients";
 
 
 class Application extends React.Component
@@ -60,7 +61,7 @@ class Application extends React.Component
                                 <LinkContainer exact to="/">
                                     <Nav.Link>Home</Nav.Link>
                                 </LinkContainer>
-                                <LinkContainer exact to="/openid">
+                                <LinkContainer exact to="/openIdProvider">
                                     <Nav.Link>OpenID</Nav.Link>
                                 </LinkContainer>
                                 <LinkContainer exact to="/system">
@@ -77,7 +78,9 @@ class Application extends React.Component
                             <Route path="/system">
                                 <SystemOverview />
                             </Route>
-                            <Route path="/openid">
+                            <Route path={"/openIdProvider/:id/openIdClient"}
+                                   component={OpenidClients} />
+                            <Route path="/openIdProvider">
                                 <OpenidProvider />
                             </Route>
                             <Route path="/">

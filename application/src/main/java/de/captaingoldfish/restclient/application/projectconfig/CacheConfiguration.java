@@ -26,6 +26,11 @@ public class CacheConfiguration
   public static final String KEYSTORE_CACHE = "keystore-cache";
 
   /**
+   * the name for the oidc state cache
+   */
+  public static final String OIDC_STATE_CACHE = "oidc-state-cache";
+
+  /**
    * creates a cache with a short lifetime
    */
   @Bean

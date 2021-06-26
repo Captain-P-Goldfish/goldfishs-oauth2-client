@@ -53,6 +53,8 @@
             </column>
             <column name="ALIAS" type="VARCHAR(64)"/>
             <column name="PRIVATE_KEY_PASSWORD" type="VARCHAR(255)"/>
+            <column name="KEY_ALGORITHM" type="VARCHAR(255)"/>
+            <column name="KEY_LENGTH" type="INTEGER"/>
         </createTable>
 
         <createIndex tableName="KEYSTORE_ENTRIES" indexName="KEYSTORE_ENTRIES_IDX">
@@ -148,6 +150,17 @@
             <column name="SOCKET_TIMEOUT" type="INTEGER"/>
             <column name="USE_HOSTNAME_VERIFIER" type="BOOLEAN"/>
             <column name="TLS_CLIENT_AUTH_KEY_REF" type="VARCHAR(64)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
+
+        <createTable tableName="PARSED_JSON_WEB_TOKENS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="PARSED_JSON_WEB_TOKENS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="SIGNATURE_KEY_REF" type="VARCHAR(64)"/>
+            <column name="DECRYPTION_KEY_REF" type="VARCHAR(64)"/>
+            <column name="JWT" type="${blob_type}"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>

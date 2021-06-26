@@ -862,7 +862,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
 
     AliasSelection aliasSelection = AliasSelection.builder()
                                                   .stateId(uploadResponse.getAliasSelection().getStateId())
-                                                  .aliases(Collections.singletonList(keystoreEntry.getAlias()))
+                                                  .aliasesList(Collections.singletonList(keystoreEntry.getAlias()))
                                                   .privateKeyPassword(keystoreEntry.getPrivateKeyPassword())
                                                   .build();
     keystoreHandler.handleAliasSelection(aliasSelection);

@@ -1,8 +1,8 @@
 import React, {createRef} from "react";
 import ScimClient from "../scim/scim-client";
 import {Optional} from "../services/utils";
-import {Alert, Card, CardDeck, Table} from "react-bootstrap";
-import {FileEarmarkPlus} from "react-bootstrap-icons";
+import {Alert, Card, CardDeck, Nav, Table} from "react-bootstrap";
+import {ArrowRightCircle, FileEarmarkPlus} from "react-bootstrap-icons";
 import {
     CardControlIcons,
     CardDateRows,
@@ -19,6 +19,7 @@ import {GoThumbsup} from "react-icons/go";
 import Modal from "../base/modal";
 import Button from "react-bootstrap/Button";
 import {CardInputField} from "../base/card-base";
+import {LinkContainer} from "react-router-bootstrap";
 
 
 export default class OpenidProvider extends React.Component
@@ -90,23 +91,23 @@ export default class OpenidProvider extends React.Component
         }
     }
 
-    onUpdateSuccess(proxy)
+    onUpdateSuccess(provider)
     {
         let providerList = [...this.state.providerList];
-        let oldProxy = lodash.find(providerList, p => p.id === proxy.id);
-        lodash.merge(oldProxy, proxy);
+        let oldProvider = lodash.find(providerList, p => p.id === provider.id);
+        lodash.merge(oldProvider, provider);
         this.setState({
             providerList: providerList,
-            newProxy: undefined,
+            newProvider: undefined,
             deletedProviderName: undefined
         })
     }
 
-    onCreateSuccess(proxy)
+    onCreateSuccess(provider)
     {
         let providerList = [...this.state.providerList];
         let oldProvider = lodash.find(providerList, p => p.id === undefined);
-        lodash.merge(oldProvider, proxy);
+        lodash.merge(oldProvider, provider);
         this.setState({
             providerList: providerList,
             newProvider: oldProvider,
@@ -131,6 +132,7 @@ export default class OpenidProvider extends React.Component
     {
         return (
             <React.Fragment>
+
                 <p className={"add-new-resource"} onClick={this.addNewProvider}>
                     <span className={"add-new-resource"}>Add new Provider <br /><FileEarmarkPlus /></span>
                 </p>
@@ -203,6 +205,9 @@ class OpenIdProviderCardEntry extends React.Component
         return (
             <Card id={"provider-card-" + this.state.provider.id} key={this.state.provider.id}
                   border={"warning"} bg={"dark"} className={"resource-card provider-card"}>
+                <Nav className="flex-column">
+                </Nav>
+
                 <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
 
                     <Modal id={"delete-dialog-" + this.state.provider.id}
@@ -228,7 +233,10 @@ class OpenIdProviderCardEntry extends React.Component
                             {
                                 this.state.editMode === false &&
                                 <React.Fragment>
-                                    <h5>{this.state.provider.name}</h5>
+                                    <LinkContainer exact
+                                                   to={"/openIdProvider/" + this.props.provider.id + "/openIdClient"}>
+                                        <a><h5><ArrowRightCircle /> {this.state.provider.name}</h5></a>
+                                    </LinkContainer>
                                 </React.Fragment>
                             }
                             {
