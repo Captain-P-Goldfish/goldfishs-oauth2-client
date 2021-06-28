@@ -10,8 +10,8 @@ import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
-import de.captaingoldfish.scim.sdk.server.endpoints.authorize.Authorization;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
@@ -35,7 +35,7 @@ public class HttpClientSettingsHandler extends ResourceHandler<ScimHttpClientSet
    * creates a new resource instance
    */
   @Override
-  public ScimHttpClientSettings createResource(ScimHttpClientSettings resource, Authorization authorization)
+  public ScimHttpClientSettings createResource(ScimHttpClientSettings resource, Context context)
   {
     HttpClientSettings httpClientSettings = HttpClientSettingsConverter.toHttpClientSettings(resource);
     httpClientSettings = httpClientSettingsDao.save(httpClientSettings);
@@ -47,9 +47,9 @@ public class HttpClientSettingsHandler extends ResourceHandler<ScimHttpClientSet
    */
   @Override
   public ScimHttpClientSettings getResource(String id,
-                                            Authorization authorization,
                                             List<SchemaAttribute> attributes,
-                                            List<SchemaAttribute> excludedAttributes)
+                                            List<SchemaAttribute> excludedAttributes,
+                                            Context context)
   {
     Long dbId = Utils.parseId(id);
     HttpClientSettings httpClientSettings = httpClientSettingsDao.findById(dbId).orElseThrow(() -> {
@@ -69,7 +69,7 @@ public class HttpClientSettingsHandler extends ResourceHandler<ScimHttpClientSet
                                                                    SortOrder sortOrder,
                                                                    List<SchemaAttribute> attributes,
                                                                    List<SchemaAttribute> excludedAttributes,
-                                                                   Authorization authorization)
+                                                                   Context context)
   {
     // not supported. Disabled endpoint
     return null;
@@ -79,7 +79,7 @@ public class HttpClientSettingsHandler extends ResourceHandler<ScimHttpClientSet
    * updates an existing resource
    */
   @Override
-  public ScimHttpClientSettings updateResource(ScimHttpClientSettings resourceToUpdate, Authorization authorization)
+  public ScimHttpClientSettings updateResource(ScimHttpClientSettings resourceToUpdate, Context context)
   {
     Long dbId = Utils.parseId(resourceToUpdate.getId().orElseThrow());
     HttpClientSettings oldHttpClientSettings = httpClientSettingsDao.findById(dbId).orElseThrow(() -> {
@@ -95,7 +95,7 @@ public class HttpClientSettingsHandler extends ResourceHandler<ScimHttpClientSet
    * deletes an existing resource
    */
   @Override
-  public void deleteResource(String id, Authorization authorization)
+  public void deleteResource(String id, Context context)
   {
     Long dbId = Utils.parseId(id);
     HttpClientSettings httpClientSettings = httpClientSettingsDao.findById(dbId).orElseThrow(() -> {

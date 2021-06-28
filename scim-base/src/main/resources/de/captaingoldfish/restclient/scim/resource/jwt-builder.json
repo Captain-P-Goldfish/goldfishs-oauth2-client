@@ -1,0 +1,49 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:JwtBuilder",
+  "name": "JwtBuilder",
+  "description": "A representation that is used to create signed and encrypted JWTs",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "header",
+      "type": "string",
+      "description": "The header of a parsed JWT",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    },
+    {
+      "name": "body",
+      "type": "string",
+      "description": "The body of a plain JWT in case of a request and the JWT itself in case of response",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    }
+  ],
+  "meta": {
+    "resourceType": "Schema",
+    "created": "2021-04-88T22:51:00+02:00",
+    "lastModified": "2021-04-88T22:51:00+02:00",
+    "location": "/Schemas/JwtBuilder"
+  }
+}

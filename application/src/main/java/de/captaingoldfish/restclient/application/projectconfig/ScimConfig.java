@@ -5,7 +5,10 @@ import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.captaingoldfish.restclient.application.crypto.JwtHandler;
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsHandler;
+import de.captaingoldfish.restclient.application.endpoints.jwt.JwtBuilderHandler;
+import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
@@ -19,6 +22,7 @@ import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
@@ -170,5 +174,23 @@ public class ScimConfig
     httpClientSettingsResourceType.getFeatures().setAutoFiltering(true);
     httpClientSettingsResourceType.getFeatures().setAutoSorting(true);
     return httpClientSettingsResourceType;
+  }
+
+  /**
+   * registers the jwt builder resourceType under the endpoint /JwtBuilder.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the JWT builder resource type
+   */
+  @Bean
+  public ResourceType jwtBuilderResourceType(ResourceEndpoint resourceEndpoint, KeystoreDao keystoreDao)
+  {
+    JwtHandler jwtHandler = new JwtHandler(keystoreDao);
+    JwtBuilderHandler jwtBuilderHandler = new JwtBuilderHandler(jwtHandler, new ScimJwtBuilderValidator(keystoreDao));
+    JwtBuilderEndpoint jwtBuilderEndpoint = new JwtBuilderEndpoint(jwtBuilderHandler);
+    ResourceType jwtBuilderResourceType = resourceEndpoint.registerEndpoint(jwtBuilderEndpoint);
+    jwtBuilderResourceType.getFeatures().setAutoFiltering(true);
+    jwtBuilderResourceType.getFeatures().setAutoSorting(true);
+    return jwtBuilderResourceType;
   }
 }

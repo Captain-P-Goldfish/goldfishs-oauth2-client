@@ -26,8 +26,8 @@ import de.captaingoldfish.restclient.scim.resources.ScimTruststore.TruststoreUpl
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
-import de.captaingoldfish.scim.sdk.server.endpoints.authorize.Authorization;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
@@ -49,7 +49,7 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
    * merges all entries of a truststore into the application keystore or a single certificate entry
    */
   @Override
-  public ScimTruststore createResource(ScimTruststore scimTruststore, Authorization authorization)
+  public ScimTruststore createResource(ScimTruststore scimTruststore, Context context)
   {
     Optional<TruststoreUpload> truststoreUpload = scimTruststore.getTruststoreUpload();
     if (truststoreUpload.isPresent())
@@ -159,9 +159,9 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
   @SneakyThrows
   @Override
   public ScimTruststore getResource(String id,
-                                    Authorization authorization,
                                     List<SchemaAttribute> attributes,
-                                    List<SchemaAttribute> excludedAttributes)
+                                    List<SchemaAttribute> excludedAttributes,
+                                    Context context)
   {
     final String alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
     Truststore truststore = truststoreDao.getTruststore();
@@ -189,7 +189,7 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
                                                            SortOrder sortOrder,
                                                            List<SchemaAttribute> attributes,
                                                            List<SchemaAttribute> excludedAttributes,
-                                                           Authorization authorization)
+                                                           Context context)
   {
     Truststore truststore = truststoreDao.getTruststore();
     ScimTruststore scimTruststore = ScimTruststore.builder()
@@ -209,14 +209,14 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
    * update not supported
    */
   @Override
-  public ScimTruststore updateResource(ScimTruststore resourceToUpdate, Authorization authorization)
+  public ScimTruststore updateResource(ScimTruststore resourceToUpdate, Context context)
   {
     return null;
   }
 
   @SneakyThrows
   @Override
-  public void deleteResource(String id, Authorization authorization)
+  public void deleteResource(String id, Context context)
   {
     final String alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
     Truststore truststore = truststoreDao.getTruststore();

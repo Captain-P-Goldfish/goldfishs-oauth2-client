@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.keystore;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
+import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
@@ -307,25 +309,14 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   @SneakyThrows
   private void addDefaultEntriesToApplicationKeystore()
   {
-    KeystoreHandler keystoreHandler = (KeystoreHandler)keystoreResourceType.getResourceHandlerImpl();
-
-    String b64Keystore = Base64.getEncoder().encodeToString(readAsBytes(UNIT_TEST_KEYSTORE_JKS_EXTENDED));
-    FileUpload fileUpload = FileUpload.builder()
-                                      .keystoreFile(b64Keystore)
-                                      .keystoreFileName("test.jks")
-                                      .keystorePassword(UNIT_TEST_KEYSTORE_PASSWORD)
-                                      .build();
-    ScimKeystore uploadResponse = keystoreHandler.handleKeystoreUpload(fileUpload);
-
+    byte[] keystore = readAsBytes(UNIT_TEST_KEYSTORE_JKS_EXTENDED);
+    Keystore applicationKeystore = new Keystore(new ByteArrayInputStream(keystore), KeyStoreSupporter.KeyStoreType.JKS,
+                                                UNIT_TEST_KEYSTORE_PASSWORD);
     for ( KeystoreEntry unitTestKeystoreEntryAccess : getExtendedUnitTestKeystoreEntryAccess() )
     {
-      AliasSelection aliasSelection = AliasSelection.builder()
-                                                    .stateId(uploadResponse.getAliasSelection().getStateId())
-                                                    .aliasesList(Collections.singletonList(unitTestKeystoreEntryAccess.getAlias()))
-                                                    .privateKeyPassword(unitTestKeystoreEntryAccess.getPrivateKeyPassword())
-                                                    .build();
-      keystoreHandler.handleAliasSelection(aliasSelection);
+      applicationKeystore.addKeyEntry(unitTestKeystoreEntryAccess);
     }
+    keystoreDao.save(applicationKeystore);
   }
 
   @Test

@@ -154,13 +154,12 @@
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
 
-        <createTable tableName="PARSED_JSON_WEB_TOKENS">
+        <createTable tableName="PLAIN_CONTENT">
             <column name="ID" type="BIGINT">
-                <constraints primaryKeyName="PARSED_JSON_WEB_TOKENS_PRIME_KEY" primaryKey="true"/>
+                <constraints primaryKeyName="PLAIN_CONTENT_PRIME_KEY" primaryKey="true"/>
             </column>
-            <column name="SIGNATURE_KEY_REF" type="VARCHAR(64)"/>
-            <column name="DECRYPTION_KEY_REF" type="VARCHAR(64)"/>
-            <column name="JWT" type="${blob_type}"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="CONTENT" type="${blob_type}"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>

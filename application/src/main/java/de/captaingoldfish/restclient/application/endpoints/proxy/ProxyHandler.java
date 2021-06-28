@@ -10,8 +10,8 @@ import de.captaingoldfish.restclient.scim.resources.ScimProxy;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
-import de.captaingoldfish.scim.sdk.server.endpoints.authorize.Authorization;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
    * creates a new proxy
    */
   @Override
-  public ScimProxy createResource(ScimProxy scimProxy, Authorization authorization)
+  public ScimProxy createResource(ScimProxy scimProxy, Context context)
   {
     Proxy proxy = ProxyConverter.toProxy(scimProxy);
     proxy = proxyDao.save(proxy);
@@ -46,9 +46,9 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
    */
   @Override
   public ScimProxy getResource(String id,
-                               Authorization authorization,
                                List<SchemaAttribute> attributes,
-                               List<SchemaAttribute> excludedAttributes)
+                               List<SchemaAttribute> excludedAttributes,
+                               Context context)
   {
     long proxyId = Utils.parseId(id);
     Proxy proxy = proxyDao.findById(proxyId).orElseThrow(() -> {
@@ -68,7 +68,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
                                                       SortOrder sortOrder,
                                                       List<SchemaAttribute> attributes,
                                                       List<SchemaAttribute> excludedAttributes,
-                                                      Authorization authorization)
+                                                      Context context)
   {
     List<Proxy> proxyList = proxyDao.findAll();
     List<ScimProxy> scimProxyList = proxyList.stream().map(ProxyConverter::toScimProxy).collect(Collectors.toList());
@@ -82,7 +82,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
    * updates an existing proxy
    */
   @Override
-  public ScimProxy updateResource(ScimProxy scimProxy, Authorization authorization)
+  public ScimProxy updateResource(ScimProxy scimProxy, Context context)
   {
     final long id = Utils.parseId(scimProxy.getId().get());
     Proxy oldProxy = proxyDao.findById(id).orElseThrow(() -> {
@@ -99,7 +99,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
    * deletes an existing proxy
    */
   @Override
-  public void deleteResource(String id, Authorization authorization)
+  public void deleteResource(String id, Context context)
   {
     long proxyId = Utils.parseId(id);
     proxyDao.findById(proxyId).orElseThrow(() -> {

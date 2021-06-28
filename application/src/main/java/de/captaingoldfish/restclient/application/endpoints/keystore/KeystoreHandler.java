@@ -29,8 +29,8 @@ import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
-import de.captaingoldfish.scim.sdk.server.endpoints.authorize.Authorization;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
@@ -63,7 +63,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
    * added to the application keystore
    */
   @Override
-  public ScimKeystore createResource(ScimKeystore scimKeystore, Authorization authorization)
+  public ScimKeystore createResource(ScimKeystore scimKeystore, Context context)
   {
     ScimKeystore.FileUpload fileUpload = scimKeystore.getFileUpload();
     ScimKeystore scimKeystoreResponse;
@@ -168,9 +168,9 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
 
   @Override
   public ScimKeystore getResource(String alias,
-                                  Authorization authorization,
                                   List<SchemaAttribute> list,
-                                  List<SchemaAttribute> list1)
+                                  List<SchemaAttribute> list1,
+                                  Context context)
   {
     Keystore keystore = keystoreDao.getKeystore();
     Meta meta = Meta.builder().created(Instant.now()).lastModified(Instant.now()).build();
@@ -189,7 +189,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
                                                          SortOrder sortOrder,
                                                          List<SchemaAttribute> attributes,
                                                          List<SchemaAttribute> excludedAttributes,
-                                                         Authorization authorization)
+                                                         Context context)
   {
     Keystore applicationKeystore = keystoreDao.getKeystore();
     List<ScimKeystore> keystoreList = new ArrayList<>();
@@ -215,7 +215,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
    * not supported
    */
   @Override
-  public ScimKeystore updateResource(ScimKeystore resourceNode, Authorization authorization)
+  public ScimKeystore updateResource(ScimKeystore resourceNode, Context context)
   {
     return null;
   }
@@ -225,7 +225,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
    */
   @SneakyThrows
   @Override
-  public void deleteResource(String alias, Authorization authorization)
+  public void deleteResource(String alias, Context context)
   {
     Keystore keystore = keystoreDao.getKeystore();
     Optional<KeystoreEntry> keystoreEntryOptional = keystore.getKeystoreEntries()

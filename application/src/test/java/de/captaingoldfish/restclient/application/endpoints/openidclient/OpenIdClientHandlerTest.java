@@ -1,8 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.openidclient;
 
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,14 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
+import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
+import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
-import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
-import de.captaingoldfish.restclient.scim.resources.ScimKeystore.AliasSelection;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
@@ -848,23 +846,13 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
   @SneakyThrows
   private void addDefaultEntriesToApplicationKeystore(String alias)
   {
-    this.keystoreEntry = getUnitTestKeystoreEntryAccess(alias);
-
-    KeystoreHandler keystoreHandler = (KeystoreHandler)keystoreResourceType.getResourceHandlerImpl();
-
-    String b64Keystore = Base64.getEncoder().encodeToString(readAsBytes(UNIT_TEST_KEYSTORE_JKS));
-    ScimKeystore.FileUpload fileUpload = ScimKeystore.FileUpload.builder()
-                                                                .keystoreFile(b64Keystore)
-                                                                .keystoreFileName("test.jks")
-                                                                .keystorePassword(UNIT_TEST_KEYSTORE_PASSWORD)
-                                                                .build();
-    ScimKeystore uploadResponse = keystoreHandler.handleKeystoreUpload(fileUpload);
-
-    AliasSelection aliasSelection = AliasSelection.builder()
-                                                  .stateId(uploadResponse.getAliasSelection().getStateId())
-                                                  .aliasesList(Collections.singletonList(keystoreEntry.getAlias()))
-                                                  .privateKeyPassword(keystoreEntry.getPrivateKeyPassword())
-                                                  .build();
-    keystoreHandler.handleAliasSelection(aliasSelection);
+    byte[] keystore = readAsBytes(UNIT_TEST_KEYSTORE_JKS);
+    Keystore applicationKeystore = new Keystore(new ByteArrayInputStream(keystore), KeyStoreSupporter.KeyStoreType.JKS,
+                                                UNIT_TEST_KEYSTORE_PASSWORD);
+    for ( KeystoreEntry unitTestKeystoreEntryAccess : getUnitTestKeystoreEntryAccess() )
+    {
+      applicationKeystore.addKeyEntry(unitTestKeystoreEntryAccess);
+    }
+    keystoreDao.save(applicationKeystore);
   }
 }

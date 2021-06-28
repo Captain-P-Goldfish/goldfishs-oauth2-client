@@ -11,8 +11,8 @@ import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
-import de.captaingoldfish.scim.sdk.server.endpoints.authorize.Authorization;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
@@ -36,7 +36,7 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
    * simply creates the new resource
    */
   @Override
-  public ScimOpenIdClient createResource(ScimOpenIdClient resource, Authorization authorization)
+  public ScimOpenIdClient createResource(ScimOpenIdClient resource, Context context)
   {
     OpenIdClient openIdClient = OpenIdClientConverter.toOpenIdClient(resource);
     openIdClient = openIdClientDao.save(openIdClient);
@@ -48,9 +48,9 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
    */
   @Override
   public ScimOpenIdClient getResource(String id,
-                                      Authorization authorization,
                                       List<SchemaAttribute> attributes,
-                                      List<SchemaAttribute> excludedAttributes)
+                                      List<SchemaAttribute> excludedAttributes,
+                                      Context context)
   {
     Long openIdClientId = Utils.parseId(id);
     OpenIdClient openIdClient = openIdClientDao.findById(openIdClientId).orElseThrow(() -> {
@@ -70,7 +70,7 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
                                                              SortOrder sortOrder,
                                                              List<SchemaAttribute> attributes,
                                                              List<SchemaAttribute> excludedAttributes,
-                                                             Authorization authorization)
+                                                             Context context)
   {
     List<OpenIdClient> openIdClientList = openIdClientDao.findAll();
     List<ScimOpenIdClient> scimOpenIdClientList = openIdClientList.stream()
@@ -86,7 +86,7 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
    * @return updates an existing OpenID Client with the new data
    */
   @Override
-  public ScimOpenIdClient updateResource(ScimOpenIdClient resourceToUpdate, Authorization authorization)
+  public ScimOpenIdClient updateResource(ScimOpenIdClient resourceToUpdate, Context context)
   {
     Long openIdClientId = Utils.parseId(resourceToUpdate.getId().orElseThrow());
     OpenIdClient openIdClient = openIdClientDao.findById(openIdClientId).orElseThrow();
@@ -101,7 +101,7 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
    * deletes an existing OpenID Client
    */
   @Override
-  public void deleteResource(String id, Authorization authorization)
+  public void deleteResource(String id, Context context)
   {
     Long openIdClientId = Utils.parseId(id);
     OpenIdClient openIdClient = openIdClientDao.findById(openIdClientId).orElseThrow(() -> {

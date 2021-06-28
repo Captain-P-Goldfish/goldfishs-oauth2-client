@@ -1,0 +1,24 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
+  ],
+  "id": "JwtBuilder",
+  "name": "JwtBuilder",
+  "description": "An endpoint for creating signed and encrypted JSON Web Tokens",
+  "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:JwtBuilder",
+  "endpoint": "/JwtBuilder",
+  "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
+    "endpointControl": {
+      "disableGet": true,
+      "disableList": true,
+      "disableUpdate": true,
+      "disableDelete": true
+    }
+  },
+  "meta": {
+    "resourceType": "ResourceType",
+    "created": "2021-05-08T22:51:00+02:00",
+    "lastModified": "2021-05-08T22:51:00+02:00",
+    "location": "/ResourceTypes/JwtBuilder"
+  }
+}

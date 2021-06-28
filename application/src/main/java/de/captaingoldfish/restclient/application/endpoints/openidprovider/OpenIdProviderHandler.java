@@ -11,8 +11,8 @@ import de.captaingoldfish.restclient.scim.resources.ScimOpenIdProvider;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
-import de.captaingoldfish.scim.sdk.server.endpoints.authorize.Authorization;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
@@ -37,7 +37,7 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
    * creates a new {@link OpenIdProvider}
    */
   @Override
-  public ScimOpenIdProvider createResource(ScimOpenIdProvider scimOpenIdProvider, Authorization authorization)
+  public ScimOpenIdProvider createResource(ScimOpenIdProvider scimOpenIdProvider, Context context)
   {
     OpenIdProvider openIdProvider = OpenIdProviderConverter.toOpenIdProvider(scimOpenIdProvider);
     openIdProvider = openIdProviderDao.save(openIdProvider);
@@ -49,9 +49,9 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
    */
   @Override
   public ScimOpenIdProvider getResource(String id,
-                                        Authorization authorization,
                                         List<SchemaAttribute> attributes,
-                                        List<SchemaAttribute> excludedAttributes)
+                                        List<SchemaAttribute> excludedAttributes,
+                                        Context context)
   {
     Long dbId = Utils.parseId(id);
     OpenIdProvider openIdProvider = openIdProviderDao.findById(dbId).orElseThrow(() -> {
@@ -71,7 +71,7 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
                                                                SortOrder sortOrder,
                                                                List<SchemaAttribute> attributes,
                                                                List<SchemaAttribute> excludedAttributes,
-                                                               Authorization authorization)
+                                                               Context context)
   {
     List<OpenIdProvider> openIdProviderList = openIdProviderDao.findAll();
     List<ScimOpenIdProvider> scimOpenIdProviderList = openIdProviderList.stream()
@@ -87,7 +87,7 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
    * updates an existing {@link OpenIdProvider}
    */
   @Override
-  public ScimOpenIdProvider updateResource(ScimOpenIdProvider resourceToUpdate, Authorization authorization)
+  public ScimOpenIdProvider updateResource(ScimOpenIdProvider resourceToUpdate, Context context)
   {
     Long dbId = Utils.parseId(resourceToUpdate.getId().get());
     OpenIdProvider oldProvider = openIdProviderDao.findById(dbId).orElseThrow(() -> {
@@ -104,7 +104,7 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
    * deletes an existing {@link OpenIdProvider}
    */
   @Override
-  public void deleteResource(String id, Authorization authorization)
+  public void deleteResource(String id, Context context)
   {
     Long dbId = Utils.parseId(id);
     openIdProviderDao.findById(dbId).orElseThrow(() -> {

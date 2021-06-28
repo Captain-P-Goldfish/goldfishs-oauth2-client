@@ -1,12 +1,12 @@
 package de.captaingoldfish.restclient.application.endpoints;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +51,7 @@ public class ScimController
    * @param requestBody the request body
    * @return the scim response that will automatically be converted to json by spring
    */
+  @Transactional
   @RequestMapping(value = "/**", method = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT,
                                            RequestMethod.PATCH,
                                            RequestMethod.DELETE}, produces = HttpHeader.SCIM_CONTENT_TYPE)
@@ -63,8 +64,7 @@ public class ScimController
     ScimResponse scimResponse = resourceEndpoint.handleRequest(request.getRequestURL().toString() + query,
                                                                HttpMethod.valueOf(request.getMethod()),
                                                                requestBody,
-                                                               httpHeaders,
-                                                               Collections::emptySet);
+                                                               httpHeaders);
     response.setContentType(HttpHeader.SCIM_CONTENT_TYPE);
     scimResponse.getHttpHeaders().forEach(response::setHeader);
     response.setStatus(scimResponse.getHttpStatus());
