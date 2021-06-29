@@ -45,6 +45,10 @@ public final class ClasspathReferences
 
   public static final String JWT_BUILDER_SCHEMA = BASE_PATH + "/resource/jwt-builder.json";
 
+  public static final String APP_INFO_RESOURCE_TYPE = BASE_PATH + "/resourcetypes/app-info-resource-type.json";
+
+  public static final String APP_INFO_SCHEMA = BASE_PATH + "/resource/app-infos.json";
+
 
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
 

@@ -1,0 +1,73 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:AppInfo",
+  "name": "AppInfo",
+  "description": "Contains some application information that might be useful for the UI",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "jwtInfo",
+      "type": "complex",
+      "description": "Contains the algorithms supported for JWTs",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "signatureAlgorithms",
+          "type": "string",
+          "description": "The supported signature algorithms for JWTs",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": true,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "keyWrapAlgorithms",
+          "type": "string",
+          "description": "The key wrap encryption algorithms that are supported",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": true,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "encryptionAlgorithms",
+          "type": "string",
+          "description": "The supported content encryption algorithms",
+          "mutability": "readOnly",
+          "returned": "default",
+          "uniqueness": "none",
+          "multiValued": true,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "resourceType": "Schema",
+    "created": "2021-04-88T22:51:00+02:00",
+    "lastModified": "2021-04-88T22:51:00+02:00",
+    "location": "/Schemas/AppInfo"
+  }
+}

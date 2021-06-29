@@ -7,6 +7,11 @@
   "description": "The endpoint to manage OpenID Client details that were registered at a specific OpenID Provider.",
   "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:OpenIdClient",
   "endpoint": "/OpenIdClient",
+  "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
+    "authorization": {
+      "authenticated": false
+    }
+  },
   "meta": {
     "resourceType": "ResourceType",
     "created": "2021-05-08T22:51:00+02:00",
