@@ -18,25 +18,28 @@ export class FormInputField extends React.Component
     render()
     {
         let controlId = this.props.name;
-        let label = this.props.label === undefined ? null : <Form.Label column sm={2}>
-            {this.props.label}
-        </Form.Label>;
+        let label = new Optional(this.props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
         let inputFieldType = this.props.type === undefined ? "text" : this.props.type;
         let inputFieldName = this.props.name;
         let inputFieldPlaceholder = this.props.placeholder === undefined ? this.props.name : this.props.placeholder;
         let inputFieldErrorMessages = this.props.onError(this.props.name);
         let isDisabled = this.props.disabled === true;
         let isReadOnly = this.props.readOnly === true;
+        let isHidden = this.props.type === "hidden";
+        let as = new Optional(this.props.as).orElse("input");
 
+        let sm = new Optional(this.props.sm).orElse(label.isPresent() ? 10 : 12);
         return (
-            <Form.Group as={Row} controlId={controlId}>
-                {label}
-                <Col sm={10}>
+            <Form.Group as={Row} controlId={controlId} style={{display: isHidden ? "none" : ""}}>
+                {label.get()}
+                <Col sm={sm}>
                     <Form.Control type={inputFieldType}
+                                  as={as}
                                   name={inputFieldName}
                                   disabled={isDisabled}
                                   readOnly={isReadOnly}
                                   placeholder={inputFieldPlaceholder}
+                                  onChange={this.props.onChange}
                                   value={this.props.value} />
 
                     <ErrorMessageList controlId={this.props.name + "-error-list"}
@@ -65,7 +68,6 @@ export class FormSelectField extends React.Component
                 return <option key={value}>{value}</option>
             });
         }).orElse([])
-
 
         return (
             <Form.Group as={Row} controlId={this.props.name}>

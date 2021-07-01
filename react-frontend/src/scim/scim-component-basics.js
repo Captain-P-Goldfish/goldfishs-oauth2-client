@@ -50,6 +50,7 @@ export default class ScimComponentBasics
     async createResource()
     {
         let resource = await this.scimClient.getResourceFromFormReference(this.formReference);
+        console.log(resource)
         let response = await this.scimClient.createResource(resource);
         this.handleCreateOrUpdateResponse(response, this.onCreateSuccess);
     }
@@ -109,7 +110,6 @@ export default class ScimComponentBasics
 
     updateInput(fieldname, value)
     {
-        console.log("fieldname: " + fieldname)
         let object = this.getCurrentResource();
         object = lodash.set(object, fieldname, value);
         this.setCurrentResource(object);

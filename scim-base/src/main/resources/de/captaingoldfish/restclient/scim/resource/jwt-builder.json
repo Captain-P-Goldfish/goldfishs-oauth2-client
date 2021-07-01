@@ -31,7 +31,7 @@
     {
       "name": "header",
       "type": "string",
-      "description": "The header of a parsed JWT",
+      "description": "The header of the JWT that should be created",
       "mutability": "writeOnly",
       "returned": "never",
       "uniqueness": "none",

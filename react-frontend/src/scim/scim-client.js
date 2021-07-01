@@ -294,8 +294,9 @@ export default class ScimClient
         };
 
         let formInputFields = Array.from(formReference.current.getElementsByTagName('input'));
+        let textAreaFields = Array.from(formReference.current.getElementsByTagName('textarea'));
         let formSelectFields = Array.from(formReference.current.getElementsByTagName('select'));
-        let allFormFields = formInputFields.concat(formSelectFields);
+        let allFormFields = formInputFields.concat(formSelectFields).concat(textAreaFields);
 
         for (let inputField of allFormFields)
         {

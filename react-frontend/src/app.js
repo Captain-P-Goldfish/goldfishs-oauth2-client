@@ -7,6 +7,7 @@ import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
 import OpenidProvider from "./openid/openid-provider";
 import OpenidClients from "./openid/openid-clients";
+import JwtHandler from "./jwt/jwt-builder";
 
 
 class Application extends React.Component
@@ -64,6 +65,9 @@ class Application extends React.Component
                                 <LinkContainer exact to="/openIdProvider">
                                     <Nav.Link>OpenID</Nav.Link>
                                 </LinkContainer>
+                                <LinkContainer exact to="/jwts">
+                                    <Nav.Link>JWTs</Nav.Link>
+                                </LinkContainer>
                                 <LinkContainer exact to="/system">
                                     <Nav.Link>System</Nav.Link>
                                 </LinkContainer>
@@ -82,6 +86,9 @@ class Application extends React.Component
                                    component={OpenidClients} />
                             <Route path="/openIdProvider">
                                 <OpenidProvider />
+                            </Route>
+                            <Route path="/jwts">
+                                <JwtHandler />
                             </Route>
                             <Route path="/">
                                 <h2>Welcome</h2>

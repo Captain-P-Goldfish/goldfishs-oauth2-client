@@ -1,0 +1,45 @@
+#jwt {
+    margin-top: 50px;
+    min-height: 200px;
+}
+
+#header {
+    min-height: 200px;
+}
+
+#body {
+    min-height: 500px;
+}
+
+.container {
+    max-width: none;
+}
+
+/*.form-group {*/
+/*    margin-bottom: 0;*/
+/*}*/
+
+p.header {
+    display: block;
+    margin: 0;
+    border: 1px solid gold;
+}
+
+textarea {
+    border: 1px solid gold;
+}
+
+.dropdown {
+    /*margin-top: 30px;*/
+    margin-bottom: 30px;
+}
+
+.dropdown-toggle, .dropdown-toggle:hover, .dropdown-toggle:focus,
+.functional-button, .functional-button:hover, .functional-button:focus {
+    width: 100%;
+    background-color: navy;
+}
+
+.functional-button, .functional-button:hover, .functional-button:focus {
+    margin-bottom: 30px;
+}

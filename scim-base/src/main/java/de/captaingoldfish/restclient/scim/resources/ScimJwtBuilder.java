@@ -30,25 +30,33 @@ public class ScimJwtBuilder extends ResourceNode
     setMeta(meta);
   }
 
-  /** The header of a parsed JWT */
+  /** The header of the JWT that should be created */
   public String getHeader()
   {
     return getStringAttribute(FieldNames.HEADER).orElse(null);
   }
 
-  /** The header of a parsed JWT */
+  /** The header of the JWT that should be created */
   public void setHeader(String header)
   {
     setAttribute(FieldNames.HEADER, header);
   }
 
-  /** The header of a parsed JWT */
+  /**
+   * The id of the key that should be used to sign, encrypt the current data. If left empty the keyId from the
+   * header will be used instead as fallback. The keyId must match an existing alias within the application
+   * keystore
+   */
   public String getKeyId()
   {
     return getStringAttribute(FieldNames.KEY_ID).orElse(null);
   }
 
-  /** The header of a parsed JWT */
+  /**
+   * The id of the key that should be used to sign, encrypt the current data. If left empty the keyId from the
+   * header will be used instead as fallback. The keyId must match an existing alias within the application
+   * keystore
+   */
   public void setKeyId(String keyId)
   {
     setAttribute(FieldNames.KEY_ID, keyId);
