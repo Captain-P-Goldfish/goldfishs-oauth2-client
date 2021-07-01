@@ -103,8 +103,22 @@ public class JwtHandlerTest implements FileReferences
 
     String header = String.format("{\"kid\": \"%s\", \"alg\": \"%s\"}", keyId, algorithm);
     String body = "{\"iss\": \"goldfish-ec\"}";
-    String jws = jwtHandler.createJwt(header, body);
-    String verifiedBody = jwtHandler.handleJwt(jws);
+    String jws = jwtHandler.createJwt(keyId, header, body);
+    String verifiedBody = jwtHandler.handleJwt(null, jws);
+    Assertions.assertEquals(body, verifiedBody);
+  }
+
+  @SneakyThrows
+  @ParameterizedTest
+  @MethodSource("signatureAlgorithmParameters")
+  public void testJwtSignerTestWithDirectKeyId(String keyId, JWSAlgorithm algorithm)
+  {
+    JwtHandler jwtHandler = new JwtHandler(keystoreDao);
+
+    String header = String.format("{ \"alg\": \"%s\"}", algorithm);
+    String body = "{\"iss\": \"goldfish-ec\"}";
+    String jws = jwtHandler.createJwt(keyId, header, body);
+    String verifiedBody = jwtHandler.handleJwt(keyId, jws);
     Assertions.assertEquals(body, verifiedBody);
   }
 
@@ -120,8 +134,24 @@ public class JwtHandlerTest implements FileReferences
                                   algorithm,
                                   contentAlgorithm);
     String body = "{\"iss\": \"goldfish-ec\"}";
-    String jwe = jwtHandler.createJwt(header, body);
-    String decrypted = jwtHandler.handleJwt(jwe);
+    String jwe = jwtHandler.createJwt(keyId, header, body);
+    String decrypted = jwtHandler.handleJwt(null, jwe);
+    Assertions.assertEquals(decrypted, body);
+  }
+
+  @SneakyThrows
+  @ParameterizedTest
+  @MethodSource("encryptionAlgorithmParameters")
+  public void testJwtEncryptionTestWithDirectKeyId(String keyId,
+                                                   JWEAlgorithm algorithm,
+                                                   EncryptionMethod contentAlgorithm)
+  {
+    JwtHandler jwtHandler = new JwtHandler(keystoreDao);
+
+    String header = String.format("{ \"alg\": \"%s\", \"enc\": \"%s\"}", algorithm, contentAlgorithm);
+    String body = "{\"iss\": \"goldfish-ec\"}";
+    String jwe = jwtHandler.createJwt(keyId, header, body);
+    String decrypted = jwtHandler.handleJwt(keyId, jwe);
     Assertions.assertEquals(decrypted, body);
   }
 }

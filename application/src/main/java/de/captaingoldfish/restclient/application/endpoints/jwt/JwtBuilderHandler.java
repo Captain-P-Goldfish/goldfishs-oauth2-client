@@ -43,7 +43,7 @@ public class JwtBuilderHandler extends ResourceHandler<ScimJwtBuilder>
   public ScimJwtBuilder createResource(ScimJwtBuilder resource, Context context)
   {
     final String id = UUID.randomUUID().toString();
-    String jwt = jwtHandler.createJwt(resource.getHeader(), resource.getBody());
+    String jwt = jwtHandler.createJwt(resource.getKeyId(), resource.getHeader(), resource.getBody());
     return ScimJwtBuilder.builder().id(id).body(jwt).meta(Meta.builder().created(Instant.now()).build()).build();
   }
 

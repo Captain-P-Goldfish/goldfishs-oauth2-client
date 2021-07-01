@@ -98,7 +98,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     Assertions.assertEquals(1, validationContext.getFieldErrors().size());
     List<String> headerErrors = validationContext.getFieldErrors().get(ScimJwtBuilder.FieldNames.HEADER);
     Assertions.assertEquals(1, headerErrors.size());
-    final String errorMessage = "Header field 'kid' is required and must match an alias of the application keystore";
+    final String errorMessage = "keyId is required and must match an alias of the application keystore";
     Assertions.assertEquals(errorMessage, headerErrors.get(0));
   }
 

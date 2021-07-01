@@ -2,6 +2,8 @@ package de.captaingoldfish.restclient.application.endpoints.jwt.validation;
 
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.captaingoldfish.restclient.application.crypto.JwtHandler;
@@ -41,7 +43,8 @@ public class ScimJwtBuilderValidator implements RequestValidator<ScimJwtBuilder>
     }
 
     String header = resource.getHeader();
-    validateHeaderNode(header, validationContext);
+    String keyId = resource.getKeyId();
+    validateHeaderNode(keyId, header, validationContext);
     if (validationContext.hasErrors())
     {
       return;
@@ -50,7 +53,7 @@ public class ScimJwtBuilderValidator implements RequestValidator<ScimJwtBuilder>
     JwtHandler jwtHandler = new JwtHandler(keystoreDao);
     try
     {
-      jwtHandler.createJwt(header, "test");
+      jwtHandler.createJwt(keyId, header, "test");
     }
     catch (Exception ex)
     {
@@ -62,7 +65,7 @@ public class ScimJwtBuilderValidator implements RequestValidator<ScimJwtBuilder>
   /**
    * checks if the given header is a valid JWS or JWE header
    */
-  private void validateHeaderNode(String header, ValidationContext validationContext)
+  private void validateHeaderNode(String keyId, String header, ValidationContext validationContext)
   {
     final ObjectNode headerNode;
     try
@@ -76,10 +79,10 @@ public class ScimJwtBuilderValidator implements RequestValidator<ScimJwtBuilder>
       return;
     }
 
-    final boolean hasKeyIdKey = headerNode.has("kid");
+    final boolean hasKeyIdKey = StringUtils.isNotBlank(keyId) || headerNode.has("kid");
     if (!hasKeyIdKey)
     {
-      String errorMessage = "Header field 'kid' is required and must match an alias of the application keystore";
+      String errorMessage = "keyId is required and must match an alias of the application keystore";
       validationContext.addError(ScimJwtBuilder.FieldNames.HEADER, errorMessage);
       return;
     }

@@ -56,42 +56,46 @@ public class JwtHandler
   /**
    * creates either an encrypted JWT (JWE) or a signed JWT (JWS) based on the contents of the JOSE header
    * 
+   * @param keyId the keyId to use. If left empty the code will look into the header of the JWT and tries to get
+   *          the 'kid' value
    * @param header the JOSE header that contains the information on what needs to be done
    * @param body the body that should either be encrypted or signed
    * @return the signed or encrypted JWT
    */
   @SneakyThrows
-  public String createJwt(String header, String body)
+  public String createJwt(String keyId, String header, String body)
   {
     try
     {
       JWSHeader jwsHeader = JWSHeader.parse(header);
-      return signJwt(jwsHeader, body);
+      return signJwt(keyId, jwsHeader, body);
     }
     catch (ParseException e)
     {
       JWEHeader jweHeader = JWEHeader.parse(header);
-      return encryptJwt(jweHeader, body);
+      return encryptJwt(keyId, jweHeader, body);
     }
   }
 
   /**
    * verifies either the signature of a signed JWT (JWS) or tries to decrypt the given JWT (JWE)
    * 
+   * @param keyId used to verify the signature or to decrypt the JWT. If left empty the application will try to
+   *          get the id from the 'kid' field within the header of the JWT
    * @param jwt the signed or encrypted JWT
    * @return the payload of the verified or decrypted content
    */
   @SneakyThrows
-  public String handleJwt(String jwt)
+  public String handleJwt(String keyId, String jwt)
   {
     final int numberOfJwtParts = jwt.split("\\.").length;
     if (numberOfJwtParts == 3)
     {
-      return verifySignature(jwt);
+      return verifySignature(keyId, jwt);
     }
     else
     {
-      return decryptJwt(jwt);
+      return decryptJwt(keyId, jwt);
     }
   }
 
@@ -99,9 +103,9 @@ public class JwtHandler
    * signs the given body based on the data within the header
    */
   @SneakyThrows
-  private String signJwt(JWSHeader jwsHeader, String body)
+  private String signJwt(String kid, JWSHeader jwsHeader, String body)
   {
-    String keyId = jwsHeader.getKeyID();
+    String keyId = Optional.ofNullable(kid).orElse(jwsHeader.getKeyID());
     Keystore applicationKeystore = keystoreDao.getKeystore();
     KeyPair keyPair = applicationKeystore.getKeyPair(keyId);
     return createSignedJwt(keyPair, jwsHeader, body);
@@ -111,15 +115,16 @@ public class JwtHandler
    * verifies the signature based on the data within the header
    */
   @SneakyThrows
-  private String verifySignature(String jws)
+  private String verifySignature(String keyId, String jws)
   {
     SignedJWT signedJwt = SignedJWT.parse(jws);
-    JWSVerifier jwsVerifier = getVerifier(signedJwt.getHeader());
+    String effectiveKeyId = Optional.ofNullable(keyId).orElse(signedJwt.getHeader().getKeyID());
+    JWSVerifier jwsVerifier = getVerifier(effectiveKeyId, signedJwt.getHeader());
     boolean isValid = signedJwt.verify(jwsVerifier);
     if (!isValid)
     {
       throw new BadRequestException(String.format("Signature validation has failed with signature key '%s'",
-                                                  signedJwt.getHeader().getKeyID()));
+                                                  effectiveKeyId));
     }
     return signedJwt.getPayload().toString();
   }
@@ -130,9 +135,9 @@ public class JwtHandler
    * @return the encrypted JWT
    */
   @SneakyThrows
-  private String encryptJwt(JWEHeader jweHeader, String body)
+  private String encryptJwt(String kid, JWEHeader jweHeader, String body)
   {
-    String keyId = jweHeader.getKeyID();
+    String keyId = Optional.ofNullable(kid).orElse(jweHeader.getKeyID());
     Keystore applicationKeystore = keystoreDao.getKeystore();
     PublicKey publicKey = applicationKeystore.getCertificate(keyId).getPublicKey();
     return createEncryptedJwt(publicKey, jweHeader, body);
@@ -144,11 +149,11 @@ public class JwtHandler
    * @return the decrypted content of the JWT
    */
   @SneakyThrows
-  private String decryptJwt(String jwt)
+  private String decryptJwt(String kid, String jwt)
   {
     EncryptedJWT encryptedJWT = EncryptedJWT.parse(jwt);
     JWEHeader jweHeader = encryptedJWT.getHeader();
-    String keyId = jweHeader.getKeyID();
+    String keyId = Optional.ofNullable(kid).orElse(jweHeader.getKeyID());
     Keystore applicationKeystore = keystoreDao.getKeystore();
     KeyPair keyPair = applicationKeystore.getKeyPair(keyId);
     return decryptJwt(keyPair, encryptedJWT);
@@ -297,10 +302,9 @@ public class JwtHandler
    * retrieves the signature verifier based on the data within the JWS header
    */
   @SneakyThrows
-  private JWSVerifier getVerifier(JWSHeader header)
+  private JWSVerifier getVerifier(String keyId, JWSHeader header)
   {
     Keystore applicationKeystore = keystoreDao.getKeystore();
-    String keyId = header.getKeyID();
     PublicKey publicKey = applicationKeystore.getCertificate(keyId).getPublicKey();
 
     boolean isRsaAlgorithm = JWSAlgorithm.Family.RSA.stream().anyMatch(rsa -> rsa.equals(header.getAlgorithm()));

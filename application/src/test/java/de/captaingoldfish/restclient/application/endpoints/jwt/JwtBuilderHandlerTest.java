@@ -74,7 +74,7 @@ public class JwtBuilderHandlerTest extends AbstractScimClientConfig
 
     JwtHandler jwtHandler = new JwtHandler(keystoreDao);
     final String jws = returnedResource.getBody();
-    String plainBody = jwtHandler.handleJwt(jws);
+    String plainBody = jwtHandler.handleJwt(null, jws);
     Assertions.assertEquals(body, plainBody);
   }
 
@@ -101,7 +101,7 @@ public class JwtBuilderHandlerTest extends AbstractScimClientConfig
     JwtHandler jwtHandler = new JwtHandler(keystoreDao);
     final String jwe = returnedResource.getBody();
     log.warn(jwe);
-    String plainBody = jwtHandler.handleJwt(jwe);
+    String plainBody = jwtHandler.handleJwt(null, jwe);
     Assertions.assertEquals(body, plainBody);
   }
 }

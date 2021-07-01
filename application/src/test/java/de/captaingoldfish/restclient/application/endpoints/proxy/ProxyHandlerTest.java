@@ -288,7 +288,7 @@ public class ProxyHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(proxy.getUsername(), returnedProxy.getUsername().get());
     Assertions.assertEquals(proxy.getPassword(), returnedProxy.getPassword().get());
     Assertions.assertEquals(proxy.getCreated(), returnedProxy.getMeta().flatMap(Meta::getCreated).get());
-    Assertions.assertEquals(proxy.getLastModified(), returnedProxy.getMeta().flatMap(Meta::getLastModified).get());
+    Assertions.assertNotEquals(proxy.getLastModified(), returnedProxy.getMeta().flatMap(Meta::getLastModified).get());
 
     Assertions.assertEquals(1, proxyDao.count());
   }

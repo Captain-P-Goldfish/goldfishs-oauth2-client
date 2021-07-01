@@ -18,6 +18,17 @@
       "caseExact": true
     },
     {
+      "name": "keyId",
+      "type": "string",
+      "description": "The id of the key that should be used to sign, encrypt the current data. If left empty the keyId from the header will be used instead as fallback. The keyId must match an existing alias within the application keystore",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "header",
       "type": "string",
       "description": "The header of a parsed JWT",

@@ -20,10 +20,11 @@ public class ScimJwtBuilder extends ResourceNode
   {}
 
   @Builder
-  public ScimJwtBuilder(String id, String header, String body, Meta meta)
+  public ScimJwtBuilder(String id, String keyId, String header, String body, Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
+    setKeyId(keyId);
     setHeader(header);
     setBody(body);
     setMeta(meta);
@@ -39,6 +40,18 @@ public class ScimJwtBuilder extends ResourceNode
   public void setHeader(String header)
   {
     setAttribute(FieldNames.HEADER, header);
+  }
+
+  /** The header of a parsed JWT */
+  public String getKeyId()
+  {
+    return getStringAttribute(FieldNames.KEY_ID).orElse(null);
+  }
+
+  /** The header of a parsed JWT */
+  public void setKeyId(String keyId)
+  {
+    setAttribute(FieldNames.KEY_ID, keyId);
   }
 
   /** The body of a plain JWT */
@@ -64,5 +77,7 @@ public class ScimJwtBuilder extends ResourceNode
     public static final String ID = "id";
 
     public static final String BODY = "body";
+
+    public static final String KEY_ID = "keyId";
   }
 }
