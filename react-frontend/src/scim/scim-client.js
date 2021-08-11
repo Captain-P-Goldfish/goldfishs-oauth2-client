@@ -281,6 +281,21 @@ export default class ScimClient
             {
                 inputFieldValue = inputfield.valueAsNumber;
             }
+            else if (inputfield.type === 'checkbox')
+            {
+                inputFieldValue = inputfield.checked;
+            }
+            else if (inputfield.type === 'radio')
+            {
+                if (inputfield.checked)
+                {
+                    inputFieldValue = inputfield.value;
+                }
+                else
+                {
+                    inputFieldValue = scimResource[name];
+                }
+            }
             else
             {
                 let val = lodash.trim(inputfield.value);

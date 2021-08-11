@@ -58,6 +58,7 @@ export default class ScimComponentBasics
     async updateResource()
     {
         let resource = await this.scimClient.getResourceFromFormReference(this.formReference);
+        console.log(resource)
         let response = await this.scimClient.updateResource(resource, this.getOriginalResource().id);
         this.handleCreateOrUpdateResponse(response, this.onUpdateSuccess);
     }

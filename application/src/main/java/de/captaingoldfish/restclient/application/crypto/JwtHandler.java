@@ -2,7 +2,9 @@ package de.captaingoldfish.restclient.application.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
@@ -36,6 +38,8 @@ import com.nimbusds.jwt.SignedJWT;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -63,19 +67,81 @@ public class JwtHandler
    * @return the signed or encrypted JWT
    */
   @SneakyThrows
-  public String createJwt(String keyId, String header, String body)
+  public String createJwt(String keyId, String header, String body, JwtAttribute... jwtAttributes)
   {
     try
     {
       JWSHeader jwsHeader = JWSHeader.parse(header);
-      return signJwt(keyId, jwsHeader, body);
+      JWSHeader effectiveHeader = Optional.ofNullable(jwtAttributes)
+                                          .map(attributes -> addAdditionalJwsHeaders(keyId, jwsHeader, attributes))
+                                          .orElse(jwsHeader);
+      return signJwt(keyId, effectiveHeader, body);
     }
     catch (ParseException e)
     {
       JWEHeader jweHeader = JWEHeader.parse(header);
-      return encryptJwt(keyId, jweHeader, body);
+      JWEHeader effectiveHeader = Optional.ofNullable(jwtAttributes)
+                                          .map(attributes -> addAdditionalJweHeaders(keyId, jweHeader, attributes))
+                                          .orElse(jweHeader);
+      return encryptJwt(keyId, effectiveHeader, body);
     }
   }
+
+  /**
+   * @param kid
+   * @param jwsHeader
+   * @param attributes
+   * @return
+   */
+  @SneakyThrows
+  private JWSHeader addAdditionalJwsHeaders(String kid, JWSHeader jwsHeader, JwtAttribute[] attributes)
+  {
+    String keyId = Optional.ofNullable(kid).orElse(jwsHeader.getKeyID());
+    Keystore applicationKeystore = keystoreDao.getKeystore();
+
+    JWSHeader.Builder builder = new JWSHeader.Builder(jwsHeader);
+
+    for ( JwtAttribute attribute : attributes )
+    {
+      if (attribute == JwtAttribute.X5T_SHA256)
+      {
+        X509Certificate certificate = applicationKeystore.getCertificate(keyId);
+        Base64URL sha256Thumbprint = Base64URL.encode(MessageDigest.getInstance("SHA-256")
+                                                                   .digest(certificate.getEncoded()));
+        builder.x509CertSHA256Thumbprint(sha256Thumbprint);
+      }
+    }
+    return builder.build();
+  }
+
+  /**
+   * @param kid
+   * @param jwsHeader
+   * @param attributes
+   * @return
+   */
+  @SneakyThrows
+  private JWEHeader addAdditionalJweHeaders(String kid, JWEHeader jwsHeader, JwtAttribute[] attributes)
+  {
+    String keyId = Optional.ofNullable(kid).orElse(jwsHeader.getKeyID());
+    Keystore applicationKeystore = keystoreDao.getKeystore();
+
+    JWEHeader.Builder builder = new JWEHeader.Builder(jwsHeader);
+
+    for ( JwtAttribute attribute : attributes )
+    {
+      if (attribute == JwtAttribute.X5T_SHA256)
+      {
+        X509Certificate certificate = applicationKeystore.getCertificate(keyId);
+        Base64URL sha256Thumbprint = Base64URL.encode(MessageDigest.getInstance("SHA-256")
+                                                                   .digest(certificate.getEncoded()));
+        builder.x509CertSHA256Thumbprint(sha256Thumbprint);
+      }
+    }
+    return builder.build();
+  }
+
+
 
   /**
    * verifies either the signature of a signed JWT (JWS) or tries to decrypt the given JWT (JWE)
@@ -86,7 +152,7 @@ public class JwtHandler
    * @return the payload of the verified or decrypted content
    */
   @SneakyThrows
-  public String handleJwt(String keyId, String jwt)
+  public PlainJwtData handleJwt(String keyId, String jwt)
   {
     final int numberOfJwtParts = jwt.split("\\.").length;
     if (numberOfJwtParts == 3)
@@ -113,9 +179,11 @@ public class JwtHandler
 
   /**
    * verifies the signature based on the data within the header
+   * 
+   * @return
    */
   @SneakyThrows
-  private String verifySignature(String keyId, String jws)
+  private PlainJwtData verifySignature(String keyId, String jws)
   {
     SignedJWT signedJwt = SignedJWT.parse(jws);
     String effectiveKeyId = Optional.ofNullable(keyId).orElse(signedJwt.getHeader().getKeyID());
@@ -126,7 +194,10 @@ public class JwtHandler
       throw new BadRequestException(String.format("Signature validation has failed with signature key '%s'",
                                                   effectiveKeyId));
     }
-    return signedJwt.getPayload().toString();
+    return PlainJwtData.builder()
+                       .header(signedJwt.getHeader().toString())
+                       .body(signedJwt.getPayload().toString())
+                       .build();
   }
 
   /**
@@ -149,14 +220,16 @@ public class JwtHandler
    * @return the decrypted content of the JWT
    */
   @SneakyThrows
-  private String decryptJwt(String kid, String jwt)
+  private PlainJwtData decryptJwt(String kid, String jwt)
   {
     EncryptedJWT encryptedJWT = EncryptedJWT.parse(jwt);
     JWEHeader jweHeader = encryptedJWT.getHeader();
     String keyId = Optional.ofNullable(kid).orElse(jweHeader.getKeyID());
     Keystore applicationKeystore = keystoreDao.getKeystore();
     KeyPair keyPair = applicationKeystore.getKeyPair(keyId);
-    return decryptJwt(keyPair, encryptedJWT);
+    String plainTextBody = decryptJwt(keyPair, encryptedJWT);
+    String jweHeaderString = jweHeader.toString();
+    return PlainJwtData.builder().header(jweHeaderString).body(plainTextBody).build();
   }
 
   /**
@@ -323,4 +396,31 @@ public class JwtHandler
     throw new IllegalArgumentException(errorMessage);
   }
 
+  /**
+   * an enum that is used to indicate that additional attributes should be added to the JWTs header before it is
+   * signed or encrypted
+   */
+  public static enum JwtAttribute
+  {
+    X5T_SHA256
+  }
+
+  /**
+   * represents the plain data of a JWT
+   */
+  @Getter
+  @Builder
+  public static class PlainJwtData
+  {
+
+    /**
+     * the JWT header
+     */
+    private final String header;
+
+    /**
+     * the JWT body
+     */
+    private final String body;
+  }
 }

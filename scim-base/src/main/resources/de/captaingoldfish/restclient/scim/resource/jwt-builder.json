@@ -29,14 +29,25 @@
       "caseExact": false
     },
     {
-      "name": "header",
-      "type": "string",
-      "description": "The header of the JWT that should be created",
+      "name": "addX5Sha256tHeader",
+      "type": "boolean",
+      "description": "Tells if the SHA-256 of the certificate corresponding to the key used to sign the JWS should be added to the header",
       "mutability": "writeOnly",
       "returned": "never",
       "uniqueness": "none",
       "multiValued": false,
-      "required": true,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "header",
+      "type": "string",
+      "description": "The header of the JWT that should be created",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
       "caseExact": false
     },
     {
@@ -47,7 +58,18 @@
       "returned": "default",
       "uniqueness": "none",
       "multiValued": false,
-      "required": true,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "jwt",
+      "type": "string",
+      "description": "The generated JWT in case of response or the JWT to be verified or decrypted in case of request",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
       "caseExact": false
     }
   ],

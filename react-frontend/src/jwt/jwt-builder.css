@@ -1,5 +1,4 @@
 #jwt {
-    margin-top: 50px;
     min-height: 200px;
 }
 
@@ -15,10 +14,6 @@
     max-width: none;
 }
 
-/*.form-group {*/
-/*    margin-bottom: 0;*/
-/*}*/
-
 p.header {
     display: block;
     margin: 0;
@@ -30,12 +25,19 @@ textarea {
 }
 
 .dropdown {
-    /*margin-top: 30px;*/
     margin-bottom: 30px;
 }
 
+.form-check.jwt {
+    margin-bottom: 30px;
+    border: 1px solid #007bff;
+    text-align: center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
 .dropdown-toggle, .dropdown-toggle:hover, .dropdown-toggle:focus,
-.functional-button, .functional-button:hover, .functional-button:focus {
+.functional-button, .functional-button:hover, .functional-button:focus, .form-check.jwt {
     width: 100%;
     background-color: navy;
 }

@@ -1,8 +1,12 @@
 package de.captaingoldfish.restclient.application.endpoints.jwt;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 
 import de.captaingoldfish.restclient.application.crypto.JwtHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
@@ -16,6 +20,7 @@ import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 
 /**
@@ -39,12 +44,30 @@ public class JwtBuilderHandler extends ResourceHandler<ScimJwtBuilder>
   /**
    * creates a new JWT
    */
+  @SneakyThrows
   @Override
   public ScimJwtBuilder createResource(ScimJwtBuilder resource, Context context)
   {
     final String id = UUID.randomUUID().toString();
-    String jwt = jwtHandler.createJwt(resource.getKeyId(), resource.getHeader(), resource.getBody());
-    return ScimJwtBuilder.builder().id(id).body(jwt).meta(Meta.builder().created(Instant.now()).build()).build();
+    JwtHandler.JwtAttribute[] jwtAttributes = getJwtAttributes(resource);
+    String jwt = jwtHandler.createJwt(resource.getKeyId(), resource.getHeader(), resource.getBody(), jwtAttributes);
+    JWT jsonWebToken = JWTParser.parse(jwt);
+    return ScimJwtBuilder.builder()
+                         .id(id)
+                         .jwt(jwt)
+                         .header(jsonWebToken.getHeader().toString())
+                         .meta(Meta.builder().created(Instant.now()).build())
+                         .build();
+  }
+
+  private JwtHandler.JwtAttribute[] getJwtAttributes(ScimJwtBuilder resource)
+  {
+    List<JwtHandler.JwtAttribute> jwtAttributeList = new ArrayList<>();
+    if (resource.isAddX5tSha256tHeader())
+    {
+      jwtAttributeList.add(JwtHandler.JwtAttribute.X5T_SHA256);
+    }
+    return jwtAttributeList.toArray(JwtHandler.JwtAttribute[]::new);
   }
 
   /**
@@ -76,12 +99,19 @@ public class JwtBuilderHandler extends ResourceHandler<ScimJwtBuilder>
   }
 
   /**
-   * disabled endpoint
+   * validates or decrypts a given JWT
    */
   @Override
-  public ScimJwtBuilder updateResource(ScimJwtBuilder resourceToUpdate, Context context)
+  public ScimJwtBuilder updateResource(ScimJwtBuilder resource, Context context)
   {
-    return null;
+    final String id = "1";
+    JwtHandler.PlainJwtData plainJwtData = jwtHandler.handleJwt(resource.getKeyId(), resource.getJwt());
+    return ScimJwtBuilder.builder()
+                         .id(id)
+                         .header(plainJwtData.getHeader())
+                         .body(plainJwtData.getBody())
+                         .meta(Meta.builder().created(Instant.now()).build())
+                         .build();
   }
 
   /**

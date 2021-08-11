@@ -51,6 +51,39 @@ export class FormInputField extends React.Component
 }
 
 /**
+ * a simple input field that might also display error messages directly bound to this input field
+ */
+export class FormCheckbox extends React.Component
+{
+
+    render()
+    {
+        let controlId = this.props.name;
+        let label = new Optional(this.props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
+        let inputFieldName = this.props.name;
+        let inputFieldErrorMessages = this.props.onError(this.props.name);
+        let isHidden = this.props.type === "hidden";
+        let checked = new Optional(this.props.checked).orElse(false);
+
+        let sm = new Optional(this.props.sm).orElse(label.isPresent() ? 10 : 12);
+        return (
+            <Form.Group as={Row} controlId={controlId} style={{display: isHidden ? "none" : ""}}>
+                {label.get()}
+                <Col sm={sm}>
+                    <Form.Check name={inputFieldName}
+                                onChange={this.props.onChange}
+                                checked={checked}
+                                label={this.props.label} />
+
+                    <ErrorMessageList controlId={this.props.name + "-error-list"}
+                                      fieldErrors={inputFieldErrorMessages} />
+                </Col>
+            </Form.Group>
+        );
+    }
+}
+
+/**
  * a select input field that might also display error messages directly bound to this input field
  */
 export class FormSelectField extends React.Component
@@ -366,7 +399,6 @@ export function CardRadioSelector(props)
 export function CardListSelector(props)
 {
     let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name)).orElse([]);
-
     return <tr>
         <th>{props.header}</th>
         <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>

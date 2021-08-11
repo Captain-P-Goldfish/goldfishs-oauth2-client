@@ -104,7 +104,7 @@ public class JwtHandlerTest implements FileReferences
     String header = String.format("{\"kid\": \"%s\", \"alg\": \"%s\"}", keyId, algorithm);
     String body = "{\"iss\": \"goldfish-ec\"}";
     String jws = jwtHandler.createJwt(keyId, header, body);
-    String verifiedBody = jwtHandler.handleJwt(null, jws);
+    String verifiedBody = jwtHandler.handleJwt(null, jws).getBody();
     Assertions.assertEquals(body, verifiedBody);
   }
 
@@ -118,7 +118,7 @@ public class JwtHandlerTest implements FileReferences
     String header = String.format("{ \"alg\": \"%s\"}", algorithm);
     String body = "{\"iss\": \"goldfish-ec\"}";
     String jws = jwtHandler.createJwt(keyId, header, body);
-    String verifiedBody = jwtHandler.handleJwt(keyId, jws);
+    String verifiedBody = jwtHandler.handleJwt(keyId, jws).getBody();
     Assertions.assertEquals(body, verifiedBody);
   }
 
@@ -135,7 +135,7 @@ public class JwtHandlerTest implements FileReferences
                                   contentAlgorithm);
     String body = "{\"iss\": \"goldfish-ec\"}";
     String jwe = jwtHandler.createJwt(keyId, header, body);
-    String decrypted = jwtHandler.handleJwt(null, jwe);
+    String decrypted = jwtHandler.handleJwt(null, jwe).getBody();
     Assertions.assertEquals(decrypted, body);
   }
 
@@ -151,7 +151,7 @@ public class JwtHandlerTest implements FileReferences
     String header = String.format("{ \"alg\": \"%s\", \"enc\": \"%s\"}", algorithm, contentAlgorithm);
     String body = "{\"iss\": \"goldfish-ec\"}";
     String jwe = jwtHandler.createJwt(keyId, header, body);
-    String decrypted = jwtHandler.handleJwt(keyId, jwe);
+    String decrypted = jwtHandler.handleJwt(keyId, jwe).getBody();
     Assertions.assertEquals(decrypted, body);
   }
 }

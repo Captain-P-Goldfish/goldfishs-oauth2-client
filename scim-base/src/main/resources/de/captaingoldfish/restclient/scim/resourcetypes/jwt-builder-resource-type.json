@@ -8,10 +8,10 @@
   "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:JwtBuilder",
   "endpoint": "/JwtBuilder",
   "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
+    "singletonEndpoint": true,
     "endpointControl": {
       "disableGet": true,
       "disableList": true,
-      "disableUpdate": true,
       "disableDelete": true
     },
     "authorization": {

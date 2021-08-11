@@ -20,13 +20,14 @@ public class ScimJwtBuilder extends ResourceNode
   {}
 
   @Builder
-  public ScimJwtBuilder(String id, String keyId, String header, String body, Meta meta)
+  public ScimJwtBuilder(String id, String keyId, String header, String body, String jwt, Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
     setKeyId(keyId);
     setHeader(header);
     setBody(body);
+    setJwt(jwt);
     setMeta(meta);
   }
 
@@ -62,6 +63,24 @@ public class ScimJwtBuilder extends ResourceNode
     setAttribute(FieldNames.KEY_ID, keyId);
   }
 
+  /**
+   * Tells if the SHA-256 of the certificate corresponding to the key used to sign the JWS should be added to
+   * the header
+   */
+  public Boolean isAddX5tSha256tHeader()
+  {
+    return getBooleanAttribute(FieldNames.ADD_X5T_SHA_256_HEADER).orElse(null);
+  }
+
+  /**
+   * Tells if the SHA-256 of the certificate corresponding to the key used to sign the JWS should be added to
+   * the header
+   */
+  public void setAddX5tSha256tHeader(boolean addX5tSHa256Header)
+  {
+    setAttribute(FieldNames.ADD_X5T_SHA_256_HEADER, addX5tSHa256Header);
+  }
+
   /** The body of a plain JWT */
   public String getBody()
   {
@@ -72,6 +91,18 @@ public class ScimJwtBuilder extends ResourceNode
   public void setBody(String body)
   {
     setAttribute(FieldNames.BODY, body);
+  }
+
+  /** The generated JWT in case of response or the JWT to be verified or decrypted in case of request */
+  public String getJwt()
+  {
+    return getStringAttribute(FieldNames.JWT).orElse(null);
+  }
+
+  /** The generated JWT in case of response or the JWT to be verified or decrypted in case of request */
+  public void setJwt(String jwt)
+  {
+    setAttribute(FieldNames.JWT, jwt);
   }
 
 
@@ -87,5 +118,9 @@ public class ScimJwtBuilder extends ResourceNode
     public static final String BODY = "body";
 
     public static final String KEY_ID = "keyId";
+
+    public static final String JWT = "jwt";
+
+    public static final String ADD_X5T_SHA_256_HEADER = "addX5Sha256tHeader";
   }
 }
