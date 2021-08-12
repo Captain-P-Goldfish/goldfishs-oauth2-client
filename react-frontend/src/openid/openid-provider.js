@@ -234,7 +234,7 @@ class OpenIdProviderCardEntry extends React.Component
                                 this.state.editMode === false &&
                                 <React.Fragment>
                                     <LinkContainer exact
-                                                   to={"/openIdProvider/" + this.props.provider.id + "/openIdClient"}>
+                                                   to={"/openIdProvider/" + this.props.provider.id + "/openIdClients"}>
                                         <a>
                                             <h5>
                                                 <ArrowRightCircle style={{color: "bisque", marginRight: "15px"}}

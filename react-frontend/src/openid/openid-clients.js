@@ -2,7 +2,7 @@ import React, {createRef} from "react";
 import ScimClient from "../scim/scim-client";
 import {Optional} from "../services/utils";
 import * as lodash from "lodash";
-import {FileEarmarkPlus} from "react-bootstrap-icons";
+import {ArrowLeftCircle, ArrowRightCircle, FileEarmarkPlus} from "react-bootstrap-icons";
 import {Alert, Card, CardDeck, Table} from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import {GoThumbsup} from "react-icons/go";
@@ -19,6 +19,7 @@ import {
 import ScimComponentBasics from "../scim/scim-component-basics";
 import Modal from "../base/modal";
 import Button from "react-bootstrap/Button";
+import {LinkContainer} from "react-router-bootstrap";
 
 
 export default class OpenidClients extends React.Component
@@ -31,7 +32,8 @@ export default class OpenidClients extends React.Component
             clientList: [],
             aliases: [],
             currentPage: 0,
-            keyInfos: []
+            keyInfos: [],
+            provider: {}
         };
         this.scimResourcePath = "/scim/v2/OpenIdClient";
         this.setState = this.setState.bind(this);
@@ -46,6 +48,30 @@ export default class OpenidClients extends React.Component
     {
         let startIndex = (this.state.currentPage * window.MAX_RESULTS) + 1;
         let count = window.MAX_RESULTS;
+
+        let openIdProviderId = this.props.match.params.id;
+        let openIdProviderResourcePath = "/scim/v2/OpenIdProvider";
+        await this.scimClient.getResource(openIdProviderId, openIdProviderResourcePath).then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(openIdProvider =>
+                {
+                    this.setState({provider: openIdProvider});
+                })
+            }
+            else
+            {
+                response.resource.then(errorResponse =>
+                {
+                    this.setState({
+                        errors: {
+                            errorMessages: [errorResponse.detail]
+                        }
+                    })
+                })
+            }
+        })
 
         await this.scimClient.listResources({
             startIndex: startIndex,
@@ -163,6 +189,15 @@ export default class OpenidClients extends React.Component
     {
         return (
             <React.Fragment>
+                <LinkContainer exact
+                               to={"/openIdProvider/"}>
+                    <a>
+                        <h5 style={{height: "35px", padding: "0", paddingLeft: "10px"}}>
+                            <ArrowLeftCircle style={{color: "bisque"}} height={"35px"} size={"25px"} />
+                            <span style={{marginLeft: "15px"}}>Back to Provider Overview</span>
+                        </h5>
+                    </a>
+                </LinkContainer>
                 <p className={"add-new-resource"} onClick={this.addNewClient}>
                     <span className={"add-new-resource"}>Add new Client <br /><FileEarmarkPlus /></span>
                 </p>
@@ -189,7 +224,7 @@ export default class OpenidClients extends React.Component
                         this.state.clientList.map((client) =>
                         {
                             return <OpenIdClientCardEntry key={new Optional(client.id).orElse("new")}
-                                                          provider={this.props.provider}
+                                                          provider={this.state.provider}
                                                           scimResourcePath={this.scimResourcePath}
                                                           client={client}
                                                           keyInfos={this.state.keyInfos}
@@ -279,7 +314,17 @@ class OpenIdClientCardEntry extends React.Component
                             <div className={"card-name-header"}>
                                 {
                                     this.state.client.clientId !== undefined &&
-                                    <h5>Client '{this.state.client.clientId}'</h5>
+                                    <LinkContainer exact
+                                                   to={"/openIdProvider/" + this.props.provider.id + "/client/"
+                                                       + this.state.client.id}>
+                                        <a>
+                                            <h5>
+                                                <ArrowRightCircle style={{color: "bisque", marginRight: "15px"}}
+                                                                  size={"20px"} height={"30px"} />
+                                                Client '{this.state.client.clientId}'
+                                            </h5>
+                                        </a>
+                                    </LinkContainer>
                                 }
                             </div>
                         </div>
