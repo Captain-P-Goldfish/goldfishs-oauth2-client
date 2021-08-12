@@ -217,10 +217,6 @@ public class Keystore
       privateKey = (PrivateKey)keyStore.getKey(keystoreEntry.getAlias(),
                                                Optional.ofNullable(privateKeyPasswordCharArray)
                                                        .orElse(keystorePasswordCharArray));
-      if (privateKey == null && log.isWarnEnabled())
-      {
-        log.warn("no private key found for alias: {}", keystoreEntry.getAlias());
-      }
       return privateKey;
     }
     catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e)
