@@ -415,6 +415,7 @@ export function CardListSelector(props)
                                   name={props.name}
                                   id={props.name}
                                   onChange={props.onChange}
+                                  value={props.selected}
                     >
                         {
                             props.selections.map((value, index) =>

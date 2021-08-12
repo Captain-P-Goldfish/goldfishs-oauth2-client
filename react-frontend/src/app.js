@@ -6,8 +6,8 @@ import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
 import OpenidProvider from "./openid/openid-provider";
-import OpenidClients from "./openid/openid-clients";
 import JwtHandler from "./jwt/jwt-builder";
+import OpenidProviderOverview from "./openid/openid-provider-overview";
 
 
 class Application extends React.Component
@@ -83,7 +83,7 @@ class Application extends React.Component
                                 <SystemOverview />
                             </Route>
                             <Route path={"/openIdProvider/:id/openIdClient"}
-                                   component={OpenidClients} />
+                                   component={OpenidProviderOverview} />
                             <Route path="/openIdProvider">
                                 <OpenidProvider />
                             </Route>

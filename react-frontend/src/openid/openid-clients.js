@@ -47,30 +47,6 @@ export default class OpenidClients extends React.Component
         let startIndex = (this.state.currentPage * window.MAX_RESULTS) + 1;
         let count = window.MAX_RESULTS;
 
-        let openIdProviderId = this.props.match.params.id;
-        let openIdProviderResourcePath = "/scim/v2/OpenIdProvider";
-        await this.scimClient.getResource(openIdProviderId, openIdProviderResourcePath).then(response =>
-        {
-            if (response.success)
-            {
-                response.resource.then(openIdProvider =>
-                {
-                    this.setState({provider: openIdProvider});
-                })
-            }
-            else
-            {
-                response.resource.then(errorResponse =>
-                {
-                    this.setState({
-                        errors: {
-                            errorMessages: [errorResponse.detail]
-                        }
-                    })
-                })
-            }
-        })
-
         await this.scimClient.listResources({
             startIndex: startIndex,
             count: count,
@@ -196,8 +172,7 @@ export default class OpenidClients extends React.Component
                 <Alert id={"save-alert-success"} variant={"success"}
                        show={new Optional(this.state.newClient).isPresent()}>
                     <Form.Text><GoThumbsup /> Client with clientId
-                                              '{new Optional(this.state.newClient).map(
-                            client => client.clientId)
+                                              '{new Optional(this.state.newClient).map(client => client.clientId)
                                                                                   .orElse("-")}'
                                               was successfully created</Form.Text>
                 </Alert>
@@ -214,7 +189,7 @@ export default class OpenidClients extends React.Component
                         this.state.clientList.map((client) =>
                         {
                             return <OpenIdClientCardEntry key={new Optional(client.id).orElse("new")}
-                                                          provider={this.state.provider}
+                                                          provider={this.props.provider}
                                                           scimResourcePath={this.scimResourcePath}
                                                           client={client}
                                                           keyInfos={this.state.keyInfos}
@@ -238,10 +213,11 @@ class OpenIdClientCardEntry extends React.Component
         this.state = {
             showModal: false,
             editMode: new Optional(props.client).map(val => val.id).map(val => false).orElse(true),
-            authenticationType: "basic",
+            authenticationType: props.client.authenticationType,
             client: JSON.parse(JSON.stringify(props.client))
         }
         this.setState = this.setState.bind(this);
+        this.resetEditMode = this.resetEditMode.bind(this);
         this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.formReference = createRef();
 
@@ -258,12 +234,22 @@ class OpenIdClientCardEntry extends React.Component
         });
     }
 
+    async resetEditMode()
+    {
+        this.scimComponentBasics.resetEditMode();
+        let client = JSON.parse(JSON.stringify(this.props.client));
+        await this.setState({client: client, authenticationType: client.authenticationType});
+    }
+
     render()
     {
         let aliases = [];
         this.props.keyInfos.forEach(keyInfo =>
         {
-            aliases.push(keyInfo.alias);
+            if (keyInfo.hasPrivateKey === true)
+            {
+                aliases.push(keyInfo.alias);
+            }
         });
         return (
             <Card id={"client-card-" + this.state.client.id} key={this.state.client.id}
@@ -302,7 +288,7 @@ class OpenIdClientCardEntry extends React.Component
                                           editMode={this.state.editMode}
                                           createResource={this.scimComponentBasics.createResource}
                                           updateResource={this.scimComponentBasics.updateResource}
-                                          resetEditMode={this.scimComponentBasics.resetEditMode}
+                                          resetEditMode={this.resetEditMode}
                                           edit={() => this.scimComponentBasics.setStateValue("editMode", true)}
                                           showModal={() => this.scimComponentBasics.setStateValue("showModal", true)} />
                         {/* this button enables pressing enter in the edit form */}
