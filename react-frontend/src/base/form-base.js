@@ -25,7 +25,7 @@ export class FormInputField extends React.Component
         let inputFieldErrorMessages = this.props.onError(this.props.name);
         let isDisabled = this.props.disabled === true;
         let isReadOnly = this.props.readOnly === true;
-        let isHidden = this.props.type === "hidden";
+        let isHidden = this.props.type === "hidden" || this.props.isHidden;
         let as = new Optional(this.props.as).orElse("input");
 
         let sm = new Optional(this.props.sm).orElse(label.isPresent() ? 10 : 12);
@@ -58,7 +58,7 @@ export class FormCheckbox extends React.Component
 
     render()
     {
-        let controlId = this.props.name;
+        let controlId = new Optional(this.props.id).orElse(this.props.name);
         let label = new Optional(this.props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
         let inputFieldName = this.props.name;
         let inputFieldErrorMessages = this.props.onError(this.props.name);
@@ -67,13 +67,14 @@ export class FormCheckbox extends React.Component
 
         let sm = new Optional(this.props.sm).orElse(label.isPresent() ? 10 : 12);
         return (
-            <Form.Group as={Row} controlId={controlId} style={{display: isHidden ? "none" : ""}}>
+            <Form.Group as={Row} style={{display: isHidden ? "none" : ""}}>
                 {label.get()}
-                <Col sm={sm}>
-                    <Form.Check name={inputFieldName}
+                <Col sm={sm} style={{alignSelf: "center"}}>
+                    <Form.Check id={controlId}
+                                name={inputFieldName}
+                                type="switch"
                                 onChange={this.props.onChange}
-                                checked={checked}
-                                label={this.props.label} />
+                                checked={checked} />
 
                     <ErrorMessageList controlId={this.props.name + "-error-list"}
                                       fieldErrors={inputFieldErrorMessages} />
@@ -152,6 +153,47 @@ export function FormFileField(props)
                         {inputFieldPlaceholder}
                     </Form.File.Label>
                 </Form.File>
+
+                <ErrorMessageList controlId={props.name + "-error-list"}
+                                  fieldErrors={inputFieldErrorMessages} />
+            </Col>
+        </Form.Group>
+    );
+}
+
+/**
+ * a file-input field that might also display error messages directly bound to this input field
+ */
+export function FormObjectList(props)
+{
+
+    let labelText = props.label === undefined ? props.name : props.label;
+    let inputFieldErrorMessages = props.onError(props.name);
+
+    return (
+        <Form.Group as={Row} controlId={props.name}>
+            <Form.Label column sm={2}>{labelText}</Form.Label>
+            <Col sm={10}>
+                <Form.Control as="select"
+                              size="sm"
+                              type={"number"}
+                              custom
+                              name={props.name}
+                              onChange={props.onChange}
+                              value={props.selected}>
+                    {
+                        props.selections.map((value, index) =>
+                        {
+                            return (
+                                <option key={index}
+                                        value={value.id}
+                                        defaultValue={props.selected === value}>
+                                    {value.value}
+                                </option>
+                            )
+                        })
+                    }
+                </Form.Control>
 
                 <ErrorMessageList controlId={props.name + "-error-list"}
                                   fieldErrors={inputFieldErrorMessages} />
