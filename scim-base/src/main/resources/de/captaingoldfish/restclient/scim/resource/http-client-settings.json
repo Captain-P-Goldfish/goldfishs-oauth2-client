@@ -77,7 +77,7 @@
     },
     {
       "name": "proxyReference",
-      "type": "integer",
+      "type": "string",
       "description": "The id of a created proxy configuration.",
       "mutability": "readWrite",
       "returned": "default",

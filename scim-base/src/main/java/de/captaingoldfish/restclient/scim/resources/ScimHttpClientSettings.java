@@ -29,7 +29,7 @@ public class ScimHttpClientSettings extends ResourceNode
                                 Long socketTimeout,
                                 Boolean useHostnameVerifier,
                                 Long openIdClientReference,
-                                Long proxyReference,
+                                String proxyReference,
                                 String tlsClientAuthAliasReference,
                                 Meta meta)
   {
@@ -112,7 +112,7 @@ public class ScimHttpClientSettings extends ResourceNode
   }
 
   /** The id of a created proxy configuration. */
-  public void setProxyReference(Long proxyReference)
+  public void setProxyReference(String proxyReference)
   {
     setAttribute(FieldNames.PROXY_REFERENCE, proxyReference);
   }
@@ -128,6 +128,7 @@ public class ScimHttpClientSettings extends ResourceNode
   {
     setAttribute(FieldNames.TLS_CLIENT_AUTH_ALIAS_REFERENCE, tlsClientAuthAliasReference);
   }
+
 
   public static class FieldNames
   {

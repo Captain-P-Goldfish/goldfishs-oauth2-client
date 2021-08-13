@@ -14,15 +14,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
+import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
+import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
+import de.captaingoldfish.scim.sdk.common.constants.AttributeNames;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
 import de.captaingoldfish.scim.sdk.common.response.ListResponse;
@@ -425,6 +429,70 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(signingKeyRef, returnedResource.getSigningKeyRef().get());
     Assertions.assertEquals(decryptionKeyRef, returnedResource.getDecryptionKeyRef().get());
     Assertions.assertEquals("basic", returnedResource.getAuthenticationType());
+
+    // assert that default http client settings are returned. No have been stored before so the handler must have
+    // created it now
+    Assertions.assertTrue(returnedResource.getHttpClientSettings().isPresent());
+    ScimHttpClientSettings httpClientSettings = returnedResource.getHttpClientSettings().orElseThrow();
+    Assertions.assertTrue(httpClientSettings.getId().isPresent(), httpClientSettings.toPrettyString());
+    Assertions.assertEquals(openIdClient.getId(), httpClientSettings.getOpenIdClientReference().orElseThrow());
+    Assertions.assertTrue(httpClientSettings.getUseHostnameVerifier().orElseThrow());
+    Assertions.assertNotNull(httpClientSettingsDao.findById(httpClientSettings.getId()
+                                                                              .map(Long::parseLong)
+                                                                              .orElseThrow()));
+  }
+
+  @Test
+  public void testGetOpenIdClientWithPrestoredHttpClientSettings()
+  {
+    final String clientId = "goldfish";
+    final String clientSecret = "blubb";
+    final String audience = "pond";
+    final String signingKeyRef = "localhost";
+    final String decryptionKeyRef = "localhost";
+
+    ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
+                                                        .openIdProviderId(openIdProvider.getId())
+                                                        .clientId(clientId)
+                                                        .clientSecret(clientSecret)
+                                                        .audience(audience)
+                                                        .signingKeyRef(signingKeyRef)
+                                                        .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType("basic")
+                                                        .build();
+
+    OpenIdClient openIdClient = OpenIdClientConverter.toOpenIdClient(scimOpenIdClient);
+    openIdClient = openIdClientDao.save(openIdClient);
+    HttpClientSettings httpClientSettings = HttpClientSettings.builder()
+                                                              .openIdClient(openIdClient)
+                                                              .socketTimeout(1)
+                                                              .requestTimeout(2)
+                                                              .connectionTimeout(3)
+                                                              .useHostnameVerifier(false)
+                                                              .build();
+    httpClientSettings = httpClientSettingsDao.save(httpClientSettings);
+
+    ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.get(ScimOpenIdClient.class,
+                                                                       OPENID_CLIENT_ENDPOINT,
+                                                                       String.valueOf(openIdClient.getId()))
+                                                                  .sendRequest();
+    Assertions.assertEquals(HttpStatus.OK, response.getHttpStatus());
+    ScimOpenIdClient returnedResource = response.getResource();
+    Assertions.assertEquals(clientId, returnedResource.getClientId());
+    Assertions.assertEquals(clientSecret, returnedResource.getClientSecret().get());
+    Assertions.assertEquals(audience, returnedResource.getAudience().get());
+    Assertions.assertEquals(signingKeyRef, returnedResource.getSigningKeyRef().get());
+    Assertions.assertEquals(decryptionKeyRef, returnedResource.getDecryptionKeyRef().get());
+    Assertions.assertEquals("basic", returnedResource.getAuthenticationType());
+
+    // assert that default http client settings are returned. No have been stored before so the handler must have
+    // created it now
+    Assertions.assertTrue(returnedResource.getHttpClientSettings().isPresent());
+    ScimHttpClientSettings originalHttpSettings = HttpClientSettingsConverter.toScimHttpClientSettings(httpClientSettings);
+    originalHttpSettings.remove(AttributeNames.RFC7643.SCHEMAS);
+    originalHttpSettings.remove(AttributeNames.RFC7643.META);
+    ScimHttpClientSettings scimHttpClientSettings = returnedResource.getHttpClientSettings().orElseThrow();
+    Assertions.assertEquals(originalHttpSettings, scimHttpClientSettings);
   }
 
   @Test

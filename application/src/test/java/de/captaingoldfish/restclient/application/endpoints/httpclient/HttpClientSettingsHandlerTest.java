@@ -65,7 +65,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -111,7 +111,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -153,7 +153,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(invalidClientReference)
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -189,7 +189,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -225,7 +225,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -261,7 +261,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -297,7 +297,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(invalidProxyReference)
+                                                                          .proxyReference(String.valueOf(invalidProxyReference))
                                                                           .requestTimeout(requestTimeout)
                                                                           .connectionTimeout(connectionTimeout)
                                                                           .socketTimeout(socketTimeout)
@@ -486,7 +486,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(newProxy.getId())
+                                                                          .proxyReference(String.valueOf(newProxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -594,7 +594,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(newProxy.getId())
+                                                                          .proxyReference(String.valueOf(newProxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -649,7 +649,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(newProxy.getId())
+                                                                          .proxyReference(String.valueOf(newProxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -704,7 +704,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(newProxy.getId())
+                                                                          .proxyReference(String.valueOf(newProxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -759,7 +759,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(newProxy.getId())
+                                                                          .proxyReference(String.valueOf(newProxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -807,7 +807,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(newOpenIdClient.getId())
-                                                                          .proxyReference(newProxy.getId())
+                                                                          .proxyReference(String.valueOf(newProxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -861,7 +861,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(invalidProxyReference)
+                                                                          .proxyReference(String.valueOf(invalidProxyReference))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)
@@ -915,7 +915,7 @@ public class HttpClientSettingsHandlerTest extends AbstractScimClientConfig
 
     ScimHttpClientSettings scimHttpClientSettings = ScimHttpClientSettings.builder()
                                                                           .openIdClientReference(openIdClient.getId())
-                                                                          .proxyReference(proxy.getId())
+                                                                          .proxyReference(String.valueOf(proxy.getId()))
                                                                           .requestTimeout(newRequestTimeout)
                                                                           .connectionTimeout(newConnectionTimeout)
                                                                           .socketTimeout(newSocketTimeout)

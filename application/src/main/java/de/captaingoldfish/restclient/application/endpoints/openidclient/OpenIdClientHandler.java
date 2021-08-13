@@ -1,12 +1,18 @@
 package de.captaingoldfish.restclient.application.endpoints.openidclient;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
 import de.captaingoldfish.restclient.application.endpoints.openidclient.validation.OpenIdClientRequestValidator;
+import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.application.utils.Utils;
+import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
+import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
@@ -56,7 +62,30 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
     OpenIdClient openIdClient = openIdClientDao.findById(openIdClientId).orElseThrow(() -> {
       return new ResourceNotFoundException(String.format("OpenID Client with id '%s' does not exist", id));
     });
-    return OpenIdClientConverter.toScimOpenIdClient(openIdClient);
+    ScimOpenIdClient scimOpenIdClient = OpenIdClientConverter.toScimOpenIdClient(openIdClient);
+    ScimHttpClientSettings httpClientSettings = getHttpClientSettings(openIdClient);
+    scimOpenIdClient.setHttpClientSettings(httpClientSettings);
+    return scimOpenIdClient;
+  }
+
+  /**
+   * gets the current http client settings for this client or creates a default configuration
+   */
+  private ScimHttpClientSettings getHttpClientSettings(OpenIdClient openIdClient)
+  {
+    HttpClientSettingsDao httpClientSettingsDao = WebAppConfig.getApplicationContext()
+                                                              .getBean(HttpClientSettingsDao.class);
+    Supplier<HttpClientSettings> defaultSettingsSupplier = () -> {
+      HttpClientSettings defaultSettings = HttpClientSettings.builder()
+                                                             .openIdClient(openIdClient)
+                                                             .useHostnameVerifier(true)
+                                                             .build();
+      defaultSettings = httpClientSettingsDao.save(defaultSettings);
+      return defaultSettings;
+    };
+    HttpClientSettings httpClientSettings = httpClientSettingsDao.findByOpenIdClient(openIdClient)
+                                                                 .orElseGet(defaultSettingsSupplier);
+    return HttpClientSettingsConverter.toScimHttpClientSettings(httpClientSettings);
   }
 
   /**

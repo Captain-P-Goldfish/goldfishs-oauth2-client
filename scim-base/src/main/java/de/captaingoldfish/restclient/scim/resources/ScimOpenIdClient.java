@@ -30,6 +30,7 @@ public class ScimOpenIdClient extends ResourceNode
                           String authenticationType,
                           String audience,
                           String decryptionKeyRef,
+                          ScimHttpClientSettings httpClientSettings,
                           Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -41,6 +42,7 @@ public class ScimOpenIdClient extends ResourceNode
     setSigningKeyRef(signingKeyRef);
     setAudience(audience);
     setDecryptionKeyRef(decryptionKeyRef);
+    setHttpClientSettings(httpClientSettings);
     setMeta(meta);
   }
 
@@ -148,6 +150,22 @@ public class ScimOpenIdClient extends ResourceNode
   public void setDecryptionKeyRef(String decryptionKeyRef)
   {
     setAttribute(FieldNames.DECRYPTION_KEY_REF, decryptionKeyRef);
+  }
+
+  /**
+   * only returned if the get-resource method is called. It contains the http client settings for this client.
+   */
+  public Optional<ScimHttpClientSettings> getHttpClientSettings()
+  {
+    return getObjectAttribute(ScimHttpClientSettings.FieldNames.SCHEMA_ID, ScimHttpClientSettings.class);
+  }
+
+  /**
+   * only returned if the get-resource method is called. It contains the http client settings for this client.
+   */
+  public void setHttpClientSettings(ScimHttpClientSettings httpClientSettings)
+  {
+    setAttribute(ScimHttpClientSettings.FieldNames.SCHEMA_ID, httpClientSettings);
   }
 
   public static class FieldNames

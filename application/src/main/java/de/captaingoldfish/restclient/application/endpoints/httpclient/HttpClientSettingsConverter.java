@@ -63,6 +63,7 @@ public final class HttpClientSettingsConverter
                                  .useHostnameVerifier(httpClientSettings.isUseHostnameVerifier())
                                  .proxyReference(Optional.ofNullable(httpClientSettings.getProxy())
                                                          .map(Proxy::getId)
+                                                         .map(String::valueOf)
                                                          .orElse(null))
                                  .openIdClientReference(Optional.ofNullable(httpClientSettings.getOpenIdClient())
                                                                 .map(OpenIdClient::getId)
