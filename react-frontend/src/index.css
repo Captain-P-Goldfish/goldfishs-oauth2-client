@@ -262,6 +262,14 @@ h1, h2, h3, h4, h5 {
     color: sandybrown;
 }
 
+a.action-link {
+    color: bisque;
+}
+
+a.action-link:hover {
+    color: #fad4a8;
+}
+
 a h5 {
     color: gold;
     padding: 5px;

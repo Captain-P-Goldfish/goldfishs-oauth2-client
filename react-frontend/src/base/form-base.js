@@ -12,42 +12,43 @@ import {CardInputField} from "./card-base";
 /**
  * a simple input field that might also display error messages directly bound to this input field
  */
-export class FormInputField extends React.Component
+export function FormInputField(props)
 {
 
-    render()
-    {
-        let controlId = this.props.name;
-        let label = new Optional(this.props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
-        let inputFieldType = this.props.type === undefined ? "text" : this.props.type;
-        let inputFieldName = this.props.name;
-        let inputFieldPlaceholder = this.props.placeholder === undefined ? this.props.name : this.props.placeholder;
-        let inputFieldErrorMessages = this.props.onError(this.props.name);
-        let isDisabled = this.props.disabled === true;
-        let isReadOnly = this.props.readOnly === true;
-        let isHidden = this.props.type === "hidden" || this.props.isHidden;
-        let as = new Optional(this.props.as).orElse("input");
+    let controlId = props.name;
+    let label = new Optional(props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
+    let inputFieldType = props.type === undefined ? "text" : props.type;
+    let inputFieldName = props.name;
+    let inputFieldPlaceholder = props.placeholder === undefined ? props.name : props.placeholder;
+    let inputFieldErrorMessages = props.onError(props.name);
+    let isDisabled = props.disabled === true;
+    let isReadOnly = props.readOnly === true;
+    let isHidden = props.type === "hidden" || props.isHidden;
+    let as = new Optional(props.as).orElse("input");
 
-        let sm = new Optional(this.props.sm).orElse(label.isPresent() ? 10 : 12);
-        return (
-            <Form.Group as={Row} controlId={controlId} style={{display: isHidden ? "none" : ""}}>
-                {label.get()}
-                <Col sm={sm}>
-                    <Form.Control type={inputFieldType}
-                                  as={as}
-                                  name={inputFieldName}
-                                  disabled={isDisabled}
-                                  readOnly={isReadOnly}
-                                  placeholder={inputFieldPlaceholder}
-                                  onChange={this.props.onChange}
-                                  value={this.props.value} />
+    let sm = new Optional(props.sm).orElse(label.isPresent() ? 10 : 12);
+    return (
+        <Form.Group as={Row} controlId={controlId} style={{display: isHidden ? "none" : ""}}>
+            {label.get()}
+            <Col sm={sm}>
+                <Form.Control type={inputFieldType}
+                              as={as}
+                              name={inputFieldName}
+                              disabled={isDisabled}
+                              readOnly={isReadOnly}
+                              placeholder={inputFieldPlaceholder}
+                              onChange={props.onChange}
+                              value={props.value} />
 
-                    <ErrorMessageList controlId={this.props.name + "-error-list"}
-                                      fieldErrors={inputFieldErrorMessages} />
-                </Col>
-            </Form.Group>
-        );
-    }
+                {
+                    props.children
+                }
+
+                <ErrorMessageList controlId={props.name + "-error-list"}
+                                  fieldErrors={inputFieldErrorMessages} />
+            </Col>
+        </Form.Group>
+    );
 }
 
 /**
@@ -195,6 +196,43 @@ export function FormObjectList(props)
                     }
                 </Form.Control>
 
+                <ErrorMessageList controlId={props.name + "-error-list"}
+                                  fieldErrors={inputFieldErrorMessages} />
+            </Col>
+        </Form.Group>
+    );
+}
+
+/**
+ * a file-input field that might also display error messages directly bound to this input field
+ */
+export function FormRadioSelection(props)
+{
+
+    let labelText = props.label === undefined ? props.name : props.label;
+    let displayType = new Optional(props.displayType).orElse("vertical")
+    let displayClass = displayType === "vertical" ? "block" : "inline";
+    let inputFieldErrorMessages = props.onError(props.name);
+
+    return (
+        <Form.Group as={Row} controlId={props.name}>
+            <Form.Label column sm={2}>{labelText}</Form.Label>
+            <Col sm={10} style={{alignSelf: "center"}}>
+                {
+                    props.selections.map((object, index) =>
+                    {
+                        return <Form.Check key={index}
+                                           style={{display: displayClass, marginRight: "45px"}}
+                                           type="radio"
+                                           label={object.display}
+                                           value={object.value}
+                                           name={props.name}
+                                           checked={props.selected === object.value}
+                                           onChange={props.onChange}
+                                           id={props.name + "-" + object.value}
+                        />
+                    })
+                }
                 <ErrorMessageList controlId={props.name + "-error-list"}
                                   fieldErrors={inputFieldErrorMessages} />
             </Col>
