@@ -147,13 +147,7 @@ export function FormFileField(props)
         <Form.Group as={Row} controlId={props.name}>
             <Form.Label column sm={2}>{labelText}</Form.Label>
             <Col sm={10}>
-                <Form.File custom>
-                    <Form.File.Input isValid
-                                     name={props.name} />
-                    <Form.File.Label data-browse={inputFieldButtonText}>
-                        {inputFieldPlaceholder}
-                    </Form.File.Label>
-                </Form.File>
+                <Form.Control type={"file"} name={props.name} />
 
                 <ErrorMessageList controlId={props.name + "-error-list"}
                                   fieldErrors={inputFieldErrorMessages} />
@@ -422,8 +416,7 @@ export function ModifiableCardFileEntry(props)
                 <XSquare key={"remove-key"} type={"button"} className={"remove-index"}
                          onClick={e => props.onRemove(props.name, undefined)} />
             }
-            <div className={"public-key-box " + new Optional(props.resourceValue).map(val => "light-border")
-                                                                                 .orElse("")}>
+            <div className={new Optional(props.resourceValue).map(val => "light-border").orElse("")}>
                 {props.resourceValue}
             </div>
             {

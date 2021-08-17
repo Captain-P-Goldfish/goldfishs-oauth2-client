@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "./logo.svg";
-import {Nav, Navbar} from "react-bootstrap";
+import {Container, Nav, Navbar} from "react-bootstrap";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./admin/system/system-overview";
@@ -47,12 +47,19 @@ class Application extends React.Component
         return (
             <React.Fragment>
                 <Router>
-                    <Navbar bg="navigation" expand="md">
-                        <Navbar.Brand href="#home">Captain Goldfish's Rest Client</Navbar.Brand>
-                        <Navbar.Collapse id="basic-navbar-nav">
-                            <Nav className="mr-auto" />
-                            <img src={logo} className="react-logo" alt="logo" />
-                        </Navbar.Collapse>
+                    <Navbar collapseOnSelect expand="lg" bg="navigation">
+                        <Container>
+                            <Navbar.Brand href="#home">Captain Goldfish's Rest Client</Navbar.Brand>
+                            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                            <Navbar.Collapse id="responsive-navbar-nav">
+                                <Nav className="me-auto" />
+                                <Nav>
+                                    <Nav.Link href="#">
+                                        <img src={logo} className="react-logo" alt="logo" />
+                                    </Nav.Link>
+                                </Nav>
+                            </Navbar.Collapse>
+                        </Container>
                     </Navbar>
 
                     <Navbar bg="navigation-left" className={"navbar-left"} expand="md" variant="dark">

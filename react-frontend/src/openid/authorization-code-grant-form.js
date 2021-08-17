@@ -206,7 +206,7 @@ export default class AuthorizationCodeGrantForm extends React.Component
                                 value={this.props.redirectUri}
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)}>
-                    <a href={"#"} onClick={this.props.resetRedirectUri} className={"action-link"}>
+                    <a href={"/#"} onClick={this.props.resetRedirectUri} className={"action-link"}>
                         <Reply /> <span>reset redirect uri</span>
                     </a>
                 </FormInputField>

@@ -141,7 +141,7 @@ export class CertificateCardEntry extends React.Component
                         this.state.loaded === false &&
                         <React.Fragment>
                             <div className={"load-certificate-icon-container"}>
-                                <Image src={CertIcon} className={"load-certificate-icon"} fluid />
+                                <Image src={CertIcon} className={"load-certificate-icon"} fluid /> <br />
                                 <Button id={"load-certificate-data-button-for-" + this.props.alias}
                                         className={"card-load-icon"}
                                         type={"button"}

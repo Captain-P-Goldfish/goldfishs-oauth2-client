@@ -235,7 +235,7 @@ class OpenIdProviderCardEntry extends React.Component
                                 <React.Fragment>
                                     <LinkContainer exact
                                                    to={"/openIdProvider/" + this.props.provider.id + "/openIdClients"}>
-                                        <a>
+                                        <a href={"/#"}>
                                             <h5>
                                                 <ArrowRightCircle style={{color: "bisque", marginRight: "15px"}}
                                                                   size={"20px"} height={"30px"} />

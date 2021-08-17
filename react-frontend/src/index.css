@@ -24,6 +24,8 @@ code, .code {
 .react-logo {
     height: 3vmin;
     pointer-events: none;
+    display: inline;
+
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -41,6 +43,91 @@ code, .code {
     }
 }
 
+.main {
+    background-color: #282c34;
+    color: white;
+    min-height: 95.5vh;
+    padding: 20px 20px 20px var(--main-padding-left);
+}
+
+
+/* *************************************************************************************************** */
+/* common */
+
+
+h1, h2, h3, h4, h5 {
+    color: sandybrown;
+}
+
+span.bold {
+    font-weight: bold;
+}
+
+small.error {
+    padding: 2px 10px;
+}
+
+.react-link {
+    color: #61dafb;
+}
+
+.hide {
+    display: none !important;
+}
+
+.light-border {
+    box-shadow: 2px 1px 1px 1px lightgoldenrodyellow;
+    margin: 5px;
+}
+
+ul.error-list {
+    padding: 0;
+    margin: 0;
+}
+
+.error-list-item {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.error-list-item > .error {
+    color: white;
+}
+
+.error-list-item-icon {
+    padding-right: 10px;
+}
+
+a.action-link {
+    color: bisque;
+}
+
+a.action-link:hover {
+    color: #fad4a8;
+}
+
+a h5 {
+    color: gold;
+    padding: 5px;
+    background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(58, 62, 66, 1) 100%);
+}
+
+a h5:hover {
+    color: gold;
+    padding: 5px;
+    background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(121, 127, 135, 0.42) 100%);
+}
+
+/* *************************************************************************************************** */
+
+/* *************************************************************************************************** */
+/* navigation */
+
+nav {
+    padding-left: 35px;
+}
+
 .navbar-left {
     float: left;
     min-height: 95.5vh;
@@ -50,17 +137,6 @@ code, .code {
 
 nav.navbar-left {
     align-items: baseline;
-}
-
-.main {
-    background-color: #282c34;
-    color: white;
-    min-height: 95.5vh;
-    padding: 20px 20px 20px var(--main-padding-left);
-}
-
-.react-link {
-    color: #61dafb;
 }
 
 .bg-navigation {
@@ -89,12 +165,13 @@ nav.navbar-left {
     background: linear-gradient(50deg, var(--color-2), var(--color-1));
 }
 
-small.error {
-    padding: 2px 10px;
-}
+/* *************************************************************************************************** */
 
-.hide {
-    display: none !important;
+/* *************************************************************************************************** */
+/* forms */
+
+.form-group.row {
+    margin-top: 10px;
 }
 
 .disabled, .form-control:disabled, .form-control[readonly] {
@@ -102,10 +179,21 @@ small.error {
     opacity: 0.5;
 }
 
+/* *************************************************************************************************** */
+
+
+/* *************************************************************************************************** */
+/* cards */
+
+div.card-header {
+    background-color: #403e3f;
+}
+
 .card-deck table th {
     min-width: 33%;
     max-width: 33%;
 }
+
 
 .card-deck table td.card-value-cell {
     word-wrap: anywhere;
@@ -115,16 +203,6 @@ small.error {
     min-width: 90%;
     max-width: 90%;
     margin-bottom: 5px;
-}
-
-.light-border {
-    box-shadow: 2px 1px 1px 1px lightgoldenrodyellow;
-    margin: 5px;
-}
-
-.public-key-box {
-    min-width: 90%;
-    max-width: 90%;
 }
 
 .card-deck table button.add-item {
@@ -182,15 +260,6 @@ small.error {
     cursor: pointer;
 }
 
-.load-certificate-icon {
-    width: 150px;
-    margin-bottom: 15px;
-}
-
-.load-certificate-icon-container {
-    text-align: center;
-}
-
 .card-modal {
     min-width: 100%;
     min-height: 100%;
@@ -225,20 +294,43 @@ small.error {
     float: right;
 }
 
-ul.error-list {
-    padding: 0;
-    margin: 0;
+div.card-name-header {
+    display: inline-block;
+    min-width: 85%;
+    max-width: 85%;
+    padding: 5px 5px 5px 10px;
 }
 
-.error-list-item {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.card-deck {
+    display: block;
 }
 
-.error-list-item-icon {
-    padding-right: 10px;
+.card-deck > div {
+    display: inline-flex;
+    margin-right: 15px;
 }
+
+.card-value-cell select {
+    width: 100%;
+}
+
+/* *************************************************************************************************** */
+
+
+/* *************************************************************************************************** */
+/* certificate entries */
+
+.load-certificate-icon {
+    width: 150px;
+    margin-bottom: 15px;
+}
+
+.load-certificate-icon-container {
+    text-align: center;
+}
+
+/* *************************************************************************************************** */
+
 
 #application-certificate-info-header {
     margin-bottom: 15px;
@@ -258,29 +350,7 @@ ul.error-list {
     height: 40px;
 }
 
-h1, h2, h3, h4, h5 {
-    color: sandybrown;
-}
 
-a.action-link {
-    color: bisque;
-}
-
-a.action-link:hover {
-    color: #fad4a8;
-}
-
-a h5 {
-    color: gold;
-    padding: 5px;
-    background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(58, 62, 66, 1) 100%);
-}
-
-a h5:hover {
-    color: gold;
-    padding: 5px;
-    background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(121, 127, 135, 0.42) 100%);
-}
 
 .nav.nav-tabs[role="tablist"] {
     margin-bottom: 20px;
@@ -307,12 +377,6 @@ input.form-control.card-input-field, input.form-control.card-input-field:focus {
     border-radius: unset;
 }
 
-div.card-name-header {
-    display: inline-block;
-    min-width: 85%;
-    max-width: 85%;
-    padding: 5px 5px 5px 10px;
-}
 
 p.add-new-resource {
     text-align: center;
@@ -345,8 +409,4 @@ span.add-new-resource {
 
 .remove-collapse:hover {
     border: 1px solid #3b361d;
-}
-
-span.bold {
-    font-weight: bold;
 }

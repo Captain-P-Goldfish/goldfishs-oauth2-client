@@ -45,6 +45,7 @@ export default class OpenidClientWorkflow extends React.Component
 
     render()
     {
+
         let authTypes = [
             {value: "authorization_code", display: "Authorization Code Grant/Flow"},
             {value: "client_credentials", display: "Client Credentials Grant"},
@@ -76,20 +77,20 @@ export default class OpenidClientWorkflow extends React.Component
                                                     {
                                                     }} />
                     }
-                    {/*{*/}
-                    {/*    this.state.workflow.authenticationType === "client_credentials" &&*/}
-                    {/*    <ClientCredentialsGrantForm isLoading={this.state.isLoading} />*/}
-                    {/*}*/}
-                    {/*{*/}
-                    {/*    this.state.workflow.authenticationType === "password" &&*/}
-                    {/*    <ResourceOwnerPasswordCredentialsForm username={this.state.workflow.username}*/}
-                    {/*                                          password={this.state.workflow.password}*/}
-                    {/*                                          isLoading={this.state.isLoading}*/}
-                    {/*                                          handleChange={this.handleChange}*/}
-                    {/*                                          onError={() =>*/}
-                    {/*                                          {*/}
-                    {/*                                          }} />*/}
-                    {/*}*/}
+                    {
+                        this.state.workflow.authenticationType === "client_credentials" &&
+                        <ClientCredentialsGrantForm isLoading={this.state.isLoading} />
+                    }
+                    {
+                        this.state.workflow.authenticationType === "password" &&
+                        <ResourceOwnerPasswordCredentialsForm username={this.state.workflow.username}
+                                                              password={this.state.workflow.password}
+                                                              isLoading={this.state.isLoading}
+                                                              handleChange={this.handleChange}
+                                                              onError={() =>
+                                                              {
+                                                              }} />
+                    }
                 </Form>
             </React.Fragment>
         )
