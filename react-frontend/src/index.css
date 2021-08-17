@@ -165,6 +165,18 @@ nav.navbar-left {
     background: linear-gradient(50deg, var(--color-2), var(--color-1));
 }
 
+.nav.nav-tabs[role="tablist"] {
+    margin-bottom: 20px;
+}
+
+.nav.nav-tabs[role="tablist"] a {
+    color: gold;
+}
+
+.nav.nav-tabs[role="tablist"] a.active {
+    background-color: black;
+}
+
 /* *************************************************************************************************** */
 
 /* *************************************************************************************************** */
@@ -310,6 +322,19 @@ div.card-name-header {
     margin-right: 15px;
 }
 
+input.form-control.card-input-field, input.form-control.card-input-field:focus {
+    color: white;
+    background-color: transparent;
+    border: none;
+    border-bottom: gold dashed thin;
+    padding: 0;
+    outline: none;
+    box-shadow: none;
+    display: inline-block;
+    height: 25px;
+    border-radius: unset;
+}
+
 /* *************************************************************************************************** */
 
 
@@ -382,6 +407,21 @@ div.workflow-details .collapse-header {
 /* *************************************************************************************************** */
 
 
+/* *************************************************************************************************** */
+/* jwt */
+
+div.jwt.sha-256-check > input {
+    display: inline-block;
+    margin-right: 15px;
+    float: unset;
+}
+
+/* *************************************************************************************************** */
+
+
+/* *************************************************************************************************** */
+/* keystore / truststore */
+
 .download-keystore-icon {
     text-align: center;
     display: inline-block;
@@ -392,31 +432,7 @@ div.workflow-details .collapse-header {
     height: 40px;
 }
 
-
-.nav.nav-tabs[role="tablist"] {
-    margin-bottom: 20px;
-}
-
-.nav.nav-tabs[role="tablist"] a {
-    color: gold;
-}
-
-.nav.nav-tabs[role="tablist"] a.active {
-    background-color: black;
-}
-
-input.form-control.card-input-field, input.form-control.card-input-field:focus {
-    color: white;
-    background-color: transparent;
-    border: none;
-    border-bottom: gold dashed thin;
-    padding: 0;
-    outline: none;
-    box-shadow: none;
-    display: inline-block;
-    height: 25px;
-    border-radius: unset;
-}
+/* *************************************************************************************************** */
 
 
 p.add-new-resource {

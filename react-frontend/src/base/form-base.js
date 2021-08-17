@@ -64,6 +64,7 @@ export class FormCheckbox extends React.Component
         let inputFieldName = this.props.name;
         let inputFieldErrorMessages = this.props.onError(this.props.name);
         let isHidden = this.props.type === "hidden";
+        let isReadOnly = this.props.readOnly === true;
         let checked = new Optional(this.props.checked).orElse(false);
 
         let sm = new Optional(this.props.sm).orElse(label.isPresent() ? 10 : 12);
@@ -73,6 +74,7 @@ export class FormCheckbox extends React.Component
                 <Col sm={sm} style={{alignSelf: "center"}}>
                     <Form.Check id={controlId}
                                 name={inputFieldName}
+                                readOnly={isReadOnly}
                                 type="switch"
                                 onChange={this.props.onChange}
                                 checked={checked} />

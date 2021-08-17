@@ -54,7 +54,7 @@ export default class JwtHandler extends React.Component
                         <JwtBuilder keyInfos={this.state.keyInfos} jwtInfo={this.state.jwtInfo} />
                     </Tab>
                     <Tab eventKey="jwtparser" title="JWT Parser">
-                        <JwtParser keyInfos={this.state.keyInfos} jwtInfo={this.state.jwtInfo} />
+                        {/*<JwtParser keyInfos={this.state.keyInfos} jwtInfo={this.state.jwtInfo} />*/}
                     </Tab>
                 </Tabs>
             </React.Fragment>
@@ -323,7 +323,7 @@ export class JwtBuilder extends React.Component
                         </Button>
 
                         <Form.Check onChange={this.handleAddSha256Thumbprint}
-                                    className={"jwt"}
+                                    className={"jwt sha-256-check"}
                                     label={"Add SHA-256 thumbprint to header"} />
 
                     </Col>
@@ -331,11 +331,12 @@ export class JwtBuilder extends React.Component
                         <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
                             <FormInputField name="keyId"
                                             type="hidden"
-                                            value={this.state.selectedKey}
+                                            value={this.state.selectedKey || ""}
                                             onError={fieldName => this.scimClient.getErrors(this.state,
                                                 fieldName)} />
                             <FormCheckbox name="addX5Sha256tHeader"
                                           type="hidden"
+                                          readOnly={true}
                                           checked={this.state.addX5Sha256tHeader}
                                           onError={fieldName => this.scimClient.getErrors(this.state,
                                               fieldName)} />
