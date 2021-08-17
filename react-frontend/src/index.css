@@ -91,10 +91,6 @@ ul.error-list {
     margin: 0;
 }
 
-.error-list-item > .error {
-    color: white;
-}
-
 .error-list-item-icon {
     padding-right: 10px;
 }
@@ -117,6 +113,10 @@ a h5:hover {
     color: gold;
     padding: 5px;
     background: linear-gradient(200deg, transparent 0%, transparent 11%, rgba(121, 127, 135, 0.42) 100%);
+}
+
+select {
+    width: 100%;
 }
 
 /* *************************************************************************************************** */
@@ -310,10 +310,6 @@ div.card-name-header {
     margin-right: 15px;
 }
 
-.card-value-cell select {
-    width: 100%;
-}
-
 /* *************************************************************************************************** */
 
 
@@ -329,9 +325,6 @@ div.card-name-header {
     text-align: center;
 }
 
-/* *************************************************************************************************** */
-
-
 #application-certificate-info-header {
     margin-bottom: 15px;
 }
@@ -339,6 +332,55 @@ div.card-name-header {
 #application-certificate-info-header p {
     display: inline;
 }
+
+/* *************************************************************************************************** */
+
+
+/* *************************************************************************************************** */
+/* openid workflow */
+
+.collapse.card, .collapsing.card {
+    background-color: #313131;
+}
+
+.collapse.card .card-header, .collapsing.card .card-header {
+    cursor: pointer;
+    background-color: #757151;
+}
+
+.alert.collapse-header {
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.remove-collapse {
+    float: right;
+    margin-top: 4px;
+}
+
+.remove-collapse:hover {
+    border: 1px solid #3b361d;
+}
+
+div.authorization-code-workflow {
+    margin-top: 20px;
+}
+
+div.workflow-details .collapse-header {
+    padding: 0;
+    margin: 0;
+}
+
+.card.workflow-card {
+    background-color: transparent;
+}
+
+.alert-workflow-details {
+    background: transparent linear-gradient(200deg, transparent 0%, transparent 11%, rgb(81, 68, 0) 100%);
+}
+
+/* *************************************************************************************************** */
+
 
 .download-keystore-icon {
     text-align: center;
@@ -349,7 +391,6 @@ div.card-name-header {
 .download-keystore-icon img {
     height: 40px;
 }
-
 
 
 .nav.nav-tabs[role="tablist"] {
@@ -386,27 +427,4 @@ p.add-new-resource {
 span.add-new-resource {
     font-size: larger;
     cursor: pointer;
-}
-
-.collapse.card, .collapsing.card {
-    background-color: #3d495e;
-}
-
-.collapse.card .card-header, .collapsing.card .card-header {
-    cursor: pointer;
-    background-color: #757151;
-}
-
-.alert.collapse-header {
-    cursor: pointer;
-    margin-bottom: 0;
-}
-
-.remove-collapse {
-    float: right;
-    margin-top: 4px;
-}
-
-.remove-collapse:hover {
-    border: 1px solid #3b361d;
 }

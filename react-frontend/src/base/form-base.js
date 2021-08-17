@@ -264,9 +264,9 @@ export function ErrorListItem(props)
 {
     return (
         <li className="error-list-item">
-            <Form.Text className={props.backgroundClass + " error"}>
+            <small className={props.backgroundClass + " error"}>
                 <GoFlame /> {props.message}
-            </Form.Text>
+            </small>
         </li>
     );
 }

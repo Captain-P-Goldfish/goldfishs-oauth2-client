@@ -1,7 +1,7 @@
 import React from 'react';
 import {act, render, waitFor} from '@testing-library/react';
 import {unmountComponentAtNode} from "react-dom";
-import {AccessTokenResponse} from "./authorization-code-grant-form";
+import {AccessTokenResponse} from "./authorization-code-grant-workflow";
 import Assertions from "../setupTests";
 
 let container = null;
