@@ -17,6 +17,37 @@ export function toBase64(file)
     });
 }
 
+export function parseJws(token)
+{
+    if (typeof token !== 'string')
+    {
+        return null;
+    }
+    let jws = token.split('.');
+    if (jws.length !== 3)
+    {
+        return null;
+    }
+
+    function decode(content)
+    {
+        let base64 = content.replace(/-/g, '+').replace(/_/g, '/');
+        return decodeURIComponent(Buffer.from(base64, "base64").toString().split('').map(function (c)
+        {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }
+
+    let header = decode(jws[0]);
+    let payload = decode(jws[1]);
+    let signature = jws[2];
+    return {
+        header: header,
+        payload: payload,
+        signature: signature
+    };
+}
+
 export class Optional
 {
     constructor(value)

@@ -1,12 +1,12 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import bsCustomFileInput from "bs-custom-file-input";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {Optional} from "../services/utils";
 import {GoFlame} from "react-icons/go";
-import {Alert, Button, Spinner} from "react-bootstrap";
-import {PencilSquare, PlusSquare, Save, TrashFill, XLg, XSquare} from "react-bootstrap-icons";
+import {Alert, Button, Card, Collapse, Spinner} from "react-bootstrap";
+import {CaretDown, CaretRight, PencilSquare, PlusSquare, Save, TrashFill, XLg, XSquare} from "react-bootstrap-icons";
 import {CardInputField} from "./card-base";
 
 /**
@@ -266,7 +266,7 @@ export function ErrorMessageList(props)
  * a simple error message for either the {@link ErrorMessageList} or an error that is directly bound to an
  * input field
  */
-function ErrorListItem(props)
+export function ErrorListItem(props)
 {
     return (
         <li className="error-list-item">
@@ -580,4 +580,39 @@ export function ModifiableCardList(props)
             }
         </td>
     </tr>
+}
+
+export function Collapseable(props)
+{
+    const [open, setOpen] = useState(false);
+    let variant = props.variant || "primary";
+
+    return (
+        <React.Fragment>
+            <Alert className={"collapse-header"}
+                   variant={variant}
+                   onClick={() => setOpen(!open)}>
+                {
+                    open === true &&
+                    <CaretDown />
+                }
+                {
+                    open === false &&
+                    <CaretRight />
+                }
+                {props.header}
+                {
+                    props.remove !== undefined &&
+                    <XLg onClick={props.remove} className={"remove-collapse"} />
+                }
+            </Alert>
+            <Collapse in={open}>
+                <Card>
+                    <Card.Body>
+                        {props.content()}
+                    </Card.Body>
+                </Card>
+            </Collapse>
+        </React.Fragment>
+    )
 }

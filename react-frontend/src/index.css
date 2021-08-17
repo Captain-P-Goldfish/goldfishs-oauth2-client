@@ -323,3 +323,30 @@ span.add-new-resource {
     font-size: larger;
     cursor: pointer;
 }
+
+.collapse.card, .collapsing.card {
+    background-color: #3d495e;
+}
+
+.collapse.card .card-header, .collapsing.card .card-header {
+    cursor: pointer;
+    background-color: #757151;
+}
+
+.alert.collapse-header {
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.remove-collapse {
+    float: right;
+    margin-top: 4px;
+}
+
+.remove-collapse:hover {
+    border: 1px solid #3b361d;
+}
+
+span.bold {
+    font-weight: bold;
+}
