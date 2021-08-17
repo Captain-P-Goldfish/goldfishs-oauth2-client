@@ -94,6 +94,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                 new Optional(this.state.authResponseParameters).isPresent() &&
                 <React.Fragment>
                     <Collapseable header={"Authorization Response Details"}
+                                  open={true}
                                   variant={"workflow-details"}
                                   content={() =>
                                   {
@@ -136,7 +137,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
 function AuthorizationCodeGrantDetails(props)
 {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
 
     let variant = "dark";
     return (
@@ -277,12 +278,14 @@ class AccessTokenView extends React.Component
                               content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
                                                             nameValueList={responseHeaders} />} />
                 <Collapseable header={"Access Token Response"}
+                              open={true}
                               variant={"workflow-details"}
                               content={() => <AccessTokenResponse contentType={contentType}
                                                                   tokenResponse={plainResponse} />} />
             </React.Fragment>
         }
         return <Collapseable header={header()}
+                             open={true}
                              variant={"workflow-details"}
                              content={responseViewContent} />
     }

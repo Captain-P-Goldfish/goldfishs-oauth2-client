@@ -579,7 +579,7 @@ export function ModifiableCardList(props)
 
 export function Collapseable(props)
 {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(props.open || false);
     let variant = props.variant || "primary";
 
     return (
