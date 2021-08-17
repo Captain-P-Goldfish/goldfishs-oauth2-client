@@ -45,3 +45,18 @@ textarea {
 .functional-button, .functional-button:hover, .functional-button:focus {
     margin-bottom: 30px;
 }
+
+#jwt {
+    height: 100%;
+}
+
+div.jwt.sha-256-check > input {
+    display: inline-block;
+    margin-right: 15px;
+    float: unset;
+}
+
+#create-jwt {
+    margin-top: 10px;
+    margin-left: 25px;
+}

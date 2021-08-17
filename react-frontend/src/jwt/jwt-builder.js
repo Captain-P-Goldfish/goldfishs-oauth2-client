@@ -3,10 +3,21 @@ import './jwt-builder.css'
 import ScimClient from "../scim/scim-client";
 import ScimComponentBasics from "../scim/scim-component-basics";
 import Form from "react-bootstrap/Form";
-import {FormCheckbox, FormInputField, LoadingSpinner} from "../base/form-base";
+import {ErrorListItem, FormCheckbox, FormInputField, LoadingSpinner} from "../base/form-base";
 import Button from "react-bootstrap/Button";
 import {Optional} from "../services/utils";
-import {Col, Container, Dropdown, DropdownButton, OverlayTrigger, Row, Tab, Tabs, Tooltip} from "react-bootstrap";
+import {
+    Alert,
+    Col,
+    Container,
+    Dropdown,
+    DropdownButton,
+    OverlayTrigger,
+    Row,
+    Tab,
+    Tabs,
+    Tooltip
+} from "react-bootstrap";
 import * as lodash from "lodash";
 
 export default class JwtHandler extends React.Component
@@ -231,6 +242,19 @@ export class JwtBuilder extends React.Component
         return (
             <Container>
                 <Row>
+                    <Col sm={12}>
+                        {
+                            ((this.state.errors || {}).errorMessages || []).length > 0 &&
+                            <Alert variant={"danger"}>
+                                <ul className="error-list">
+                                    {this.state.errors.errorMessages.map((message, index) =>
+                                        <ErrorListItem key={"error-message-" + index} message={message} />)}
+                                </ul>
+                            </Alert>
+                        }
+                    </Col>
+                </Row>
+                <Row>
                     <Col>
                         <Dropdown>
                             <DropdownButton id={"aliases"}
@@ -328,43 +352,47 @@ export class JwtBuilder extends React.Component
 
                     </Col>
                     <Col sm={"9"}>
-                        <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
-                            <FormInputField name="keyId"
-                                            type="hidden"
-                                            value={this.state.selectedKey || ""}
-                                            onError={fieldName => this.scimClient.getErrors(this.state,
-                                                fieldName)} />
-                            <FormCheckbox name="addX5Sha256tHeader"
-                                          type="hidden"
-                                          readOnly={true}
-                                          checked={this.state.addX5Sha256tHeader}
-                                          onError={fieldName => this.scimClient.getErrors(this.state,
-                                              fieldName)} />
-                            <FormInputField name="header"
-                                            type="text"
-                                            as="textarea"
-                                            onChange={this.handleHeaderChange}
-                                            onError={fieldName => this.scimClient.getErrors(this.state,
-                                                fieldName)} />
-                            <FormInputField name="body"
-                                            type="text"
-                                            as="textarea"
-                                            onChange={this.handleBodyChange}
-                                            onError={fieldName => this.scimClient.getErrors(this.state,
-                                                fieldName)} />
-                            <Button id={"save"} type="Save">
-                                <LoadingSpinner show={this.state.isLoading} /> Create
-                            </Button>
-                        </Form>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col sm={12}>
-                        <Form.Control id={"jwt"}
-                                      style={{marginTop: "50px"}}
-                                      sm={5}
-                                      as={"textarea"}
-                                      onChange={this.handleBodyChange} />
+                        <Container>
+                            <Row>
+                                <Col>
+                                    <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
+                                        <FormInputField name="keyId"
+                                                        type="hidden"
+                                                        value={this.state.selectedKey || ""}
+                                                        onError={fieldName => this.scimClient.getErrors(this.state,
+                                                            fieldName)} />
+                                        <FormCheckbox name="addX5Sha256tHeader"
+                                                      type="hidden"
+                                                      readOnly={true}
+                                                      checked={this.state.addX5Sha256tHeader}
+                                                      onError={fieldName => this.scimClient.getErrors(this.state,
+                                                          fieldName)} />
+                                        <FormInputField name="header"
+                                                        type="text"
+                                                        as="textarea"
+                                                        onChange={this.handleHeaderChange}
+                                                        onError={fieldName => this.scimClient.getErrors(this.state,
+                                                            fieldName)} />
+                                        <FormInputField name="body"
+                                                        type="text"
+                                                        as="textarea"
+                                                        onChange={this.handleBodyChange}
+                                                        onError={fieldName => this.scimClient.getErrors(this.state,
+                                                            fieldName)} />
+                                    </Form>
+                                </Col>
+                                <Col sm={5}>
+                                    <Form.Control id={"jwt"}
+                                                  sm={5}
+                                                  as={"textarea"}
+                                                  onChange={this.handleBodyChange} />
+
+                                </Col>
+                            </Row>
+                        </Container>
+                        <Button id={"create-jwt"} type={"button"} onClick={this.scimComponentBasics.onSubmit}>
+                            <LoadingSpinner show={this.state.isLoading} /> Create
+                        </Button>
                     </Col>
                 </Row>
             </Container>
