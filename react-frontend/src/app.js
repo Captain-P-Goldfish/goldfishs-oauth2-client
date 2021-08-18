@@ -6,7 +6,7 @@ import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
 import OpenidProvider from "./openid/openid-provider";
-import JwtHandler from "./jwt/jwt-builder";
+import JwtHandler from "./jwt/jwt-handler";
 import OpenidClients from "./openid/openid-clients";
 import OpenidClientOverview from "./openid/openid-client-overview";
 

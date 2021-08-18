@@ -2,11 +2,11 @@
     min-height: 200px;
 }
 
-#header {
+#jwt-builder-header, #jwt-parsed-header {
     min-height: 200px;
 }
 
-#body {
+#jwt-builder-body, #jwt-parsed-body {
     min-height: 500px;
 }
 
@@ -59,4 +59,57 @@ div.jwt.sha-256-check > input {
 #create-jwt {
     margin-top: 10px;
     margin-left: 25px;
+}
+
+#parse-jwt, #jwt-to-parse {
+    margin-top: 10px;
+    width: 100%
+}
+
+#jwt-to-parse {
+    height: 57%;
+    resize: none;
+}
+
+.jwt-overlay {
+    overflow-y: scroll;
+    margin-top: 10px;
+    padding-top: 7px;
+    padding-left: 13px;
+    padding-right: 10px;
+    background-color: #eaeaea;
+    height: 40%;
+    border-radius: 5px;
+}
+
+.jwt-part {
+    word-break: break-all;
+}
+
+.jwt-dot-separator {
+    font-weight: bolder;
+}
+
+.jwt-part-0 {
+    color: red;
+}
+
+.jwt-part-1 {
+    color: #d63aff;
+}
+
+.jwt-part-2 {
+    color: #00a5d7;
+}
+
+.jwt-part-3 {
+    color: #0aa105;
+}
+
+.jwt-part-4 {
+    color: #c58e02;
+}
+
+.jwt-part-over {
+    color: black;
 }

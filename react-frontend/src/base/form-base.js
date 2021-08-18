@@ -6,7 +6,17 @@ import Col from "react-bootstrap/Col";
 import {Optional} from "../services/utils";
 import {GoFlame} from "react-icons/go";
 import {Alert, Button, Card, Collapse, Spinner} from "react-bootstrap";
-import {CaretDown, CaretRight, PencilSquare, PlusSquare, Save, TrashFill, XLg, XSquare} from "react-bootstrap-icons";
+import {
+    CaretDown,
+    CaretRight,
+    ExclamationLg,
+    PencilSquare,
+    PlusSquare,
+    Save,
+    TrashFill,
+    XLg,
+    XSquare
+} from "react-bootstrap-icons";
 import {CardInputField} from "./card-base";
 
 /**
@@ -15,7 +25,7 @@ import {CardInputField} from "./card-base";
 export function FormInputField(props)
 {
 
-    let controlId = props.name;
+    let controlId = props.id || props.name;
     let label = new Optional(props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
     let inputFieldType = props.type === undefined ? "text" : props.type;
     let inputFieldName = props.name;
@@ -34,6 +44,7 @@ export function FormInputField(props)
                 <Form.Control type={inputFieldType}
                               as={as}
                               name={inputFieldName}
+                              className={props.className}
                               disabled={isDisabled}
                               readOnly={isReadOnly}
                               placeholder={inputFieldPlaceholder}
@@ -271,6 +282,33 @@ export function ErrorListItem(props)
             </small>
         </li>
     );
+}
+
+export function AlertListMessages(props)
+{
+    let variant = props.variant || "info";
+    let icon = props.icon || <ExclamationLg />;
+    return (
+        <React.Fragment>
+            {
+                (props.messages || []).length > 0 &&
+                <Alert variant={variant}>
+                    <ul className="error-list">
+                        {
+                            props.messages.map((message, index) =>
+                            {
+                                return <li key={"alert-" + variant + "-message-" + index} className={"error-list-item"}>
+                                    <small className={"error"}>
+                                        {icon} {message}
+                                    </small>
+                                </li>
+                            })
+                        }
+                    </ul>
+                </Alert>
+            }
+        </React.Fragment>
+    )
 }
 
 export function LoadingSpinner(props)
