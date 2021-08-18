@@ -6,6 +6,7 @@ import {LinkContainer} from "react-router-bootstrap";
 import HttpSettings from "./http-settings";
 import {Optional} from "../services/utils";
 import OpenidClientWorkflow from "./openid-client-workflow";
+import {ApplicationInfoContext} from "../app";
 
 export default class OpenidClientOverview extends React.Component
 {
@@ -93,7 +94,12 @@ export default class OpenidClientOverview extends React.Component
                     <Tab eventKey="workflow" title="OpenID Workflow">
                         {
                             new Optional(this.state.client).isPresent() &&
-                            <OpenidClientWorkflow client={this.state.client} />
+                            <ApplicationInfoContext.Consumer>
+                                {appInfo =>
+                                    <OpenidClientWorkflow client={this.state.client}
+                                                          originalRedirectUri={appInfo.authCodeRedirectUri} />
+                                }
+                            </ApplicationInfoContext.Consumer>
                         }
                     </Tab>
                     <Tab eventKey="clients" title="HTTP Settings">

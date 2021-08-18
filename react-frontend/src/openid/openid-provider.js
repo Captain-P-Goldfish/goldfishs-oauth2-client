@@ -21,7 +21,6 @@ import Button from "react-bootstrap/Button";
 import {CardInputField} from "../base/card-base";
 import {LinkContainer} from "react-router-bootstrap";
 
-
 export default class OpenidProvider extends React.Component
 {
 
@@ -44,8 +43,8 @@ export default class OpenidProvider extends React.Component
 
     async componentDidMount()
     {
-        let startIndex = (this.state.currentPage * window.MAX_RESULTS) + 1;
-        let count = window.MAX_RESULTS;
+        let startIndex = (this.state.currentPage * this.props.serviceProviderConfig.filter.maxResults) + 1;
+        let count = this.props.serviceProviderConfig.filter.maxResults;
 
         await this.scimClient.listResources({
             startIndex: startIndex,

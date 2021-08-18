@@ -18,6 +18,20 @@
       "caseExact": true
     },
     {
+      "name": "authCodeRedirectUri",
+      "type": "reference",
+      "description": "The redirect uri for authorization codes to this application.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true,
+      "referenceTypes": [
+        "url"
+      ]
+    },
+    {
       "name": "jwtInfo",
       "type": "complex",
       "description": "Contains the algorithms supported for JWTs",

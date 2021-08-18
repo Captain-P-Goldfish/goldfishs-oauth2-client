@@ -11,35 +11,53 @@ import OpenidClients from "./openid/openid-clients";
 import OpenidClientOverview from "./openid/openid-client-overview";
 
 
+export const ApplicationInfoContext = React.createContext(null);
+export const ScimServiceProviderContext = React.createContext(null);
+
 class Application extends React.Component
 {
 
     constructor(props)
     {
         super(props);
-        this.state = {configLoaded: false}
-        this.helloWorld = this.helloWorld.bind(this);
-    }
-
-    helloWorld(object)
-    {
-        this.setState(object);
+        this.state = {
+            serviceProviderConfig: {
+                bulk: {
+                    maxOperations: 5,
+                    maxPayloadSize: 2097152
+                },
+                filter: {
+                    maxResults: 5
+                }
+            }
+        }
+        this.setState = this.setState.bind(this);
     }
 
     async componentDidMount()
     {
-        if (this.state.configLoaded)
+        let scimClient = new ScimClient("/scim/v2/ServiceProviderConfig", this.setState);
+        scimClient.listResources().then(response =>
         {
-            return;
-        }
-        let scimClient = new ScimClient("/scim/v2/ServiceProviderConfig", this.helloWorld);
-        let serviceProvider = await scimClient.listResources();
-        serviceProvider.resource.then(resource =>
-        {
-            window.MAX_RESULTS = resource.filter.maxResults;
-            window.MAX_OPERATIONS = resource.bulk.maxOperations;
+            if (response.success)
+            {
+                response.resource.then(serviceProviderConfig =>
+                {
+                    this.setState({serviceProviderConfig: serviceProviderConfig});
+                })
+            }
         })
-        this.setState({configLoaded: true})
+
+        scimClient.getResource(null, "/scim/v2/AppInfo").then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(appInfo =>
+                {
+                    this.setState({appInfo: appInfo});
+                })
+            }
+        });
     }
 
     render()
@@ -84,26 +102,34 @@ class Application extends React.Component
                     </Navbar>
 
                     <div className="main">
-                        {/* A <Switch> looks through its children <Route>s and
-                         renders the first one that matches the current URL. */}
-                        <Switch>
-                            <Route path="/system">
-                                <SystemOverview />
-                            </Route>
-                            <Route path={"/openIdProvider/:providerId/client/:clientId"}
-                                   component={OpenidClientOverview} />
-                            <Route path={"/openIdProvider/:id/openIdClients"}
-                                   component={OpenidClients} />
-                            <Route path="/openIdProvider">
-                                <OpenidProvider />
-                            </Route>
-                            <Route path="/jwts">
-                                <JwtHandler />
-                            </Route>
-                            <Route path="/">
-                                <h2>Welcome</h2>
-                            </Route>
-                        </Switch>
+                        <ApplicationInfoContext.Provider value={this.state.appInfo}>
+                            <ScimServiceProviderContext.Provider value={this.state.serviceProviderConfig}>
+                                {/* A <Switch> looks through its children <Route>s and
+                                 renders the first one that matches the current URL. */}
+                                <Switch>
+                                    <Route path="/system">
+                                        <SystemOverview />
+                                    </Route>
+                                    <Route path={"/openIdProvider/:providerId/client/:clientId"}
+                                           component={OpenidClientOverview} />
+                                    <Route path={"/openIdProvider/:id/openIdClients"}
+                                           render={route =>
+                                           {
+                                               return <OpenidClients match={route.match}
+                                                                     serviceProviderConfig={this.state.serviceProviderConfig} />
+                                           }} />
+                                    <Route path="/openIdProvider">
+                                        <OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig} />
+                                    </Route>
+                                    <Route path="/jwts">
+                                        <JwtHandler />
+                                    </Route>
+                                    <Route path="/">
+                                        <h2>Welcome</h2>
+                                    </Route>
+                                </Switch>
+                            </ScimServiceProviderContext.Provider>
+                        </ApplicationInfoContext.Provider>
                     </div>
                 </Router>
             </React.Fragment>

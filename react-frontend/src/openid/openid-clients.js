@@ -46,8 +46,8 @@ export default class OpenidClients extends React.Component
 
     async componentDidMount()
     {
-        let startIndex = (this.state.currentPage * window.MAX_RESULTS) + 1;
-        let count = window.MAX_RESULTS;
+        let startIndex = (this.state.currentPage * this.props.serviceProviderConfig.filter.maxResults) + 1;
+        let count = this.props.serviceProviderConfig.filter.maxResults;
 
         let openIdProviderId = this.props.match.params.id;
         let openIdProviderResourcePath = "/scim/v2/OpenIdProvider";
@@ -238,7 +238,6 @@ export default class OpenidClients extends React.Component
         )
     }
 }
-
 
 class OpenIdClientCardEntry extends React.Component
 {

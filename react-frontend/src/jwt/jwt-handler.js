@@ -4,6 +4,7 @@ import ScimClient from "../scim/scim-client";
 import {Tab, Tabs} from "react-bootstrap";
 import JwtParser from "./jwt-parser";
 import JwtBuilder from "./jwt-builder";
+import {ApplicationInfoContext} from "../app";
 
 export default class JwtHandler extends React.Component
 {
@@ -18,16 +19,6 @@ export default class JwtHandler extends React.Component
 
     componentDidMount()
     {
-        this.scimClient.getResource(null, "/scim/v2/AppInfo").then(response =>
-        {
-            if (response.success)
-            {
-                response.resource.then(appInfo =>
-                {
-                    this.setState({jwtInfo: appInfo.jwtInfo});
-                })
-            }
-        });
         this.scimClient.getResource(null, "/scim/v2/Keystore").then(response =>
         {
             if (response.success)
@@ -44,16 +35,19 @@ export default class JwtHandler extends React.Component
     render()
     {
         return (
-            <React.Fragment>
-                <Tabs defaultActiveKey="jwtparser" id="uncontrolled-tab-example">
-                    <Tab eventKey="jwtparser" title="JWT Parser">
-                        <JwtParser keyInfos={this.state.keyInfos} jwtInfo={this.state.jwtInfo} />
-                    </Tab>
-                    <Tab eventKey="jwtbuilder" title="JWT Builder">
-                        <JwtBuilder keyInfos={this.state.keyInfos} jwtInfo={this.state.jwtInfo} />
-                    </Tab>
-                </Tabs>
-            </React.Fragment>
+            <ApplicationInfoContext.Consumer>
+                {appInfo =>
+                    appInfo &&
+                    <Tabs defaultActiveKey="jwtparser" id="uncontrolled-tab-example">
+                        <Tab eventKey="jwtparser" title="JWT Parser">
+                            <JwtParser keyInfos={this.state.keyInfos} jwtInfo={appInfo.jwtInfo} />
+                        </Tab>
+                        <Tab eventKey="jwtbuilder" title="JWT Builder">
+                            <JwtBuilder keyInfos={this.state.keyInfos} jwtInfo={appInfo.jwtInfo} />
+                        </Tab>
+                    </Tabs>
+                }
+            </ApplicationInfoContext.Consumer>
         )
     }
 }

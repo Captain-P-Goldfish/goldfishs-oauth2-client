@@ -6,9 +6,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import reportWebVitals from './reportWebVitals';
 import Application from "./app";
 
-window.MAX_RESULTS = 10;
-window.MAX_OPERATIONS = 10;
-
 ReactDOM.render(
     <Application />
     ,

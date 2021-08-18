@@ -27,12 +27,25 @@ public class ScimApplicationInfo extends ResourceNode
   {}
 
   @Builder
-  public ScimApplicationInfo(JwtInfo jwtInfo)
+  public ScimApplicationInfo(String authCodeRedirectUri, JwtInfo jwtInfo)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId("1");
+    setAuthCodeRedirectUri(authCodeRedirectUri);
     setJwt(jwtInfo);
     setMeta(META);
+  }
+
+  /** The redirect uri for authorization codes to this application. */
+  public List<String> getAuthCodeRedirectUri()
+  {
+    return getSimpleArrayAttribute(FieldNames.AUTH_CODE_REDIRECT_URI);
+  }
+
+  /** The redirect uri for authorization codes to this application. */
+  public void setAuthCodeRedirectUri(String authCodeRedirectUri)
+  {
+    setAttribute(FieldNames.AUTH_CODE_REDIRECT_URI, authCodeRedirectUri);
   }
 
   /** Contains the algorithms supported for JWTs */
@@ -107,6 +120,8 @@ public class ScimApplicationInfo extends ResourceNode
   {
 
     public static final String SCHEMA_ID = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:AppInfo";
+
+    public static final String AUTH_CODE_REDIRECT_URI = "authCodeRedirectUri";
 
     public static final String KEY_WRAP_ALGORITHMS = "keyWrapAlgorithms";
 

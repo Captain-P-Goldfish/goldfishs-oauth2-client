@@ -1,7 +1,6 @@
 import React from "react";
 import Form from "react-bootstrap/Form";
 import {ErrorMessagesAlert, FormInputField, FormRadioSelection, LoadingSpinner} from "../base/form-base";
-import * as lodash from "lodash";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
@@ -10,20 +9,20 @@ import AuthorizationCodeGrantWorkflow from "./auth-code-grant/authorization-code
 
 export default class OpenidClientWorkflow extends React.Component
 {
-    constructor(props)
+
+    constructor(props, context)
     {
-        super(props)
+        super(props, context)
         this.authCodeGrantType = "authorization_code";
         this.clientCredentialsGrantType = "client_credentials";
         this.resourceOwnerGrantType = "password";
+
         this.state = {
-            workflow: {
-                authenticationType: this.authCodeGrantType,
-                originalRedirectUri: "http://localhost:8080/authcode",
-                redirectUri: "http://localhost:8080/authcode",
-                username: "",
-                password: ""
-            },
+            authenticationType: this.authCodeGrantType,
+            originalRedirectUri: props.originalRedirectUri,
+            redirectUri: "http://localhost:8080/authcode",
+            username: "",
+            password: "",
             isLoading: false
         }
         this.resetRedirectUri = this.resetRedirectUri.bind(this);
@@ -34,9 +33,7 @@ export default class OpenidClientWorkflow extends React.Component
     async resetRedirectUri(e)
     {
         e.preventDefault();
-        let workflow = this.state.workflow;
-        lodash.set(workflow, "redirectUri", workflow.originalRedirectUri)
-        await this.setState({workflow: workflow})
+        await this.setState({redirectUri: this.state.originalRedirectUri})
     }
 
     handleAuthTypeFormResponse(type, responseDetails)
@@ -50,14 +47,13 @@ export default class OpenidClientWorkflow extends React.Component
 
     handleChange(fieldname, value)
     {
-        let object = this.state.workflow;
-        object = lodash.set(object, fieldname, value);
-        this.setState({workflow: object})
+        let wrapperObject = {};
+        wrapperObject[fieldname] = value;
+        this.setState(wrapperObject)
     }
 
     render()
     {
-
         let authTypes = [
             {value: this.authCodeGrantType, display: "Authorization Code Grant/Flow"},
             {value: this.clientCredentialsGrantType, display: "Client Credentials Grant"},
@@ -73,38 +69,38 @@ export default class OpenidClientWorkflow extends React.Component
                     <FormRadioSelection name="authenticationType"
                                         label="AuthenticationType Type"
                                         displayType={"vertical"}
-                                        selected={this.state.workflow.authenticationType}
+                                        selected={this.state.authenticationType}
                                         selections={authTypes}
                                         onChange={e => this.handleChange(e.target.name, e.target.value)}
                                         onError={() =>
                                         {
                                         }} />
                     {
-                        this.state.workflow.authenticationType === this.authCodeGrantType &&
-                        <AuthorizationCodeGrantForm redirectUri={this.state.workflow.redirectUri}
+                        this.state.authenticationType === this.authCodeGrantType &&
+                        <AuthorizationCodeGrantForm redirectUri={this.state.redirectUri}
                                                     isLoading={this.state.isLoading}
                                                     handleChange={this.handleChange}
                                                     resetRedirectUri={this.resetRedirectUri}
                                                     handleResponse={details => this.handleAuthTypeFormResponse(
-                                                        this.state.workflow.authenticationType, details)}
+                                                        this.state.authenticationType, details)}
                                                     onError={() =>
                                                     {
                                                     }} />
                     }
                     {
-                        this.state.workflow.authenticationType === this.clientCredentialsGrantType &&
+                        this.state.authenticationType === this.clientCredentialsGrantType &&
                         <ClientCredentialsGrantForm isLoading={this.state.isLoading}
                                                     handleResponse={details => this.handleAuthTypeFormResponse(
-                                                        this.state.workflow.authenticationType, details)} />
+                                                        this.state.authenticationType, details)} />
                     }
                     {
-                        this.state.workflow.authenticationType === this.resourceOwnerGrantType &&
-                        <ResourceOwnerPasswordCredentialsForm username={this.state.workflow.username}
-                                                              password={this.state.workflow.password}
+                        this.state.authenticationType === this.resourceOwnerGrantType &&
+                        <ResourceOwnerPasswordCredentialsForm username={this.state.username}
+                                                              password={this.state.password}
                                                               isLoading={this.state.isLoading}
                                                               handleChange={this.handleChange}
                                                               handleResponse={details => this.handleAuthTypeFormResponse(
-                                                                  this.state.workflow.authenticationType, details)}
+                                                                  this.state.authenticationType, details)}
                                                               onError={() =>
                                                               {
                                                               }} />

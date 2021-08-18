@@ -3,11 +3,15 @@ package de.captaingoldfish.restclient.application.endpoints.appinfo;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints;
+import de.captaingoldfish.restclient.application.endpoints.ScimRequestContext;
 import de.captaingoldfish.restclient.scim.resources.ScimApplicationInfo;
 import de.captaingoldfish.restclient.scim.resources.ScimApplicationInfo.JwtInfo;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
@@ -43,8 +47,14 @@ public class AppInfoHandler extends ResourceHandler<ScimApplicationInfo>
                                          List<SchemaAttribute> excludedAttributes,
                                          Context context)
   {
+    ScimRequestContext scimRequestContext = (ScimRequestContext)context;
+    UriComponentsBuilder uriComponentsBuilder = scimRequestContext.getUriComponentsBuilder();
+    String authCodeRedirectUrl = uriComponentsBuilder.cloneBuilder()
+                                                     .path(BrowserEntryEndpoints.AUTH_CODE_ENDPOINT)
+                                                     .build()
+                                                     .toString();
     JwtInfo jwtInfo = getJwtInfo();
-    return ScimApplicationInfo.builder().jwtInfo(jwtInfo).build();
+    return ScimApplicationInfo.builder().authCodeRedirectUri(authCodeRedirectUrl).jwtInfo(jwtInfo).build();
   }
 
   /**

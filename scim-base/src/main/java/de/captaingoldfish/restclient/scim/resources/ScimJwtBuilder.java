@@ -1,6 +1,7 @@
 package de.captaingoldfish.restclient.scim.resources;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import de.captaingoldfish.scim.sdk.common.resources.ResourceNode;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
@@ -20,7 +21,13 @@ public class ScimJwtBuilder extends ResourceNode
   {}
 
   @Builder
-  public ScimJwtBuilder(String id, String keyId, String header, String body, String jwt, Meta meta)
+  public ScimJwtBuilder(String id,
+                        String keyId,
+                        String header,
+                        String body,
+                        String jwt,
+                        Boolean addX5tSHa256Header,
+                        Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
@@ -28,6 +35,7 @@ public class ScimJwtBuilder extends ResourceNode
     setHeader(header);
     setBody(body);
     setJwt(jwt);
+    setAddX5tSha256tHeader(Optional.ofNullable(addX5tSHa256Header).orElse(false));
     setMeta(meta);
   }
 

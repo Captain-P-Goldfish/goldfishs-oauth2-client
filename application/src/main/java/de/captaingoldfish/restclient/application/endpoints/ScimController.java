@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import de.captaingoldfish.scim.sdk.common.constants.HttpHeader;
 import de.captaingoldfish.scim.sdk.common.constants.enums.HttpMethod;
@@ -57,6 +58,7 @@ public class ScimController
                                            RequestMethod.DELETE}, produces = HttpHeader.SCIM_CONTENT_TYPE)
   public @ResponseBody String handleScimRequest(HttpServletRequest request,
                                                 HttpServletResponse response,
+                                                UriComponentsBuilder uriComponentsBuilder,
                                                 @RequestBody(required = false) String requestBody)
   {
     Map<String, String> httpHeaders = getHttpHeaders(request);
@@ -64,7 +66,8 @@ public class ScimController
     ScimResponse scimResponse = resourceEndpoint.handleRequest(request.getRequestURL().toString() + query,
                                                                HttpMethod.valueOf(request.getMethod()),
                                                                requestBody,
-                                                               httpHeaders);
+                                                               httpHeaders,
+                                                               new ScimRequestContext(uriComponentsBuilder));
     response.setContentType(HttpHeader.SCIM_CONTENT_TYPE);
     scimResponse.getHttpHeaders().forEach(response::setHeader);
     response.setStatus(scimResponse.getHttpStatus());
