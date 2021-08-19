@@ -83,12 +83,15 @@ export default class OpenidClientOverview extends React.Component
                     <a href={"/#"}>
                         <h5 style={{height: "35px", padding: "0", paddingLeft: "10px"}}>
                             <ArrowLeftCircle style={{color: "bisque"}} height={"35px"} size={"25px"} />
-                            <span style={{marginLeft: "15px"}}>Back to "{provider.map(val => val.name).orElse("")}" Overview</span>
+                            <span style={{marginLeft: "15px"}}>Back to
+                                <span style={{color: "lightgray"}}> "{provider.map(val => val.name).orElse("")}" </span>
+                                                               Overview
+                            </span>
                         </h5>
                     </a>
                 </LinkContainer>
 
-                <h5>Client: {client.map(c => c.clientId).orElse("")}</h5>
+                <h5>Client: <span style={{color: "lightgray"}}>{client.map(c => c.clientId).orElse("")}</span></h5>
 
                 <Tabs defaultActiveKey="workflow" id="uncontrolled-tab-example">
                     <Tab eventKey="workflow" title="OpenID Workflow">

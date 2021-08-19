@@ -62,7 +62,7 @@ export default class OpenidClientWorkflow extends React.Component
 
         return (
             <React.Fragment>
-                <h2>OpenID Connect Workflow for {this.props.client.clientId}</h2>
+                <h2>OpenID Connect Workflow</h2>
                 <ErrorMessagesAlert errors={this.state.errors} />
 
                 <Form>

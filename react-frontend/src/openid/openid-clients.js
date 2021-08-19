@@ -198,6 +198,9 @@ export default class OpenidClients extends React.Component
                         </h5>
                     </a>
                 </LinkContainer>
+
+                <h5>Provider: <span style={{color: "lightgray"}}>{this.state.provider.name}</span></h5>
+
                 <p className={"add-new-resource"} onClick={this.addNewClient}>
                     <span className={"add-new-resource"}>Add new Client <br /><FileEarmarkPlus /></span>
                 </p>
