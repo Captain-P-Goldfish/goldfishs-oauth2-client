@@ -167,26 +167,9 @@ class AuthorizationCodeGrantForm extends React.Component
     {
         return {
             backendToken: Math.random().toString(36).substring(2, 15),
-            authCodeUrl: "http://localhost:8080/auth/realms/master/...",
-            queryParameters: [
-                {
-                    name: "client_id",
-                    value: "goldfish"
-                },
-                {
-                    name: "redirect_uri",
-                    value: "http://localhost"
-                },
-                {
-                    name: "state",
-                    value: Math.random().toString(36).substring(2, 15)
-                },
-                {
-                    name: "grant_type",
-                    value: "authorization_code"
-                },
-            ]
+            authCodeUrl: "http://localhost:8081/auth/realms/goldfish/protocol/openid-connect/auth?client_id=goldfish-rest-client&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8180%2Fauthcode&state=bab36cc5-73a7-4db7-9a01-dca7a6981256"
         }
+
     }
 
     render()

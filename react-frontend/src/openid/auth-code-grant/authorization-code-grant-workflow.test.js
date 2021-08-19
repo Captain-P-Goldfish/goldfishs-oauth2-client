@@ -2,7 +2,7 @@ import React from 'react';
 import {act, render, waitFor} from '@testing-library/react';
 import {unmountComponentAtNode} from "react-dom";
 import {AccessTokenResponse} from "./authorization-code-grant-workflow";
-import Assertions from "../setupTests";
+import Assertions from "../../setupTests";
 
 let container = null;
 
@@ -30,21 +30,24 @@ afterEach(() =>
 test("Render AccessTokenResponse With Bearer Token", async () =>
 {
 
-    let bearerToken = "{\"access_token\": \"abc\", \"token_type\": \"Bearer\", \"expires_in\": 3600, "
-                      + "\"refresh_token\": \"cba\"}";
-    let contentType = "application/json;encoding=utf-8";
-    act(() =>
-    {
-        render(<AccessTokenResponse contentType={contentType}
-                                    tokenResponse={bearerToken} />, container);
-    });
+    // let bearerToken = "{\"access_token\": \"abc\", \"token_type\": \"Bearer\", \"expires_in\": 3600, "
+    //                   + "\"refresh_token\": \"cba\"}";
+    // let contentType = "application/json;encoding=utf-8";
+    // act(() =>
+    // {
+    //     render(<AccessTokenResponse contentType={contentType}
+    //                                 tokenResponse={bearerToken} />, container);
+    // });
+    //
+    // await waitFor(() =>
+    // {
+    //     expect(new Assertions("#access-token-response-container").isPresent().isVisible());
+    // })
 
-    await waitFor(() =>
-    {
-        expect(new Assertions("#access-token-response-container").isPresent().isVisible());
-    })
-
-
+    let authUrl = new URL(
+        "http://localhost:8081/auth/realms/goldfish/protocol/openid-connect/auth?client_id=goldfish-rest-client&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fauthcode&state=bab36cc5-73a7-4db7-9a01-dca7a6981256");
+    const params = Object.fromEntries(authUrl.searchParams);
+    console.log(params)
 })
 
 test("Render AccessTokenResponse With Plain Token", async () =>

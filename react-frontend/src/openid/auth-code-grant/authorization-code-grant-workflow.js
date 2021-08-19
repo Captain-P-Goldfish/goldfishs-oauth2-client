@@ -65,6 +65,8 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     loadAuthorizationQueryParameterView()
     {
+        let authCodeQueryParams = Object.fromEntries(new URL(this.props.requestDetails.authCodeUrl).searchParams);
+
         return <div className={"workflow-details"}>
             <Collapseable header={"Authorization Request Details"} variant={"workflow-details"} content={() =>
             {
@@ -74,11 +76,11 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                         <Col>{this.props.requestDetails.authCodeUrl}</Col>
                     </Row>
                     {
-                        this.props.requestDetails.queryParameters.map((queryObject, index) =>
+                        Object.keys(authCodeQueryParams).map((key, index) =>
                         {
                             return <Row key={"auth-code-request-row-" + index}>
-                                <Col sm={2}>{queryObject.name}</Col>
-                                <Col sm={4}>{queryObject.value}</Col>
+                                <Col sm={2}>{key}</Col>
+                                <Col sm={4}>{authCodeQueryParams[key]}</Col>
                             </Row>
                         })
                     }
