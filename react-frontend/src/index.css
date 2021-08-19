@@ -404,6 +404,10 @@ div.workflow-details .collapse-header {
     background: transparent linear-gradient(200deg, transparent 0%, transparent 11%, rgb(81, 68, 0) 100%);
 }
 
+.url-base-value {
+    color: #b5b5b5;
+}
+
 /* *************************************************************************************************** */
 
 

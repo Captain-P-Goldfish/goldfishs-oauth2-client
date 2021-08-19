@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import Col from "react-bootstrap/Col";
 import {Collapseable, ErrorListItem, LoadingSpinner} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
-import {Optional} from "../../services/utils";
 import Button from "react-bootstrap/Button";
 import {CaretDown, CaretRight, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
@@ -40,7 +39,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
             {
                 clearInterval(state.interval);
                 delete state.interval;
-                state.authResponseParameters = authRequestStatus.authResponseParameters;
+                state.authorizationResponseUrl = authRequestStatus.authorizationResponseUrl;
                 forceUpdate();
             }
         }, 200);
@@ -48,18 +47,11 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     getAuthRequestStatus()
     {
+        let code = Math.random().toString(36).substring(2, 15);
+        let state = Math.random().toString(36).substring(2, 15);
         return {
             success: true,
-            authResponseParameters: [
-                {
-                    name: "code",
-                    value: Math.random().toString(36).substring(2, 15)
-                },
-                {
-                    name: "state",
-                    value: Math.random().toString(36).substring(2, 15)
-                },
-            ]
+            authorizationResponseUrl: "http://localhost:8080/authcode?code=" + code + "&state=" + state
         };
     }
 
@@ -72,15 +64,15 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
             {
                 return <React.Fragment>
                     <Row>
-                        <Col sm={2}>authCodeUrl</Col>
-                        <Col>{this.props.requestDetails.authCodeUrl}</Col>
+                        <Col sm={2} className={"url-base-value"}>authCodeUrl</Col>
+                        <Col sm={10} className={"url-base-value"}>{this.props.requestDetails.authCodeUrl}</Col>
                     </Row>
                     {
                         Object.keys(authCodeQueryParams).map((key, index) =>
                         {
                             return <Row key={"auth-code-request-row-" + index}>
                                 <Col sm={2}>{key}</Col>
-                                <Col sm={4}>{authCodeQueryParams[key]}</Col>
+                                <Col sm={10}>{authCodeQueryParams[key]}</Col>
                             </Row>
                         })
                     }
@@ -91,23 +83,38 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     loadAuthorizationCodeResponseDetailsView()
     {
+        if (!this.state.authorizationResponseUrl)
+        {
+            return null;
+        }
+        let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
+        const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
+
         return <div className={"workflow-details"}>
             {
-                new Optional(this.state.authResponseParameters).isPresent() &&
                 <React.Fragment>
                     <Collapseable header={"Authorization Response Details"}
                                   open={true}
                                   variant={"workflow-details"}
                                   content={() =>
                                   {
-                                      return this.state.authResponseParameters.map(
-                                          (authResponseParam, index) =>
+                                      return <React.Fragment>
+                                          <Row>
+                                              <Col sm={2} className={"url-base-value"}>authResponseUrl</Col>
+                                              <Col sm={10} className={"url-base-value"}>
+                                                  {this.state.authorizationResponseUrl}
+                                              </Col>
+                                          </Row>
                                           {
-                                              return <Row key={"auth-code-response-row-" + index}>
-                                                  <Col sm={2}>{authResponseParam.name}</Col>
-                                                  <Col sm={4}>{authResponseParam.value}</Col>
-                                              </Row>
-                                          })
+                                              Object.keys(queryParamsObject).map((key, index) =>
+                                              {
+                                                  return <Row key={"auth-code-response-row-" + index}>
+                                                      <Col sm={2}>{key}</Col>
+                                                      <Col sm={10}>{queryParamsObject[key]}</Col>
+                                                  </Row>
+                                              })
+                                          }
+                                      </React.Fragment>
                                   }}
                     />
                     <AccessTokenView />
