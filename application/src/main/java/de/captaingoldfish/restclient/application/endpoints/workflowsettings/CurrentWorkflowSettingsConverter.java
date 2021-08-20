@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.workflowsettings;
 
+import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
@@ -15,9 +16,9 @@ import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.
 public class CurrentWorkflowSettingsConverter
 {
 
-  public static CurrentWorkflowSettings toCurrentWorkflowSettings(OpenIdClientDao openIdClientDao,
-                                                                  ScimCurrentWorkflowSettings scimSettings)
+  public static CurrentWorkflowSettings toCurrentWorkflowSettings(ScimCurrentWorkflowSettings scimSettings)
   {
+    OpenIdClientDao openIdClientDao = WebAppConfig.getApplicationContext().getBean(OpenIdClientDao.class);
     OpenIdClient openIdClient = openIdClientDao.findById(scimSettings.getOpenIdClientId()).orElseThrow();
     return CurrentWorkflowSettings.builder()
                                   .openIdClient(openIdClient)

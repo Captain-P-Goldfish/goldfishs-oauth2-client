@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.crypto.JwtHandler;
 import de.captaingoldfish.restclient.application.endpoints.appinfo.AppInfoHandler;
+import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestHandler;
+import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.JwtBuilderHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
@@ -23,6 +25,7 @@ import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
@@ -207,5 +210,20 @@ public class ScimConfig
   {
     AppInfoEndpoint appInfoEndpoint = new AppInfoEndpoint(new AppInfoHandler());
     return resourceEndpoint.registerEndpoint(appInfoEndpoint);
+  }
+
+  /**
+   * registers the auth code grant request resourceType under the endpoint /AuthCodeGrantRequest.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the auth code grant request resource type
+   */
+  @Bean
+  public ResourceType authCodeGrantRequestResourceType(ResourceEndpoint resourceEndpoint,
+                                                       AuthCodeGrantRequestService authCodeGrantRequestService)
+  {
+    AuthCodeGrantRequestHandler handler = new AuthCodeGrantRequestHandler(authCodeGrantRequestService);
+    AuthCodeGrantRequestEndpoint authCodeGrantRequestEndpoint = new AuthCodeGrantRequestEndpoint(handler);
+    return resourceEndpoint.registerEndpoint(authCodeGrantRequestEndpoint);
   }
 }

@@ -56,7 +56,7 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   protected CurrentWorkflowSettingsDao currentWorkflowSettingsDao;
 
   @LocalServerPort
-  private int port;
+  protected int port;
 
   @Value("${server.servlet.context-path:}")
   private String contextPath;
@@ -83,9 +83,14 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
     keystoreDao.deleteAll();
   }
 
+  public String getApplicationUrl()
+  {
+    return getApplicationUrl(null);
+  }
+
   public String getApplicationUrl(String path)
   {
-    return this.applicationUrl + path;
+    return this.applicationUrl + StringUtils.stripToEmpty(path);
   }
 
   public List<String> jsonArrayToList(JSONArray jsonArray)

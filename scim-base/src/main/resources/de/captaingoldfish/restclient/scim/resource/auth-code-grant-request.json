@@ -1,0 +1,55 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:AuthCodeGrantRequest",
+  "name": "AuthCodeGrantRequest",
+  "description": "Can be used to get the authorization code grant url to redirect the user to the identity provider and to retrieve the authorization code after it was received by the backend",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "authorizationCodeGrantUrl",
+      "type": "reference",
+      "description": "The authorization code grant request url that is used by the frontend to delegate the user to the identity provider and to show the specific request details",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": true,
+      "referenceTypes": [
+        "url"
+      ]
+    },
+    {
+      "name": "authorizationResponseUrl",
+      "type": "reference",
+      "description": "The authorization code response that was built by the identity provider to return the user to the application",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": true,
+      "referenceTypes": [
+        "url"
+      ]
+    }
+  ],
+  "meta": {
+    "resourceType": "Schema",
+    "created": "2021-04-88T22:51:00+02:00",
+    "lastModified": "2021-04-88T22:51:00+02:00",
+    "location": "/Schemas/AuthCodeGrantRequest"
+  }
+}

@@ -12,38 +12,37 @@ import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
 
 /**
  * @author Pascal Knueppel
- * @since 28.05.2021
+ * @since 20.08.2021
  */
-public class OpenIdClientEndpoint extends EndpointDefinition
+public class AuthCodeGrantRequestEndpoint extends EndpointDefinition
 {
 
-  public OpenIdClientEndpoint(ResourceHandler resourceHandler)
+  public AuthCodeGrantRequestEndpoint(ResourceHandler resourceHandler)
   {
     super(getResourceTypeSchema(), getResourceSchemaNode(), getExtensions(), resourceHandler);
   }
 
   /**
-   * @return the resource type schema for the openid client endpoint
+   * @return the resource type schema for the auth code grant request endpoint
    */
   private static JsonNode getResourceTypeSchema()
   {
-    return JsonHelper.loadJsonDocument(ClasspathReferences.OPEN_ID_CLIENT_RESOURCE_TYPE);
+    return JsonHelper.loadJsonDocument(ClasspathReferences.AUTH_CODE_GRANT_REQUEST_RESOURCE_TYPE);
   }
 
   /**
-   * @return the openid client schema defined in the resource type
+   * @return the auth code grant request schema defined in the resource type
    */
   private static JsonNode getResourceSchemaNode()
   {
-    return JsonHelper.loadJsonDocument(ClasspathReferences.OPEN_ID_CLIENT_SCHEMA);
+    return JsonHelper.loadJsonDocument(ClasspathReferences.AUTH_CODE_GRANT_REQUEST_SCHEMA);
   }
 
   /**
-   * @return the extension of the openid client resource type endpoint definition
+   * @return the extension of the auth code grant request resource type endpoint definition
    */
   private static List<JsonNode> getExtensions()
   {
-    return List.of(JsonHelper.loadJsonDocument(ClasspathReferences.HTTP_CLIENT_SETTINGS_SCHEMA),
-                   JsonHelper.loadJsonDocument(ClasspathReferences.CURRENT_WORKFLOW_SETTINGS_SCHEMA));
+    return List.of(JsonHelper.loadJsonDocument(ClasspathReferences.CURRENT_WORKFLOW_SETTINGS_SCHEMA));
   }
 }

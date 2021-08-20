@@ -64,7 +64,8 @@
         <version.liquibase>4.3.5</version.liquibase>
         <version.bouncy.castle>1.68</version.bouncy.castle>
         <version.validation.api>2.0.1.Final</version.validation.api>
-        <version.nimbus>9.10</version.nimbus>
+        <version.nimbus.jose.jwt>9.12.1</version.nimbus.jose.jwt>
+        <version.nimbus.oauth2>9.13</version.nimbus.oauth2>
         <version.caffeine>3.0.2</version.caffeine>
         <version.commons.fileupload>1.4</version.commons.fileupload>
         <version.unirest>3.11.11</version.unirest>
@@ -184,7 +185,12 @@
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
-                <version>${version.nimbus}</version>
+                <version>${version.nimbus.jose.jwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>oauth2-oidc-sdk</artifactId>
+                <version>${version.nimbus.oauth2}</version>
             </dependency>
 
             <!-- database -->

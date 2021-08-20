@@ -49,10 +49,7 @@ public class AppInfoHandler extends ResourceHandler<ScimApplicationInfo>
   {
     ScimRequestContext scimRequestContext = (ScimRequestContext)context;
     UriComponentsBuilder uriComponentsBuilder = scimRequestContext.getUriComponentsBuilder();
-    String authCodeRedirectUrl = uriComponentsBuilder.cloneBuilder()
-                                                     .path(BrowserEntryEndpoints.AUTH_CODE_ENDPOINT)
-                                                     .build()
-                                                     .toString();
+    String authCodeRedirectUrl = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     JwtInfo jwtInfo = getJwtInfo();
     return ScimApplicationInfo.builder().authCodeRedirectUri(authCodeRedirectUrl).jwtInfo(jwtInfo).build();
   }

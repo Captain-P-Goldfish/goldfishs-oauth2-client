@@ -38,6 +38,11 @@ public interface FileReferences
 
   public static final String UNIT_TEST_KEYSTORE_JKS_EXTENDED = BASE_PATH + "/files/unit-test-extended.jks";
 
+  /**
+   * an OpenID Connect discovery json body as returned by keycloak
+   */
+  public static final String TEST_IDP_OIDC_DISCOVERY_JSON = BASE_PATH + "/files/keycloak-oidc-discovery.json";
+
 
   default InputStream readAsInputStream(String classpathFile)
   {
