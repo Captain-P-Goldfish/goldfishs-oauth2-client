@@ -6,6 +6,7 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import {Reply} from "react-bootstrap-icons";
 import AuthorizationCodeGrantWorkflow from "./auth-code-grant/authorization-code-grant-workflow";
+import * as lodash from "lodash";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -16,13 +17,13 @@ export default class OpenidClientWorkflow extends React.Component
         this.authCodeGrantType = "authorization_code";
         this.clientCredentialsGrantType = "client_credentials";
         this.resourceOwnerGrantType = "password";
+        this.currentWorkflowSettingsUri = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CurrentWorkflowSettings";
 
         this.state = {
             authenticationType: this.authCodeGrantType,
             originalRedirectUri: props.originalRedirectUri,
-            redirectUri: "http://localhost:8080/authcode",
-            username: "",
-            password: "",
+            authCodeParameters: this.props.client[this.currentWorkflowSettingsUri].authCodeParameters,
+            resourceOwnerPasswordParameters: this.props.client[this.currentWorkflowSettingsUri].resourceOwnerPasswordParameters,
             isLoading: false
         }
         this.resetRedirectUri = this.resetRedirectUri.bind(this);
@@ -33,7 +34,9 @@ export default class OpenidClientWorkflow extends React.Component
     async resetRedirectUri(e)
     {
         e.preventDefault();
-        await this.setState({redirectUri: this.state.originalRedirectUri})
+        let wrapperObject = this.state;
+        lodash.set(wrapperObject, "authCodeParameters.redirectUri", this.state.originalRedirectUri);
+        this.setState(wrapperObject)
     }
 
     handleAuthTypeFormResponse(type, responseDetails)
@@ -47,8 +50,8 @@ export default class OpenidClientWorkflow extends React.Component
 
     handleChange(fieldname, value)
     {
-        let wrapperObject = {};
-        wrapperObject[fieldname] = value;
+        let wrapperObject = this.state;
+        lodash.set(wrapperObject, fieldname, value);
         this.setState(wrapperObject)
     }
 
@@ -77,7 +80,8 @@ export default class OpenidClientWorkflow extends React.Component
                                         }} />
                     {
                         this.state.authenticationType === this.authCodeGrantType &&
-                        <AuthorizationCodeGrantForm redirectUri={this.state.redirectUri}
+                        <AuthorizationCodeGrantForm redirectUri={this.state.authCodeParameters.redirectUri}
+                                                    queryParameters={this.state.authCodeParameters.queryParameters}
                                                     isLoading={this.state.isLoading}
                                                     handleChange={this.handleChange}
                                                     resetRedirectUri={this.resetRedirectUri}
@@ -95,15 +99,16 @@ export default class OpenidClientWorkflow extends React.Component
                     }
                     {
                         this.state.authenticationType === this.resourceOwnerGrantType &&
-                        <ResourceOwnerPasswordCredentialsForm username={this.state.username}
-                                                              password={this.state.password}
-                                                              isLoading={this.state.isLoading}
-                                                              handleChange={this.handleChange}
-                                                              handleResponse={details => this.handleAuthTypeFormResponse(
-                                                                  this.state.authenticationType, details)}
-                                                              onError={() =>
-                                                              {
-                                                              }} />
+                        <ResourceOwnerPasswordCredentialsForm
+                            username={this.state.resourceOwnerPasswordParameters.username}
+                            password={this.state.resourceOwnerPasswordParameters.password}
+                            isLoading={this.state.isLoading}
+                            handleChange={this.handleChange}
+                            handleResponse={details => this.handleAuthTypeFormResponse(
+                                this.state.authenticationType, details)}
+                            onError={() =>
+                            {
+                            }} />
                     }
                 </Form>
                 {
@@ -169,14 +174,13 @@ class AuthorizationCodeGrantForm extends React.Component
             backendToken: Math.random().toString(36).substring(2, 15),
             authCodeUrl: "http://localhost:8081/auth/realms/goldfish/protocol/openid-connect/auth?client_id=goldfish-rest-client&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8180%2Fauthcode&state=bab36cc5-73a7-4db7-9a01-dca7a6981256"
         }
-
     }
 
     render()
     {
         return (
             <React.Fragment>
-                <FormInputField name="redirectUri"
+                <FormInputField name="authCodeParameters.redirectUri"
                                 label="Redirect URI"
                                 value={this.props.redirectUri}
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
@@ -185,8 +189,9 @@ class AuthorizationCodeGrantForm extends React.Component
                         <Reply /> <span>reset redirect uri</span>
                     </a>
                 </FormInputField>
-                <FormInputField name="urlParameters"
-                                label="URL Parameter"
+                <FormInputField name="authCodeParameters.queryParameters"
+                                label="Additional URL Query"
+                                value={this.props.queryParameters}
                                 placeholder="add an optional query string that is appended to the request URL"
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)} />
@@ -223,13 +228,14 @@ function ResourceOwnerPasswordCredentialsForm(props)
 
     return (
         <React.Fragment>
-            <FormInputField name="username"
+            <FormInputField name="resourceOwnerPasswordParameters.username"
                             label="Username"
                             value={props.username}
                             onChange={e => props.handleChange(e.target.name, e.target.value)}
                             onError={fieldname => props.onError(fieldname)} />
-            <FormInputField name="password"
+            <FormInputField name="resourceOwnerPasswordParameters.password"
                             label="Password"
+                            value={props.password}
                             onChange={e => props.handleChange(e.target.name, e.target.value)}
                             onError={fieldname => props.onError(fieldname)} />
             <Form.Group as={Row}>
