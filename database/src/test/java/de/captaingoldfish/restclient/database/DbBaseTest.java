@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
+import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
@@ -47,6 +48,9 @@ public abstract class DbBaseTest implements FileReferences
 
   @Autowired
   protected HttpClientSettingsDao httpClientSettingsDao;
+
+  @Autowired
+  protected CurrentWorkflowSettingsDao currentWorkflowSettingsDao;
 
   @Autowired
   private EntityManager entityManager;

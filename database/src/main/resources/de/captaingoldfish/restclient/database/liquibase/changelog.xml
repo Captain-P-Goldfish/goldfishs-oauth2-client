@@ -9,6 +9,10 @@
     <property name="blob_type" value="BLOB" dbms="oracle"/>
     <property name="blob_type" value="BYTEA" dbms="postgresql"/>
 
+    <property name="clob_type" value="LONGTEXT" dbms="mssql, mysql, mariadb"/>
+    <property name="clob_type" value="CLOB" dbms="oracle, hsqldb"/>
+    <property name="clob_type" value="TEXT" dbms="postgresql"/>
+
     <property name="datetime" value="datetime"/>
     <property name="datetime" value="datetime2" dbms="mssql"/>
 
@@ -164,6 +168,25 @@
             <column name="LAST_MODIFIED" type="${datetime}"/>
         </createTable>
 
+    </changeSet>
+
+    <changeSet id="addTableCurrentWorkflowSettings" author="pascal_knueppel">
+        <createTable tableName="CURRENT_WORKFLOW_SETTINGS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="WORKFLOW_SETTINGS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="OPENID_CLIENT_ID" type="BIGINT">
+                <constraints foreignKeyName="WORKFLOW_SETTINGS_CLIENT_ID_FK" referencedTableName="OPENID_CLIENT"
+                             referencedColumnNames="ID" unique="true"
+                             uniqueConstraintName="WORKFLOW_SETTINGS_CLIENT_UQ"/>
+            </column>
+            <column name="REDIRECT_URI" type="${clob_type}"/>
+            <column name="QUERY_PARAMETER" type="${clob_type}"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="USER_PASSWORD" type="VARCHAR(255)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

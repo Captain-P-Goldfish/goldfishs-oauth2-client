@@ -1,0 +1,102 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CurrentWorkflowSettings",
+  "name": "CurrentWorkflowSettings",
+  "description": "Represents the last settings representation that have been used for a specific client",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": true
+    },
+    {
+      "name": "openIdClientId",
+      "type": "integer",
+      "description": "The foreign key reference to an open-id-client resource.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    },
+    {
+      "name": "authCodeParameters",
+      "type": "complex",
+      "description": "The settings that have been used for the authorization code grant in the last request.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "redirectUri",
+          "type": "string",
+          "description": "The redirect URI that was entered into the frontend input field.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "queryParameters",
+          "type": "string",
+          "description": "A string representation of query parameters that should be appended to the authorization request",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    },
+    {
+      "name": "resourceOwnerPasswordParameters",
+      "type": "complex",
+      "description": "The settings that have been used for the resource owner password credentials grant in the last request.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "username",
+          "type": "string",
+          "description": "The username that should be used to authenticate at the identity provider.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "description": "The password that should be used to authenticate at the identity provider with the given username.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
+    }
+  ]
+}

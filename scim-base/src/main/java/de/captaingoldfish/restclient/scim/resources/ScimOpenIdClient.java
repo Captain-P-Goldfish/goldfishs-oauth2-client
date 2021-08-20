@@ -31,6 +31,7 @@ public class ScimOpenIdClient extends ResourceNode
                           String audience,
                           String decryptionKeyRef,
                           ScimHttpClientSettings httpClientSettings,
+                          ScimCurrentWorkflowSettings currentWorkflowSettings,
                           Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -43,6 +44,7 @@ public class ScimOpenIdClient extends ResourceNode
     setAudience(audience);
     setDecryptionKeyRef(decryptionKeyRef);
     setHttpClientSettings(httpClientSettings);
+    setCurrentWorkflowSettings(currentWorkflowSettings);
     setMeta(meta);
   }
 
@@ -166,6 +168,24 @@ public class ScimOpenIdClient extends ResourceNode
   public void setHttpClientSettings(ScimHttpClientSettings httpClientSettings)
   {
     setAttribute(ScimHttpClientSettings.FieldNames.SCHEMA_ID, httpClientSettings);
+  }
+
+  /**
+   * only returned if the get-resource method is called. It contains the last used settings of previous OpenID
+   * Connect workflows for this client.
+   */
+  public Optional<ScimCurrentWorkflowSettings> getCurrentWorkflowSettings()
+  {
+    return getObjectAttribute(ScimCurrentWorkflowSettings.FieldNames.SCHEMA_ID, ScimCurrentWorkflowSettings.class);
+  }
+
+  /**
+   * only returned if the get-resource method is called. It contains the last used settings of previous OpenID
+   * Connect workflows for this client.
+   */
+  public void setCurrentWorkflowSettings(ScimCurrentWorkflowSettings currentWorkflowSettings)
+  {
+    setAttribute(ScimCurrentWorkflowSettings.FieldNames.SCHEMA_ID, currentWorkflowSettings);
   }
 
   public static class FieldNames

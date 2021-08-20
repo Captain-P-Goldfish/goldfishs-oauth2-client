@@ -15,14 +15,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
+import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsConverter;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
+import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
+import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
@@ -472,6 +475,15 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                               .build();
     httpClientSettings = httpClientSettingsDao.save(httpClientSettings);
 
+    CurrentWorkflowSettings currentWorkflowSettings = CurrentWorkflowSettings.builder()
+                                                                             .openIdClient(openIdClient)
+                                                                             .redirectUri("http://localhost:9999")
+                                                                             .queryParameters("client_id=123")
+                                                                             .username("goldfish")
+                                                                             .userPassword("123456")
+                                                                             .build();
+    currentWorkflowSettings = currentWorkflowSettingsDao.save(currentWorkflowSettings);
+
     ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.get(ScimOpenIdClient.class,
                                                                        OPENID_CLIENT_ENDPOINT,
                                                                        String.valueOf(openIdClient.getId()))
@@ -493,6 +505,15 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     originalHttpSettings.remove(AttributeNames.RFC7643.META);
     ScimHttpClientSettings scimHttpClientSettings = returnedResource.getHttpClientSettings().orElseThrow();
     Assertions.assertEquals(originalHttpSettings, scimHttpClientSettings);
+
+    // assert that default current workflow settings are returned. No have been stored before so the handler must
+    // have created it now
+    Assertions.assertTrue(returnedResource.getCurrentWorkflowSettings().isPresent());
+    ScimCurrentWorkflowSettings originalWorkflowSettings = CurrentWorkflowSettingsConverter.toScimWorkflowSettings(currentWorkflowSettings);
+    originalWorkflowSettings.remove(AttributeNames.RFC7643.SCHEMAS);
+    ScimCurrentWorkflowSettings scimCurrentWorkflowSettings = returnedResource.getCurrentWorkflowSettings()
+                                                                              .orElseThrow();
+    Assertions.assertEquals(originalWorkflowSettings, scimCurrentWorkflowSettings);
   }
 
   @Test

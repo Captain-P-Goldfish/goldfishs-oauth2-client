@@ -6,12 +6,16 @@ import java.util.stream.Collectors;
 
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
 import de.captaingoldfish.restclient.application.endpoints.openidclient.validation.OpenIdClientRequestValidator;
+import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsConverter;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.application.utils.Utils;
+import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
+import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
@@ -65,6 +69,8 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
     ScimOpenIdClient scimOpenIdClient = OpenIdClientConverter.toScimOpenIdClient(openIdClient);
     ScimHttpClientSettings httpClientSettings = getHttpClientSettings(openIdClient);
     scimOpenIdClient.setHttpClientSettings(httpClientSettings);
+    ScimCurrentWorkflowSettings currentWorkflowSettings = getCurrentWorkflowSettings(openIdClient);
+    scimOpenIdClient.setCurrentWorkflowSettings(currentWorkflowSettings);
     return scimOpenIdClient;
   }
 
@@ -86,6 +92,23 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
     HttpClientSettings httpClientSettings = httpClientSettingsDao.findByOpenIdClient(openIdClient)
                                                                  .orElseGet(defaultSettingsSupplier);
     return HttpClientSettingsConverter.toScimHttpClientSettings(httpClientSettings);
+  }
+
+  /**
+   * gets the current openid workflow settings for this client or creates a default configuration
+   */
+  private ScimCurrentWorkflowSettings getCurrentWorkflowSettings(OpenIdClient openIdClient)
+  {
+    CurrentWorkflowSettingsDao currentWorkflowSettingsDao = WebAppConfig.getApplicationContext()
+                                                                        .getBean(CurrentWorkflowSettingsDao.class);
+    Supplier<CurrentWorkflowSettings> defaultCurrentSettingsSupplier = () -> {
+      CurrentWorkflowSettings defaultSettings = CurrentWorkflowSettings.builder().openIdClient(openIdClient).build();
+      defaultSettings = currentWorkflowSettingsDao.save(defaultSettings);
+      return defaultSettings;
+    };
+    CurrentWorkflowSettings settings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
+                                                                 .orElseGet(defaultCurrentSettingsSupplier);
+    return CurrentWorkflowSettingsConverter.toScimWorkflowSettings(settings);
   }
 
   /**

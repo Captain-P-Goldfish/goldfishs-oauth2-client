@@ -13,6 +13,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
@@ -51,6 +52,9 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @Autowired
   protected HttpClientSettingsDao httpClientSettingsDao;
 
+  @Autowired
+  protected CurrentWorkflowSettingsDao currentWorkflowSettingsDao;
+
   @LocalServerPort
   private int port;
 
@@ -70,6 +74,7 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @AfterEach
   public void clearTables()
   {
+    currentWorkflowSettingsDao.deleteAll();
     httpClientSettingsDao.deleteAll();
     openIdClientDao.deleteAll();
     openIdProviderDao.deleteAll();

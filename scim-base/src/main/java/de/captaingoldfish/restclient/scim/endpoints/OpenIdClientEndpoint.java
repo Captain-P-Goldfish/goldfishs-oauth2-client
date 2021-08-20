@@ -43,6 +43,7 @@ public class OpenIdClientEndpoint extends EndpointDefinition
    */
   private static List<JsonNode> getExtensions()
   {
-    return List.of(JsonHelper.loadJsonDocument(ClasspathReferences.HTTP_CLIENT_SETTINGS_SCHEMA));
+    return List.of(JsonHelper.loadJsonDocument(ClasspathReferences.HTTP_CLIENT_SETTINGS_SCHEMA),
+                   JsonHelper.loadJsonDocument(ClasspathReferences.CURRENT_WORKFLOW_SETTINGS_SCHEMA));
   }
 }

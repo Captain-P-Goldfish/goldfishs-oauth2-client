@@ -49,6 +49,7 @@ public final class ClasspathReferences
 
   public static final String APP_INFO_SCHEMA = BASE_PATH + "/resource/app-infos.json";
 
+  public static final String CURRENT_WORKFLOW_SETTINGS_SCHEMA = BASE_PATH + "/resource/current-workflow-settings.json";
 
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
 
