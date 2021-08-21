@@ -16,6 +16,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
@@ -37,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 21.05.2021
  */
 @Slf4j
+@DirtiesContext
 @OAuthRestClientTest
 public class OpenIdProviderHandlerTest extends AbstractScimClientConfig
 {
