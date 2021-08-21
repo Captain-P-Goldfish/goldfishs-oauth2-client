@@ -12,7 +12,7 @@ import de.captaingoldfish.restclient.application.projectconfig.CacheConfiguratio
  * @since 20.08.2021
  */
 @Component
-public class AuthCodeGrantCache
+public class AuthCodeGrantResponseCache
 {
 
   /**
@@ -21,7 +21,7 @@ public class AuthCodeGrantCache
    * @param state The state-parameter from the OAuth2 request
    * @return the full authorization code response url
    */
-  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "#state")
+  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_RESPONSE_CACHE, key = "#state")
   public String getAuthorizationResponseUrl(String state)
   {
     return null;
@@ -34,8 +34,8 @@ public class AuthCodeGrantCache
    * @param state The state-parameter from the OAuth2 request
    * @return the full authorization code response url
    */
-  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "#state")
-  public String setAuthorizationResponsUrl(String state, String authorizationResponseUrl)
+  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_RESPONSE_CACHE, key = "#state")
+  public String setAuthorizationResponseUrl(String state, String authorizationResponseUrl)
   {
     return authorizationResponseUrl;
   }

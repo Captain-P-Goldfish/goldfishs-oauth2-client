@@ -51,7 +51,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
    * to check that the request urls are correctly stored within the cache
    */
   @Autowired
-  private AuthCodeGrantCache authCodeGrantCache;
+  private AuthCodeGrantResponseCache authCodeGrantResponseCache;
 
   /**
    * used to check that the workflow settings are correctly saved within the database if changed
@@ -106,7 +106,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
 
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authorizationCodeRequestUrl).build();
     final String state = uriComponents.getQueryParams().getFirst("state");
-    Assertions.assertNotNull(authCodeGrantCache.getAuthorizationResponseUrl(state));
+    Assertions.assertNotNull(authCodeGrantResponseCache.getAuthorizationResponseUrl(state));
 
     CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
                                                                                 .orElseThrow();
@@ -158,7 +158,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     "code",
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
     Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl);
-    Assertions.assertNotNull(authCodeGrantCache.getAuthorizationResponseUrl(state));
+    Assertions.assertNotNull(authCodeGrantResponseCache.getAuthorizationResponseUrl(state));
 
     CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
                                                                                 .orElseThrow();
@@ -203,6 +203,6 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     "code",
                                                     openIdClient.getClientId());
     Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl);
-    Assertions.assertNotNull(authCodeGrantCache.getAuthorizationResponseUrl(state));
+    Assertions.assertNotNull(authCodeGrantResponseCache.getAuthorizationResponseUrl(state));
   }
 }

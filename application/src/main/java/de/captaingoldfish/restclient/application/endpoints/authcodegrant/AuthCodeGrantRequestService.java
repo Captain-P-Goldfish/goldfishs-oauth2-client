@@ -25,6 +25,7 @@ import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
+import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -42,11 +43,13 @@ public class AuthCodeGrantRequestService
 
   private final OpenIdProviderMetdatdataCache openIdProviderMetdatdataCache;
 
-  private final AuthCodeGrantCache authCodeGrantCache;
+  private final AuthCodeGrantRequestCache authCodeGrantRequestCache;
+
+  private final AuthCodeGrantResponseCache authCodeGrantResponseCache;
 
   /**
-   * generates the authorization code grant request and caches it in {@link #authCodeGrantCache} under the state
-   * parameter as key
+   * generates the authorization code grant request and caches it in {@link #authCodeGrantRequestCache} under
+   * the state parameter as key
    * 
    * @param openIdClient the owner of the authorization code grant request
    * @param workflowSettings the dynamic settings from the javascript frontend
@@ -87,7 +90,7 @@ public class AuthCodeGrantRequestService
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authCodeRequestUrl).build();
     List<String> stateParams = uriComponents.getQueryParams().get("state");
     final String state = stateParams.get(0);
-    authCodeGrantCache.setAuthorizationResponsUrl(state, authCodeRequestUrl);
+    authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
   }
 
   /**
@@ -151,4 +154,42 @@ public class AuthCodeGrantRequestService
     return metadata;
   }
 
+  /**
+   * this method will handle the authorization response from an identity provider by identifying the necessary
+   * data based on the given state parameter that should be present within the request
+   * 
+   * @param fullRequestUrl the full url that should contain the authorization code and the state parameter or
+   *          maybe some error details
+   */
+  public void handleAuthorizationResponse(String fullRequestUrl)
+  {
+    UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(fullRequestUrl).build();
+    final String state = getStateFromAuthorizationResponseUrl(uriComponents);
+    String originalRequestUrl = authCodeGrantRequestCache.getAuthorizationRequestUrl(state);
+    if (originalRequestUrl == null)
+    {
+      throw new BadRequestException(String.format("The state parameter '%s' cannot be mapped to a previous sent request",
+                                                  state));
+    }
+    authCodeGrantResponseCache.setAuthorizationResponseUrl(state, fullRequestUrl);
+  }
+
+  /**
+   * retrieves the state-parameter from an authorization code grant response url
+   * 
+   * @param uriComponents the parsed response url
+   * @return the state-parameter from the url
+   */
+  private String getStateFromAuthorizationResponseUrl(UriComponents uriComponents)
+  {
+    List<String> stateParams = uriComponents.getQueryParams().get("state");
+    final int numberOfStateParams = Optional.ofNullable(stateParams).map(List::size).orElse(0);
+    if (numberOfStateParams != 1)
+    {
+      throw new BadRequestException(String.format("Got an unexpected number of state-parameters '%s'. "
+                                                  + "Exactly '1' state-parameter must be present in the response.",
+                                                  numberOfStateParams));
+    }
+    return stateParams.get(0);
+  }
 }

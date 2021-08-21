@@ -31,6 +31,11 @@ public class CacheConfiguration
   public static final String AUTH_CODE_GRANT_REQUEST_CACHE = "auth-code-grant-request-cache";
 
   /**
+   * the name of the cache that contains the authorization code responses
+   */
+  public static final String AUTH_CODE_GRANT_RESPONSE_CACHE = "auth-code-grant-response-cache";
+
+  /**
    * creates a cache with a short lifetime
    */
   @Bean

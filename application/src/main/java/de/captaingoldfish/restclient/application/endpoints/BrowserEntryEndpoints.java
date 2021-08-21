@@ -1,16 +1,24 @@
 package de.captaingoldfish.restclient.application.endpoints;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
+import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
+import lombok.RequiredArgsConstructor;
+
 
 /**
  * @author Pascal Knueppel
  * @since 18.08.2021
  */
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/")
 public class BrowserEntryEndpoints
@@ -20,6 +28,11 @@ public class BrowserEntryEndpoints
    * describes the endpoint where authorization codes for OpenID Connect are accepted
    */
   public static final String AUTH_CODE_ENDPOINT = "/authcode";
+
+  /**
+   * used to handle the authorization code grant response
+   */
+  private final AuthCodeGrantRequestService authCodeGrantRequestService;
 
   /**
    * @param uriComponentsBuilder the uri builder to user that should be preconfigured with the url
@@ -36,9 +49,20 @@ public class BrowserEntryEndpoints
    * @return a note for the user to return to the main-window
    */
   @GetMapping
-  @RequestMapping(AUTH_CODE_ENDPOINT)
-  public @ResponseBody String acceptAuthorizationCode()
+  @RequestMapping(value = AUTH_CODE_ENDPOINT, produces = "text/html")
+  public @ResponseBody String acceptAuthorizationCode(HttpServletRequest request, HttpServletResponse response)
   {
-    return "Authorization Code accepted. Please return to the main-window";
+    try
+    {
+      final String query = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+      final String fullRequestUrl = request.getRequestURL().toString() + query;
+      authCodeGrantRequestService.handleAuthorizationResponse(fullRequestUrl);
+      return "<html><body><h3>Authorization Code accepted. Please return to the main-window</h3></body></html>";
+    }
+    catch (Exception ex)
+    {
+      response.setStatus(HttpStatus.BAD_REQUEST);
+      return String.format("<html><body><span style='color: \"red\"'>%s</span></body></html>", ex.getMessage());
+    }
   }
 }
