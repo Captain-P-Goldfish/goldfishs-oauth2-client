@@ -3,7 +3,7 @@ import Col from "react-bootstrap/Col";
 import {Collapseable, ErrorListItem, LoadingSpinner} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
-import {CaretDown, CaretRight, XLg} from "react-bootstrap-icons";
+import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
@@ -26,12 +26,14 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
             clearInterval(this.state.interval);
         }
     }
-
     componentDidMount()
     {
         let state = this.state;
         let forceUpdate = this.forceUpdate
         let getAuthRequestStatus = this.getAuthRequestStatus;
+        window.open(this.props.requestDetails.authorizationCodeGrantUrl,
+            '_blank',
+            'location=yes,height=570,width=520,scrollbars=yes,status=yes');
         this.state.interval = setInterval(function ()
         {
             let authRequestStatus = getAuthRequestStatus();
@@ -57,15 +59,23 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     loadAuthorizationQueryParameterView()
     {
-        let authCodeQueryParams = Object.fromEntries(new URL(this.props.requestDetails.authCodeUrl).searchParams);
+        let authCodeQueryParams = Object.fromEntries(
+            new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
+
+        let showInfoMessage = this.state.interval === undefined && this.state.authorizationResponseUrl === undefined;
 
         return <div className={"workflow-details"}>
+            <Alert variant={"info"} show={showInfoMessage}>
+                <ExclamationLg /> The authorization code grant will try to open a new browser window. Make sure your
+                                  popup blocker does not block this.
+            </Alert>
             <Collapseable header={"Authorization Request Details"} variant={"workflow-details"} content={() =>
             {
                 return <React.Fragment>
                     <Row>
                         <Col sm={2} className={"url-base-value"}>authCodeUrl</Col>
-                        <Col sm={10} className={"url-base-value"}>{this.props.requestDetails.authCodeUrl}</Col>
+                        <Col sm={10}
+                             className={"url-base-value"}>{this.props.requestDetails.authorizationCodeGrantUrl}</Col>
                     </Row>
                     {
                         Object.keys(authCodeQueryParams).map((key, index) =>

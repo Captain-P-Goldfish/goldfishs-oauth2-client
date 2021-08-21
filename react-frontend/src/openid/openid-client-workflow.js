@@ -1,4 +1,4 @@
-import React from "react";
+import React, {createRef} from "react";
 import Form from "react-bootstrap/Form";
 import {ErrorMessagesAlert, FormInputField, FormRadioSelection, LoadingSpinner} from "../base/form-base";
 import Row from "react-bootstrap/Row";
@@ -7,6 +7,8 @@ import Button from "react-bootstrap/Button";
 import {Reply} from "react-bootstrap-icons";
 import AuthorizationCodeGrantWorkflow from "./auth-code-grant/authorization-code-grant-workflow";
 import * as lodash from "lodash";
+import ScimClient from "../scim/scim-client";
+import {CURRENT_WORKFLOW_URI} from "../scim/scim-constants";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -17,17 +19,17 @@ export default class OpenidClientWorkflow extends React.Component
         this.authCodeGrantType = "authorization_code";
         this.clientCredentialsGrantType = "client_credentials";
         this.resourceOwnerGrantType = "password";
-        this.currentWorkflowSettingsUri = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CurrentWorkflowSettings";
 
         this.state = {
             authenticationType: this.authCodeGrantType,
             originalRedirectUri: props.originalRedirectUri,
-            authCodeParameters: this.props.client[this.currentWorkflowSettingsUri].authCodeParameters,
-            resourceOwnerPasswordParameters: this.props.client[this.currentWorkflowSettingsUri].resourceOwnerPasswordParameters,
+            workflowDetails: this.props.client[CURRENT_WORKFLOW_URI],
             isLoading: false
         }
+
+        this.formReference = createRef();
         this.resetRedirectUri = this.resetRedirectUri.bind(this);
-        this.handleChange = this.handleChange.bind(this);
+        this.handleNestedElementChange = this.handleNestedElementChange.bind(this);
         this.handleAuthTypeFormResponse = this.handleAuthTypeFormResponse.bind(this);
     }
 
@@ -48,11 +50,11 @@ export default class OpenidClientWorkflow extends React.Component
         this.setState(wrapperObject);
     }
 
-    handleChange(fieldname, value)
+    handleNestedElementChange(fieldname, value)
     {
-        let wrapperObject = this.state;
+        let wrapperObject = this.state.workflowDetails;
         lodash.set(wrapperObject, fieldname, value);
-        this.setState(wrapperObject)
+        this.setState({workflowDetails: wrapperObject})
     }
 
     render()
@@ -68,22 +70,22 @@ export default class OpenidClientWorkflow extends React.Component
                 <h2>OpenID Connect Workflow</h2>
                 <ErrorMessagesAlert errors={this.state.errors} />
 
-                <Form>
+                <Form ref={this.formReference}>
                     <FormRadioSelection name="authenticationType"
                                         label="AuthenticationType Type"
                                         displayType={"vertical"}
                                         selected={this.state.authenticationType}
                                         selections={authTypes}
-                                        onChange={e => this.handleChange(e.target.name, e.target.value)}
+                                        onChange={e => this.setState({authenticationType: e.target.value})}
                                         onError={() =>
                                         {
                                         }} />
                     {
                         this.state.authenticationType === this.authCodeGrantType &&
-                        <AuthorizationCodeGrantForm redirectUri={this.state.authCodeParameters.redirectUri}
-                                                    queryParameters={this.state.authCodeParameters.queryParameters}
+                        <AuthorizationCodeGrantForm formReference={this.formReference}
+                                                    workflowDetails={this.state.workflowDetails}
                                                     isLoading={this.state.isLoading}
-                                                    handleChange={this.handleChange}
+                                                    handleChange={this.handleNestedElementChange}
                                                     resetRedirectUri={this.resetRedirectUri}
                                                     handleResponse={details => this.handleAuthTypeFormResponse(
                                                         this.state.authenticationType, details)}
@@ -100,10 +102,9 @@ export default class OpenidClientWorkflow extends React.Component
                     {
                         this.state.authenticationType === this.resourceOwnerGrantType &&
                         <ResourceOwnerPasswordCredentialsForm
-                            username={this.state.resourceOwnerPasswordParameters.username}
-                            password={this.state.resourceOwnerPasswordParameters.password}
+                            workflowDetails={this.state.workflowDetails}
                             isLoading={this.state.isLoading}
-                            handleChange={this.handleChange}
+                            handleChange={this.handleNestedElementChange}
                             handleResponse={details => this.handleAuthTypeFormResponse(
                                 this.state.authenticationType, details)}
                             onError={() =>
@@ -114,7 +115,7 @@ export default class OpenidClientWorkflow extends React.Component
                 {
                     (this.state[this.authCodeGrantType] || []).map((authTypeDetails) =>
                     {
-                        return <div key={this.authCodeGrantType + "-" + authTypeDetails.backendToken}>
+                        return <div key={this.authCodeGrantType + "-" + authTypeDetails.id}>
                             <AuthorizationCodeGrantWorkflow requestDetails={authTypeDetails}
                                                             onRemove={() =>
                                                             {
@@ -146,7 +147,6 @@ class AuthorizationCodeGrantForm extends React.Component
         }
         this.setState = this.setState.bind(this);
         this.forceUpdate = this.forceUpdate.bind(this);
-        this.loadAuthorizationCode = this.loadAuthorizationCode.bind(this);
         this.loadAuthorizationRequestDetails = this.loadAuthorizationRequestDetails.bind(this);
     }
 
@@ -161,19 +161,25 @@ class AuthorizationCodeGrantForm extends React.Component
         })
     }
 
-    async loadAuthorizationCode(e)
+    loadAuthorizationRequestDetails(e)
     {
         e.preventDefault();
-        let details = await this.loadAuthorizationRequestDetails();
-        this.props.handleResponse(details);
-    }
+        const resourcePath = "/scim/v2/AuthCodeGrantRequest";
+        let scimClient = new ScimClient(resourcePath, this.setState);
+        let resource = scimClient.getResourceFromFormReference(this.props.formReference);
+        resource[CURRENT_WORKFLOW_URI] = this.props.workflowDetails;
 
-    async loadAuthorizationRequestDetails()
-    {
-        return {
-            backendToken: Math.random().toString(36).substring(2, 15),
-            authCodeUrl: "http://localhost:8081/auth/realms/goldfish/protocol/openid-connect/auth?client_id=goldfish-rest-client&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8180%2Fauthcode&state=bab36cc5-73a7-4db7-9a01-dca7a6981256"
-        }
+        let handleResponse = this.props.handleResponse;
+        scimClient.createResource(resource).then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    handleResponse(resource);
+                })
+            }
+        });
     }
 
     render()
@@ -182,7 +188,8 @@ class AuthorizationCodeGrantForm extends React.Component
             <React.Fragment>
                 <FormInputField name="authCodeParameters.redirectUri"
                                 label="Redirect URI"
-                                value={this.props.redirectUri}
+                                placeholder="The redirect uri that is added to the request parameters"
+                                value={this.props.workflowDetails.authCodeParameters.redirectUri}
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)}>
                     <a href={"/#"} onClick={this.props.resetRedirectUri} className={"action-link"}>
@@ -191,13 +198,13 @@ class AuthorizationCodeGrantForm extends React.Component
                 </FormInputField>
                 <FormInputField name="authCodeParameters.queryParameters"
                                 label="Additional URL Query"
-                                value={this.props.queryParameters}
+                                value={this.props.workflowDetails.authCodeParameters.queryParameters}
                                 placeholder="add an optional query string that is appended to the request URL"
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)} />
                 <Form.Group as={Row}>
                     <Col sm={{span: 10, offset: 2}}>
-                        <Button type="submit" onClick={this.loadAuthorizationCode}>
+                        <Button type="submit" onClick={this.loadAuthorizationRequestDetails}>
                             <LoadingSpinner show={this.props.isLoading} /> Get Authorization Code
                         </Button>
                     </Col>
@@ -230,12 +237,12 @@ function ResourceOwnerPasswordCredentialsForm(props)
         <React.Fragment>
             <FormInputField name="resourceOwnerPasswordParameters.username"
                             label="Username"
-                            value={props.username}
+                            value={props.workflowDetails.resourceOwnerPasswordParameters.username}
                             onChange={e => props.handleChange(e.target.name, e.target.value)}
                             onError={fieldname => props.onError(fieldname)} />
             <FormInputField name="resourceOwnerPasswordParameters.password"
                             label="Password"
-                            value={props.password}
+                            value={props.workflowDetails.resourceOwnerPasswordParameters.password}
                             onChange={e => props.handleChange(e.target.name, e.target.value)}
                             onError={fieldname => props.onError(fieldname)} />
             <Form.Group as={Row}>
