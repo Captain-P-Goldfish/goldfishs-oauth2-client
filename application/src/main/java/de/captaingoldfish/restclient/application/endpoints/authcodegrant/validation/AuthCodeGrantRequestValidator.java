@@ -50,7 +50,7 @@ public class AuthCodeGrantRequestValidator implements RequestValidator<ScimAuthC
     {
       UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://localhost").query(queryParameters).build();
       List<String> stateParameters = uriComponents.getQueryParams().get("state");
-      if (stateParameters.size() > 1)
+      if (Optional.ofNullable(stateParameters).map(List::size).orElse(0) > 1)
       {
         String errorMessage = "Only a single state parameter may be added. The state parameter is used to identify the "
                               + "authorization response. If you use several values unpredictable results may occur.";
