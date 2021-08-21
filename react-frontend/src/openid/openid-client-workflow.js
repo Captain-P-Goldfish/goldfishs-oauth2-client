@@ -8,7 +8,7 @@ import {Reply} from "react-bootstrap-icons";
 import AuthorizationCodeGrantWorkflow from "./auth-code-grant/authorization-code-grant-workflow";
 import * as lodash from "lodash";
 import ScimClient from "../scim/scim-client";
-import {CURRENT_WORKFLOW_URI} from "../scim/scim-constants";
+import {AUTH_CODE_GRANT_ENDPOINT, CURRENT_WORKFLOW_URI} from "../scim/scim-constants";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -164,8 +164,7 @@ class AuthorizationCodeGrantForm extends React.Component
     loadAuthorizationRequestDetails(e)
     {
         e.preventDefault();
-        const resourcePath = "/scim/v2/AuthCodeGrantRequest";
-        let scimClient = new ScimClient(resourcePath, this.setState);
+        let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
         let resource = scimClient.getResourceFromFormReference(this.props.formReference);
         resource[CURRENT_WORKFLOW_URI] = this.props.workflowDetails;
 

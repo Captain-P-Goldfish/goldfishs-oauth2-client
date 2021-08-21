@@ -5,6 +5,8 @@ import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
+import ScimClient from "../../scim/scim-client";
+import {AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -26,35 +28,43 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
             clearInterval(this.state.interval);
         }
     }
+
     componentDidMount()
     {
-        let state = this.state;
-        let forceUpdate = this.forceUpdate
         let getAuthRequestStatus = this.getAuthRequestStatus;
         window.open(this.props.requestDetails.authorizationCodeGrantUrl,
             '_blank',
             'location=yes,height=570,width=520,scrollbars=yes,status=yes');
         this.state.interval = setInterval(function ()
         {
-            let authRequestStatus = getAuthRequestStatus();
-            if (authRequestStatus.success)
-            {
-                clearInterval(state.interval);
-                delete state.interval;
-                state.authorizationResponseUrl = authRequestStatus.authorizationResponseUrl;
-                forceUpdate();
-            }
-        }, 200);
+            getAuthRequestStatus();
+        }, 2000);
     }
 
     getAuthRequestStatus()
     {
-        let code = Math.random().toString(36).substring(2, 15);
-        let state = Math.random().toString(36).substring(2, 15);
-        return {
-            success: true,
-            authorizationResponseUrl: "http://localhost:8080/authcode?code=" + code + "&state=" + state
-        };
+        let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
+        let authCodeQueryParams = Object.fromEntries(
+            new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
+        let stateParam = authCodeQueryParams.state;
+
+        let state = this.state;
+        let setState = this.setState;
+
+        scimClient.getResource(stateParam).then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    clearInterval(state.interval);
+                    delete state.interval
+                    setState({
+                        authorizationResponseUrl: resource.authorizationResponseUrl
+                    });
+                })
+            }
+        });
     }
 
     loadAuthorizationQueryParameterView()

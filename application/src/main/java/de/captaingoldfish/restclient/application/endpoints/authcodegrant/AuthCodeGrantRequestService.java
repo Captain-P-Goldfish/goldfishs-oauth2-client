@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -191,5 +194,19 @@ public class AuthCodeGrantRequestService
                                                   numberOfStateParams));
     }
     return stateParams.get(0);
+  }
+
+  /**
+   * simply returns the authorization code response url from the cache if it is already present
+   * 
+   * @param state the state parameter from the request that was used to save the response url
+   * @return the full authorization code response
+   * @see #handleAuthorizationResponse(String)
+   * @see de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints#acceptAuthorizationCode(HttpServletRequest,
+   *      HttpServletResponse)
+   */
+  public Optional<String> getAuthorizationCodeResponseUrl(String state)
+  {
+    return Optional.ofNullable(authCodeGrantResponseCache.getAuthorizationResponseUrl(state));
   }
 }

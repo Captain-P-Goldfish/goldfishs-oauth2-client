@@ -2,6 +2,7 @@ package de.captaingoldfish.restclient.application.endpoints.authcodegrant;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.validation.AuthCodeGrantRequestValidator;
@@ -64,7 +65,17 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
                                               List<SchemaAttribute> excludedAttributes,
                                               Context context)
   {
-    return null;
+    final String state = id;
+    final Optional<String> authorizationResponseUrl = requestService.getAuthorizationCodeResponseUrl(state);
+    if (authorizationResponseUrl.isEmpty())
+    {
+      return null; // causes a 404 not found response
+    }
+    return ScimAuthCodeGrantRequest.builder()
+                                   .id(id)
+                                   .authorizationResponseUrl(authorizationResponseUrl.get())
+                                   .meta(Meta.builder().created(Instant.now()).build())
+                                   .build();
   }
 
   /**
