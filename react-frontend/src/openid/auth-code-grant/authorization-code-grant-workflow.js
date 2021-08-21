@@ -137,7 +137,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                       </React.Fragment>
                                   }}
                     />
-                    <AccessTokenView />
+                    <AccessTokenView code={queryParamsObject.code} />
                 </React.Fragment>
             }
         </div>
@@ -220,43 +220,39 @@ class AccessTokenView extends React.Component
     {
         e.preventDefault();
         let accessTokenDetails = {
-            requestDetails: {
-                requestHeaders: [
-                    {
-                        name: "User-Agent",
-                        value: "apache-http-client"
-                    },
-                    {
-                        name: "Authorization",
-                        value: "Basic Z29sZGZpc2g6MTIzNDU2"
-                    },
-                ],
-                requestParams: [
-                    {
-                        name: "client_id",
-                        value: "goldifsh"
-                    },
-                    {
-                        name: "redirect_uri",
-                        value: "http://localhost:8080"
-                    },
-                ]
-            },
-            response: {
-                statusCode: 200,
-                responseHeaders: [
-                    {
-                        name: "Content-Type",
-                        value: "application/json"
-                    }
-                ],
-                plainResponse: "{\n"
-                               + "  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n"
-                               + "  \"token_type\": \"Bearer\",\n"
-                               + "  \"expires_in\": 3600,\n"
-                               + "  \"refresh_token\": \"cba\"\n"
-                               + "}"
-            }
+            requestHeaders: [
+                {
+                    name: "User-Agent",
+                    value: "apache-http-client"
+                },
+                {
+                    name: "Authorization",
+                    value: "Basic Z29sZGZpc2g6MTIzNDU2"
+                },
+            ],
+            requestParams: [
+                {
+                    name: "client_id",
+                    value: "goldifsh"
+                },
+                {
+                    name: "redirect_uri",
+                    value: "http://localhost:8080"
+                },
+            ],
+            statusCode: 200,
+            responseHeaders: [
+                {
+                    name: "Content-Type",
+                    value: "application/json"
+                }
+            ],
+            plainResponse: "{\n"
+                           + "  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n"
+                           + "  \"token_type\": \"Bearer\",\n"
+                           + "  \"expires_in\": 3600,\n"
+                           + "  \"refresh_token\": \"cba\"\n"
+                           + "}"
         }
         this.setState({accessTokenDetails: accessTokenDetails})
     }
@@ -270,13 +266,13 @@ class AccessTokenView extends React.Component
                 <Collapseable header={"Request Header"}
                               variant={"workflow-details"}
                               content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
-                                                            nameValueList={(((state.accessTokenDetails || {})
-                                                                .requestDetails || {}).requestHeaders || [])} />} />
+                                                            nameValueList={((state.accessTokenDetails || {})
+                                                                                .requestHeaders || [])} />} />
                 <Collapseable header={"Request Parameter"}
                               variant={"workflow-details"}
                               content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
-                                                            nameValueList={(((state.accessTokenDetails || {})
-                                                                .requestDetails || {}).requestParams || [])} />} />
+                                                            nameValueList={((state.accessTokenDetails || {})
+                                                                                .requestParams || [])} />} />
             </React.Fragment>
         }
         return <Collapseable header={"Access Token Request Details"}
@@ -286,7 +282,7 @@ class AccessTokenView extends React.Component
 
     loadAccessTokenResponseView()
     {
-        let responseDetails = ((this.state.accessTokenDetails || {}).response || {});
+        let responseDetails = (this.state.accessTokenDetails || {});
         let responseStatusCode = responseDetails.statusCode;
         let responseHeaders = responseDetails.responseHeaders || [];
         let plainResponse = responseDetails.plainResponse || "";
