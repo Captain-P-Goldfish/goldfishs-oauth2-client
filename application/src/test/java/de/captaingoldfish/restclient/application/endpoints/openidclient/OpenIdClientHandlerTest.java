@@ -11,8 +11,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsConverter;
@@ -33,7 +33,6 @@ import de.captaingoldfish.scim.sdk.common.constants.AttributeNames;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
 import de.captaingoldfish.scim.sdk.common.response.ListResponse;
-import de.captaingoldfish.scim.sdk.server.schemas.ResourceType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,19 +51,13 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
    */
   private static final String OPENID_CLIENT_ENDPOINT = "/OpenIdClient";
 
-  @Qualifier("keystoreResourceType")
-  @Autowired
-  private ResourceType keystoreResourceType;
-
   private OpenIdProvider openIdProvider;
-
-  private KeystoreEntry keystoreEntry;
 
   @BeforeEach
   public void initialize()
   {
     openIdProvider = createDefaultProvider();
-    addDefaultEntriesToApplicationKeystore("localhost");
+    addDefaultEntriesToApplicationKeystore();
   }
 
   @Test
@@ -83,6 +76,53 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
                                                         .clientSecret(clientSecret)
                                                         .audience(audience)
                                                         .signingKeyRef(signingKeyRef)
+                                                        .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
+                                                        .build();
+    Assertions.assertEquals(0, openIdClientDao.count());
+    ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
+                                                                          OPENID_CLIENT_ENDPOINT)
+                                                                  .setResource(scimOpenIdClient)
+                                                                  .sendRequest();
+    Assertions.assertEquals(HttpStatus.CREATED, response.getHttpStatus());
+
+    ScimOpenIdClient createdResource = response.getResource();
+    Assertions.assertEquals(clientId, createdResource.getClientId());
+    Assertions.assertEquals(clientSecret, createdResource.getClientSecret().get());
+    Assertions.assertEquals(audience, createdResource.getAudience().get());
+    Assertions.assertEquals(signingKeyRef, createdResource.getSigningKeyRef().get());
+    Assertions.assertEquals(decryptionKeyRef, createdResource.getDecryptionKeyRef().get());
+    Assertions.assertEquals(authenticationType, createdResource.getAuthenticationType());
+
+    Assertions.assertEquals(1, openIdClientDao.count());
+    OpenIdClient openIdClient = openIdClientDao.findById(Long.valueOf(createdResource.getId().get())).get();
+    Assertions.assertEquals(clientId, openIdClient.getClientId());
+    Assertions.assertEquals(clientSecret, openIdClient.getClientSecret());
+    Assertions.assertEquals(audience, openIdClient.getAudience());
+    Assertions.assertEquals(signingKeyRef, openIdClient.getSigningKeyRef());
+    Assertions.assertEquals(decryptionKeyRef, openIdClient.getDecryptionKeyRef());
+    Assertions.assertEquals(authenticationType, openIdClient.getAuthenticationType());
+    Assertions.assertEquals(1, openIdClientDao.count());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES256K", "ES384", "ES512"})
+  public void testCreateOpenIdClientWithSupportedAlgorithms(String signatureAlgorithm)
+  {
+    final String clientId = "goldfish";
+    final String clientSecret = "blubb";
+    final String audience = "pond";
+    final String signingKeyRef = "localhost";
+    final String decryptionKeyRef = "localhost";
+    final String authenticationType = "jwt";
+
+    ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
+                                                        .openIdProviderId(openIdProvider.getId())
+                                                        .clientId(clientId)
+                                                        .clientSecret(clientSecret)
+                                                        .audience(audience)
+                                                        .signingKeyRef(signingKeyRef)
+                                                        .signatureAlgorithm(signatureAlgorithm)
                                                         .decryptionKeyRef(decryptionKeyRef)
                                                         .authenticationType(authenticationType)
                                                         .build();
@@ -284,6 +324,46 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(1, clientIdErrors.size());
     String errorMessage = String.format("A client with this clientId '%s' was already registered", clientId);
     MatcherAssert.assertThat(clientIdErrors, Matchers.containsInAnyOrder(errorMessage));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"HS256", "HS384", "HS512", "EdDSA"})
+  public void testCreateClientWithUnsupportedSignatureAlgorithm(String signatureAlgorithm)
+  {
+    final String clientId = "goldfish";
+    final String clientSecret = "blubb";
+    final String audience = "pond";
+    final String signingKeyRef = "localhost";
+    final String decryptionKeyRef = "localhost";
+    final String authenticationType = "jwt";
+
+    ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
+                                                        .openIdProviderId(openIdProvider.getId())
+                                                        .clientId(clientId)
+                                                        .clientSecret(clientSecret)
+                                                        .audience(audience)
+                                                        .signingKeyRef(signingKeyRef)
+                                                        .signatureAlgorithm(signatureAlgorithm)
+                                                        .decryptionKeyRef(decryptionKeyRef)
+                                                        .authenticationType(authenticationType)
+                                                        .build();
+
+    ServerResponse<ScimOpenIdClient> response = scimRequestBuilder.create(ScimOpenIdClient.class,
+                                                                          OPENID_CLIENT_ENDPOINT)
+                                                                  .setResource(scimOpenIdClient)
+                                                                  .sendRequest();
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
+    ErrorResponse errorResponse = response.getErrorResponse();
+    Assertions.assertEquals(0, errorResponse.getErrorMessages().size());
+
+    Map<String, List<String>> fieldErrors = errorResponse.getFieldErrors();
+    Assertions.assertEquals(1, fieldErrors.size());
+    List<String> algorithmErrors = fieldErrors.get(ScimOpenIdClient.FieldNames.SIGNATURE_ALGORITHM);
+    Assertions.assertEquals(1, algorithmErrors.size());
+    String errorMessage = String.format("Unsupported algorithm found '%s'. Only RSA and EC algorithms "
+                                        + "are supported",
+                                        signatureAlgorithm);
+    MatcherAssert.assertThat(algorithmErrors, Matchers.containsInAnyOrder(errorMessage));
   }
 
   @Test
@@ -636,8 +716,8 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     final String newSigningKeyRef = "unit-test";
     final String newDecryptionKeyRef = "goldfish";
     final String newAuthenticationType = "jwt";
-    addDefaultEntriesToApplicationKeystore(newSigningKeyRef);
-    addDefaultEntriesToApplicationKeystore(newDecryptionKeyRef);
+    addDefaultEntriesToApplicationKeystore();
+    addDefaultEntriesToApplicationKeystore();
 
     ScimOpenIdClient scimOpenIdClient = ScimOpenIdClient.builder()
                                                         .openIdProviderId(openIdProvider.getId())
@@ -933,7 +1013,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
    * adds all entries from the unit-keystore of type jks into the application keystore
    */
   @SneakyThrows
-  private void addDefaultEntriesToApplicationKeystore(String alias)
+  private void addDefaultEntriesToApplicationKeystore()
   {
     byte[] keystore = readAsBytes(UNIT_TEST_KEYSTORE_JKS);
     Keystore applicationKeystore = new Keystore(new ByteArrayInputStream(keystore), KeyStoreSupporter.KeyStoreType.JKS,

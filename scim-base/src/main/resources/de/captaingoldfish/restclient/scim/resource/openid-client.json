@@ -84,6 +84,18 @@
       "maxLength": 64
     },
     {
+      "name": "signatureAlgorithm",
+      "type": "string",
+      "description": "The algorithm that should be used to sign the JWT for the identity provider.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "maxLength": 10
+    },
+    {
       "name": "audience",
       "type": "string",
       "description": "The audience is an optional field that becomes necessary if JWT authentication is used. This field will be entered into the created JWTs audience value.",

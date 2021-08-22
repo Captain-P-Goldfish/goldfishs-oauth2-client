@@ -20,6 +20,7 @@ import ScimComponentBasics from "../scim/scim-component-basics";
 import Modal from "../base/modal";
 import Button from "react-bootstrap/Button";
 import {LinkContainer} from "react-router-bootstrap";
+import {ApplicationInfoContext} from "../app";
 
 
 export default class OpenidClients extends React.Component
@@ -402,6 +403,22 @@ class OpenIdClientCardEntry extends React.Component
                                                                   this.state, fieldName)}
 
                                             />
+                                            <ApplicationInfoContext.Consumer>
+                                                {appInfo =>
+                                                    <CardListSelector header={"JWT Signature Algorithm"}
+                                                                      name={"signatureAlgorithm"}
+                                                                      editMode={this.state.editMode}
+                                                                      selections={["",
+                                                                                   ...appInfo.jwtInfo.signatureAlgorithms]}
+                                                                      selected={this.state.client.signatureAlgorithm}
+                                                                      onChange={e => this.scimComponentBasics.updateInput(
+                                                                          e.target.name, e.target.value)}
+                                                                      onError={fieldName => this.scimClient.getErrors(
+                                                                          this.state, fieldName)}
+
+                                                    />
+                                                }
+                                            </ApplicationInfoContext.Consumer>
                                             <ModifiableCardEntry header={"Audience"}
                                                                  name={"audience"}
                                                                  resourceId={this.state.client.audience}

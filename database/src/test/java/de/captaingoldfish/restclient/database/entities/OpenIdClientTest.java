@@ -7,6 +7,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.nimbusds.jose.JWSAlgorithm;
+
 import de.captaingoldfish.restclient.database.DatabaseTest;
 import de.captaingoldfish.restclient.database.DbBaseTest;
 
@@ -81,6 +83,7 @@ public class OpenIdClientTest extends DbBaseTest
                                             .openIdProvider(openIdProvider)
                                             .clientId(clientId)
                                             .signingKeyRef(signatureKeyRef)
+                                            .signatureAlgorithm(JWSAlgorithm.PS256.getName())
                                             .audience(audience)
                                             .build();
     openIdClient = openIdClientDao.save(openIdClient);
@@ -90,6 +93,7 @@ public class OpenIdClientTest extends DbBaseTest
     Assertions.assertEquals(clientId, openIdClient.getClientId());
     Assertions.assertEquals(audience, openIdClient.getAudience());
     Assertions.assertEquals(signatureKeyRef, openIdClient.getSigningKeyRef());
+    Assertions.assertEquals(JWSAlgorithm.PS256.getName(), openIdClient.getSignatureAlgorithm());
 
     Assertions.assertEquals(1, openIdProviderDao.count());
     Assertions.assertEquals(1, openIdClientDao.count());

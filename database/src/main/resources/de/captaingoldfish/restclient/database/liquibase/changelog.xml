@@ -126,6 +126,7 @@
             <column name="AUTHENTICATION_TYPE" type="VARCHAR(5)"/>
             <column name="CLIENT_SECRET" type="VARCHAR(255)"/>
             <column name="SIGNING_KEY_REF" type="VARCHAR(64)"/>
+            <column name="SIGNATURE_ALGORITHM" type="VARCHAR(10)"/>
             <column name="AUDIENCE" type="VARCHAR(1024)"/>
             <column name="DECRYPTION_KEY_REF" type="VARCHAR(64)"/>
             <column name="CREATED" type="${datetime}"/>

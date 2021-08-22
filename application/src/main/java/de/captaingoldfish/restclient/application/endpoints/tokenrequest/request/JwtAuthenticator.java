@@ -107,9 +107,15 @@ public class JwtAuthenticator implements Authenticator
    */
   private JWSAlgorithm determineJwsAlgorithm(KeystoreEntry signatureKeyEntry)
   {
+    Optional<JWSAlgorithm> clientSignatureAlgorithm = Optional.ofNullable(openIdClient.getSignatureAlgorithm())
+                                                              .map(JWSAlgorithm::parse);
+    if (clientSignatureAlgorithm.isPresent())
+    {
+      return clientSignatureAlgorithm.get();
+    }
     if ("RSA".equals(signatureKeyEntry.getKeyAlgorithm().toUpperCase(Locale.ROOT)))
     {
-      return JWSAlgorithm.PS256;
+      return JWSAlgorithm.RS256;
     }
     else if ("EC".equals(signatureKeyEntry.getKeyAlgorithm().toUpperCase(Locale.ROOT)))
     {

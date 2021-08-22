@@ -3,6 +3,9 @@ package de.captaingoldfish.restclient.application.endpoints.openidclient.validat
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.util.ArrayUtils;
+
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
@@ -102,7 +105,37 @@ public class OpenIdClientRequestValidator implements RequestValidator<ScimOpenId
                                  String.format("No OpenID Provider with ID '%s' does exist",
                                                resource.getOpenIdProviderId()));
     }
+    validateSignatureAlgorithm(resource, validationContext);
     return provider;
+  }
+
+  /**
+   * verifies that the given signature algorithm is either empty to use a default algorithm or is set to a valid
+   * supported algorithm. The check does not include a check if the algorithm and the key will fit together
+   */
+  private void validateSignatureAlgorithm(ScimOpenIdClient resource, ValidationContext validationContext)
+  {
+    if (resource.getSignatureAlgorithm().isPresent())
+    {
+      // @formatter:off
+      JWSAlgorithm.Family supportedAlgorithms = new JWSAlgorithm.Family(ArrayUtils
+        .concat(
+          JWSAlgorithm.Family.RSA.toArray(new JWSAlgorithm[]{}),
+          JWSAlgorithm.Family.EC.toArray(new JWSAlgorithm[]{})
+        )
+      );
+      // @formatter:on
+      boolean isNotSupportedAlgorithm = supportedAlgorithms.stream().noneMatch(supportedAlgorithm -> {
+        return supportedAlgorithm.getName().equals(resource.getSignatureAlgorithm().get());
+      });
+      if (isNotSupportedAlgorithm)
+      {
+        validationContext.addError(ScimOpenIdClient.FieldNames.SIGNATURE_ALGORITHM,
+                                   String.format("Unsupported algorithm found '%s'. Only RSA and EC algorithms "
+                                                 + "are supported",
+                                                 resource.getSignatureAlgorithm().get()));
+      }
+    }
   }
 
   /**

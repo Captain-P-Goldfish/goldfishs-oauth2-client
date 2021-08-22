@@ -72,6 +72,12 @@ public class OpenIdClient
   private String signingKeyRef;
 
   /**
+   * The algorithm that should be used to sign the JWT during authentication at an identity provider
+   */
+  @Column(name = "SIGNATURE_ALGORITHM")
+  private String signatureAlgorithm;
+
+  /**
    * the audience is an optional field that becomes necessary if the {@link #signingKeyRef} is present and the
    * client is going to use JWT authentication
    */
@@ -107,6 +113,7 @@ public class OpenIdClient
                       String clientSecret,
                       String authenticationType,
                       String signingKeyRef,
+                      String signatureAlgorithm,
                       String audience,
                       String decryptionKeyRef)
   {
@@ -115,6 +122,7 @@ public class OpenIdClient
     this.clientSecret = clientSecret;
     this.openIdProvider = openIdProvider;
     this.signingKeyRef = signingKeyRef;
+    this.signatureAlgorithm = signatureAlgorithm;
     this.authenticationType = authenticationType;
     this.audience = audience;
     this.decryptionKeyRef = decryptionKeyRef;

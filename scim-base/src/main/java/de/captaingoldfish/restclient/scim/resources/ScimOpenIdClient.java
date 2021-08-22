@@ -27,6 +27,7 @@ public class ScimOpenIdClient extends ResourceNode
                           String clientId,
                           String clientSecret,
                           String signingKeyRef,
+                          String signatureAlgorithm,
                           String authenticationType,
                           String audience,
                           String decryptionKeyRef,
@@ -41,6 +42,7 @@ public class ScimOpenIdClient extends ResourceNode
     setClientSecret(clientSecret);
     setAuthenticationType(authenticationType);
     setSigningKeyRef(signingKeyRef);
+    setSignatureAlgorithm(signatureAlgorithm);
     setAudience(audience);
     setDecryptionKeyRef(decryptionKeyRef);
     setHttpClientSettings(httpClientSettings);
@@ -136,6 +138,18 @@ public class ScimOpenIdClient extends ResourceNode
     setAttribute(FieldNames.SIGNING_KEY_REF, signingKeyRef);
   }
 
+  /** The algorithm that should be used to sign the JWT for the identity provider. */
+  public Optional<String> getSignatureAlgorithm()
+  {
+    return getStringAttribute(FieldNames.SIGNATURE_ALGORITHM);
+  }
+
+  /** The algorithm that should be used to sign the JWT for the identity provider. */
+  public void setSignatureAlgorithm(String signatureAlgorithm)
+  {
+    setAttribute(FieldNames.SIGNATURE_ALGORITHM, signatureAlgorithm);
+  }
+
   /**
    * The alias of the key reference within the application keystore to decrypt JWTs on responses e.g. the ID
    * Token.
@@ -208,5 +222,7 @@ public class ScimOpenIdClient extends ResourceNode
     public static final String ID = "id";
 
     public static final String SIGNING_KEY_REF = "signingKeyRef";
+
+    public static final String SIGNATURE_ALGORITHM = "signatureAlgorithm";
   }
 }

@@ -40,6 +40,7 @@ public final class OpenIdClientConverter
                        .clientSecret(scimOpenIdClient.getClientSecret().orElse(null))
                        .authenticationType(scimOpenIdClient.getAuthenticationType())
                        .signingKeyRef(signingKeyReference)
+                       .signatureAlgorithm(scimOpenIdClient.getSignatureAlgorithm().orElse(null))
                        .audience(scimOpenIdClient.getAudience().orElse(null))
                        .decryptionKeyRef(decryptionKeyReference)
                        .build();
@@ -67,6 +68,7 @@ public final class OpenIdClientConverter
                            .clientSecret(openIdClient.getClientSecret())
                            .authenticationType(openIdClient.getAuthenticationType())
                            .signingKeyRef(signingKeyReference)
+                           .signatureAlgorithm(openIdClient.getSignatureAlgorithm())
                            .audience(openIdClient.getAudience())
                            .decryptionKeyRef(decryptionKeyReference)
                            .meta(Meta.builder()
