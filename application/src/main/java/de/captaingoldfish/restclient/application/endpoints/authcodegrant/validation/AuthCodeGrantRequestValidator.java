@@ -9,6 +9,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
@@ -49,7 +50,7 @@ public class AuthCodeGrantRequestValidator implements RequestValidator<ScimAuthC
     if (StringUtils.isNotBlank(queryParameters))
     {
       UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://localhost").query(queryParameters).build();
-      List<String> stateParameters = uriComponents.getQueryParams().get("state");
+      List<String> stateParameters = uriComponents.getQueryParams().get(OAuthConstants.STATE);
       if (Optional.ofNullable(stateParameters).map(List::size).orElse(0) > 1)
       {
         String errorMessage = "Only a single state parameter may be added. The state parameter is used to identify the "

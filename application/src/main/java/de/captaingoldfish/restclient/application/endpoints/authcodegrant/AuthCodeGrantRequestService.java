@@ -20,6 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsService;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
@@ -87,7 +88,7 @@ public class AuthCodeGrantRequestService
   private void cacheAuthCodeRequestUrl(String authCodeRequestUrl)
   {
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authCodeRequestUrl).build();
-    List<String> stateParams = uriComponents.getQueryParams().get("state");
+    List<String> stateParams = uriComponents.getQueryParams().get(OAuthConstants.STATE);
     final String state = stateParams.get(0);
     authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
   }
@@ -111,14 +112,14 @@ public class AuthCodeGrantRequestService
                                                       .query(additionalQueryParams)
                                                       .build();
     MultiValueMap<String, String> queryParamMap = new LinkedMultiValueMap<>(uriComponents.getQueryParams());
-    queryParamMap.putIfAbsent("response_type", Collections.singletonList("code"));
-    queryParamMap.putIfAbsent("client_id",
+    queryParamMap.putIfAbsent("response_type", Collections.singletonList(OAuthConstants.CODE));
+    queryParamMap.putIfAbsent(OAuthConstants.CLIENT_ID,
                               Collections.singletonList(URLEncoder.encode(clientId, StandardCharsets.UTF_8)));
     Optional.ofNullable(redirectUri).ifPresent(uri -> {
-      queryParamMap.putIfAbsent("redirect_uri",
+      queryParamMap.putIfAbsent(OAuthConstants.REDIRECT_URI,
                                 Collections.singletonList(URLEncoder.encode(uri, StandardCharsets.UTF_8)));
     });
-    queryParamMap.putIfAbsent("state",
+    queryParamMap.putIfAbsent(OAuthConstants.STATE,
                               Collections.singletonList(URLEncoder.encode(UUID.randomUUID().toString(),
                                                                           StandardCharsets.UTF_8)));
     return uriComponentsBuilder.queryParams(queryParamMap);
@@ -152,7 +153,7 @@ public class AuthCodeGrantRequestService
    */
   private String getStateFromAuthorizationResponseUrl(UriComponents uriComponents)
   {
-    List<String> stateParams = uriComponents.getQueryParams().get("state");
+    List<String> stateParams = uriComponents.getQueryParams().get(OAuthConstants.STATE);
     final int numberOfStateParams = Optional.ofNullable(stateParams).map(List::size).orElse(0);
     if (numberOfStateParams != 1)
     {

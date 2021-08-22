@@ -67,6 +67,39 @@
       "caseExact": false
     },
     {
+      "name": "username",
+      "type": "string",
+      "description": "If the grant_type is 'password' this field is required for user authentication",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "If the grant_type is 'password' this field is required for user authentication",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "scope",
+      "type": "string",
+      "description": "an optional scope parameter that may be added to the access token requests",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "requestHeaders",
       "type": "complex",
       "description": "Contains the HTTP request headers that were send in the AccessToken request",

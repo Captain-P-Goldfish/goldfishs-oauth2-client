@@ -29,6 +29,9 @@ public class ScimAccessTokenRequest extends ResourceNode
                                 String grantType,
                                 String authorizationCode,
                                 String redirectUri,
+                                String username,
+                                String password,
+                                String scope,
                                 List<RequestHeaders> requestHeadersList,
                                 List<RequestParams> requestParamsList,
                                 Integer statusCode,
@@ -42,6 +45,9 @@ public class ScimAccessTokenRequest extends ResourceNode
     setGrantType(grantType);
     setAuthorizationCode(authorizationCode);
     setRedirectUri(redirectUri);
+    setUsername(username);
+    setPassword(password);
+    setScope(scope);
     setRequestHeaders(requestHeadersList);
     setRequestParams(requestParamsList);
     setStatusCode(statusCode);
@@ -108,6 +114,43 @@ public class ScimAccessTokenRequest extends ResourceNode
   public void setRedirectUri(String redirectUri)
   {
     setAttribute(FieldNames.REDIRECT_URI, redirectUri);
+  }
+
+  /** If the grant_type is 'password' this field is required for user authentication */
+  public Optional<String> getUsername()
+  {
+    return getStringAttribute(FieldNames.USERNAME);
+  }
+
+  /** If the grant_type is 'password' this field is required for user authentication */
+  public void setUsername(String username)
+  {
+    setAttribute(FieldNames.USERNAME, username);
+  }
+
+  /** If the grant_type is 'password' this field is required for user authentication */
+  public Optional<String> getPassword()
+  {
+    return getStringAttribute(FieldNames.PASSWORD);
+  }
+
+  /** If the grant_type is 'password' this field is required for user authentication */
+  public void setPassword(String password)
+  {
+    setAttribute(FieldNames.PASSWORD, password);
+  }
+
+
+  /** an optional scope parameter that may be added to the access token requests */
+  public Optional<String> getScope()
+  {
+    return getStringAttribute(FieldNames.SCOPE);
+  }
+
+  /** an optional scope parameter that may be added to the access token requests */
+  public void setScope(String scope)
+  {
+    setAttribute(FieldNames.SCOPE, scope);
   }
 
   /** The response code from the AccessToken response */
@@ -297,15 +340,23 @@ public class ScimAccessTokenRequest extends ResourceNode
 
     public static final String REDIRECT_URI = "redirectUri";
 
+    public static final String AUTHORIZATION_CODE = "authorizationCode";
+
+    public static final String REQUEST_PARAMS = "requestParams";
+
+    public static final String OPEN_ID_CLIENT_ID = "openIdClientId";
+
+    public static final String PLAIN_RESPONSE = "plainResponse";
+
+    public static final String PASSWORD = "password";
+
     public static final String REQUEST_HEADERS = "requestHeaders";
 
     public static final String RESPONSE_HEADERS = "responseHeaders";
 
-    public static final String AUTHORIZATION_CODE = "authorizationCode";
+    public static final String SCOPE = "scope";
 
     public static final String NAME = "name";
-
-    public static final String REQUEST_PARAMS = "requestParams";
 
     public static final String ID = "id";
 
@@ -313,10 +364,8 @@ public class ScimAccessTokenRequest extends ResourceNode
 
     public static final String VALUE = "value";
 
-    public static final String OPEN_ID_CLIENT_ID = "openIdClientId";
+    public static final String USERNAME = "username";
 
     public static final String STATUS_CODE = "statusCode";
-
-    public static final String PLAIN_RESPONSE = "plainResponse";
   }
 }

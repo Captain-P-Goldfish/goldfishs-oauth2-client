@@ -18,6 +18,7 @@ import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints
 import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentityProvider;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
@@ -98,14 +99,14 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
     String expectedAuthorizationUrl = String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&state=",
                                                     getApplicationUrl(TestIdentityProvider.IDP_PATH
                                                                       + TestIdentityProvider.AUTHORIZATION_ENDPOINT),
-                                                    "code",
+                                                    OAuthConstants.CODE,
                                                     openIdClient.getClientId(),
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
     expectedAuthorizationUrl = Pattern.quote(expectedAuthorizationUrl) + ".*";
     MatcherAssert.assertThat(authorizationCodeRequestUrl, Matchers.matchesPattern(expectedAuthorizationUrl));
 
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authorizationCodeRequestUrl).build();
-    final String state = uriComponents.getQueryParams().getFirst("state");
+    final String state = uriComponents.getQueryParams().getFirst(OAuthConstants.STATE);
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
 
     CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
@@ -155,7 +156,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                       + TestIdentityProvider.AUTHORIZATION_ENDPOINT),
                                                     client_id,
                                                     state,
-                                                    "code",
+                                                    OAuthConstants.CODE,
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
     Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl);
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
@@ -200,7 +201,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     getApplicationUrl(TestIdentityProvider.IDP_PATH
                                                                       + TestIdentityProvider.AUTHORIZATION_ENDPOINT),
                                                     state,
-                                                    "code",
+                                                    OAuthConstants.CODE,
                                                     openIdClient.getClientId());
     Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl);
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));

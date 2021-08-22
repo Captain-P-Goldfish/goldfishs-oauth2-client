@@ -16,6 +16,7 @@ import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints
 import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentityProvider;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
@@ -75,7 +76,7 @@ public class AccessTokenRequestHandlerTest extends AbstractScimClientConfig
     String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     ScimAccessTokenRequest scimAccessTokenRequest = ScimAccessTokenRequest.builder()
                                                                           .openIdClientId(openIdClient.getId())
-                                                                          .grantType("authorization_code")
+                                                                          .grantType(OAuthConstants.AUTH_CODE_GRANT_TYPE)
                                                                           .authorizationCode(authorizationCode)
                                                                           .redirectUri(redirectUri)
                                                                           .build();
@@ -101,16 +102,16 @@ public class AccessTokenRequestHandlerTest extends AbstractScimClientConfig
     {
       Assertions.assertEquals(4, accessTokenRequest.getRequestParams().size());
       RequestParams code = accessTokenRequest.getRequestParams().get(0);
-      Assertions.assertEquals("code", code.getName());
+      Assertions.assertEquals(OAuthConstants.CODE, code.getName());
       Assertions.assertEquals(authorizationCode, code.getValue());
       RequestParams grantType = accessTokenRequest.getRequestParams().get(1);
       Assertions.assertEquals("grant_type", grantType.getName());
-      Assertions.assertEquals("authorization_code", grantType.getValue());
+      Assertions.assertEquals(OAuthConstants.AUTH_CODE_GRANT_TYPE, grantType.getValue());
       RequestParams redirectUriParam = accessTokenRequest.getRequestParams().get(2);
-      Assertions.assertEquals("redirect_uri", redirectUriParam.getName());
+      Assertions.assertEquals(OAuthConstants.REDIRECT_URI, redirectUriParam.getName());
       Assertions.assertEquals(redirectUri, redirectUriParam.getValue());
       RequestParams clientIdParam = accessTokenRequest.getRequestParams().get(3);
-      Assertions.assertEquals("client_id", clientIdParam.getName());
+      Assertions.assertEquals(OAuthConstants.CLIENT_ID, clientIdParam.getName());
       Assertions.assertEquals(openIdClient.getClientId(), clientIdParam.getValue());
     }
     // validate response code from idp

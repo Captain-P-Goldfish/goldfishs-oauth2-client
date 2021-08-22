@@ -21,6 +21,7 @@ import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints
 import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentityProvider;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
@@ -110,7 +111,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
     String expectedAuthorizationUrl = String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&state=",
                                                     getApplicationUrl(TestIdentityProvider.IDP_PATH
                                                                       + TestIdentityProvider.AUTHORIZATION_ENDPOINT),
-                                                    "code",
+                                                    OAuthConstants.CODE,
                                                     openIdClient.getClientId(),
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
     expectedAuthorizationUrl = Pattern.quote(expectedAuthorizationUrl) + ".*";

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 
 import de.captaingoldfish.restclient.application.setup.FileReferences;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.utils.JsonHelper;
 
@@ -73,8 +74,8 @@ public class TestIdentityProvider implements FileReferences
   }
 
   @GetMapping(AUTHORIZATION_ENDPOINT)
-  public RedirectView authorizationEndpoint(@RequestParam(name = "redirect_uri") String redirectUri,
-                                            @RequestParam(name = "state") String state)
+  public RedirectView authorizationEndpoint(@RequestParam(name = OAuthConstants.REDIRECT_URI) String redirectUri,
+                                            @RequestParam(name = OAuthConstants.STATE) String state)
   {
     return new RedirectView(String.format("%s?code=%s&state=%s", redirectUri, UUID.randomUUID(), state));
   }

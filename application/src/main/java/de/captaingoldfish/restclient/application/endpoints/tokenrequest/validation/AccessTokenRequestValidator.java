@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
+import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest;
@@ -29,12 +30,28 @@ public class AccessTokenRequestValidator implements RequestValidator<ScimAccessT
       return;
     }
 
-    if ("authorization_code".equals(resource.getGrantType()))
+    if (OAuthConstants.AUTH_CODE_GRANT_TYPE.equals(resource.getGrantType()))
     {
       if (resource.getAuthorizationCode().isEmpty())
       {
         validationContext.addError(ScimAccessTokenRequest.FieldNames.AUTHORIZATION_CODE,
-                                   "The authorization code is required in case of grant_type 'authorization_code'");
+                                   String.format("The authorization code is required in case of grant_type '%s'",
+                                                 OAuthConstants.AUTH_CODE_GRANT_TYPE));
+      }
+    }
+    if (OAuthConstants.RESOURCE_PASSWORD_GRANT_TYPE.equals(resource.getGrantType()))
+    {
+      if (resource.getUsername().isEmpty())
+      {
+        validationContext.addError(ScimAccessTokenRequest.FieldNames.USERNAME,
+                                   String.format("The username is required in case of grant_type '%s'",
+                                                 OAuthConstants.RESOURCE_PASSWORD_GRANT_TYPE));
+      }
+      if (resource.getPassword().isEmpty())
+      {
+        validationContext.addError(ScimAccessTokenRequest.FieldNames.PASSWORD,
+                                   String.format("The password is required in case of grant_type '%s'",
+                                                 OAuthConstants.RESOURCE_PASSWORD_GRANT_TYPE));
       }
     }
 
