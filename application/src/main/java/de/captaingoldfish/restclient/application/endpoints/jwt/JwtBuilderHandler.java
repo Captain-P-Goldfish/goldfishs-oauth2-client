@@ -12,6 +12,7 @@ import de.captaingoldfish.restclient.application.crypto.JwtHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
 import de.captaingoldfish.restclient.scim.resources.ScimJwtBuilder;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
+import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
 import de.captaingoldfish.scim.sdk.server.endpoints.Context;
@@ -105,13 +106,20 @@ public class JwtBuilderHandler extends ResourceHandler<ScimJwtBuilder>
   public ScimJwtBuilder updateResource(ScimJwtBuilder resource, Context context)
   {
     final String id = "1";
-    JwtHandler.PlainJwtData plainJwtData = jwtHandler.handleJwt(resource.getKeyId(), resource.getJwt());
-    return ScimJwtBuilder.builder()
-                         .id(id)
-                         .header(plainJwtData.getHeader())
-                         .body(plainJwtData.getBody())
-                         .meta(Meta.builder().created(Instant.now()).build())
-                         .build();
+    try
+    {
+      JwtHandler.PlainJwtData plainJwtData = jwtHandler.handleJwt(resource.getKeyId(), resource.getJwt());
+      return ScimJwtBuilder.builder()
+                           .id(id)
+                           .header(plainJwtData.getHeader())
+                           .body(plainJwtData.getBody())
+                           .meta(Meta.builder().created(Instant.now()).build())
+                           .build();
+    }
+    catch (Exception ex)
+    {
+      throw new BadRequestException(ex.getMessage(), ex);
+    }
   }
 
   /**

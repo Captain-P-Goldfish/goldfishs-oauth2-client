@@ -9,6 +9,7 @@ import {Optional} from "../services/utils";
 import {Col, Container, Dropdown, DropdownButton, Row} from "react-bootstrap";
 import {ExclamationTriangle} from "react-bootstrap-icons";
 import {GoFlame} from "react-icons/go";
+import {JWT_BUILDER_ENDPOINT} from "../scim/scim-constants";
 
 export default class JwtParser extends React.Component
 {
@@ -18,12 +19,11 @@ export default class JwtParser extends React.Component
         super(props);
         this.state = {
             isMounted: false,
-            jwtBuilder: {id: "1", header: "", body: ""},
             selectedKey: "",
             currentJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
         };
         this.setState = this.setState.bind(this);
-        this.scimClient = new ScimClient("/scim/v2/JwtBuilder", this.setState);
+        this.scimClient = new ScimClient(JWT_BUILDER_ENDPOINT, this.setState);
         this.formReference = createRef();
         this.onUpdateSuccess = this.onUpdateSuccess.bind(this);
         this.handleKeySelectionSelection = this.handleKeySelectionSelection.bind(this);
@@ -33,8 +33,8 @@ export default class JwtParser extends React.Component
         this.scimComponentBasics = new ScimComponentBasics({
             scimClient: this.scimClient,
             formReference: this.formReference,
-            getOriginalResource: () => this.state.jwtBuilder,
-            getCurrentResource: () => this.state.jwtBuilder,
+            getOriginalResource: () => this.state.jwtBuilder || {id: 1},
+            getCurrentResource: () => this.state.jwtBuilder || {id: 1},
             setCurrentResource: resource =>
             {
             },
@@ -62,15 +62,23 @@ export default class JwtParser extends React.Component
         this.setState({jwtBuilder: jwtBuilder});
     }
 
-    parseJwt()
+    getJwtParts()
     {
         if (this.state.isMounted === false)
         {
             return null;
         }
         let token = document.getElementById("jwt-to-parse").value;
+        return (token || "").split(".");
+    }
+
+    parseJwt(parts)
+    {
+        if (this.state.isMounted === false)
+        {
+            return null;
+        }
         let jwtDetails = {};
-        let parts = (token || "").split(".");
         jwtDetails.parts = parts;
 
         let jwtPartDecoder = function (tokenPart)
@@ -117,112 +125,151 @@ export default class JwtParser extends React.Component
 
     render()
     {
-        let jwtDetails = this.parseJwt() || {};
-        return (
-            <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
+        let jwtParts = this.getJwtParts();
+        let jwtDetails = this.parseJwt(jwtParts) || {};
+        let isJws = new Optional(jwtParts).map(parts => parts.length === 3).orElse(false);
+        let isJwe = new Optional(jwtParts).map(parts => parts.length === 5).orElse(false);
 
-                <AlertListMessages icon={<GoFlame />} variant={"danger"}
-                                   messages={(this.state.errorMessages || []).errors} />
-                <AlertListMessages icon={<ExclamationTriangle />} variant={"warning"}
-                                   messages={jwtDetails.warnMessages} />
-                <AlertListMessages variant={"info"} messages={jwtDetails.infoMessages} />
-                <Container>
-                    <Row>
-                        <Col sm={3}>
-                            <Dropdown>
-                                <DropdownButton id={"jwt-parser-aliases"}
-                                                title={"available keys"}
-                                                onSelect={this.handleKeySelectionSelection}>
-                                    {
-                                        new Optional(this.props.keyInfos).isPresent() &&
-                                        this.props.keyInfos.map((keyInfo) =>
+        let headerToDisplay = new Optional(this.state.jwtBuilder).map(details => details.header).orElse(
+            jwtDetails.header);
+        let bodyToDisplay = new Optional(this.state.jwtBuilder).map(details => details.body).orElse(jwtDetails.body);
+
+        let errors = this.state.errors || {};
+        return (
+            <React.Fragment>
+                <AlertListMessages variant={"danger"} icon={<GoFlame />}
+                                   messages={errors.errorMessages || new Optional(errors.detail).map(d => [d]).orElse(
+                                       [])} />
+                <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
+
+                    <AlertListMessages icon={<GoFlame />} variant={"danger"}
+                                       messages={(this.state.errorMessages || []).errors} />
+                    <AlertListMessages icon={<ExclamationTriangle />} variant={"warning"}
+                                       messages={jwtDetails.warnMessages} />
+                    <AlertListMessages variant={"info"} messages={jwtDetails.infoMessages} />
+                    <Container>
+                        <Row>
+                            <Col sm={3}>
+                                <Dropdown>
+                                    <DropdownButton id={"jwt-parser-aliases"}
+                                                    title={"available keys"}
+                                                    onSelect={this.handleKeySelectionSelection}>
                                         {
-                                            return <Dropdown.Item key={keyInfo.alias}
-                                                                  eventKey={keyInfo.alias}>{keyInfo.alias + " ("
-                                                                                            + keyInfo.keyAlgorithm
-                                                                                            + "-" + keyInfo.keyLength
-                                                                                            + "-bit)"}</Dropdown.Item>
-                                        })
-                                    }
-                                </DropdownButton>
-                                <p>
-                                    selected key:
-                                    <span className={"code"}
-                                          style={{marginLeft: "15px", color: "lightgreen"}}>
+                                            new Optional(this.props.keyInfos).isPresent() &&
+                                            this.props.keyInfos.map((keyInfo) =>
+                                            {
+                                                return <Dropdown.Item key={keyInfo.alias}
+                                                                      eventKey={keyInfo.alias}>{keyInfo.alias + " ("
+                                                                                                + keyInfo.keyAlgorithm
+                                                                                                + "-"
+                                                                                                + keyInfo.keyLength
+                                                                                                + "-bit)"}</Dropdown.Item>
+                                            })
+                                        }
+                                    </DropdownButton>
+                                    <p>
+                                        selected key:
+                                        <span className={"code"}
+                                              style={{marginLeft: "15px", color: "lightgreen"}}>
                                         {this.state.selectedKey}
                                     </span>
-                                </p>
-                            </Dropdown>
+                                    </p>
+                                </Dropdown>
 
-                            <Col>
-                                <Button id={"parse-jwt"} type="submit">
-                                    <LoadingSpinner show={this.state.isLoading} /> Parse JWT at backend
-                                </Button>
-                            </Col>
-                        </Col>
-                        <Col sm={4} className={"form-group"}>
-                            <Form.Control id={"jwt-to-parse"}
-                                          name={"jwt"}
-                                          sm={12}
-                                          as={"textarea"}
-                                          value={this.state.currentJwt}
-                                          onChange={e => this.setState({currentJwt: e.target.value})} />
-                            {
-                                <div id={"jwt-input"}
-                                     className={"jwt-overlay"}>
+                                {
+                                    (isJwe === true || isJws === true) &&
+                                    <Button id={"parse-jwt"} type="submit" onClick={e =>
                                     {
-                                        (jwtDetails.parts || []).map((part, index) =>
+                                        this.setState({jwtBuilder: undefined})
+                                    }
+                                    }>
+                                        <LoadingSpinner show={this.state.isLoading} />
                                         {
-                                            return <span key={"jwt-part-" + index}
-                                                         className={"jwt-part jwt-part-" + (index <= 4 ? index
-                                                                                                       : "over")}>
+                                            isJws === true &&
+                                            <span>Verify Signature</span>
+                                        }
+                                        {
+                                            isJwe === true &&
+                                            <span>Decrypt</span>
+                                        }
+                                    </Button>
+                                }
+                                {
+                                    this.state.jwtBuilder && isJws &&
+                                    <h5 style={{color: "lightgreen", marginTop: "50px"}}>Signature valid</h5>
+                                }
+                                {
+                                    this.state.jwtBuilder && isJwe &&
+                                    <h5 style={{color: "lightgreen", marginTop: "50px"}}>Successfully decrypted</h5>
+                                }
+                            </Col>
+                            <Col sm={4} className={"form-group"}>
+                                <Form.Control id={"jwt-to-parse"}
+                                              name={"jwt"}
+                                              sm={12}
+                                              as={"textarea"}
+                                              value={this.state.currentJwt}
+                                              onChange={e => this.setState({
+                                                  currentJwt: e.target.value,
+                                                  jwtBuilder: undefined
+                                              })} />
+                                {
+                                    <div id={"jwt-input"}
+                                         className={"jwt-overlay"}>
+                                        {
+                                            (jwtDetails.parts || []).map((part, index) =>
+                                            {
+                                                return <span key={"jwt-part-" + index}
+                                                             className={"jwt-part jwt-part-" + (index <= 4 ? index
+                                                                                                           : "over")}>
                                                 {
                                                     index > 0 &&
                                                     <span className={"jwt-dot-separator"}>
                                                         .<br />
                                                     </span>
                                                 }
-                                                {part}
+                                                    {part}
                                             </span>
-                                        })
-                                    }
-                                </div>
-                            }
-                        </Col>
-                        <Col sm={5}>
-                            <FormInputField id={"jwt-parser-key-id"}
-                                            name="keyId"
-                                            readOnly={true}
-                                            type="hidden"
-                                            value={this.state.selectedKey}
-                                            onError={fieldName => this.scimClient.getErrors(this.state,
-                                                fieldName)} />
-                            <FormInputField id={"jwt-parsed-header"}
-                                            name="header"
-                                            className={"jwt-part-0"}
-                                            type="text"
-                                            as="textarea"
-                                            value={jwtDetails.header}
-                                            onChange={() =>
-                                            {/*do nothing*/
-                                            }}
-                                            onError={fieldName => this.scimClient.getErrors(this.state,
-                                                fieldName)} />
-                            <FormInputField id={"jwt-parsed-body"}
-                                            name="body"
-                                            className={"jwt-part-1"}
-                                            type="text"
-                                            as="textarea"
-                                            value={jwtDetails.body}
-                                            onChange={() =>
-                                            {/*do nothing*/
-                                            }}
-                                            onError={fieldName => this.scimClient.getErrors(this.state,
-                                                fieldName)} />
-                        </Col>
-                    </Row>
-                </Container>
-            </Form>
+                                            })
+                                        }
+                                    </div>
+                                }
+                            </Col>
+                            <Col sm={5}>
+                                <FormInputField id={"jwt-parser-key-id"}
+                                                name="keyId"
+                                                readOnly={true}
+                                                type="hidden"
+                                                value={this.state.selectedKey}
+                                                onError={fieldName => this.scimClient.getErrors(this.state,
+                                                    fieldName)} />
+                                <FormInputField id={"jwt-parsed-header"}
+                                                name="header"
+                                                className={"jwt-part-0"}
+                                                type="text"
+                                                as="textarea"
+                                                value={headerToDisplay}
+                                                onChange={() =>
+                                                {/*do nothing*/
+                                                }}
+                                                onError={fieldName => this.scimClient.getErrors(this.state,
+                                                    fieldName)} />
+                                <FormInputField id={"jwt-parsed-body"}
+                                                name="body"
+                                                className={"jwt-part-1"}
+                                                type="text"
+                                                as="textarea"
+                                                value={bodyToDisplay}
+                                                onChange={() =>
+                                                {/*do nothing*/
+                                                }}
+                                                onError={fieldName => this.scimClient.getErrors(this.state,
+                                                    fieldName)} />
+                            </Col>
+                        </Row>
+                    </Container>
+                </Form>
+            </React.Fragment>
         )
     }
 }

@@ -54,7 +54,6 @@ export default class JwtBuilder extends React.Component
         this.addDefaultJwtAttributes();
     }
 
-
     componentDidUpdate(prevProps, prevState, snapshot)
     {
         if (prevProps.jwtInfo !== this.props.jwtInfo && this.props.jwtInfo !== undefined)
