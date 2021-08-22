@@ -217,7 +217,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(11, keystore.getKeystoreEntries().size());
 
     ServerResponse<ListResponse<ScimKeystore>> response = scimRequestBuilder.list(ScimKeystore.class, KEYSTORE_ENDPOINT)
                                                                             .get()
@@ -233,7 +233,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
     Assertions.assertNull(appKeystore.getAliasSelection());
     Assertions.assertNull(appKeystore.getCertificateInfo());
     Assertions.assertNotNull(appKeystore.getKeyInfos());
-    Assertions.assertEquals(10, appKeystore.getKeyInfos().size());
+    Assertions.assertEquals(11, appKeystore.getKeyInfos().size());
     appKeystore.getKeyInfos().forEach(keyInfo -> {
       KeystoreEntry keystoreEntry = getExtendedUnitTestKeystoreEntryAccess(keyInfo.getAlias());
       Assertions.assertEquals(keystoreEntry.getAlias(), keyInfo.getAlias());
@@ -258,7 +258,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(11, keystore.getKeystoreEntries().size());
 
     for ( KeystoreEntry unitTestKeystoreEntryAccess : getExtendedUnitTestKeystoreEntryAccess() )
     {
@@ -287,7 +287,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(11, keystore.getKeystoreEntries().size());
 
     List<KeystoreEntry> testKeystoreEntryAccess = getExtendedUnitTestKeystoreEntryAccess();
     for ( int i = 0 ; i < testKeystoreEntryAccess.size() ; i++ )
@@ -299,7 +299,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                                                 .sendRequest();
       Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
       keystore = keystoreDao.getKeystore();
-      Assertions.assertEquals(10 - (i + 1), keystore.getKeystoreEntries().size());
+      Assertions.assertEquals(11 - (i + 1), keystore.getKeystoreEntries().size());
     }
   }
 
@@ -933,7 +933,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
   {
     addDefaultEntriesToApplicationKeystore();
     Keystore keystore = keystoreDao.getKeystore();
-    Assertions.assertEquals(10, keystore.getKeystoreEntries().size());
+    Assertions.assertEquals(11, keystore.getKeystoreEntries().size());
     OpenIdProvider openIdProvider = openIdProviderDao.save(OpenIdProvider.builder()
                                                                          .name(UUID.randomUUID().toString())
                                                                          .discoveryEndpoint("http://localhost:8080")
@@ -961,7 +961,7 @@ public class KeystoreHandlerTest extends AbstractScimClientConfig
                                                                 .sendRequest();
       Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getHttpStatus());
       keystore = keystoreDao.getKeystore();
-      Assertions.assertEquals(10 - (i + 1), keystore.getKeystoreEntries().size());
+      Assertions.assertEquals(11 - (i + 1), keystore.getKeystoreEntries().size());
 
       Assertions.assertEquals(1, openIdClientDao.count());
       openIdClient = openIdClientDao.findById(openIdClient.getId()).orElseThrow();
