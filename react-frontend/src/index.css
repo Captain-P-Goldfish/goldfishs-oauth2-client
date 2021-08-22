@@ -387,7 +387,7 @@ input.form-control.card-input-field, input.form-control.card-input-field:focus {
     border: 1px solid #3b361d;
 }
 
-div.authorization-code-workflow {
+div.grant-type-workflow {
     margin-top: 20px;
 }
 

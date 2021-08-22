@@ -1,12 +1,13 @@
 import React, {useState} from "react";
 import Col from "react-bootstrap/Col";
-import {Collapseable} from "../../base/form-base";
+import {Collapseable, LoadingSpinner} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
 import ScimClient from "../../scim/scim-client";
 import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
-import AccessTokenView from "./access-token-view";
+import AccessTokenDetailsView from "./access-token-details-view";
+import Button from "react-bootstrap/Button";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -176,7 +177,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     render()
     {
         return (
-            <div className={"authorization-code-workflow"}>
+            <div className={"grant-type-workflow"}>
                 {
                     <AuthorizationCodeGrantDetails
                         content={() =>
@@ -186,7 +187,6 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                 {this.loadAuthorizationCodeResponseDetailsView()}
                             </React.Fragment>
                         }}
-                        responseDetails={this.props.authResponseParameters}
                         remove={this.props.onRemove} />
                 }
             </div>
@@ -231,5 +231,20 @@ function AuthorizationCodeGrantDetails(props)
             </Collapse>
         </React.Fragment>
     );
+}
+
+function AccessTokenView(props)
+{
+    return <React.Fragment>
+        <Button type="submit" onClick={props.retrieveAccessTokenDetails}
+                style={{marginTop: "15px", marginBottom: "15px"}}>
+            <LoadingSpinner show={props.isLoading} /> Get Access Token
+        </Button>
+        {
+            props.accessTokenDetails &&
+            <AccessTokenDetailsView accessTokenDetails={props.accessTokenDetails} />
+        }
+    </React.Fragment>
+
 }
 
