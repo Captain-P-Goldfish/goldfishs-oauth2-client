@@ -24,7 +24,7 @@ export default class OpenidClientWorkflow extends React.Component
         this.state = {
             authenticationType: this.authCodeGrantType,
             originalRedirectUri: props.originalRedirectUri,
-            workflowDetails: this.props.client[CURRENT_WORKFLOW_URI],
+            workflowDetails: this.props.client[CURRENT_WORKFLOW_URI] || {},
             isLoading: false
         }
 
@@ -199,12 +199,14 @@ class AuthorizationCodeGrantForm extends React.Component
 
     render()
     {
+        let authCodeParameters = this.props.workflowDetails.authCodeParameters || {};
+
         return (
             <React.Fragment>
                 <FormInputField name="authCodeParameters.redirectUri"
                                 label="Redirect URI"
                                 placeholder="The redirect uri that is added to the request parameters"
-                                value={this.props.workflowDetails.authCodeParameters.redirectUri}
+                                value={authCodeParameters.redirectUri}
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)}>
                     <a href={"/#"} onClick={this.props.resetRedirectUri} className={"action-link"}>
@@ -213,7 +215,7 @@ class AuthorizationCodeGrantForm extends React.Component
                 </FormInputField>
                 <FormInputField name="authCodeParameters.queryParameters"
                                 label="Additional URL Query"
-                                value={this.props.workflowDetails.authCodeParameters.queryParameters}
+                                value={authCodeParameters.queryParameters}
                                 placeholder="add an optional query string that is appended to the request URL"
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)} />
@@ -279,17 +281,19 @@ class ClientCredentialsGrantForm extends React.Component
 
 function ResourceOwnerPasswordCredentialsForm(props)
 {
-
+    let resourceOwnerPasswordParameters = props.workflowDetails.resourceOwnerPasswordParameters || {};
     return (
         <React.Fragment>
             <FormInputField name="resourceOwnerPasswordParameters.username"
                             label="Username"
-                            value={props.workflowDetails.resourceOwnerPasswordParameters.username}
+                            value={resourceOwnerPasswordParameters.username}
+                            placeholder={"the username to authenticate"}
                             onChange={e => props.handleChange(e.target.name, e.target.value)}
                             onError={fieldname => props.onError(fieldname)} />
             <FormInputField name="resourceOwnerPasswordParameters.password"
                             label="Password"
-                            value={props.workflowDetails.resourceOwnerPasswordParameters.password}
+                            placeholder={"the users password"}
+                            value={resourceOwnerPasswordParameters.password}
                             onChange={e => props.handleChange(e.target.name, e.target.value)}
                             onError={fieldname => props.onError(fieldname)} />
             <Form.Group as={Row}>
