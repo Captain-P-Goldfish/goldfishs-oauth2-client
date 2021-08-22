@@ -9,7 +9,7 @@ import AuthorizationCodeGrantWorkflow from "./auth-code-grant/authorization-code
 import * as lodash from "lodash";
 import ScimClient from "../scim/scim-client";
 import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT, CURRENT_WORKFLOW_URI} from "../scim/scim-constants";
-import ClientCredentialsWorkflow from "./auth-code-grant/client-credentials-workflow";
+import AccessTokenView from "./auth-code-grant/access-token-view";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -25,7 +25,8 @@ export default class OpenidClientWorkflow extends React.Component
             authenticationType: this.authCodeGrantType,
             originalRedirectUri: props.originalRedirectUri,
             workflowDetails: this.props.client[CURRENT_WORKFLOW_URI] || {},
-            isLoading: false
+            isLoading: false,
+            responseDetails: []
         }
 
         this.formReference = createRef();
@@ -45,10 +46,11 @@ export default class OpenidClientWorkflow extends React.Component
 
     handleGrantTypeResponseDetails(type, responseDetails)
     {
-        let responseDetailsArray = (this.state[type] || []);
-        responseDetailsArray.push(responseDetails);
+        let responseDetailsArray = (this.state.responseDetails || []);
+        responseDetails.grantType = type;
+        responseDetailsArray.unshift(responseDetails);
         let wrapperObject = {};
-        wrapperObject[type] = responseDetailsArray
+        wrapperObject.responseDetails = responseDetailsArray
         this.setState(wrapperObject);
     }
 
@@ -59,13 +61,13 @@ export default class OpenidClientWorkflow extends React.Component
         this.setState({workflowDetails: wrapperObject})
     }
 
-    removeGrantTypeDetails(grantType, details)
+    removeGrantTypeDetails(details)
     {
-        let detailsObject = this.state[grantType];
+        let detailsObject = this.state.responseDetails;
         let detailsIndex = detailsObject.indexOf(details);
         detailsObject.splice(detailsIndex, 1);
         let wrapperObject = {};
-        wrapperObject[grantType] = detailsObject;
+        wrapperObject.responseDetails = detailsObject;
         this.setState(wrapperObject)
     }
 
@@ -82,7 +84,7 @@ export default class OpenidClientWorkflow extends React.Component
                 <h2>OpenID Connect Workflow</h2>
                 <ErrorMessagesAlert errors={this.state.errors} />
 
-                <Form ref={this.formReference}>
+                <Form ref={this.formReference} onSubmit={e => e.preventDefault()}>
                     <FormRadioSelection name="authenticationType"
                                         label="AuthenticationType Type"
                                         displayType={"vertical"}
@@ -116,6 +118,7 @@ export default class OpenidClientWorkflow extends React.Component
                     {
                         this.state.authenticationType === this.resourceOwnerGrantType &&
                         <ResourceOwnerPasswordCredentialsForm
+                            client={this.props.client}
                             workflowDetails={this.state.workflowDetails}
                             isLoading={this.state.isLoading}
                             handleChange={this.handleNestedElementChange}
@@ -127,29 +130,53 @@ export default class OpenidClientWorkflow extends React.Component
                     }
                 </Form>
                 {
-                    (this.state[this.authCodeGrantType] || []).map((authTypeDetails) =>
+                    (this.state.responseDetails || []).map((responseDetails) =>
                     {
-                        return <div key={this.authCodeGrantType + "-" + authTypeDetails.id}>
-                            <AuthorizationCodeGrantWorkflow client={this.props.client}
-                                                            requestDetails={authTypeDetails}
-                                                            onRemove={() => this.removeGrantTypeDetails(
-                                                                this.authCodeGrantType, authTypeDetails)} />
-                        </div>
-                    })
-                }
-                {
-                    (this.state[this.clientCredentialsGrantType] || []).map((accessTokenDetails) =>
-                    {
-                        return <div key={this.clientCredentialsGrantType + "-" + accessTokenDetails.id}>
-                            <ClientCredentialsWorkflow accessTokenDetails={accessTokenDetails}
-                                                       onRemove={() => this.removeGrantTypeDetails(
-                                                           this.clientCredentialsGrantType, accessTokenDetails)} />
-                        </div>
+                        return <ResponseDetailsView responseDetails={responseDetails}
+                                                    client={this.props.client}
+                                                    removeGrantTypeDetails={this.removeGrantTypeDetails} />
                     })
                 }
             </React.Fragment>
         )
     }
+}
+
+function ResponseDetailsView(props)
+{
+
+    let authCodeGrantType = "authorization_code";
+    let clientCredentialsGrantType = "client_credentials";
+    let resourceOwnerGrantType = "password";
+
+    let responseDetails = props.responseDetails;
+
+    if (authCodeGrantType === responseDetails.grantType)
+    {
+        return <div key={authCodeGrantType + "-" + responseDetails.id}>
+            <AuthorizationCodeGrantWorkflow client={props.client}
+                                            requestDetails={responseDetails}
+                                            onRemove={() => props.removeGrantTypeDetails(
+                                                responseDetails)} />
+        </div>
+    }
+
+    if (clientCredentialsGrantType === responseDetails.grantType)
+    {
+        return <div key={clientCredentialsGrantType + "-" + responseDetails.id}>
+            <AccessTokenView header={"Client Credentials Grant"}
+                             accessTokenDetails={responseDetails}
+                             onRemove={() => props.removeGrantTypeDetails(
+                                 responseDetails)} />
+        </div>
+    }
+
+    return <div key={resourceOwnerGrantType + "-" + responseDetails.id}>
+        <AccessTokenView header={"Resource Owner Password Credentials Grant"}
+                         accessTokenDetails={responseDetails}
+                         onRemove={() => props.removeGrantTypeDetails(
+                             responseDetails)} />
+    </div>
 }
 
 class AuthorizationCodeGrantForm extends React.Component
@@ -279,30 +306,72 @@ class ClientCredentialsGrantForm extends React.Component
     }
 }
 
-function ResourceOwnerPasswordCredentialsForm(props)
+class ResourceOwnerPasswordCredentialsForm extends React.Component
 {
-    let resourceOwnerPasswordParameters = props.workflowDetails.resourceOwnerPasswordParameters || {};
-    return (
-        <React.Fragment>
-            <FormInputField name="resourceOwnerPasswordParameters.username"
-                            label="Username"
-                            value={resourceOwnerPasswordParameters.username}
-                            placeholder={"the username to authenticate"}
-                            onChange={e => props.handleChange(e.target.name, e.target.value)}
-                            onError={fieldname => props.onError(fieldname)} />
-            <FormInputField name="resourceOwnerPasswordParameters.password"
-                            label="Password"
-                            placeholder={"the users password"}
-                            value={resourceOwnerPasswordParameters.password}
-                            onChange={e => props.handleChange(e.target.name, e.target.value)}
-                            onError={fieldname => props.onError(fieldname)} />
-            <Form.Group as={Row}>
-                <Col sm={{span: 10, offset: 2}}>
-                    <Button id={"upload"} type="submit">
-                        <LoadingSpinner show={props.isLoading} /> Get Access Token
-                    </Button>
-                </Col>
-            </Form.Group>
-        </React.Fragment>
-    );
+
+    constructor(props)
+    {
+        super(props);
+        this.setState = this.setState.bind(this);
+        this.retrieveAccessTokenDetails = this.retrieveAccessTokenDetails.bind(this);
+    }
+
+    retrieveAccessTokenDetails(e)
+    {
+        e.preventDefault();
+        let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
+
+        let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
+        let username = resourceOwnerPasswordParameters.username || "";
+        let password = resourceOwnerPasswordParameters.password || "";
+
+        let resource = {
+            grantType: "password",
+            openIdClientId: parseInt(this.props.client.id),
+            username: username,
+            password: password
+        }
+
+        let handleResponse = this.props.handleResponse;
+        scimClient.createResource(resource).then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    handleResponse(resource);
+                })
+            }
+        });
+    }
+
+    render()
+    {
+        let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
+        let username = resourceOwnerPasswordParameters.username || "";
+        let password = resourceOwnerPasswordParameters.password || "";
+        return (
+            <React.Fragment>
+                <FormInputField name="resourceOwnerPasswordParameters.username"
+                                label="Username"
+                                value={username}
+                                placeholder={"the username to authenticate"}
+                                onChange={e => this.props.handleChange(e.target.name, e.target.value)}
+                                onError={fieldname => this.props.onError(fieldname)} />
+                <FormInputField name="resourceOwnerPasswordParameters.password"
+                                label="Password"
+                                placeholder={"the users password"}
+                                value={password}
+                                onChange={e => this.props.handleChange(e.target.name, e.target.value)}
+                                onError={fieldname => this.props.onError(fieldname)} />
+                <Form.Group as={Row}>
+                    <Col sm={{span: 10, offset: 2}}>
+                        <Button id={"upload"} type="submit" onClick={this.retrieveAccessTokenDetails}>
+                            <LoadingSpinner show={this.props.isLoading} /> Get Access Token
+                        </Button>
+                    </Col>
+                </Form.Group>
+            </React.Fragment>
+        );
+    }
 }

@@ -6,8 +6,8 @@ import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
 import ScimClient from "../../scim/scim-client";
 import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
-import AccessTokenDetailsView from "./access-token-details-view";
 import Button from "react-bootstrap/Button";
+import {AccessTokenDetailsView} from "./access-token-view";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {

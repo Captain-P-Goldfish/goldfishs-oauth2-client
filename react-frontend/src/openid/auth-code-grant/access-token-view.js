@@ -1,10 +1,65 @@
-import React from "react";
+import React, {useState} from "react";
+import {Alert, Card, Collapse} from "react-bootstrap";
+import {CaretDown, CaretRight, XLg} from "react-bootstrap-icons";
 import {Collapseable, ErrorListItem} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import {Alert} from "react-bootstrap";
 
-export default function AccessTokenDetailsView(props)
+
+export default function AccessTokenView(props)
+{
+    return <div className={"grant-type-workflow"}>
+        <AccessTokenCollapsible
+            header={props.header}
+            content={() =>
+            {
+                return <AccessTokenDetailsView accessTokenDetails={props.accessTokenDetails} />
+            }}
+            remove={props.onRemove}>
+        </AccessTokenCollapsible>
+    </div>
+}
+
+function AccessTokenCollapsible(props)
+{
+    const [open, setOpen] = useState(true);
+
+    let variant = "dark";
+    return (
+        <React.Fragment>
+            <Alert className={"collapse-header"}
+                   variant={variant}
+                   onClick={() =>
+                   {
+                       setOpen(!open);
+                   }}
+            >
+                {
+                    open === true &&
+                    <CaretDown />
+                }
+                {
+                    open === false &&
+                    <CaretRight />
+                }
+                {props.header}
+                {
+                    props.remove !== undefined &&
+                    <XLg onClick={props.remove} className={"remove-collapse"} />
+                }
+            </Alert>
+            <Collapse in={open}>
+                <Card className={"workflow-card"}>
+                    <Card.Body>
+                        {props.content()}
+                    </Card.Body>
+                </Card>
+            </Collapse>
+        </React.Fragment>
+    );
+}
+
+export function AccessTokenDetailsView(props)
 {
     return <div className={"workflow-details"}>
         <AccessTokenRequestView accessTokenDetails={props.accessTokenDetails} />
@@ -160,4 +215,3 @@ export class AccessTokenResponse extends React.Component
         )
     }
 }
-
