@@ -90,11 +90,11 @@ div.jwt.sha-256-check > input {
     font-weight: bolder;
 }
 
-.jwt-part-0 {
+.jwt-part-0, .jwt-part-0:active, .jwt-part-0:focus {
     color: red;
 }
 
-.jwt-part-1 {
+.jwt-part-1, .jwt-part-1:active, .jwt-part-1:focus {
     color: #d63aff;
 }
 
