@@ -47,7 +47,6 @@ test("Render AccessTokenResponse With Bearer Token", async () =>
     let authUrl = new URL(
         "http://localhost:8081/auth/realms/goldfish/protocol/openid-connect/auth?client_id=goldfish-rest-client&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fauthcode&state=bab36cc5-73a7-4db7-9a01-dca7a6981256");
     const params = Object.fromEntries(authUrl.searchParams);
-    console.log(params)
 })
 
 test("Render AccessTokenResponse With Plain Token", async () =>

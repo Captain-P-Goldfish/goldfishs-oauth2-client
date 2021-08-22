@@ -9,6 +9,8 @@ import OpenidProvider from "./openid/openid-provider";
 import JwtHandler from "./jwt/jwt-handler";
 import OpenidClients from "./openid/openid-clients";
 import OpenidClientOverview from "./openid/openid-client-overview";
+import {AlertListMessages} from "./base/form-base";
+import {GoFlame} from "react-icons/go";
 
 
 export const ApplicationInfoContext = React.createContext(null);
@@ -102,6 +104,10 @@ class Application extends React.Component
                     </Navbar>
 
                     <div className="main">
+                        <AlertListMessages variant={"danger"}
+                                           icon={<GoFlame />}
+                                           messages={(this.state.errors || {}).errorMessages} />
+
                         <ApplicationInfoContext.Provider value={this.state.appInfo}>
                             <ScimServiceProviderContext.Provider value={this.state.serviceProviderConfig}>
                                 {/* A <Switch> looks through its children <Route>s and
