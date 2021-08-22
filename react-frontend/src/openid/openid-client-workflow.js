@@ -130,9 +130,10 @@ export default class OpenidClientWorkflow extends React.Component
                     }
                 </Form>
                 {
-                    (this.state.responseDetails || []).map((responseDetails) =>
+                    (this.state.responseDetails || []).map(responseDetails =>
                     {
-                        return <ResponseDetailsView responseDetails={responseDetails}
+                        return <ResponseDetailsView key={"response-details-" + responseDetails.id}
+                                                    responseDetails={responseDetails}
                                                     client={this.props.client}
                                                     removeGrantTypeDetails={this.removeGrantTypeDetails} />
                     })
