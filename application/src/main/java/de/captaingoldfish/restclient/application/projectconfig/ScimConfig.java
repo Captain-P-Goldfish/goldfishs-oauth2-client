@@ -17,6 +17,7 @@ import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHand
 import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
+import de.captaingoldfish.restclient.application.endpoints.tokenrequest.AccessTokenRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
@@ -24,6 +25,7 @@ import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
+import de.captaingoldfish.restclient.scim.endpoints.AccessTokenRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
@@ -99,8 +101,7 @@ public class ScimConfig
                                            KeystoreDao keystoreDao)
   {
     KeystoreEndpoint keystoreEndpoint = new KeystoreEndpoint(new KeystoreHandler(keystoreFileCache, keystoreDao));
-    ResourceType keystoreResourceType = resourceEndpoint.registerEndpoint(keystoreEndpoint);
-    return keystoreResourceType;
+    return resourceEndpoint.registerEndpoint(keystoreEndpoint);
   }
 
   /**
@@ -113,8 +114,7 @@ public class ScimConfig
   public ResourceType truststoreResourceType(ResourceEndpoint resourceEndpoint, TruststoreDao truststoreDao)
   {
     TruststoreEndpoint truststoreEndpoint = new TruststoreEndpoint(new TruststoreHandler(truststoreDao));
-    ResourceType truststoreResourceType = resourceEndpoint.registerEndpoint(truststoreEndpoint);
-    return truststoreResourceType;
+    return resourceEndpoint.registerEndpoint(truststoreEndpoint);
   }
 
   /**
@@ -127,8 +127,7 @@ public class ScimConfig
   public ResourceType proxyResourceType(ResourceEndpoint resourceEndpoint, ProxyDao proxyDao)
   {
     ProxyEndpoint proxyEndpoint = new ProxyEndpoint(new ProxyHandler(proxyDao));
-    ResourceType proxyResourceType = resourceEndpoint.registerEndpoint(proxyEndpoint);
-    return proxyResourceType;
+    return resourceEndpoint.registerEndpoint(proxyEndpoint);
   }
 
   /**
@@ -225,5 +224,19 @@ public class ScimConfig
     AuthCodeGrantRequestHandler handler = new AuthCodeGrantRequestHandler(authCodeGrantRequestService);
     AuthCodeGrantRequestEndpoint authCodeGrantRequestEndpoint = new AuthCodeGrantRequestEndpoint(handler);
     return resourceEndpoint.registerEndpoint(authCodeGrantRequestEndpoint);
+  }
+
+  /**
+   * registers the auth code grant request resourceType under the endpoint /AccessTokenRequest.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the auth code grant request resource type
+   */
+  @Bean
+  public ResourceType accessTokenRequestResourceType(ResourceEndpoint resourceEndpoint)
+  {
+    AccessTokenRequestHandler handler = new AccessTokenRequestHandler();
+    AccessTokenRequestEndpoint accessTokenRequestEndpoint = new AccessTokenRequestEndpoint(handler);
+    return resourceEndpoint.registerEndpoint(accessTokenRequestEndpoint);
   }
 }

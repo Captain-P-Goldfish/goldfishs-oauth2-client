@@ -1,0 +1,203 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:AccessTokenRequest",
+  "name": "AccessTokenRequest",
+  "description": "This resource is used to show details about an access token request",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "openIdClientId",
+      "type": "integer",
+      "description": "The foreign key reference to an open-id-client resource.",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    },
+    {
+      "name": "grantType",
+      "type": "string",
+      "description": "The authentication grant type to use",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "canonicalValues": [
+        "authorization_code",
+        "client_credentials",
+        "password"
+      ]
+    },
+    {
+      "name": "authorizationCode",
+      "type": "string",
+      "description": "The authorization code that is only required in case that the grantType field is set to 'authorization_code'",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "redirectUri",
+      "type": "string",
+      "description": "If the redirect uri was present in the authorization code request it must also be added to the access token request",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "requestHeaders",
+      "type": "complex",
+      "description": "Contains the HTTP request headers that were send in the AccessToken request",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": true,
+      "required": true,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "The name of the HTTP header",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "The value of the HTTP header",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
+    },
+    {
+      "name": "requestParams",
+      "type": "complex",
+      "description": "Contains the HTTP request parameter that were send in the AccessToken request",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": true,
+      "required": true,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "The name of the request parameter",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "The value of the request parameter",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
+    },
+    {
+      "name": "statusCode",
+      "type": "integer",
+      "description": "The response code from the AccessToken response",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    },
+    {
+      "name": "responseHeaders",
+      "type": "complex",
+      "description": "Contains the HTTP response headers that were received with the AccessToken response",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": true,
+      "required": true,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "The name of the HTTP header",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "The value of the HTTP header",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
+    },
+    {
+      "name": "plainResponse",
+      "type": "string",
+      "description": "the plain response body of the AccessToken response",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
+    }
+  ],
+  "meta": {
+    "resourceType": "Schema",
+    "created": "2021-04-88T22:51:00+02:00",
+    "lastModified": "2021-04-88T22:51:00+02:00",
+    "location": "/Schemas/AccessTokenRequest"
+  }
+}

@@ -77,7 +77,6 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
   {
     // prepare
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     OpenIdProvider openIdProvider = OpenIdProvider.builder().discoveryEndpoint(discoveryUrl).build();
     openIdProvider = openIdProviderDao.save(openIdProvider);
     OpenIdClient openIdClient = OpenIdClient.builder()
@@ -89,6 +88,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
     openIdClient = openIdClientDao.save(openIdClient);
 
     // do
+    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     AuthCodeParameters authCodeParameters = AuthCodeParameters.builder().redirectUri(redirectUri).build();
     ScimCurrentWorkflowSettings workflowSettings = ScimCurrentWorkflowSettings.builder()
                                                                               .openIdClientId(openIdClient.getId())

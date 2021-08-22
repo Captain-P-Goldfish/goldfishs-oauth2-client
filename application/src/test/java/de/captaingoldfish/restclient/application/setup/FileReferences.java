@@ -84,6 +84,7 @@ public interface FileReferences
                          new KeystoreEntry("localhost-rsa", "123456", "RSA", 2048),
                          new KeystoreEntry("unit-test-ec", "unit-test", "EC", 521),
                          new KeystoreEntry("goldfish-ec", "123456", "EC", 256),
+                         new KeystoreEntry("ec-256k", "123456", "EC", 256),
                          new KeystoreEntry("localhost-ec", "123456", "EC", 384),
                          new KeystoreEntry("hello-dsa", "123456", "DSA", 2048),
                          new KeystoreEntry("cert-dsa", null, "DSA", 2048),

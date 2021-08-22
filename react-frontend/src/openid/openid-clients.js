@@ -396,7 +396,8 @@ class OpenIdClientCardEntry extends React.Component
                                                               editMode={this.state.editMode}
                                                               selections={["", ...aliases]}
                                                               selected={this.state.client.signingKeyRef}
-                                                              onChange={this.scimComponentBasics.updateInput}
+                                                              onChange={e => this.scimComponentBasics.updateInput(
+                                                                  e.target.name, e.target.value)}
                                                               onError={fieldName => this.scimClient.getErrors(
                                                                   this.state, fieldName)}
 
@@ -415,7 +416,8 @@ class OpenIdClientCardEntry extends React.Component
                                                               editMode={this.state.editMode}
                                                               selections={["", ...aliases]}
                                                               selected={this.state.client.decryptionKeyRef}
-                                                              onChange={this.scimComponentBasics.updateInput}
+                                                              onChange={e => this.scimComponentBasics.updateInput(
+                                                                  e.target.name, e.target.value)}
 
                                             />
                                         </React.Fragment>

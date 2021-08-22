@@ -116,7 +116,8 @@ export default class OpenidClientWorkflow extends React.Component
                     (this.state[this.authCodeGrantType] || []).map((authTypeDetails) =>
                     {
                         return <div key={this.authCodeGrantType + "-" + authTypeDetails.id}>
-                            <AuthorizationCodeGrantWorkflow requestDetails={authTypeDetails}
+                            <AuthorizationCodeGrantWorkflow client={this.props.client}
+                                                            requestDetails={authTypeDetails}
                                                             onRemove={() =>
                                                             {
                                                                 let authCodeRequestDetails = this.state[this.authCodeGrantType];

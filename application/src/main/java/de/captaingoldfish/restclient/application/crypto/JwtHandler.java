@@ -179,8 +179,6 @@ public class JwtHandler
 
   /**
    * verifies the signature based on the data within the header
-   * 
-   * @return
    */
   @SneakyThrows
   private PlainJwtData verifySignature(String keyId, String jws)

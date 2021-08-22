@@ -6,7 +6,7 @@ import Button from "react-bootstrap/Button";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
 import ScimClient from "../../scim/scim-client";
-import {AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
+import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -110,6 +110,11 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
         const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
 
+        let authCodeQueryParams = Object.fromEntries(
+            new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
+        console.log(queryParamsObject)
+        console.log(authCodeQueryParams)
+
         return <div className={"workflow-details"}>
             {
                 <React.Fragment>
@@ -137,7 +142,9 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                       </React.Fragment>
                                   }}
                     />
-                    <AccessTokenView code={queryParamsObject.code} />
+                    <AccessTokenView openIdClientId={this.props.client.id}
+                                     authorizationCode={queryParamsObject.code}
+                                     redirectUri={authCodeQueryParams.redirect_uri} />
                 </React.Fragment>
             }
         </div>
@@ -210,6 +217,7 @@ class AccessTokenView extends React.Component
     {
         super(props);
         this.state = {};
+        this.setState = this.setState.bind(this);
         this.retrieveAccessTokenDetails = this.retrieveAccessTokenDetails.bind(this);
         this.loadAccessTokenView = this.loadAccessTokenView.bind(this);
         this.loadAccessTokenRequestView = this.loadAccessTokenRequestView.bind(this);
@@ -219,42 +227,23 @@ class AccessTokenView extends React.Component
     retrieveAccessTokenDetails(e)
     {
         e.preventDefault();
-        let accessTokenDetails = {
-            requestHeaders: [
-                {
-                    name: "User-Agent",
-                    value: "apache-http-client"
-                },
-                {
-                    name: "Authorization",
-                    value: "Basic Z29sZGZpc2g6MTIzNDU2"
-                },
-            ],
-            requestParams: [
-                {
-                    name: "client_id",
-                    value: "goldifsh"
-                },
-                {
-                    name: "redirect_uri",
-                    value: "http://localhost:8080"
-                },
-            ],
-            statusCode: 200,
-            responseHeaders: [
-                {
-                    name: "Content-Type",
-                    value: "application/json"
-                }
-            ],
-            plainResponse: "{\n"
-                           + "  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n"
-                           + "  \"token_type\": \"Bearer\",\n"
-                           + "  \"expires_in\": 3600,\n"
-                           + "  \"refresh_token\": \"cba\"\n"
-                           + "}"
+        let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
+        let resource = {
+            grantType: "authorization_code",
+            openIdClientId: parseInt(this.props.openIdClientId),
+            redirectUri: this.props.redirectUri,
+            authorizationCode: this.props.authorizationCode
         }
-        this.setState({accessTokenDetails: accessTokenDetails})
+        scimClient.createResource(resource).then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    this.setState({accessTokenDetails: resource})
+                })
+            }
+        });
     }
 
     loadAccessTokenRequestView()
@@ -343,7 +332,7 @@ function NameValueList(props)
             {
                 return <Row key={props.keyPrefix + index}>
                     <Col sm={2}>{nameValuePair.name}</Col>
-                    <Col sm={4}>{nameValuePair.value}</Col>
+                    <Col sm={10}>{nameValuePair.value}</Col>
                 </Row>
             })
         }

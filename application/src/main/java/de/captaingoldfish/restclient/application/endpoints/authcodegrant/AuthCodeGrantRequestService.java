@@ -17,20 +17,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsService;
+import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 
 /**
@@ -44,7 +40,7 @@ public class AuthCodeGrantRequestService
 
   private final CurrentWorkflowSettingsService currentWorkflowSettingsService;
 
-  private final OpenIdProviderMetdatdataCache openIdProviderMetdatdataCache;
+  private final OpenIdProviderMetdatdataCache openIdProviderMetaDataCache;
 
   private final AuthCodeGrantRequestCache authCodeGrantRequestCache;
 
@@ -61,7 +57,7 @@ public class AuthCodeGrantRequestService
   public String generateAuthCodeRequestUrl(OpenIdClient openIdClient, ScimCurrentWorkflowSettings workflowSettings)
   {
     OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
-    OIDCProviderMetadata metadata = loadDiscoveryEndpointInfos(openIdProvider);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdProvider);
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
 
     final String redirectUri = workflowSettings.getAuthCodeParameters()
@@ -126,35 +122,6 @@ public class AuthCodeGrantRequestService
                               Collections.singletonList(URLEncoder.encode(UUID.randomUUID().toString(),
                                                                           StandardCharsets.UTF_8)));
     return uriComponentsBuilder.queryParams(queryParamMap);
-  }
-
-  /**
-   * loads the OpenID Connect metadata from the identity provider
-   * 
-   * @param openIdProvider the OpenID Provider definition
-   * @return the metadata of the OpenID Provider
-   */
-  @SneakyThrows
-  private OIDCProviderMetadata loadDiscoveryEndpointInfos(OpenIdProvider openIdProvider)
-  {
-    OIDCProviderMetadata metadata = openIdProviderMetdatdataCache.getProviderMetadata(openIdProvider.getId());
-    if (metadata != null)
-    {
-      return metadata;
-    }
-    String discoveryUrl = openIdProvider.getDiscoveryEndpoint()
-                                        // workaround to bypass the problem with the automatically appended well-known
-                                        // endpoint path from nimbus
-                                        .replace(OIDCProviderConfigurationRequest.OPENID_PROVIDER_WELL_KNOWN_PATH, "");
-    Issuer issuer = new Issuer(discoveryUrl);
-    OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
-    // Make HTTP request
-    HTTPRequest httpRequest = request.toHTTPRequest();
-    HTTPResponse httpResponse = httpRequest.send();
-    // Parse OpenID provider metadata
-    metadata = OIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
-    openIdProviderMetdatdataCache.setProviderMetadata(openIdProvider.getId(), metadata);
-    return metadata;
   }
 
   /**
