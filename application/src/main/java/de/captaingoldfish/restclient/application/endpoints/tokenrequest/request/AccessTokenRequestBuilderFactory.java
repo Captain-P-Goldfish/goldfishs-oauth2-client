@@ -30,7 +30,7 @@ public class AccessTokenRequestBuilderFactory
     if (OAuthConstants.AUTH_CODE_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
     {
       return new AuthCodeTokenRequestBuilder(openIdClient, accessTokenRequest.getAuthorizationCode().orElseThrow(),
-                                             accessTokenRequest.getRedirectUri().orElseThrow());
+                                             accessTokenRequest.getRedirectUri().orElse(null));
     }
     if (OAuthConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
     {

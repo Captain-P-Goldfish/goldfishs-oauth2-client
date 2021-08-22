@@ -31,13 +31,14 @@ export default class OpenidClientWorkflow extends React.Component
         this.resetRedirectUri = this.resetRedirectUri.bind(this);
         this.handleNestedElementChange = this.handleNestedElementChange.bind(this);
         this.handleAuthTypeFormResponse = this.handleAuthTypeFormResponse.bind(this);
+        this.removeAuthCodeGrantType = this.removeAuthCodeGrantType.bind(this);
     }
 
     async resetRedirectUri(e)
     {
         e.preventDefault();
         let wrapperObject = this.state;
-        lodash.set(wrapperObject, "authCodeParameters.redirectUri", this.state.originalRedirectUri);
+        lodash.set(wrapperObject, "workflowDetails.authCodeParameters.redirectUri", this.state.originalRedirectUri);
         this.setState(wrapperObject)
     }
 
@@ -55,6 +56,16 @@ export default class OpenidClientWorkflow extends React.Component
         let wrapperObject = this.state.workflowDetails;
         lodash.set(wrapperObject, fieldname, value);
         this.setState({workflowDetails: wrapperObject})
+    }
+
+    removeAuthCodeGrantType(authTypeDetails)
+    {
+        let authCodeRequestDetails = this.state[this.authCodeGrantType];
+        let detailsIndex = authCodeRequestDetails.indexOf(authTypeDetails);
+        authCodeRequestDetails.splice(detailsIndex, 1);
+        let wrapperObject = {};
+        wrapperObject[this.authCodeGrantType] = authCodeRequestDetails;
+        this.setState(wrapperObject)
     }
 
     render()
@@ -118,17 +129,8 @@ export default class OpenidClientWorkflow extends React.Component
                         return <div key={this.authCodeGrantType + "-" + authTypeDetails.id}>
                             <AuthorizationCodeGrantWorkflow client={this.props.client}
                                                             requestDetails={authTypeDetails}
-                                                            onRemove={() =>
-                                                            {
-                                                                let authCodeRequestDetails = this.state[this.authCodeGrantType];
-                                                                let detailsIndex = authCodeRequestDetails.indexOf(
-                                                                    authTypeDetails);
-                                                                authCodeRequestDetails.splice(detailsIndex, 1);
-                                                                let wrapperObject = {};
-                                                                wrapperObject[this.authCodeGrantType] =
-                                                                    authCodeRequestDetails;
-                                                                this.setState(wrapperObject)
-                                                            }} />
+                                                            onRemove={() => this.removeAuthCodeGrantType(
+                                                                authTypeDetails)} />
                         </div>
                     })
                 }

@@ -1,12 +1,12 @@
 import React, {useState} from "react";
 import Col from "react-bootstrap/Col";
-import {Collapseable, ErrorListItem, LoadingSpinner} from "../../base/form-base";
+import {Collapseable} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
-import Button from "react-bootstrap/Button";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
 import ScimClient from "../../scim/scim-client";
 import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
+import AccessTokenView from "./access-token-view";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -19,6 +19,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         this.loadAuthorizationQueryParameterView = this.loadAuthorizationQueryParameterView.bind(this);
         this.getAuthRequestStatus = this.getAuthRequestStatus.bind(this);
         this.loadAuthorizationCodeResponseDetailsView = this.loadAuthorizationCodeResponseDetailsView.bind(this);
+        this.retrieveAccessTokenDetails = this.retrieveAccessTokenDetails.bind(this);
     }
 
     componentWillUnmount()
@@ -101,6 +102,34 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         </div>
     }
 
+    retrieveAccessTokenDetails(e)
+    {
+        e.preventDefault();
+        let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
+
+        let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
+        const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
+        let authCodeQueryParams = Object.fromEntries(
+            new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
+
+        let resource = {
+            grantType: "authorization_code",
+            openIdClientId: parseInt(this.props.client.id),
+            redirectUri: authCodeQueryParams.redirect_uri,
+            authorizationCode: queryParamsObject.code
+        }
+        scimClient.createResource(resource).then(response =>
+        {
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    this.setState({accessTokenDetails: resource})
+                })
+            }
+        });
+    }
+
     loadAuthorizationCodeResponseDetailsView()
     {
         if (!this.state.authorizationResponseUrl)
@@ -109,11 +138,6 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         }
         let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
         const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
-
-        let authCodeQueryParams = Object.fromEntries(
-            new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
-        console.log(queryParamsObject)
-        console.log(authCodeQueryParams)
 
         return <div className={"workflow-details"}>
             {
@@ -142,9 +166,8 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                       </React.Fragment>
                                   }}
                     />
-                    <AccessTokenView openIdClientId={this.props.client.id}
-                                     authorizationCode={queryParamsObject.code}
-                                     redirectUri={authCodeQueryParams.redirect_uri} />
+                    <AccessTokenView retrieveAccessTokenDetails={this.retrieveAccessTokenDetails}
+                                     accessTokenDetails={this.state.accessTokenDetails} />
                 </React.Fragment>
             }
         </div>
@@ -208,210 +231,5 @@ function AuthorizationCodeGrantDetails(props)
             </Collapse>
         </React.Fragment>
     );
-}
-
-class AccessTokenView extends React.Component
-{
-
-    constructor(props)
-    {
-        super(props);
-        this.state = {};
-        this.setState = this.setState.bind(this);
-        this.retrieveAccessTokenDetails = this.retrieveAccessTokenDetails.bind(this);
-        this.loadAccessTokenView = this.loadAccessTokenView.bind(this);
-        this.loadAccessTokenRequestView = this.loadAccessTokenRequestView.bind(this);
-        this.loadAccessTokenResponseView = this.loadAccessTokenResponseView.bind(this);
-    }
-
-    retrieveAccessTokenDetails(e)
-    {
-        e.preventDefault();
-        let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
-        let resource = {
-            grantType: "authorization_code",
-            openIdClientId: parseInt(this.props.openIdClientId),
-            redirectUri: this.props.redirectUri,
-            authorizationCode: this.props.authorizationCode
-        }
-        scimClient.createResource(resource).then(response =>
-        {
-            if (response.success)
-            {
-                response.resource.then(resource =>
-                {
-                    this.setState({accessTokenDetails: resource})
-                })
-            }
-        });
-    }
-
-    loadAccessTokenRequestView()
-    {
-        let state = this.state;
-        let requestViewContent = function ()
-        {
-            return <React.Fragment>
-                <Collapseable header={"Request Header"}
-                              variant={"workflow-details"}
-                              content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
-                                                            nameValueList={((state.accessTokenDetails || {})
-                                                                                .requestHeaders || [])} />} />
-                <Collapseable header={"Request Parameter"}
-                              variant={"workflow-details"}
-                              content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
-                                                            nameValueList={((state.accessTokenDetails || {})
-                                                                                .requestParams || [])} />} />
-            </React.Fragment>
-        }
-        return <Collapseable header={"Access Token Request Details"}
-                             variant={"workflow-details"}
-                             content={requestViewContent} />
-    }
-
-    loadAccessTokenResponseView()
-    {
-        let responseDetails = (this.state.accessTokenDetails || {});
-        let responseStatusCode = responseDetails.statusCode;
-        let responseHeaders = responseDetails.responseHeaders || [];
-        let plainResponse = responseDetails.plainResponse || "";
-        let contentType = (responseHeaders.filter(header => header.name.toLowerCase() === "content-type")[0]
-                           || []).value;
-
-        let header = function ()
-        {
-            return <span>Access Token Response Details
-                <span className={"bold"}> (Status: {responseStatusCode})</span>
-            </span>
-        }
-        let responseViewContent = function ()
-        {
-            return <React.Fragment>
-                <Collapseable header={"Response Header"}
-                              variant={"workflow-details"}
-                              content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
-                                                            nameValueList={responseHeaders} />} />
-                <Collapseable header={"Access Token Response"}
-                              open={true}
-                              variant={"workflow-details"}
-                              content={() => <AccessTokenResponse contentType={contentType}
-                                                                  tokenResponse={plainResponse} />} />
-            </React.Fragment>
-        }
-        return <Collapseable header={header()}
-                             open={true}
-                             variant={"workflow-details"}
-                             content={responseViewContent} />
-    }
-
-    loadAccessTokenView()
-    {
-        return <React.Fragment>
-            {this.loadAccessTokenRequestView()}
-            {this.loadAccessTokenResponseView()}
-        </React.Fragment>
-    }
-
-    render()
-    {
-        return <React.Fragment>
-            <Button type="submit" onClick={this.retrieveAccessTokenDetails}
-                    style={{marginTop: "15px", marginBottom: "15px"}}>
-                <LoadingSpinner show={this.props.isLoading} /> Get Access Token
-            </Button>
-            {this.state.accessTokenDetails && this.loadAccessTokenView()}
-        </React.Fragment>
-    }
-}
-
-function NameValueList(props)
-{
-    return <React.Fragment>
-        {
-            props.nameValueList.map((nameValuePair, index) =>
-            {
-                return <Row key={props.keyPrefix + index}>
-                    <Col sm={2}>{nameValuePair.name}</Col>
-                    <Col sm={10}>{nameValuePair.value}</Col>
-                </Row>
-            })
-        }
-    </React.Fragment>
-}
-
-export class AccessTokenResponse extends React.Component
-{
-
-    constructor(props)
-    {
-        super(props);
-        this.state = {errorMessages: []}
-    }
-
-    componentDidMount()
-    {
-        this.parseJsonContent();
-    }
-
-    async parseJsonContent()
-    {
-        let isContentTypeJson = (this.props.contentType || "").toLowerCase().includes("application/json");
-        try
-        {
-            let stateExtension = {};
-            stateExtension.json = JSON.parse(this.props.tokenResponse);
-            if (!isContentTypeJson)
-            {
-                stateExtension.errorMessages = [...this.state.errorMessages,
-                                                "Found invalid content-type: " + this.props.contentType
-                                                + ". Response is valid JSON but content-type header does not match."];
-            }
-            this.setState(stateExtension)
-        } catch (e)
-        {
-            console.error(e)
-            if (isContentTypeJson)
-            {
-                this.setState({
-                    errorMessages: [...this.state.errorMessages, "Expected content to be JSON but could not parse it",
-                                    e.message]
-                })
-            }
-        }
-    }
-
-    render()
-    {
-        return (
-            <div id={"access-token-response-container"}>
-                {
-                    this.state.errorMessages.length > 0 &&
-                    <Alert variant={"danger"}>
-                        <ul className="error-list">
-                            {this.state.errorMessages.map((message, index) =>
-                                <ErrorListItem key={"error-message-" + index} message={message} />)}
-                        </ul>
-                    </Alert>
-                }
-                {
-                    this.state.json &&
-                    Object.keys(this.state.json).map((key, index) =>
-                    {
-                        return <Row key={"access-token-response-json-param-" + index}>
-                            <Col sm={2}>{key}</Col>
-                            <Col sm={10}> {this.state.json[key]} </Col>
-                        </Row>
-                    })
-                }
-                {
-                    !this.state.json &&
-                    <Row key={"access-token-response-json-param-_"}>
-                        <Col sm={2}>access_token</Col>
-                        <Col sm={10}> {this.props.tokenResponse} </Col>
-                    </Row>
-                }
-            </div>
-        )
-    }
 }
 
