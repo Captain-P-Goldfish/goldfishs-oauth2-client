@@ -67,7 +67,7 @@ public class AccessTokenRequestHandler extends ResourceHandler<ScimAccessTokenRe
     }
     catch (Exception ex)
     {
-      throw new BadRequestException(ex.getMessage());
+      throw new BadRequestException(ex.getMessage(), ex);
     }
   }
 

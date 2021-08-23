@@ -4,10 +4,6 @@ import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
 
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderConfigurationRequest;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.OpenIdProviderMetdatdataCache;
@@ -19,17 +15,20 @@ import de.captaingoldfish.restclient.database.entities.Proxy;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import kong.unirest.Config;
+import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestInstance;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * @author Pascal Knueppel
  * @since 21.05.2021
  */
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Utils
 {
@@ -52,12 +51,13 @@ public final class Utils
   /**
    * loads the OpenID Connect metadata from the identity provider
    *
-   * @param openIdProvider the OpenID Provider definition
+   * @param openIdClient the OpenID Provider definition
    * @return the metadata of the OpenID Provider
    */
   @SneakyThrows
-  public static OIDCProviderMetadata loadDiscoveryEndpointInfos(OpenIdProvider openIdProvider)
+  public synchronized static OIDCProviderMetadata loadDiscoveryEndpointInfos(OpenIdClient openIdClient)
   {
+    final OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
     OpenIdProviderMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
                                                               .getBean(OpenIdProviderMetdatdataCache.class);
     OIDCProviderMetadata metadata = metadataCache.getProviderMetadata(openIdProvider.getId());
@@ -65,17 +65,24 @@ public final class Utils
     {
       return metadata;
     }
-    String discoveryUrl = openIdProvider.getDiscoveryEndpoint()
-                                        // workaround to bypass the problem with the automatically appended well-known
-                                        // endpoint path from nimbus
-                                        .replace(OIDCProviderConfigurationRequest.OPENID_PROVIDER_WELL_KNOWN_PATH, "");
-    Issuer issuer = new Issuer(discoveryUrl);
-    OIDCProviderConfigurationRequest request = new OIDCProviderConfigurationRequest(issuer);
-    // Make HTTP request
-    HTTPRequest httpRequest = request.toHTTPRequest();
-    HTTPResponse httpResponse = httpRequest.send();
-    // Parse OpenID provider metadata
-    metadata = OIDCProviderMetadata.parse(httpResponse.getContentAsJSONObject());
+    String discoveryUrl = openIdProvider.getDiscoveryEndpoint();
+    final String responseBody;
+    try (UnirestInstance unirest = getUnirestInstance(openIdClient))
+    {
+      HttpResponse<String> response = unirest.get(discoveryUrl).asString();
+      if (!response.isSuccess())
+      {
+        throw new BadRequestException(String.format("Failed to load meta-data from OpenID Discovery endpoint: %s",
+                                                    response.getStatusText()));
+      }
+      responseBody = response.getBody();
+    }
+    catch (Exception ex)
+    {
+      throw new BadRequestException(String.format("Failed to load meta-data from OpenID Discovery endpoint: %s",
+                                                  ex.getMessage()));
+    }
+    metadata = OIDCProviderMetadata.parse(responseBody);
     metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
     return metadata;
   }
@@ -95,6 +102,10 @@ public final class Utils
     SSLContext sslContext = SSLContextHelper.getSslContext(httpSettings);
     Config unirestConfig = unirest.config();
     unirestConfig.sslContext(sslContext);
+    if (!httpSettings.isUseHostnameVerifier())
+    {
+      unirestConfig.hostnameVerifier((s, sslSession) -> true);
+    }
     unirestConfig.connectTimeout(httpSettings.getConnectionTimeout() * 1000);
     unirestConfig.socketTimeout(httpSettings.getSocketTimeout() * 1000);
     Optional.ofNullable(proxy)

@@ -23,7 +23,6 @@ import de.captaingoldfish.restclient.application.endpoints.workflowsettings.Curr
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
-import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
@@ -57,8 +56,7 @@ public class AuthCodeGrantRequestService
    */
   public String generateAuthCodeRequestUrl(OpenIdClient openIdClient, ScimCurrentWorkflowSettings workflowSettings)
   {
-    OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdProvider);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
 
     final String redirectUri = workflowSettings.getAuthCodeParameters()

@@ -72,7 +72,7 @@ public abstract class AccessTokenRequestBuilder
     Map<String, String> requestHeaders = getRequestHeaders();
     Map<String, String> requestParameters = getRequestParameters();
 
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String tokenEndpoint = metadata.getTokenEndpointURI().toString();
 
     try (UnirestInstance unirest = Utils.getUnirestInstance(openIdClient))

@@ -173,7 +173,7 @@ public class JwtAuthenticator implements Authenticator
    */
   private String getProviderIssuer()
   {
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     return metadata.getIssuer().getValue();
   }
 }
