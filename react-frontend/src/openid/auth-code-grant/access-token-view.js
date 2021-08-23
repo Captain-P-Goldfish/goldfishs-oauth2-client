@@ -90,7 +90,7 @@ function AccessTokenRequestView(props)
                                                                             .requestParams || [])} />} />
         </React.Fragment>
     }
-    return <Collapseable header={"Access Token Request Details-header"}
+    return <Collapseable header={"Access Token Request Details"}
                          variant={"workflow-details"}
                          content={requestViewContent} />
 }
