@@ -10,7 +10,22 @@ get access tokens for the following grants (see also screenshot):
 
 It allows you to take a direct look at request and response details which can be used for teaching purposes.
 
-The project supports basic-authentication and JWT authentication but the some features on the different grants are still
-missing.
+The project supports basic-authentication and JWT authentication.
+
+This project is not feature complete and was created to make lifetime easier for people who regularly need to check on
+AccessTokens on any Identity Provider.
 
 ![theme-settings](images/auth-code-grant.png)
+
+The project is based on springboot and needs a database connection which can be setup like this in
+`application.properties` file
+
+```properties
+database.url=jdbc:mysql://localhost:3306/goldfishs_rest_client
+database.user=root
+database.password=123456
+logging.config=./config/log4j2.xml
+```
+
+Please note that the frontend is pretty poorly implemented due to inexperience with javascript I created several design
+problems that would actually require the frontend to be reimplemented.
