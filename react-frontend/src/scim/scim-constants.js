@@ -13,3 +13,4 @@ export const OPENID_CLIENT_ENDPOINT = BASE_URL + "/OpenIdClient";
 export const OPENID_PROVIDER_ENDPOINT = BASE_URL + "/OpenIdProvider";
 export const PROXY_ENDPOINT = BASE_URL + "/Proxy";
 export const TRUSTSTORE_ENDPOINT = BASE_URL + "/Truststore";
+export const CURRENT_WORKFLOW_SETTINGS_ENDPOINT = BASE_URL + "/CurrentWorkflowSettings";

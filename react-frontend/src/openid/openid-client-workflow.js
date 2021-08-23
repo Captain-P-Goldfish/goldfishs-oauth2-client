@@ -18,6 +18,7 @@ import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT, CURRENT_WORKFLO
 import AccessTokenView from "./auth-code-grant/access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../services/utils";
+import CurrentWorkflowSettingsClient from "../scim/current-workflow-settings-client";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -118,10 +119,15 @@ export default class OpenidClientWorkflow extends React.Component
                     {
                         this.state.authenticationType === this.clientCredentialsGrantType &&
                         <ClientCredentialsGrantForm formReference={this.formReference}
+                                                    workflowDetails={this.state.workflowDetails}
                                                     client={this.props.client}
                                                     isLoading={this.state.isLoading}
+                                                    handleChange={this.handleNestedElementChange}
                                                     handleResponse={details => this.handleGrantTypeResponseDetails(
-                                                        this.clientCredentialsGrantType, details)} />
+                                                        this.clientCredentialsGrantType, details)}
+                                                    onError={() =>
+                                                    {
+                                                    }} />
                     }
                     {
                         this.state.authenticationType === this.resourceOwnerGrantType &&
@@ -202,6 +208,7 @@ class AuthorizationCodeGrantForm extends React.Component
         this.setState = this.setState.bind(this);
         this.forceUpdate = this.forceUpdate.bind(this);
         this.loadAuthorizationRequestDetails = this.loadAuthorizationRequestDetails.bind(this);
+        this.patchWorkflowSettings = this.patchWorkflowSettings.bind(this);
     }
 
     componentWillUnmount()
@@ -218,6 +225,8 @@ class AuthorizationCodeGrantForm extends React.Component
     loadAuthorizationRequestDetails(e)
     {
         e.preventDefault();
+        this.patchWorkflowSettings();
+
         let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
         let resource = scimClient.getResourceFromFormReference(this.props.formReference);
         resource[CURRENT_WORKFLOW_URI] = this.props.workflowDetails;
@@ -233,6 +242,22 @@ class AuthorizationCodeGrantForm extends React.Component
                 })
             }
         });
+    }
+
+    patchWorkflowSettings()
+    {
+        let workflowSettingsClient = new CurrentWorkflowSettingsClient(this.setState);
+
+        let openIdClientId = new Optional(this.props.workflowDetails).map(w => w.openIdClientId)
+                                                                     .orElse(undefined);
+        let redirectUri = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
+                                                                  .map(a => a.redirectUri)
+                                                                  .orElse(undefined);
+        let queryParams = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
+                                                                  .map(a => a.queryParameters)
+                                                                  .orElse(undefined);
+
+        workflowSettingsClient.updateAuthCodeSettings(openIdClientId, redirectUri, queryParams);
     }
 
     render()
@@ -278,17 +303,23 @@ class ClientCredentialsGrantForm extends React.Component
         this.state = {};
         this.setState = this.setState.bind(this);
         this.retrieveAccessTokenDetails = this.retrieveAccessTokenDetails.bind(this);
+        this.patchWorkflowSettings = this.patchWorkflowSettings.bind(this);
     }
 
     retrieveAccessTokenDetails(e)
     {
         e.preventDefault();
+        this.patchWorkflowSettings();
         this.setState({isLoading: true})
         let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
 
+        let scope = new Optional(this.props.workflowDetails).map(w => w.clientCredentialsParameters)
+                                                            .map(c => c.scope)
+                                                            .orElse(undefined);
         let resource = {
             grantType: "client_credentials",
-            openIdClientId: parseInt(this.props.client.id)
+            openIdClientId: parseInt(this.props.client.id),
+            scope: scope
         }
         let handleResponse = this.props.handleResponse;
         scimClient.createResource(resource).then(response =>
@@ -304,11 +335,32 @@ class ClientCredentialsGrantForm extends React.Component
         });
     }
 
+    patchWorkflowSettings()
+    {
+        let workflowSettingsClient = new CurrentWorkflowSettingsClient(this.setState);
+
+        let openIdClientId = new Optional(this.props.workflowDetails).map(w => w.openIdClientId)
+                                                                     .orElse(undefined);
+        let scope = new Optional(this.props.workflowDetails).map(w => w.clientCredentialsParameters)
+                                                            .map(c => c.scope)
+                                                            .orElse(undefined);
+
+        workflowSettingsClient.updateClientCredentialsSettings(openIdClientId, scope);
+    }
+
     render()
     {
+        let clientCredentialsParameters = this.props.workflowDetails.clientCredentialsParameters || {};
+
         let errors = this.state.errors || {};
         return (
             <React.Fragment>
+                <FormInputField name="clientCredentialsParameters.scope"
+                                label="Scope"
+                                value={clientCredentialsParameters.scope || ""}
+                                placeholder="The scope to access from the identity provider"
+                                onChange={e => this.props.handleChange(e.target.name, e.target.value)}
+                                onError={fieldname => this.props.onError(fieldname)} />
                 <Form.Group as={Row}>
                     <Col sm={{span: 10, offset: 2}}>
                         <Button id={"upload"} type="submit" onClick={this.retrieveAccessTokenDetails}>
@@ -338,18 +390,22 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
     retrieveAccessTokenDetails(e)
     {
         e.preventDefault();
+        this.patchWorkflowSettings();
+
         this.setState({isLoading: true});
         let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
 
         let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
         let username = resourceOwnerPasswordParameters.username || "";
         let password = resourceOwnerPasswordParameters.password || "";
+        let scope = resourceOwnerPasswordParameters.scope || "";
 
         let resource = {
             grantType: "password",
             openIdClientId: parseInt(this.props.client.id),
             username: username,
-            password: password
+            password: password,
+            scope: scope
         }
 
         let handleResponse = this.props.handleResponse;
@@ -366,11 +422,27 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
         });
     }
 
+    patchWorkflowSettings()
+    {
+        let workflowSettingsClient = new CurrentWorkflowSettingsClient(this.setState);
+
+        let openIdClientId = new Optional(this.props.workflowDetails).map(w => w.openIdClientId)
+                                                                     .orElse(undefined);
+        let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
+        let username = resourceOwnerPasswordParameters.username || "";
+        let password = resourceOwnerPasswordParameters.password || "";
+        let scope = resourceOwnerPasswordParameters.scope || "";
+
+        workflowSettingsClient.updateResourceOwnerPasswordCredentialsSettings(openIdClientId, username, password,
+            scope);
+    }
+
     render()
     {
         let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
         let username = resourceOwnerPasswordParameters.username || "";
         let password = resourceOwnerPasswordParameters.password || "";
+        let scope = resourceOwnerPasswordParameters.scope || "";
 
         let errors = this.state.errors || {};
         return (
@@ -385,6 +457,12 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
                                 label="Password"
                                 placeholder={"the users password"}
                                 value={password}
+                                onChange={e => this.props.handleChange(e.target.name, e.target.value)}
+                                onError={fieldname => this.props.onError(fieldname)} />
+                <FormInputField name="resourceOwnerPasswordParameters.scope"
+                                label="Scope"
+                                value={scope}
+                                placeholder="The scope to access from the identity provider"
                                 onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                                 onError={fieldname => this.props.onError(fieldname)} />
                 <Form.Group as={Row}>

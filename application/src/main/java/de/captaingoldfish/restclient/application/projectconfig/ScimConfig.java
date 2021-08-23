@@ -19,6 +19,8 @@ import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenId
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.AccessTokenRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
+import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsHandler;
+import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsService;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
@@ -28,6 +30,7 @@ import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.AccessTokenRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.CurrentWorkflowSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
@@ -238,5 +241,20 @@ public class ScimConfig
     AccessTokenRequestHandler handler = new AccessTokenRequestHandler();
     AccessTokenRequestEndpoint accessTokenRequestEndpoint = new AccessTokenRequestEndpoint(handler);
     return resourceEndpoint.registerEndpoint(accessTokenRequestEndpoint);
+  }
+
+  /**
+   * registers the current-workflow-settings resourceType under the endpoint /CurrentWorkflowSettings.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the current-workflow-settings resource type
+   */
+  @Bean
+  public ResourceType currentWorkflowSettingsResourceType(ResourceEndpoint resourceEndpoint,
+                                                          CurrentWorkflowSettingsService currentWorkflowSettingsService)
+  {
+    CurrentWorkflowSettingsHandler handler = new CurrentWorkflowSettingsHandler(currentWorkflowSettingsService);
+    CurrentWorkflowSettingsEndpoint currentWorkflowSettingsEndpoint = new CurrentWorkflowSettingsEndpoint(handler);
+    return resourceEndpoint.registerEndpoint(currentWorkflowSettingsEndpoint);
   }
 }

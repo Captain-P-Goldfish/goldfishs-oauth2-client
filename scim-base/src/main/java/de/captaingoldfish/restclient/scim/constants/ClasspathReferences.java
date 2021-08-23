@@ -59,6 +59,9 @@ public final class ClasspathReferences
 
   public static final String ACCESS_TOKEN_REQUEST_SCHEMA = BASE_PATH + "/resource/access-token-request.json";
 
+  public static final String CURRENT_WORKFLOW_SETTINGS_RESOURCE_TYPE = BASE_PATH
+                                                                       + "/resourcetypes/current-workflow-settings-resource-type.json";
+
   public static final String CURRENT_WORKFLOW_SETTINGS_SCHEMA = BASE_PATH + "/resource/current-workflow-settings.json";
 
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";

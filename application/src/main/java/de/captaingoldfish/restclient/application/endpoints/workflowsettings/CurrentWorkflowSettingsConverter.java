@@ -6,6 +6,7 @@ import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
+import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.ClientCredentialsParameters;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.ResourceOwnerPasswordParameters;
 
 
@@ -23,17 +24,23 @@ public class CurrentWorkflowSettingsConverter
     return CurrentWorkflowSettings.builder()
                                   .openIdClient(openIdClient)
                                   .redirectUri(scimSettings.getAuthCodeParameters()
-                                                           .map(AuthCodeParameters::getRedirectUri)
+                                                           .flatMap(AuthCodeParameters::getRedirectUri)
                                                            .orElse(null))
                                   .queryParameters(scimSettings.getAuthCodeParameters()
                                                                .flatMap(AuthCodeParameters::getQueryParameters)
                                                                .orElse(null))
+                                  .clientCredentialsGrantScope(scimSettings.getClientCredentialsParameters()
+                                                                           .map(ClientCredentialsParameters::getScope)
+                                                                           .orElse(null))
                                   .username(scimSettings.getResourceOwnerPasswordParameters()
                                                         .map(ResourceOwnerPasswordParameters::getUsername)
                                                         .orElse(null))
                                   .userPassword(scimSettings.getResourceOwnerPasswordParameters()
                                                             .map(ResourceOwnerPasswordParameters::getPassword)
                                                             .orElse(null))
+                                  .resourcePasswordGrantScope(scimSettings.getResourceOwnerPasswordParameters()
+                                                                          .map(ResourceOwnerPasswordParameters::getScope)
+                                                                          .orElse(null))
                                   .build();
   }
 
@@ -43,13 +50,16 @@ public class CurrentWorkflowSettingsConverter
                                                               .redirectUri(settings.getRedirectUri())
                                                               .queryParameters(settings.getQueryParameters())
                                                               .build();
-    ResourceOwnerPasswordParameters passwordParams = ResourceOwnerPasswordParameters.builder()
-                                                                                    .username(settings.getUsername())
-                                                                                    .password(settings.getUserPassword())
-                                                                                    .build();
+    var clientCredentialsParameters = new ClientCredentialsParameters(settings.getClientCredentialsGrantScope());
+    var passwordParams = ResourceOwnerPasswordParameters.builder()
+                                                        .username(settings.getUsername())
+                                                        .password(settings.getUserPassword())
+                                                        .scope(settings.getResourcePasswordGrantScope())
+                                                        .build();
     return ScimCurrentWorkflowSettings.builder()
                                       .openIdClientId(settings.getOpenIdClient().getId())
                                       .authCodeParameters(authCodeParameters)
+                                      .clientCredentialsParameters(clientCredentialsParameters)
                                       .resourceOwnerPasswordParameters(passwordParams)
                                       .build();
   }

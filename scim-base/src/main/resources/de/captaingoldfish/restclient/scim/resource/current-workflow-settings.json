@@ -64,6 +64,30 @@
       ]
     },
     {
+      "name": "clientCredentialsParameters",
+      "type": "complex",
+      "description": "The settings that have been used for the client credentials grant in the last request.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "scope",
+          "type": "string",
+          "description": "The optional scope parameter to set the scope of the access token.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    },
+    {
       "name": "resourceOwnerPasswordParameters",
       "type": "complex",
       "description": "The settings that have been used for the resource owner password credentials grant in the last request.",
@@ -82,7 +106,7 @@
           "returned": "default",
           "uniqueness": "server",
           "multiValued": false,
-          "required": true,
+          "required": false,
           "caseExact": false
         },
         {
@@ -93,7 +117,18 @@
           "returned": "default",
           "uniqueness": "server",
           "multiValued": false,
-          "required": true,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "description": "The optional scope parameter to set the scope of the access token.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
           "caseExact": false
         }
       ]

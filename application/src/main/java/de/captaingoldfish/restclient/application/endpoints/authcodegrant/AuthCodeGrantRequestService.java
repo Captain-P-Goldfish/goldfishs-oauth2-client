@@ -55,7 +55,7 @@ public class AuthCodeGrantRequestService
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
 
     final String redirectUri = workflowSettings.getAuthCodeParameters()
-                                               .map(AuthCodeParameters::getRedirectUri)
+                                               .flatMap(AuthCodeParameters::getRedirectUri)
                                                .map(StringUtils::stripToNull)
                                                .orElse(null);
     final String additionalQueryParams = workflowSettings.getAuthCodeParameters()

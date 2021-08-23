@@ -183,10 +183,12 @@
             </column>
             <column name="REDIRECT_URI" type="${clob_type}"/>
             <column name="QUERY_PARAMETER" type="${clob_type}"/>
+            <column name="CLIENT_CREDENTIALS_GRANT_SCOPE" type="${clob_type}"/>
             <column name="USERNAME" type="VARCHAR(255)"/>
             <column name="USER_PASSWORD" type="VARCHAR(255)"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>
+            <column name="RESOURCE_PASSWORD_GRANT_SCOPE" type="${clob_type}"/>
         </createTable>
     </changeSet>
 

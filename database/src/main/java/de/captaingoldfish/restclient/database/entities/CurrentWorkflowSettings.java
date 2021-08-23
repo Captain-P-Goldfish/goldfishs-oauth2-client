@@ -57,6 +57,13 @@ public class CurrentWorkflowSettings
   private String queryParameters;
 
   /**
+   * The optional scope parameter to set the scope of the access token. This field is explicitly stored for the
+   * client-credentials-grant
+   */
+  @Column(name = "CLIENT_CREDENTIALS_GRANT_SCOPE")
+  private String clientCredentialsGrantScope;
+
+  /**
    * the username that was used in the last resource owner password credentials grant request for the parent
    * client
    */
@@ -69,6 +76,13 @@ public class CurrentWorkflowSettings
    */
   @Column(name = "USER_PASSWORD")
   private String userPassword;
+
+  /**
+   * The optional scope parameter to set the scope of the access token. This field is explicitly stored for the
+   * resource-owner-password-credentials-grant
+   */
+  @Column(name = "RESOURCE_PASSWORD_GRANT_SCOPE")
+  private String resourcePasswordGrantScope;
 
   /**
    * the moment this instance was created
@@ -86,14 +100,18 @@ public class CurrentWorkflowSettings
   public CurrentWorkflowSettings(OpenIdClient openIdClient,
                                  String redirectUri,
                                  String queryParameters,
+                                 String clientCredentialsGrantScope,
                                  String username,
-                                 String userPassword)
+                                 String userPassword,
+                                 String resourcePasswordGrantScope)
   {
     this.openIdClient = openIdClient;
     this.redirectUri = redirectUri;
     this.queryParameters = queryParameters;
+    this.clientCredentialsGrantScope = clientCredentialsGrantScope;
     this.username = username;
     this.userPassword = userPassword;
+    this.resourcePasswordGrantScope = resourcePasswordGrantScope;
   }
 
   @PrePersist

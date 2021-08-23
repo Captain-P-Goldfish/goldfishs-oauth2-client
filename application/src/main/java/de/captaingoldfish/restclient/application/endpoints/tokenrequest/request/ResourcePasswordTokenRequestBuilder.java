@@ -3,6 +3,8 @@ package de.captaingoldfish.restclient.application.endpoints.tokenrequest.request
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 
@@ -34,7 +36,7 @@ public class ResourcePasswordTokenRequestBuilder extends AccessTokenRequestBuild
     super(openIdClient);
     this.username = username;
     this.password = password;
-    this.scope = scope;
+    this.scope = StringUtils.stripToNull(scope);
   }
 
   /**

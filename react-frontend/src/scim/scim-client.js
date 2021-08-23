@@ -205,6 +205,7 @@ export default class ScimClient
         this.resetErrors();
         return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PATCH",
+            headers: {'Content-Type': 'application/scim+json'},
             body: JSON.stringify(patchBody)
         }).then(response =>
         {

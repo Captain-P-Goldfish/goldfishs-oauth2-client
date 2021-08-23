@@ -25,6 +25,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   public ScimCurrentWorkflowSettings(String id,
                                      Long openIdClientId,
                                      AuthCodeParameters authCodeParameters,
+                                     ClientCredentialsParameters clientCredentialsParameters,
                                      ResourceOwnerPasswordParameters resourceOwnerPasswordParameters,
                                      Meta meta)
   {
@@ -32,6 +33,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     setId(id);
     setOpenIdClientId(openIdClientId);
     setAuthCodeParameters(authCodeParameters);
+    setClientCredentialsParameters(clientCredentialsParameters);
     setResourceOwnerPasswordParameters(resourceOwnerPasswordParameters);
     setMeta(meta);
   }
@@ -43,9 +45,9 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   }
 
   /** The foreign key reference to an open-id-client resource. */
-  public void setOpenIdClientId(Long idOfClient)
+  public void setOpenIdClientId(Long openIdClientId)
   {
-    setAttribute(FieldNames.OPENID_CLIENT_ID, idOfClient);
+    setAttribute(FieldNames.OPENID_CLIENT_ID, openIdClientId);
   }
 
   /** The settings that have been used for the authorization code grant in the last request. */
@@ -57,9 +59,19 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   /** The settings that have been used for the authorization code grant in the last request. */
   public void setAuthCodeParameters(AuthCodeParameters authCodeParameters)
   {
-    setAttribute(FieldNames.AUTH_CODE_PARAMETERS,
-                 Optional.ofNullable(authCodeParameters).map(ScimObjectNode::isEmpty).orElse(false) ? null
-                   : authCodeParameters);
+    setAttribute(FieldNames.AUTH_CODE_PARAMETERS, authCodeParameters);
+  }
+
+  /** The settings that have been used for the client credentials grant in the last request. */
+  public Optional<ClientCredentialsParameters> getClientCredentialsParameters()
+  {
+    return getObjectAttribute(FieldNames.CLIENT_CREDENTIALS_PARAMETERS, ClientCredentialsParameters.class);
+  }
+
+  /** The settings that have been used for the client credentials grant in the last request. */
+  public void setClientCredentialsParameters(ClientCredentialsParameters clientCredentialsParameters)
+  {
+    setAttribute(FieldNames.CLIENT_CREDENTIALS_PARAMETERS, clientCredentialsParameters);
   }
 
   /** The settings that have been used for the resource owner password credentials grant in the last request. */
@@ -71,9 +83,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   /** The settings that have been used for the resource owner password credentials grant in the last request. */
   public void setResourceOwnerPasswordParameters(ResourceOwnerPasswordParameters resourceOwnerPasswordParameters)
   {
-    setAttribute(FieldNames.RESOURCE_OWNER_PASSWORD_PARAMETERS,
-                 Optional.ofNullable(resourceOwnerPasswordParameters).map(ScimObjectNode::isEmpty).orElse(false) ? null
-                   : resourceOwnerPasswordParameters);
+    setAttribute(FieldNames.RESOURCE_OWNER_PASSWORD_PARAMETERS, resourceOwnerPasswordParameters);
   }
 
   /** The settings that have been used for the authorization code grant in the last request. */
@@ -91,9 +101,9 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     }
 
     /** The redirect URI that was entered into the frontend input field. */
-    public String getRedirectUri()
+    public Optional<String> getRedirectUri()
     {
-      return getStringAttribute(FieldNames.REDIRECT_URI).orElse(null);
+      return getStringAttribute(FieldNames.REDIRECT_URI);
     }
 
     /** The redirect URI that was entered into the frontend input field. */
@@ -117,6 +127,33 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
 
   }
 
+  /** The settings that have been used for the client credentials grant in the last request. */
+  public static class ClientCredentialsParameters extends ScimObjectNode
+  {
+
+    public ClientCredentialsParameters()
+    {}
+
+    public ClientCredentialsParameters(String scope)
+    {
+      setScope(scope);
+    }
+
+    /** The optional scope parameter to set the scope of the access token. */
+    public String getScope()
+    {
+      return getStringAttribute(FieldNames.SCOPE).orElse(null);
+    }
+
+    /** The optional scope parameter to set the scope of the access token. */
+    public void setScope(String scope)
+    {
+      setAttribute(FieldNames.SCOPE, scope);
+    }
+
+
+  }
+
   /** The settings that have been used for the resource owner password credentials grant in the last request. */
   public static class ResourceOwnerPasswordParameters extends ScimObjectNode
   {
@@ -125,10 +162,11 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     {}
 
     @Builder
-    public ResourceOwnerPasswordParameters(String username, String password)
+    public ResourceOwnerPasswordParameters(String username, String password, String scope)
     {
       setUsername(username);
       setPassword(password);
+      setScope(scope);
     }
 
     /** The username that should be used to authenticate at the identity provider. */
@@ -155,6 +193,18 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
       setAttribute(FieldNames.PASSWORD, password);
     }
 
+    /** The optional scope parameter to set the scope of the access token. */
+    public String getScope()
+    {
+      return getStringAttribute(FieldNames.SCOPE).orElse(null);
+    }
+
+    /** The optional scope parameter to set the scope of the access token. */
+    public void setScope(String scope)
+    {
+      setAttribute(FieldNames.SCOPE, scope);
+    }
+
 
   }
 
@@ -169,13 +219,17 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
 
     public static final String QUERY_PARAMETERS = "queryParameters";
 
+    public static final String CLIENT_CREDENTIALS_PARAMETERS = "clientCredentialsParameters";
+
     public static final String AUTH_CODE_PARAMETERS = "authCodeParameters";
+
+    public static final String SCOPE = "scope";
 
     public static final String ID = "id";
 
-    public static final String OPENID_CLIENT_ID = "openIdClientId";
-
     public static final String RESOURCE_OWNER_PASSWORD_PARAMETERS = "resourceOwnerPasswordParameters";
+
+    public static final String OPENID_CLIENT_ID = "openIdClientId";
 
     public static final String USERNAME = "username";
   }
