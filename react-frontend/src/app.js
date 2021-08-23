@@ -1,7 +1,7 @@
 import React from "react";
 import logo from "./logo.svg";
 import {Container, Nav, Navbar} from "react-bootstrap";
-import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
 import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
@@ -86,10 +86,6 @@ class Application extends React.Component
                         <Navbar.Collapse>
 
                             <Nav className="flex-column">
-
-                                <LinkContainer exact to="/">
-                                    <Nav.Link>Home</Nav.Link>
-                                </LinkContainer>
                                 <LinkContainer exact to="/openIdProvider">
                                     <Nav.Link>OpenID</Nav.Link>
                                 </LinkContainer>
@@ -131,7 +127,7 @@ class Application extends React.Component
                                         <JwtHandler />
                                     </Route>
                                     <Route path="/">
-                                        <h2>Welcome</h2>
+                                        <Redirect to="/jwts" />
                                     </Route>
                                 </Switch>
                             </ScimServiceProviderContext.Provider>
