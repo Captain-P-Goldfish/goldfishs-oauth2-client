@@ -4,6 +4,7 @@ import {CaretDown, CaretRight, XLg} from "react-bootstrap-icons";
 import {Collapseable, ErrorListItem} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import {Optional} from "../../services/utils";
 
 
 export default function AccessTokenView(props)
@@ -11,6 +12,7 @@ export default function AccessTokenView(props)
     return <div className={"grant-type-workflow"}>
         <AccessTokenCollapsible
             header={props.header}
+            headerClass={props.headerClass}
             content={() =>
             {
                 return <AccessTokenDetailsView accessTokenDetails={props.accessTokenDetails} />
@@ -24,11 +26,11 @@ function AccessTokenCollapsible(props)
 {
     const [open, setOpen] = useState(true);
 
-    let variant = "dark";
+    let headerClass = new Optional(props.headerClass).map(val => " " + val).orElse("");
+
     return (
         <React.Fragment>
-            <Alert className={"collapse-header"}
-                   variant={variant}
+            <Alert className={"collapse-header" + headerClass}
                    onClick={() =>
                    {
                        setOpen(!open);

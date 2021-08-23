@@ -418,7 +418,7 @@ div.workflow-card {
 }
 
 .alert-workflow-details {
-    background: #824e9929 linear-gradient(200deg, #43935b45 0%, #d71c1c21 11%, rgba(177, 148, 0, 0.35) 120%);
+    background: #824e9929 linear-gradient(200deg, #43935b45 0%, #d71c1c21 30%, rgba(177, 148, 0, 0.35) 100%);
     border: none;
 }
 
@@ -433,6 +433,25 @@ div.workflow-card {
 
 .url-base-value {
     color: #b5b5b5;
+}
+
+.grant-type-workflow .alert {
+    border: none
+}
+
+.grant-type-workflow .alert.authorization-code-grant {
+    color: black;
+    background-color: floralwhite;
+}
+
+.grant-type-workflow .alert.client-credentials-grant {
+    color: black;
+    background-color: burlywood;
+}
+
+.grant-type-workflow .alert.resource-owner-password-credentials-grant {
+    color: black;
+    background-color: sandybrown;
 }
 
 /* *************************************************************************************************** */

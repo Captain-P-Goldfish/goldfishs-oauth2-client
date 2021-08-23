@@ -174,6 +174,7 @@ function ResponseDetailsView(props)
     {
         return <React.Fragment key={clientCredentialsGrantType + "-" + responseDetails.id}>
             <AccessTokenView header={"Client Credentials Grant"}
+                             headerClass={"client-credentials-grant"}
                              accessTokenDetails={responseDetails}
                              onRemove={() => props.removeGrantTypeDetails(
                                  responseDetails)} />
@@ -182,6 +183,7 @@ function ResponseDetailsView(props)
 
     return <React.Fragment key={resourceOwnerGrantType + "-" + responseDetails.id}>
         <AccessTokenView header={"Resource Owner Password Credentials Grant"}
+                         headerClass={"resource-owner-password-credentials-grant"}
                          accessTokenDetails={responseDetails}
                          onRemove={() => props.removeGrantTypeDetails(
                              responseDetails)} />

@@ -222,7 +222,7 @@ function AuthorizationCodeGrantDetails(props)
     let variant = "dark";
     return (
         <React.Fragment>
-            <Alert className={"collapse-header"}
+            <Alert className={"collapse-header authorization-code-grant"}
                    variant={variant}
                    onClick={() =>
                    {
