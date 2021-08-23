@@ -27,7 +27,8 @@ public class ScimTruststore extends ResourceNode
   }
 
   @Builder
-  public ScimTruststore(List<String> aliasesList,
+  public ScimTruststore(String applicationTruststore,
+                        List<String> aliasesList,
                         TruststoreUpload truststoreUpload,
                         TruststoreUploadResponse truststoreUploadResponse,
                         CertificateUpload certificateUpload,
@@ -37,6 +38,7 @@ public class ScimTruststore extends ResourceNode
   {
     this();
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
+    setApplicationTruststore(applicationTruststore);
     setAliases(aliasesList);
     setTruststoreUpload(truststoreUpload);
     setTruststoreUploadResponse(truststoreUploadResponse);
@@ -44,6 +46,22 @@ public class ScimTruststore extends ResourceNode
     setCertificateUploadResponse(certificateUploadResponse);
     setCertificateInfo(certificateInfo);
     setMeta(meta);
+  }
+
+  /**
+   * A base64 encoded representation of the application truststore that is only returned if directly requested.
+   */
+  public String getApplicationTruststore()
+  {
+    return getStringAttribute(FieldNames.APPLICATION_TRUSTSTORE).orElse(null);
+  }
+
+  /**
+   * A base64 encoded representation of the application truststore that is only returned if directly requested
+   */
+  public void setApplicationTruststore(String applicationTruststore)
+  {
+    setAttribute(FieldNames.APPLICATION_TRUSTSTORE, applicationTruststore);
   }
 
   /**
@@ -326,6 +344,8 @@ public class ScimTruststore extends ResourceNode
     public static final String DUPLICATE_ALIASES = "duplicateAliases";
 
     public static final String ALIASES = "aliases";
+
+    public static final String APPLICATION_TRUSTSTORE = "applicationTruststore";
 
     public static final String TRUSTSTORE_UPLOAD = "truststoreUpload";
 

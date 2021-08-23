@@ -20,6 +20,17 @@
       "maxLength": 64
     },
     {
+      "name": "applicationTruststore",
+      "type": "string",
+      "description": "A base64 encoded representation of the application truststore that is only returned if directly requested",
+      "mutability": "readOnly",
+      "returned": "request",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "truststoreUpload",
       "type": "complex",
       "description": "Used to upload a truststore whose entries will be merged into the application keystore if possible.",

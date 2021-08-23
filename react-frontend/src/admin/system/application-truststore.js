@@ -4,13 +4,14 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import {ErrorMessagesAlert, FormFileField, FormInputField, LoadingSpinner} from "../../base/form-base";
-import {Optional} from "../../services/utils";
+import {downloadBase64Data, Optional} from "../../services/utils";
 import ScimClient from "../../scim/scim-client";
 import {Alert, Badge, Image} from "react-bootstrap";
 import downloadIcon from "../../media/secure-download-icon.png";
 import {InfoCircle} from "react-bootstrap-icons";
 import {GoFlame, GoThumbsup} from "react-icons/go";
 import CertificateList from "../../base/certificate-list";
+import {TRUSTSTORE_ENDPOINT} from "../../scim/scim-constants";
 
 
 export default class ApplicationTruststore extends React.Component
@@ -267,6 +268,7 @@ class CertificateEntryList extends React.Component
         this.setState = this.setState.bind(this);
         this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
+        this.downloadTruststore = this.downloadTruststore.bind(this);
     }
 
     async componentDidMount()
@@ -309,6 +311,24 @@ class CertificateEntryList extends React.Component
         })
     }
 
+    downloadTruststore(e)
+    {
+        e.preventDefault();
+        this.setState({downloading: true})
+        this.scimClient.getResource("1", TRUSTSTORE_ENDPOINT, {attributes: "applicationTruststore"}).then(response =>
+        {
+            this.setState({downloading: false})
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    let base64ApplicationTruststore = resource.applicationTruststore;
+                    downloadBase64Data(base64ApplicationTruststore, "application-truststore-pw-123456.jks", "jks")
+                })
+            }
+        })
+    }
+
     render()
     {
         return (
@@ -316,7 +336,8 @@ class CertificateEntryList extends React.Component
                 <h2 id="application-certificate-info-header">
                     <p>Application Truststore Infos</p>
                     <Badge className="download-keystore-icon">
-                        <a id={"truststore-download-link"} href={this.basePath + "/download"}>
+                        <a id={"truststore-download-link"} href={"/#"} onClick={this.downloadTruststore}>
+                            <LoadingSpinner show={this.state.downloading || false} />
                             <Image src={downloadIcon} fluid />
                             <p>Download</p>
                         </a>

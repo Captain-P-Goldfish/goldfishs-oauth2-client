@@ -82,14 +82,18 @@ export default class ScimClient
         })
     }
 
-    async getResource(id, resourcePath)
+    async getResource(id, resourcePath, params)
     {
         this.isLoading(true);
         this.resetErrors();
 
         let path = new Optional(resourcePath).orElse(this.resourcePath);
-        let fullPath = path + new Optional(id).map(val => "/" + encodeURIComponent(val)).orElse("");
-        return await fetch(fullPath, {
+
+        let searchParams = new Optional(params).map(parameters => "?" + new URLSearchParams(parameters).toString())
+                                               .orElse("");
+        let url = path + new Optional(id).map(val => "/" + encodeURIComponent(val)).orElse("") + searchParams;
+
+        return await fetch(url, {
             method: "GET"
         }).then(response =>
         {

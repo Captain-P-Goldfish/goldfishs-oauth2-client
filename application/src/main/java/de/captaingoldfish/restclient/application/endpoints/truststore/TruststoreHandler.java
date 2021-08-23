@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.truststore;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
@@ -164,18 +165,45 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
                                     Context context)
   {
     final String alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
-    Truststore truststore = truststoreDao.getTruststore();
-    X509Certificate certificate = (X509Certificate)truststore.getTruststore().getCertificate(alias);
-    CertificateInfo certificateInfo = CertificateInfo.builder().alias(id).certificate(certificate).build();
-    ScimTruststore scimTruststore = ScimTruststore.builder()
-                                                  .certificateInfo(certificateInfo)
-                                                  .meta(Meta.builder()
-                                                            .created(Instant.now())
-                                                            .lastModified(Instant.now())
-                                                            .build())
-                                                  .build();
+    Truststore applicationTruststore = truststoreDao.getTruststore();
+
+    boolean downloadTruststoreFile = attributes.stream().anyMatch(attribute -> {
+      return attribute.getName().equals(ScimTruststore.FieldNames.APPLICATION_TRUSTSTORE);
+    });
+
+    final ScimTruststore scimTruststore;
+    if (downloadTruststoreFile)
+    {
+      String base64EncodedTruststore = applicationTruststoreToBase64(applicationTruststore);
+      scimTruststore = ScimTruststore.builder().applicationTruststore(base64EncodedTruststore).build();
+    }
+    else
+    {
+      X509Certificate certificate = (X509Certificate)applicationTruststore.getTruststore().getCertificate(alias);
+      CertificateInfo certificateInfo = CertificateInfo.builder().alias(id).certificate(certificate).build();
+      scimTruststore = ScimTruststore.builder().certificateInfo(certificateInfo).build();
+    }
     scimTruststore.setId(id);
+    scimTruststore.setMeta(Meta.builder().created(Instant.now()).lastModified(Instant.now()).build());
     return scimTruststore;
+  }
+
+  /**
+   * parses the application keystore to a base64 representation
+   *
+   * @param applicationTruststore the application keystore for download
+   * @return the base64 representation of the application keystore if it should be downloaded
+   */
+  @SneakyThrows
+  private String applicationTruststoreToBase64(Truststore applicationTruststore)
+  {
+    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+    {
+      applicationTruststore.getTruststore()
+                           .store(outputStream, applicationTruststore.getTruststorePassword().toCharArray());
+      byte[] applicationKeystoreBytes = outputStream.toByteArray();
+      return Base64.getEncoder().encodeToString(applicationKeystoreBytes);
+    }
   }
 
   /**

@@ -23,7 +23,8 @@ public class ScimKeystore extends ResourceNode
 {
 
   @Builder
-  public ScimKeystore(List<KeyInfos> keyInfosList,
+  public ScimKeystore(String applicationKeystore,
+                      List<KeyInfos> keyInfosList,
                       FileUpload fileUpload,
                       AliasSelection aliasSelection,
                       CertificateInfo certificateInfo,
@@ -31,11 +32,26 @@ public class ScimKeystore extends ResourceNode
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId("1");
+    setApplicationKeystore(applicationKeystore);
     setKeyInfos(keyInfosList);
     setFileUpload(fileUpload);
     setAliasSelection(aliasSelection);
     setCertificateInfo(certificateInfo);
     setMeta(meta);
+  }
+
+  /**
+   * A base64 encoded representation of the application keystore that is only returned if directly requested.
+   */
+  public String getApplicationKeystore()
+  {
+    return getStringAttribute(FieldNames.APPLICATION_KEYSTORE).orElse(null);
+  }
+
+  /** A base64 encoded representation of the application keystore that is only returned if directly requested */
+  public void setApplicationKeystore(String applicationKeystore)
+  {
+    setAttribute(FieldNames.APPLICATION_KEYSTORE, applicationKeystore);
   }
 
   /** A list of all key entries with some minor infos that are present within this keystore. */
@@ -334,6 +350,8 @@ public class ScimKeystore extends ResourceNode
   {
 
     public static final String SCHEMA_ID = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:Keystore";
+
+    public static final String APPLICATION_KEYSTORE = "applicationKeystore";
 
     public static final String ALIAS_SELECTION = "aliasSelection";
 

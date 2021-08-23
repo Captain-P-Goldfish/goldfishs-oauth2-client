@@ -4,13 +4,14 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import {ErrorMessagesAlert, FormFileField, FormInputField, FormSelectField, LoadingSpinner} from "../../base/form-base";
-import {Optional} from "../../services/utils";
+import {downloadBase64Data, Optional} from "../../services/utils";
 import ScimClient from "../../scim/scim-client";
 import {Alert, Badge, CardDeck, Image} from "react-bootstrap";
 import downloadIcon from "../../media/secure-download-icon.png";
 import {InfoCircle} from "react-bootstrap-icons";
 import {GoThumbsup} from "react-icons/go";
 import {CertificateCardEntry} from "../../base/certificate-list";
+import {KEYSTORE_ENDPOINT} from "../../scim/scim-constants";
 
 
 export default class ApplicationKeystore extends React.Component
@@ -218,6 +219,7 @@ class KeystoreEntryList extends React.Component
         this.setState = this.setState.bind(this);
         this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.onDeleteSuccess = this.onDeleteSuccess.bind(this);
+        this.downloadKeystore = this.downloadKeystore.bind(this);
     }
 
     async componentDidMount()
@@ -276,6 +278,24 @@ class KeystoreEntryList extends React.Component
         })
     }
 
+    downloadKeystore(e)
+    {
+        e.preventDefault();
+        this.setState({downloading: true})
+        this.scimClient.getResource("1", KEYSTORE_ENDPOINT, {attributes: "applicationKeystore"}).then(response =>
+        {
+            this.setState({downloading: false})
+            if (response.success)
+            {
+                response.resource.then(resource =>
+                {
+                    let base64ApplicationKeystore = resource.applicationKeystore;
+                    downloadBase64Data(base64ApplicationKeystore, "application-keystore-pw-123456.p12", "p12")
+                })
+            }
+        })
+    }
+
     render()
     {
         return (
@@ -283,7 +303,8 @@ class KeystoreEntryList extends React.Component
                 <h2 id="application-certificate-info-header">
                     <p>Application Keystore Infos</p>
                     <Badge className="download-keystore-icon">
-                        <a id={"keystore-download-link"} href={this.basePath + "/download"}>
+                        <a id={"keystore-download-link"} href={"/#"} onClick={this.downloadKeystore}>
+                            <LoadingSpinner show={this.state.downloading || false} />
                             <Image src={downloadIcon} fluid />
                             <p>Download</p>
                         </a>

@@ -17,6 +17,27 @@ export function toBase64(file)
     });
 }
 
+export function downloadBase64Data(base64Data, filename, filetype)
+{
+    let decoded = window.atob(base64Data);
+    var len = decoded.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++)
+    {
+        bytes[i] = decoded.charCodeAt(i);
+    }
+    let file = new Blob([bytes.buffer], {type: filetype});
+    let downloadAnchor = document.createElement("a");
+    let url = URL.createObjectURL(file);
+    downloadAnchor.href = url;
+    downloadAnchor.download = filename;
+    downloadAnchor.click();
+    setTimeout(function ()
+    {
+        window.URL.revokeObjectURL(url);
+    }, 0);
+}
+
 export function parseJws(token)
 {
     if (typeof token !== 'string')

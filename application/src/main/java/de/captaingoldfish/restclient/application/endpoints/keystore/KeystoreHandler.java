@@ -1,6 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.keystore;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -168,17 +169,48 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
 
   @Override
   public ScimKeystore getResource(String alias,
-                                  List<SchemaAttribute> list,
-                                  List<SchemaAttribute> list1,
+                                  List<SchemaAttribute> attributes,
+                                  List<SchemaAttribute> excludedAttributes,
                                   Context context)
   {
-    Keystore keystore = keystoreDao.getKeystore();
+    Keystore applicationKeystore = keystoreDao.getKeystore();
     Meta meta = Meta.builder().created(Instant.now()).lastModified(Instant.now()).build();
-    X509Certificate x509Certificate = keystore.getCertificate(alias);
-    CertificateInfo certificateInfo = new CertificateInfo(alias, x509Certificate);
-    ScimKeystore scimKeystore = ScimKeystore.builder().certificateInfo(certificateInfo).meta(meta).build();
+
+    boolean downloadKeystoreFile = attributes.stream().anyMatch(attribute -> {
+      return attribute.getName().equals(ScimKeystore.FieldNames.APPLICATION_KEYSTORE);
+    });
+
+    final ScimKeystore scimKeystore;
+    if (downloadKeystoreFile)
+    {
+      String base64EncodedApplicationKeystore = applicationKeystoreToBase64(applicationKeystore);
+      scimKeystore = ScimKeystore.builder().applicationKeystore(base64EncodedApplicationKeystore).meta(meta).build();
+    }
+    else
+    {
+      X509Certificate x509Certificate = applicationKeystore.getCertificate(alias);
+      CertificateInfo certificateInfo = new CertificateInfo(alias, x509Certificate);
+      scimKeystore = ScimKeystore.builder().certificateInfo(certificateInfo).meta(meta).build();
+    }
     scimKeystore.setId(alias);
     return scimKeystore;
+  }
+
+  /**
+   * parses the application keystore to a base64 representation
+   * 
+   * @param applicationKeystore the application keystore for download
+   * @return the base64 representation of the application keystore if it should be downloaded
+   */
+  @SneakyThrows
+  private String applicationKeystoreToBase64(Keystore applicationKeystore)
+  {
+    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+    {
+      applicationKeystore.getKeyStore().store(outputStream, applicationKeystore.getKeystorePassword().toCharArray());
+      byte[] applicationKeystoreBytes = outputStream.toByteArray();
+      return Base64.getEncoder().encodeToString(applicationKeystoreBytes);
+    }
   }
 
   @Override
