@@ -1,4 +1,4 @@
-package de.captaingoldfish.restclient.application.endpoints.authcodegrant;
+package de.captaingoldfish.restclient.application.endpoints;
 
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;

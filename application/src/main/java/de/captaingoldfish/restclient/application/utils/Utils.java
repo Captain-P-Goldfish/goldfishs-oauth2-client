@@ -6,7 +6,7 @@ import javax.net.ssl.SSLContext;
 
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
-import de.captaingoldfish.restclient.application.endpoints.authcodegrant.OpenIdProviderMetdatdataCache;
+import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
