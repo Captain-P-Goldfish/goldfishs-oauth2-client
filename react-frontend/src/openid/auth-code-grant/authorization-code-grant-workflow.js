@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import Col from "react-bootstrap/Col";
-import {Collapseable, LoadingSpinner} from "../../base/form-base";
+import {AlertListMessages, Collapseable, LoadingSpinner} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse} from "react-bootstrap";
@@ -8,6 +8,8 @@ import ScimClient from "../../scim/scim-client";
 import {ACCESS_TOKEN_REQUEST_ENDPOINT, AUTH_CODE_GRANT_ENDPOINT} from "../../scim/scim-constants";
 import Button from "react-bootstrap/Button";
 import {AccessTokenDetailsView} from "./access-token-view";
+import {GoFlame} from "react-icons/go";
+import {Optional} from "../../services/utils";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -74,12 +76,13 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         let authCodeQueryParams = Object.fromEntries(
             new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
 
-        let showInfoMessage = this.state.interval === undefined && this.state.authorizationResponseUrl === undefined;
+        let showInfoMessage = this.state.authorizationResponseUrl === undefined;
 
         return <div className={"workflow-details"}>
             <Alert variant={"info"} show={showInfoMessage}>
                 <ExclamationLg /> The authorization code grant will try to open a new browser window. Make sure your
-                                  popup blocker does not block this.
+                                  popup blocker does not block this. If you closed this window before finishing the
+                                  login process. Close this workflow and start again.
             </Alert>
             <Collapseable header={"Authorization Request Details"} variant={"workflow-details"} content={() =>
             {
@@ -140,6 +143,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
         const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
 
+        let errors = this.state.errors || {};
         return <div className={"workflow-details"}>
             {
                 <React.Fragment>
@@ -167,8 +171,24 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                       </React.Fragment>
                                   }}
                     />
-                    <AccessTokenView retrieveAccessTokenDetails={this.retrieveAccessTokenDetails}
-                                     accessTokenDetails={this.state.accessTokenDetails} />
+
+                    <Button type="submit" onClick={e =>
+                    {
+                        this.setState({isLoading: true});
+                        this.retrieveAccessTokenDetails(e);
+                    }}
+                            style={{marginTop: "15px", marginBottom: "15px"}}>
+                        <LoadingSpinner show={this.state.isLoading} /> Get Access Token
+                    </Button>
+                    {
+                        this.state.accessTokenDetails &&
+                        <AccessTokenDetailsView accessTokenDetails={this.state.accessTokenDetails} />
+                    }
+
+                    <AlertListMessages variant={"danger"} icon={<GoFlame />}
+                                       messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
+                                                                                                    .orElse(
+                                                                                                        [])} />
                 </React.Fragment>
             }
         </div>
@@ -180,6 +200,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
             <div className={"grant-type-workflow"}>
                 {
                     <AuthorizationCodeGrantDetails
+                        isLoading={this.state.authorizationResponseUrl === undefined}
                         content={() =>
                         {
                             return <React.Fragment>
@@ -216,7 +237,7 @@ function AuthorizationCodeGrantDetails(props)
                     open === false &&
                     <CaretRight />
                 }
-                Authorization Code Grant/Flow
+                <span><LoadingSpinner show={props.isLoading} /> Authorization Code Grant/Flow</span>
                 {
                     props.remove !== undefined &&
                     <XLg onClick={props.remove} className={"remove-collapse"} />
@@ -233,18 +254,4 @@ function AuthorizationCodeGrantDetails(props)
     );
 }
 
-function AccessTokenView(props)
-{
-    return <React.Fragment>
-        <Button type="submit" onClick={props.retrieveAccessTokenDetails}
-                style={{marginTop: "15px", marginBottom: "15px"}}>
-            <LoadingSpinner show={props.isLoading} /> Get Access Token
-        </Button>
-        {
-            props.accessTokenDetails &&
-            <AccessTokenDetailsView accessTokenDetails={props.accessTokenDetails} />
-        }
-    </React.Fragment>
-
-}
 
