@@ -29,3 +29,11 @@ logging.config=./config/log4j2.xml
 
 Please note that the frontend is pretty poorly implemented due to inexperience with javascript I created several design
 problems that would actually require the frontend to be reimplemented.
+
+# Requirements
+
+The project requires JDK 11+
+
+# Build
+
+The executable artifact can be found at `application/target/oauth2-test-client.jar` after `maven clean package`
