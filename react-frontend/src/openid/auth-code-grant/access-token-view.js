@@ -74,17 +74,21 @@ function AccessTokenRequestView(props)
         return <React.Fragment>
             <Collapseable header={"Request Header"}
                           variant={"workflow-details"}
+                          headerClass={"nested-workflow-details-header"}
+                          bodyClass={"nested-workflow-details-body"}
                           content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
                                                         nameValueList={((props.accessTokenDetails || {})
                                                                             .requestHeaders || [])} />} />
             <Collapseable header={"Request Parameter"}
                           variant={"workflow-details"}
+                          headerClass={"nested-workflow-details-header"}
+                          bodyClass={"nested-workflow-details-body"}
                           content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
                                                         nameValueList={((props.accessTokenDetails || {})
                                                                             .requestParams || [])} />} />
         </React.Fragment>
     }
-    return <Collapseable header={"Access Token Request Details"}
+    return <Collapseable header={"Access Token Request Details-header"}
                          variant={"workflow-details"}
                          content={requestViewContent} />
 }
@@ -110,11 +114,14 @@ function AccessTokenResponseView(props)
         return <React.Fragment>
             <Collapseable header={"Response Header"}
                           variant={"workflow-details"}
+                          headerClass={"nested-workflow-details-header"}
+                          bodyClass={"nested-workflow-details-body"}
                           content={() => <NameValueList keyPrefix={"access-token-request-header-row-"}
                                                         nameValueList={responseHeaders} />} />
             <Collapseable header={"Access Token Response"}
                           open={true}
                           variant={"workflow-details"}
+                          headerClass={"nested-workflow-details-header"}
                           content={() => <AccessTokenResponse contentType={contentType}
                                                               tokenResponse={plainResponse} />} />
         </React.Fragment>

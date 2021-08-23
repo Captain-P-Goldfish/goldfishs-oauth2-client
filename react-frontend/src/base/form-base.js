@@ -618,11 +618,14 @@ export function ModifiableCardList(props)
 export function Collapseable(props)
 {
     const [open, setOpen] = useState(props.open || false);
+
     let variant = props.variant || "primary";
+    let headerClass = new Optional(props.headerClass).map(val => " " + val).orElse("");
+    let bodyClass = new Optional(props.bodyClass).map(val => " " + val).orElse("");
 
     return (
         <React.Fragment>
-            <Alert className={"collapse-header"}
+            <Alert className={"collapse-header" + headerClass}
                    variant={variant}
                    onClick={() => setOpen(!open)}>
                 {
@@ -640,7 +643,7 @@ export function Collapseable(props)
                 }
             </Alert>
             <Collapse in={open}>
-                <Card>
+                <Card className={bodyClass}>
                     <Card.Body>
                         {props.content()}
                     </Card.Body>

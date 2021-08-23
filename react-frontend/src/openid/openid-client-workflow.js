@@ -162,30 +162,30 @@ function ResponseDetailsView(props)
 
     if (authCodeGrantType === responseDetails.grantType)
     {
-        return <div key={authCodeGrantType + "-" + responseDetails.id}>
+        return <React.Fragment key={authCodeGrantType + "-" + responseDetails.id}>
             <AuthorizationCodeGrantWorkflow client={props.client}
                                             requestDetails={responseDetails}
                                             onRemove={() => props.removeGrantTypeDetails(
                                                 responseDetails)} />
-        </div>
+        </React.Fragment>
     }
 
     if (clientCredentialsGrantType === responseDetails.grantType)
     {
-        return <div key={clientCredentialsGrantType + "-" + responseDetails.id}>
+        return <React.Fragment key={clientCredentialsGrantType + "-" + responseDetails.id}>
             <AccessTokenView header={"Client Credentials Grant"}
                              accessTokenDetails={responseDetails}
                              onRemove={() => props.removeGrantTypeDetails(
                                  responseDetails)} />
-        </div>
+        </React.Fragment>
     }
 
-    return <div key={resourceOwnerGrantType + "-" + responseDetails.id}>
+    return <React.Fragment key={resourceOwnerGrantType + "-" + responseDetails.id}>
         <AccessTokenView header={"Resource Owner Password Credentials Grant"}
                          accessTokenDetails={responseDetails}
                          onRemove={() => props.removeGrantTypeDetails(
                              responseDetails)} />
-    </div>
+    </React.Fragment>
 }
 
 class AuthorizationCodeGrantForm extends React.Component

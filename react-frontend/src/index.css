@@ -400,8 +400,22 @@ div.workflow-details .collapse-header {
     background-color: transparent;
 }
 
+div.workflow-card {
+    border: 1px solid bisque;
+}
+
 .alert-workflow-details {
-    background: transparent linear-gradient(200deg, transparent 0%, transparent 11%, rgb(81, 68, 0) 100%);
+    background: #824e9929 linear-gradient(200deg, #43935b45 0%, #d71c1c21 11%, rgba(177, 148, 0, 0.35) 120%);
+    border: none;
+}
+
+.nested-workflow-details-header {
+    background: transparent linear-gradient(200deg, transparent 0%, transparent 11%, rgba(0, 171, 255, 0.17) 100%);
+    border: none;
+}
+
+.nested-workflow-details-body {
+    border: none;
 }
 
 .url-base-value {
