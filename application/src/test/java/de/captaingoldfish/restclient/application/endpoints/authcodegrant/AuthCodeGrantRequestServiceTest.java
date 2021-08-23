@@ -19,7 +19,7 @@ import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentity
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
-import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
+import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
@@ -84,6 +84,8 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                             .clientSecret(UUID.randomUUID().toString())
                                             .build();
     openIdClient = openIdClientDao.save(openIdClient);
+    HttpClientSettings httpClientSettings = HttpClientSettings.builder().openIdClient(openIdClient).build();
+    httpClientSettingsDao.save(httpClientSettings);
 
     // do
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
@@ -108,11 +110,6 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authorizationCodeRequestUrl).build();
     final String state = uriComponents.getQueryParams().getFirst(OAuthConstants.STATE);
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
-
-    CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
-                                                                                .orElseThrow();
-    Assertions.assertEquals(redirectUri, currentWorkflowSettings.getRedirectUri());
-    Assertions.assertNull(currentWorkflowSettings.getQueryParameters());
   }
 
   /**
@@ -133,6 +130,8 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                             .clientSecret(UUID.randomUUID().toString())
                                             .build();
     openIdClient = openIdClientDao.save(openIdClient);
+    HttpClientSettings httpClientSettings = HttpClientSettings.builder().openIdClient(openIdClient).build();
+    httpClientSettingsDao.save(httpClientSettings);
 
     // do
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
@@ -160,11 +159,6 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
     Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl);
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
-
-    CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
-                                                                                .orElseThrow();
-    Assertions.assertEquals(redirectUri, currentWorkflowSettings.getRedirectUri());
-    Assertions.assertEquals(queryParameters, currentWorkflowSettings.getQueryParameters());
   }
 
   /**
@@ -184,6 +178,8 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                             .clientSecret(UUID.randomUUID().toString())
                                             .build();
     openIdClient = openIdClientDao.save(openIdClient);
+    HttpClientSettings httpClientSettings = HttpClientSettings.builder().openIdClient(openIdClient).build();
+    httpClientSettingsDao.save(httpClientSettings);
 
     // do
     final String state = "some-state-param";

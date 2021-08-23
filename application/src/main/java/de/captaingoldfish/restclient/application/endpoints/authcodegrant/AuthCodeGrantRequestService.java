@@ -19,7 +19,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
-import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsService;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
@@ -37,10 +36,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class AuthCodeGrantRequestService
 {
-
-  private final CurrentWorkflowSettingsService currentWorkflowSettingsService;
-
-  private final OpenIdProviderMetdatdataCache openIdProviderMetaDataCache;
 
   private final AuthCodeGrantRequestCache authCodeGrantRequestCache;
 
@@ -74,7 +69,6 @@ public class AuthCodeGrantRequestService
     final String authCodeRequestUrl = requestUrl.toString();
 
     cacheAuthCodeRequestUrl(authCodeRequestUrl);
-    currentWorkflowSettingsService.overrideCurrentWorkflowSettings(workflowSettings);
     return authCodeRequestUrl;
   }
 

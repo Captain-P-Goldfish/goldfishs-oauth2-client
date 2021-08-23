@@ -80,7 +80,8 @@ public final class Utils
     catch (Exception ex)
     {
       throw new BadRequestException(String.format("Failed to load meta-data from OpenID Discovery endpoint: %s",
-                                                  ex.getMessage()));
+                                                  ex.getMessage()),
+                                    ex);
     }
     metadata = OIDCProviderMetadata.parse(responseBody);
     metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
