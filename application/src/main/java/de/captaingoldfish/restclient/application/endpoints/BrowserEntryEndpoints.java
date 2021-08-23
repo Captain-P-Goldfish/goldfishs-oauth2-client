@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
@@ -41,6 +42,15 @@ public class BrowserEntryEndpoints
   public static String getAuthorizationCodeEntryPoint(UriComponentsBuilder uriComponentsBuilder)
   {
     return uriComponentsBuilder.cloneBuilder().path(BrowserEntryEndpoints.AUTH_CODE_ENDPOINT).build().toString();
+  }
+
+  /**
+   * loads the main page of this project
+   */
+  @GetMapping
+  public ModelAndView loadIndex()
+  {
+    return new ModelAndView("index");
   }
 
   /**
