@@ -21,6 +21,7 @@ import Modal from "../base/modal";
 import Button from "react-bootstrap/Button";
 import {LinkContainer} from "react-router-bootstrap";
 import {ApplicationInfoContext} from "../app";
+import {OPENID_CLIENT_ENDPOINT, OPENID_PROVIDER_ENDPOINT} from "../scim/scim-constants";
 
 
 export default class OpenidClients extends React.Component
@@ -36,7 +37,7 @@ export default class OpenidClients extends React.Component
             keyInfos: [],
             provider: {}
         };
-        this.scimResourcePath = "/scim/v2/OpenIdClient";
+        this.scimResourcePath = OPENID_CLIENT_ENDPOINT;
         this.setState = this.setState.bind(this);
         this.scimClient = new ScimClient(this.scimResourcePath, this.setState);
         this.addNewClient = this.addNewClient.bind(this);
@@ -51,7 +52,7 @@ export default class OpenidClients extends React.Component
         let count = this.props.serviceProviderConfig.filter.maxResults;
 
         let openIdProviderId = this.props.match.params.id;
-        let openIdProviderResourcePath = "/scim/v2/OpenIdProvider";
+        let openIdProviderResourcePath = OPENID_PROVIDER_ENDPOINT;
         await this.scimClient.getResource(openIdProviderId, openIdProviderResourcePath).then(response =>
         {
             if (response.success)
@@ -77,7 +78,8 @@ export default class OpenidClients extends React.Component
         await this.scimClient.listResources({
             startIndex: startIndex,
             count: count,
-            sortBy: 'clientId'
+            sortBy: 'clientId',
+            filter: 'openIDProviderId eq ' + openIdProviderId
         }).then(listResponse =>
         {
             listResponse.resource.then(listResponse =>
@@ -377,7 +379,8 @@ class OpenIdClientCardEntry extends React.Component
                                                            fieldName)}
                                     />
                                     {
-                                        this.state.authenticationType === "basic" &&
+                                        (this.state.authenticationType === undefined ||
+                                            this.state.authenticationType === "basic") &&
                                         <ModifiableCardEntry header={"Client Secret"}
                                                              name={"clientSecret"}
                                                              resourceId={this.state.client.id}
