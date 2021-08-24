@@ -1,7 +1,7 @@
 {
   "version": 3,
   "sources": [
-    "../node_modules/web-vitals/dist/web-vitals.js"
+    "C:/Users/capta/Dropbox/projekte/java/oauth2-rest-client/react-frontend/node_modules/web-vitals/dist/web-vitals.js"
   ],
   "names": [
     "e",
