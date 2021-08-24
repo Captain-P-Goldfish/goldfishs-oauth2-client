@@ -310,7 +310,7 @@ class ClientCredentialsGrantForm extends React.Component
     {
         e.preventDefault();
         this.patchWorkflowSettings();
-        this.setState({isLoading: true})
+        this.setState({accessingToken: true})
         let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
 
         let scope = new Optional(this.props.workflowDetails).map(w => w.clientCredentialsParameters)
@@ -324,7 +324,7 @@ class ClientCredentialsGrantForm extends React.Component
         let handleResponse = this.props.handleResponse;
         scimClient.createResource(resource).then(response =>
         {
-            this.setState({isLoading: false})
+            this.setState({accessingToken: false})
             if (response.success)
             {
                 response.resource.then(resource =>
@@ -364,11 +364,11 @@ class ClientCredentialsGrantForm extends React.Component
                 <Form.Group as={Row}>
                     <Col sm={{span: 10, offset: 2}}>
                         <Button id={"upload"} type="submit" onClick={this.retrieveAccessTokenDetails}>
-                            <LoadingSpinner show={this.state.isLoading} /> Get Access Token
+                            <LoadingSpinner show={this.state.accessingToken} /> Get Access Token
                         </Button>
                         <AlertListMessages variant={"danger"} icon={<GoFlame />}
                                            messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                                                                                                        .orElse([])} />
+                                               .orElse([])} />
                     </Col>
                 </Form.Group>
             </React.Fragment>
@@ -392,7 +392,7 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
         e.preventDefault();
         this.patchWorkflowSettings();
 
-        this.setState({isLoading: true});
+        this.setState({accessingToken: true});
         let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
 
         let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
@@ -411,7 +411,7 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
         let handleResponse = this.props.handleResponse;
         scimClient.createResource(resource).then(response =>
         {
-            this.setState({isLoading: false});
+            this.setState({accessingToken: false});
             if (response.success)
             {
                 response.resource.then(resource =>
@@ -468,11 +468,11 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
                 <Form.Group as={Row}>
                     <Col sm={{span: 10, offset: 2}}>
                         <Button id={"upload"} type="submit" onClick={this.retrieveAccessTokenDetails}>
-                            <LoadingSpinner show={this.state.isLoading} /> Get Access Token
+                            <LoadingSpinner show={this.state.accessingToken} /> Get Access Token
                         </Button>
                         <AlertListMessages variant={"danger"} icon={<GoFlame />}
                                            messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                                                                                                        .orElse([])} />
+                                               .orElse([])} />
                     </Col>
                 </Form.Group>
             </React.Fragment>
