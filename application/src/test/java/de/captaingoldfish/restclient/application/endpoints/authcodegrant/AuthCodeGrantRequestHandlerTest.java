@@ -17,7 +17,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints;
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
 import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentityProvider;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
@@ -92,7 +92,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
     httpClientSettingsDao.save(httpClientSettings);
 
     // do
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     AuthCodeParameters authCodeParameters = AuthCodeParameters.builder().redirectUri(redirectUri).build();
     ScimCurrentWorkflowSettings workflowSettings = ScimCurrentWorkflowSettings.builder()
                                                                               .openIdClientId(openIdClient.getId())
@@ -163,7 +163,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
   {
     // prepare
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     OpenIdProvider openIdProvider = OpenIdProvider.builder().discoveryEndpoint(discoveryUrl).build();
     openIdProvider = openIdProviderDao.save(openIdProvider);
     OpenIdClient openIdClient = OpenIdClient.builder()
@@ -223,7 +223,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
   {
     // prepare
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     OpenIdProvider openIdProvider = OpenIdProvider.builder().discoveryEndpoint(discoveryUrl).build();
     openIdProvider = openIdProviderDao.save(openIdProvider);
     OpenIdClient openIdClient = OpenIdClient.builder()
@@ -276,7 +276,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
   {
     // prepare
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     OpenIdProvider openIdProvider = OpenIdProvider.builder().discoveryEndpoint(discoveryUrl).build();
     openIdProvider = openIdProviderDao.save(openIdProvider);
     OpenIdClient openIdClient = OpenIdClient.builder()

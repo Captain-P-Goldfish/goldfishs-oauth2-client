@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints;
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
 import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentityProvider;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
@@ -89,7 +89,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
 
     // do
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     AuthCodeParameters authCodeParameters = AuthCodeParameters.builder().redirectUri(redirectUri).build();
     ScimCurrentWorkflowSettings workflowSettings = ScimCurrentWorkflowSettings.builder()
                                                                               .openIdClientId(openIdClient.getId())
@@ -135,7 +135,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
 
     // do
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(getApplicationUrl());
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     final String client_id = "test-me";
     final String state = "some-state-param";
     final String queryParameters = String.format("client_id=%s&state=%s", client_id, state);

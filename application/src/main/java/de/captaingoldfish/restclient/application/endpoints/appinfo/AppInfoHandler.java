@@ -10,7 +10,7 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
 
-import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints;
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
 import de.captaingoldfish.restclient.application.endpoints.ScimRequestContext;
 import de.captaingoldfish.restclient.scim.resources.ScimApplicationInfo;
 import de.captaingoldfish.restclient.scim.resources.ScimApplicationInfo.JwtInfo;
@@ -49,7 +49,7 @@ public class AppInfoHandler extends ResourceHandler<ScimApplicationInfo>
   {
     ScimRequestContext scimRequestContext = (ScimRequestContext)context;
     UriComponentsBuilder uriComponentsBuilder = scimRequestContext.getUriComponentsBuilder();
-    String authCodeRedirectUrl = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String authCodeRedirectUrl = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     JwtInfo jwtInfo = getJwtInfo();
     return ScimApplicationInfo.builder().authCodeRedirectUri(authCodeRedirectUrl).jwtInfo(jwtInfo).build();
   }

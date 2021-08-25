@@ -10,6 +10,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -162,7 +163,7 @@ public class AuthCodeGrantRequestService
    * @param state the state parameter from the request that was used to save the response url
    * @return the full authorization code response
    * @see #handleAuthorizationResponse(String)
-   * @see de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints#acceptAuthorizationCode(HttpServletRequest,
+   * @see BrowserEntryController#acceptAuthorizationCode(HttpServletRequest,
    *      HttpServletResponse)
    */
   public Optional<String> getAuthorizationCodeResponseUrl(String state)

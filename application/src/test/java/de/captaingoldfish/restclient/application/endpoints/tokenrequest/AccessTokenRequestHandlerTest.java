@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import de.captaingoldfish.restclient.application.endpoints.BrowserEntryEndpoints;
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
 import de.captaingoldfish.restclient.application.endpoints.provider.TestIdentityProvider;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
@@ -73,7 +73,7 @@ public class AccessTokenRequestHandlerTest extends AbstractScimClientConfig
 
     // do
     String authorizationCode = UUID.randomUUID().toString();
-    String redirectUri = BrowserEntryEndpoints.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
+    String redirectUri = BrowserEntryController.getAuthorizationCodeEntryPoint(uriComponentsBuilder);
     ScimAccessTokenRequest scimAccessTokenRequest = ScimAccessTokenRequest.builder()
                                                                           .openIdClientId(openIdClient.getId())
                                                                           .grantType(OAuthConstants.AUTH_CODE_GRANT_TYPE)

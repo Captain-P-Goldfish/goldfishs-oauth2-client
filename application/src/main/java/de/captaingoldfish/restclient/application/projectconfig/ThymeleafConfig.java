@@ -56,7 +56,7 @@ public class ThymeleafConfig implements ApplicationContextAware, WebMvcConfigure
   /**
    * reads the thymeleaf property that tells us if caching should be enabled or not
    */
-  @Value("${spring.thymeleaf.cache:false}")
+  @Value("${spring.thymeleaf.cache:true}")
   private boolean cachingActivated;
 
   /**

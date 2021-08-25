@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/")
-public class BrowserEntryEndpoints
+public class BrowserEntryController
 {
 
   /**
@@ -41,7 +41,7 @@ public class BrowserEntryEndpoints
    */
   public static String getAuthorizationCodeEntryPoint(UriComponentsBuilder uriComponentsBuilder)
   {
-    return uriComponentsBuilder.cloneBuilder().path(BrowserEntryEndpoints.AUTH_CODE_ENDPOINT).build().toString();
+    return uriComponentsBuilder.cloneBuilder().path(BrowserEntryController.AUTH_CODE_ENDPOINT).build().toString();
   }
 
   /**
