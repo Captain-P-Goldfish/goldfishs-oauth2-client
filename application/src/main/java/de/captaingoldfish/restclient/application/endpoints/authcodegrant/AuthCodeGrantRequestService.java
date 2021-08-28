@@ -163,8 +163,7 @@ public class AuthCodeGrantRequestService
    * @param state the state parameter from the request that was used to save the response url
    * @return the full authorization code response
    * @see #handleAuthorizationResponse(String)
-   * @see BrowserEntryController#acceptAuthorizationCode(HttpServletRequest,
-   *      HttpServletResponse)
+   * @see BrowserEntryController#acceptAuthorizationCode(HttpServletRequest, HttpServletResponse)
    */
   public Optional<String> getAuthorizationCodeResponseUrl(String state)
   {

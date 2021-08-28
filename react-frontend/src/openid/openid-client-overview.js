@@ -78,7 +78,7 @@ export default class OpenidClientOverview extends React.Component
         return (
             <React.Fragment>
                 <LinkContainer exact
-                               to={"/openIdProvider/" + this.props.match.params.providerId
+                               to={"/views/openIdProvider/" + this.props.match.params.providerId
                                    + "/openIdClients"}>
                     <a href={"/#"}>
                         <h5 style={{height: "35px", padding: "0", paddingLeft: "10px"}}>

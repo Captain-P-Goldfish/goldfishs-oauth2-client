@@ -86,13 +86,13 @@ class Application extends React.Component
                         <Navbar.Collapse>
 
                             <Nav className="flex-column">
-                                <LinkContainer exact to="/openIdProvider">
+                                <LinkContainer exact to="/views/openIdProvider">
                                     <Nav.Link>OpenID</Nav.Link>
                                 </LinkContainer>
-                                <LinkContainer exact to="/jwts">
+                                <LinkContainer exact to="/views/jwts">
                                     <Nav.Link>JWTs</Nav.Link>
                                 </LinkContainer>
-                                <LinkContainer exact to="/system">
+                                <LinkContainer exact to="/views/system">
                                     <Nav.Link>System</Nav.Link>
                                 </LinkContainer>
                             </Nav>
@@ -109,25 +109,25 @@ class Application extends React.Component
                                 {/* A <Switch> looks through its children <Route>s and
                                  renders the first one that matches the current URL. */}
                                 <Switch>
-                                    <Route path="/system">
+                                    <Route path="/views/system">
                                         <SystemOverview />
                                     </Route>
-                                    <Route path={"/openIdProvider/:providerId/client/:clientId"}
+                                    <Route path={"/views/openIdProvider/:providerId/client/:clientId"}
                                            component={OpenidClientOverview} />
-                                    <Route path={"/openIdProvider/:id/openIdClients"}
+                                    <Route path={"/views/openIdProvider/:id/openIdClients"}
                                            render={route =>
                                            {
                                                return <OpenidClients match={route.match}
                                                                      serviceProviderConfig={this.state.serviceProviderConfig} />
                                            }} />
-                                    <Route path="/openIdProvider">
+                                    <Route path="/views/openIdProvider">
                                         <OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig} />
                                     </Route>
-                                    <Route path="/jwts">
+                                    <Route path="/views/jwts">
                                         <JwtHandler />
                                     </Route>
                                     <Route path="/">
-                                        <Redirect to="/jwts" />
+                                        <Redirect to="/views/jwts" />
                                     </Route>
                                 </Switch>
                             </ScimServiceProviderContext.Provider>

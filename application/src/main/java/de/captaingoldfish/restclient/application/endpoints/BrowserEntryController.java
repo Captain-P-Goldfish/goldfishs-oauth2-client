@@ -47,7 +47,7 @@ public class BrowserEntryController
   /**
    * loads the main page of this project
    */
-  @GetMapping
+  @GetMapping("/views/**")
   public ModelAndView loadIndex()
   {
     return new ModelAndView("index");

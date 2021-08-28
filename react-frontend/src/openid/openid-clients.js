@@ -193,7 +193,7 @@ export default class OpenidClients extends React.Component
         return (
             <React.Fragment>
                 <LinkContainer exact
-                               to={"/openIdProvider/"}>
+                               to={"/views/openIdProvider/"}>
                     <a href={"/#"}>
                         <h5 style={{height: "35px", padding: "0", paddingLeft: "10px"}}>
                             <ArrowLeftCircle style={{color: "bisque"}} height={"35px"} size={"25px"} />
@@ -320,7 +320,7 @@ class OpenIdClientCardEntry extends React.Component
                                 {
                                     this.state.client.clientId !== undefined &&
                                     <LinkContainer exact
-                                                   to={"/openIdProvider/" + this.props.provider.id + "/client/"
+                                                   to={"/views/openIdProvider/" + this.props.provider.id + "/client/"
                                                        + this.state.client.id}>
                                         <a href={"/#"}>
                                             <h5>
