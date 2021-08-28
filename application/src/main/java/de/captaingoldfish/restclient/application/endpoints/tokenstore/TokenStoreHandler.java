@@ -19,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 
 
 /**
+ * This handler provides functionality to create and access arbitrary tokens that should be stored for later
+ * retrieval
+ * 
  * @author Pascal Knueppel
  * @since 28.08.2021
  */
