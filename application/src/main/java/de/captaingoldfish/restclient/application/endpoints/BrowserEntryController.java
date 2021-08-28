@@ -45,6 +45,15 @@ public class BrowserEntryController
   }
 
   /**
+   * redirects to load the view
+   */
+  @GetMapping("/")
+  public ModelAndView redirectToLoadViews()
+  {
+    return new ModelAndView("redirect:/views");
+  }
+
+  /**
    * loads the main page of this project
    */
   @GetMapping("/views/**")
