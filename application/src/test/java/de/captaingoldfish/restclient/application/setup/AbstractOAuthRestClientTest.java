@@ -3,6 +3,7 @@ package de.captaingoldfish.restclient.application.setup;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +56,9 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @Autowired
   protected CurrentWorkflowSettingsDao currentWorkflowSettingsDao;
 
+  @Autowired
+  protected TokenStoreDao tokenStoreDao;
+
   @LocalServerPort
   protected int port;
 
@@ -74,6 +78,7 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @AfterEach
   public void clearTables()
   {
+    tokenStoreDao.deleteAll();
     currentWorkflowSettingsDao.deleteAll();
     httpClientSettingsDao.deleteAll();
     openIdClientDao.deleteAll();

@@ -192,4 +192,17 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="addTokenStore" author="pascal_knueppel">
+        <createTable tableName="TOKEN_STORE">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="TOKEN_STORE_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="ORIGIN" type="VARCHAR(255)"/>
+            <column name="TOKEN" type="${clob_type}"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

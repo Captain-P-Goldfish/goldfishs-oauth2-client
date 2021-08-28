@@ -1,0 +1,58 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenStore",
+  "name": "TokenStore",
+  "description": "A storage for any tokens that should be saved for later retrieval",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "origin",
+      "type": "string",
+      "description": "an optional identifier that can be used to categorize tokens",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "minLength": 1,
+      "maxLength": 255
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "a name that is used as identifier. The combination of origin and name should be unique but it is not a requirement.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "minLength": 1
+    },
+    {
+      "name": "token",
+      "type": "string",
+      "description": "the token that is the base of this resource.",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false,
+      "minLength": 1
+    }
+  ]
+}

@@ -18,6 +18,7 @@ import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdCl
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.AccessTokenRequestHandler;
+import de.captaingoldfish.restclient.application.endpoints.tokenstore.TokenStoreHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsHandler;
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsService;
@@ -26,6 +27,7 @@ import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
+import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.AccessTokenRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
@@ -37,6 +39,7 @@ import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.ProxyEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.TokenStoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TruststoreEndpoint;
 import de.captaingoldfish.scim.sdk.common.resources.ServiceProvider;
 import de.captaingoldfish.scim.sdk.common.resources.complex.BulkConfig;
@@ -256,5 +259,22 @@ public class ScimConfig
     CurrentWorkflowSettingsHandler handler = new CurrentWorkflowSettingsHandler(currentWorkflowSettingsService);
     CurrentWorkflowSettingsEndpoint currentWorkflowSettingsEndpoint = new CurrentWorkflowSettingsEndpoint(handler);
     return resourceEndpoint.registerEndpoint(currentWorkflowSettingsEndpoint);
+  }
+
+  /**
+   * registers the token-store resourceType under the endpoint /TokenStore.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the token-store resource type
+   */
+  @Bean
+  public ResourceType tokenStoreResourceType(ResourceEndpoint resourceEndpoint, TokenStoreDao tokenStoreDao)
+  {
+    TokenStoreHandler handler = new TokenStoreHandler(tokenStoreDao);
+    TokenStoreEndpoint endpoint = new TokenStoreEndpoint(handler);
+    ResourceType resourceType = resourceEndpoint.registerEndpoint(endpoint);
+    resourceType.getFeatures().setAutoFiltering(true);
+    resourceType.getFeatures().setAutoSorting(true);
+    return resourceType;
   }
 }
