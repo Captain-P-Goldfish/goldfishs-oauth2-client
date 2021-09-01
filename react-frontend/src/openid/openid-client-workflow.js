@@ -33,7 +33,6 @@ export default class OpenidClientWorkflow extends React.Component
 
         this.state = {
             authenticationType: this.authCodeGrantType,
-            originalRedirectUri: props.originalRedirectUri,
             workflowDetails: this.props.client[CURRENT_WORKFLOW_URI] || {},
             isLoading: false,
             responseDetails: []
@@ -50,7 +49,7 @@ export default class OpenidClientWorkflow extends React.Component
     {
         e.preventDefault();
         let wrapperObject = this.state;
-        lodash.set(wrapperObject, "workflowDetails.authCodeParameters.redirectUri", this.state.originalRedirectUri);
+        lodash.set(wrapperObject, "workflowDetails.authCodeParameters.redirectUri", this.props.originalRedirectUri);
         this.setState(wrapperObject)
     }
 
@@ -107,6 +106,7 @@ export default class OpenidClientWorkflow extends React.Component
                     {
                         this.state.authenticationType === this.authCodeGrantType &&
                         <AuthorizationCodeGrantForm formReference={this.formReference}
+                                                    originalRedirectUri={this.props.originalRedirectUri}
                                                     workflowDetails={this.state.workflowDetails}
                                                     isLoading={this.state.isLoading}
                                                     handleChange={this.handleNestedElementChange}
@@ -272,7 +272,8 @@ class AuthorizationCodeGrantForm extends React.Component
 
     render()
     {
-        let authCodeParameters = this.props.workflowDetails.authCodeParameters || {};
+        let authCodeParameters = this.props.workflowDetails.authCodeParameters
+                                 || {redirectUri: this.props.originalRedirectUri};
 
         return (
             <React.Fragment>
