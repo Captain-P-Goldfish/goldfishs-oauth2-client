@@ -156,10 +156,10 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
   public void deleteResource(String id, Context context)
   {
     Long openIdClientId = Utils.parseId(id);
-    OpenIdClient openIdClient = openIdClientDao.findById(openIdClientId).orElseThrow(() -> {
+    openIdClientDao.findById(openIdClientId).orElseThrow(() -> {
       return new ResourceNotFoundException(String.format("OpenID Client with id '%s' does not exist", openIdClientId));
     });
-    openIdClientDao.delete(openIdClient);
+    openIdClientDao.deleteById(openIdClientId);
   }
 
   /**
