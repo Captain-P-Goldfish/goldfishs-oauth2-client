@@ -16,7 +16,7 @@ import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
  * this class represents the database-access from spring to the {@link OpenIdProvider}-objects
  */
 @Repository
-public interface OpenIdProviderDao extends ScimCrudRepository<OpenIdProvider, Long>
+public interface OpenIdProviderDao extends ScimCrudRepository<OpenIdProvider, Long>, OpenIdProviderDaoExtension
 {
 
   /**
@@ -24,11 +24,4 @@ public interface OpenIdProviderDao extends ScimCrudRepository<OpenIdProvider, Lo
    */
   public Optional<OpenIdProvider> findByName(String name);
 
-  /**
-   * Deletes the entity with the given id.
-   *
-   * @param id must not be {@literal null}.
-   * @throws IllegalArgumentException in case the given {@literal id} is {@literal null}
-   */
-  void deleteById(Long id);
 }

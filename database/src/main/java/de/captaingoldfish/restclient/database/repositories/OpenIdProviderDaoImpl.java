@@ -7,6 +7,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.transaction.Transactional;
 
+import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
@@ -27,9 +28,25 @@ public class OpenIdProviderDaoImpl implements OpenIdProviderDaoExtension
   @Override
   public void deleteById(Long id)
   {
+    deleteCurrentWorkflowSettingsReferences(id);
     deleteHttpClientSettingsReferences(id);
     deleteOpenIdClients(id);
     deleteOpenIdProvider(id);
+  }
+
+  private void deleteCurrentWorkflowSettingsReferences(Long id)
+  {
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    CriteriaDelete<CurrentWorkflowSettings> criteriaDelete = criteriaBuilder.createCriteriaDelete(CurrentWorkflowSettings.class);
+    Root<CurrentWorkflowSettings> root = criteriaDelete.from(CurrentWorkflowSettings.class);
+
+    Subquery<OpenIdClient> subquery = criteriaDelete.subquery(OpenIdClient.class);
+    Root<OpenIdClient> subRoot = subquery.from(OpenIdClient.class);
+    subquery.select(subRoot.get("id"));
+    subquery.where(criteriaBuilder.equal(subRoot.get("openIdProvider").get("id"), id));
+
+    criteriaDelete.where(root.get("openIdClient").get("id").in(subquery));
+    entityManager.createQuery(criteriaDelete).executeUpdate();
   }
 
   private void deleteHttpClientSettingsReferences(Long id)
