@@ -19,6 +19,7 @@ import AccessTokenView from "./auth-code-grant/access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../services/utils";
 import CurrentWorkflowSettingsClient from "../scim/current-workflow-settings-client";
+import {Alert} from "react-bootstrap";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -226,6 +227,7 @@ class AuthorizationCodeGrantForm extends React.Component
     {
         e.preventDefault();
         this.patchWorkflowSettings();
+        this.setState({getAuthcode: true, errorMessage: undefined});
 
         let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
         let resource = scimClient.getResourceFromFormReference(this.props.formReference);
@@ -234,11 +236,19 @@ class AuthorizationCodeGrantForm extends React.Component
         let handleResponse = this.props.handleResponse;
         scimClient.createResource(resource).then(response =>
         {
+            this.setState({getAuthcode: false});
             if (response.success)
             {
                 response.resource.then(resource =>
                 {
                     handleResponse(resource);
+                })
+            }
+            else
+            {
+                response.resource.then(errorResponse =>
+                {
+                    this.setState({errorMessage: errorResponse.detail});
                 })
             }
         });
@@ -285,8 +295,16 @@ class AuthorizationCodeGrantForm extends React.Component
                 <Form.Group as={Row}>
                     <Col sm={{span: 10, offset: 2}}>
                         <Button type="submit" onClick={this.loadAuthorizationRequestDetails}>
-                            <LoadingSpinner show={this.props.isLoading} /> Get Authorization Code
+                            <LoadingSpinner show={this.state.getAuthcode} /> Get Authorization Code
                         </Button>
+                        {
+                            this.state.errorMessage &&
+                            <Alert variant={"danger"}>
+                                <small className={"error"}>
+                                    <GoFlame /> {this.state.errorMessage}
+                                </small>
+                            </Alert>
+                        }
                     </Col>
                 </Form.Group>
             </React.Fragment>
@@ -368,7 +386,7 @@ class ClientCredentialsGrantForm extends React.Component
                         </Button>
                         <AlertListMessages variant={"danger"} icon={<GoFlame />}
                                            messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                                               .orElse([])} />
+                                                                                                        .orElse([])} />
                     </Col>
                 </Form.Group>
             </React.Fragment>
@@ -472,7 +490,7 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
                         </Button>
                         <AlertListMessages variant={"danger"} icon={<GoFlame />}
                                            messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                                               .orElse([])} />
+                                                                                                        .orElse([])} />
                     </Col>
                 </Form.Group>
             </React.Fragment>
