@@ -1,6 +1,9 @@
 package de.captaingoldfish.restclient.application.endpoints.tokenstore;
 
+import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
+import de.captaingoldfish.restclient.database.entities.TokenCategory;
 import de.captaingoldfish.restclient.database.entities.TokenStore;
+import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
 import de.captaingoldfish.restclient.scim.resources.ScimTokenStore;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import lombok.AccessLevel;
@@ -17,9 +20,12 @@ public final class TokenStoreConverter
 
   public static TokenStore toTokenStore(ScimTokenStore scimTokenStore)
   {
+    TokenCategoryDao tokenCategoryDao = WebAppConfig.getApplicationContext().getBean(TokenCategoryDao.class);
+    TokenCategory tokenCategory = tokenCategoryDao.findById(scimTokenStore.getCategoryId()).orElseThrow();
+
     return TokenStore.builder()
                      .id(scimTokenStore.getId().map(Long::parseLong).orElse(0L))
-                     .origin(scimTokenStore.getOrigin().orElse(null))
+                     .tokenCategory(tokenCategory)
                      .name(scimTokenStore.getName())
                      .token(scimTokenStore.getToken())
                      .build();
@@ -29,7 +35,7 @@ public final class TokenStoreConverter
   {
     return ScimTokenStore.builder()
                          .id(String.valueOf(tokenStore.getId()))
-                         .origin(tokenStore.getOrigin())
+                         .categoryId(tokenStore.getTokenCategory().getId())
                          .name(tokenStore.getName())
                          .token(tokenStore.getToken())
                          .meta(Meta.builder()

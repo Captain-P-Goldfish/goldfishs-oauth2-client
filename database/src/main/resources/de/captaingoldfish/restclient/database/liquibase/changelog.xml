@@ -193,12 +193,24 @@
     </changeSet>
 
     <changeSet id="addTokenStore" author="pascal_knueppel">
+        <createTable tableName="TOKEN_CATEGORY">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="TOKEN_CATEGORY_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
+
         <createTable tableName="TOKEN_STORE">
             <column name="ID" type="BIGINT">
                 <constraints primaryKeyName="TOKEN_STORE_PRIME_KEY" primaryKey="true"/>
             </column>
+            <column name="TOKEN_CATEGORY_ID" type="BIGINT">
+                <constraints foreignKeyName="TOKEN_CATEGORY_STORE_FK" referencedColumnNames="ID"
+                             referencedTableName="TOKEN_CATEGORY"/>
+            </column>
             <column name="NAME" type="VARCHAR(255)"/>
-            <column name="ORIGIN" type="VARCHAR(255)"/>
             <column name="TOKEN" type="${clob_type}"/>
             <column name="CREATED" type="${datetime}"/>
             <column name="LAST_MODIFIED" type="${datetime}"/>

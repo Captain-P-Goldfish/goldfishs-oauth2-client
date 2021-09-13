@@ -2,6 +2,9 @@ package de.captaingoldfish.restclient.application.projectconfig;
 
 import java.util.Collections;
 
+import de.captaingoldfish.restclient.application.endpoints.tokencategory.TokenCategoryHandler;
+import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
+import de.captaingoldfish.restclient.scim.endpoints.TokenCategoryEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -259,6 +262,23 @@ public class ScimConfig
     CurrentWorkflowSettingsHandler handler = new CurrentWorkflowSettingsHandler(currentWorkflowSettingsService);
     CurrentWorkflowSettingsEndpoint currentWorkflowSettingsEndpoint = new CurrentWorkflowSettingsEndpoint(handler);
     return resourceEndpoint.registerEndpoint(currentWorkflowSettingsEndpoint);
+  }
+
+  /**
+   * registers the token-category resourceType under the endpoint /TokenCategory.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the token-category resource type
+   */
+  @Bean
+  public ResourceType tokenCategoryResourceType(ResourceEndpoint resourceEndpoint, TokenCategoryDao tokenStoreDao)
+  {
+    TokenCategoryHandler handler = new TokenCategoryHandler(tokenStoreDao);
+    TokenCategoryEndpoint endpoint = new TokenCategoryEndpoint(handler);
+    ResourceType resourceType = resourceEndpoint.registerEndpoint(endpoint);
+    resourceType.getFeatures().setAutoFiltering(true);
+    resourceType.getFeatures().setAutoSorting(true);
+    return resourceType;
   }
 
   /**

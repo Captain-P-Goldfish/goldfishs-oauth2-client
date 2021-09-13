@@ -68,6 +68,11 @@ public final class ClasspathReferences
 
   public static final String TOKEN_STORE_SCHEMA = BASE_PATH + "/resource/token-store.json";
 
+  public static final String TOKEN_CATEGORY_RESOURCE_TYPE = BASE_PATH
+                                                            + "/resourcetypes/token-category-resource-type.json";
+
+  public static final String TOKEN_CATEGORY_SCHEMA = BASE_PATH + "/resource/token-category.json";
+
   public static final String CERTIFICATE_INFO_SCHEMA = BASE_PATH + "/resource/certificate-info.json";
 
 

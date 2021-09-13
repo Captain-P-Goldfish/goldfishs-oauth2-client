@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.captaingoldfish.restclient.application.endpoints.tokenstore.validation.TokenStoreValidator;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.TokenStore;
 import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
@@ -13,6 +14,7 @@ import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
 import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
+import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
 import lombok.RequiredArgsConstructor;
@@ -82,12 +84,19 @@ public class TokenStoreHandler extends ResourceHandler<ScimTokenStore>
   }
 
   /**
-   * endpoint disable
+   * {@inheritDoc}
    */
   @Override
   public ScimTokenStore updateResource(ScimTokenStore resourceToUpdate, Context context)
   {
-    return null;
+    Long dbId = Utils.parseId(resourceToUpdate.getId().orElseThrow());
+    TokenStore oldTokenStore = tokenStoreDao.findById(dbId).orElseThrow(() -> {
+      return new ResourceNotFoundException(String.format("Resource with ID '%s' does not exist", dbId));
+    });
+    TokenStore newTokenStore = TokenStoreConverter.toTokenStore(resourceToUpdate);
+    newTokenStore.setCreated(oldTokenStore.getCreated());
+    tokenStoreDao.save(newTokenStore);
+    return TokenStoreConverter.toScimTokenStore(newTokenStore);
   }
 
   /**
@@ -103,5 +112,11 @@ public class TokenStoreHandler extends ResourceHandler<ScimTokenStore>
       throw new ResourceNotFoundException(String.format("Resource with id '%s' does not exist", id));
     }
     tokenStoreDao.delete(tokenStore.get());
+  }
+
+  @Override
+  public RequestValidator<ScimTokenStore> getRequestValidator()
+  {
+    return new TokenStoreValidator();
   }
 }

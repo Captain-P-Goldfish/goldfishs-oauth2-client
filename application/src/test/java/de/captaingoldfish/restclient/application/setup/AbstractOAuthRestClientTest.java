@@ -3,7 +3,6 @@ package de.captaingoldfish.restclient.application.setup;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +19,8 @@ import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
+import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
+import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import kong.unirest.json.JSONArray;
 import lombok.SneakyThrows;
@@ -57,6 +58,9 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   protected CurrentWorkflowSettingsDao currentWorkflowSettingsDao;
 
   @Autowired
+  protected TokenCategoryDao tokenCategoryDao;
+
+  @Autowired
   protected TokenStoreDao tokenStoreDao;
 
   @LocalServerPort
@@ -79,6 +83,7 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   public void clearTables()
   {
     tokenStoreDao.deleteAll();
+    tokenCategoryDao.deleteAll();
     currentWorkflowSettingsDao.deleteAll();
     httpClientSettingsDao.deleteAll();
     openIdClientDao.deleteAll();

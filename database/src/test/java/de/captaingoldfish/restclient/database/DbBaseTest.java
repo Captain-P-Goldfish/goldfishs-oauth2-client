@@ -20,6 +20,8 @@ import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
+import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
+import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import lombok.SneakyThrows;
 
@@ -53,11 +55,19 @@ public abstract class DbBaseTest implements FileReferences
   protected CurrentWorkflowSettingsDao currentWorkflowSettingsDao;
 
   @Autowired
+  protected TokenStoreDao tokenStoreDao;
+
+  @Autowired
+  protected TokenCategoryDao tokenCategoryDao;
+
+  @Autowired
   private EntityManager entityManager;
 
   @AfterEach
   public void clearTables()
   {
+    tokenStoreDao.deleteAll();
+    tokenCategoryDao.deleteAll();
     httpClientSettingsDao.deleteAll();
     openIdClientDao.deleteAll();
     openIdProviderDao.deleteAll();

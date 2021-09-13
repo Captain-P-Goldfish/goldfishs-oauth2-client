@@ -18,17 +18,15 @@
       "caseExact": true
     },
     {
-      "name": "origin",
-      "type": "string",
-      "description": "an optional identifier that can be used to categorize tokens",
+      "name": "categoryId",
+      "type": "integer",
+      "description": "The id of the token category into which this token belongs",
       "mutability": "readWrite",
       "returned": "default",
       "uniqueness": "server",
       "multiValued": false,
-      "required": false,
-      "caseExact": false,
-      "minLength": 1,
-      "maxLength": 255
+      "required": true,
+      "caseExact": false
     },
     {
       "name": "name",

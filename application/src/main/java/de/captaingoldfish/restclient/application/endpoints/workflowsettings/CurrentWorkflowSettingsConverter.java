@@ -1,5 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.workflowsettings;
 
+import java.util.Optional;
+
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
@@ -50,7 +52,9 @@ public class CurrentWorkflowSettingsConverter
                                                               .redirectUri(settings.getRedirectUri())
                                                               .queryParameters(settings.getQueryParameters())
                                                               .build();
-    var clientCredentialsParameters = new ClientCredentialsParameters(settings.getClientCredentialsGrantScope());
+    ClientCredentialsParameters clientCredentialsParameters = Optional.ofNullable(settings.getClientCredentialsGrantScope())
+                                                                      .map(ClientCredentialsParameters::new)
+                                                                      .orElse(null);
     var passwordParams = ResourceOwnerPasswordParameters.builder()
                                                         .username(settings.getUsername())
                                                         .password(settings.getUserPassword())

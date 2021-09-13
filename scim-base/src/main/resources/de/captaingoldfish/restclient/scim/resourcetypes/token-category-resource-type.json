@@ -2,11 +2,11 @@
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
   ],
-  "id": "TokenStore",
-  "name": "TokenStore",
-  "description": "An endpoint to store any token that should be retrievable for later view",
-  "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenStore",
-  "endpoint": "/TokenStore",
+  "id": "TokenCategory",
+  "name": "TokenCategory",
+  "description": "An endpoint to manage categories under which tokens can be stored",
+  "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenCategory",
+  "endpoint": "/TokenCategory",
   "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
     "authorization": {
       "authenticated": false
@@ -16,6 +16,6 @@
     "resourceType": "ResourceType",
     "created": "2021-05-08T22:51:00+02:00",
     "lastModified": "2021-05-08T22:51:00+02:00",
-    "location": "/ResourceTypes/TokenStore"
+    "location": "/ResourceTypes/TokenCategory"
   }
 }

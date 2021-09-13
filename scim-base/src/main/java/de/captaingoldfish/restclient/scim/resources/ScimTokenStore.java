@@ -19,26 +19,26 @@ public class ScimTokenStore extends ResourceNode
   {}
 
   @Builder
-  public ScimTokenStore(String id, String origin, String name, String token, Meta meta)
+  public ScimTokenStore(String id, Long categoryId, String name, String token, Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
-    setOrigin(origin);
+    setCategoryId(categoryId);
     setName(name);
     setToken(token);
     setMeta(meta);
   }
 
-  /** an optional identifier that can be used to categorize tokens */
-  public Optional<String> getOrigin()
+  /** The id of the token category into which this token belongs */
+  public Long getCategoryId()
   {
-    return getStringAttribute(FieldNames.ORIGIN);
+    return getLongAttribute(FieldNames.CATEGORY_ID).orElseThrow();
   }
 
-  /** an optional identifier that can be used to categorize tokens */
-  public void setOrigin(String origin)
+  /** The id of the token category into which this token belongs */
+  public void setCategoryId(Long origin)
   {
-    setAttribute(FieldNames.ORIGIN, origin);
+    setAttribute(FieldNames.CATEGORY_ID, origin);
   }
 
   /**
@@ -77,7 +77,7 @@ public class ScimTokenStore extends ResourceNode
 
     public static final String SCHEMA_ID = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenStore";
 
-    public static final String ORIGIN = "origin";
+    public static final String CATEGORY_ID = "categoryId";
 
     public static final String NAME = "name";
 

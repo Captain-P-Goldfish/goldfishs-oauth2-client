@@ -7,8 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -20,13 +18,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author Pascal Knueppel
- * @since 28.08.2021
+ * @since 02.09.2021
  */
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "TOKEN_STORE")
-public class TokenStore
+@Table(name = "TOKEN_CATEGORY")
+public class TokenCategory
 {
 
   /**
@@ -38,23 +36,10 @@ public class TokenStore
   private long id;
 
   /**
-   * the owning category under which this token will be stored
-   */
-  @ManyToOne
-  @JoinColumn(name = "TOKEN_CATEGORY_ID")
-  private TokenCategory tokenCategory;
-
-  /**
-   * the name of the token
+   * the name of the category
    */
   @Column(name = "NAME")
   private String name;
-
-  /**
-   * the stored token
-   */
-  @Column(name = "TOKEN")
-  private String token;
 
   /**
    * the moment this instance was created
@@ -69,12 +54,12 @@ public class TokenStore
   private Instant lastModified;
 
   @Builder
-  public TokenStore(long id, TokenCategory tokenCategory, String name, String token)
+  public TokenCategory(long id, String name, Instant created, Instant lastModified)
   {
     this.id = id;
-    this.tokenCategory = tokenCategory;
     this.name = name;
-    this.token = token;
+    this.created = created;
+    this.lastModified = lastModified;
   }
 
   @PrePersist
