@@ -1,11 +1,9 @@
 import {Optional, toBase64} from "../services/utils";
 import * as lodash from "lodash";
 
-export default class ScimClient
-{
+export default class ScimClient {
 
-    constructor(resourcePath, setState)
-    {
+    constructor(resourcePath, setState) {
         this.resourcePath = resourcePath;
         this.setState = setState;
         this.resetErrors = this.resetErrors.bind(this);
@@ -13,64 +11,50 @@ export default class ScimClient
         this.createResource = this.createResource.bind(this);
         this.getErrors = this.getErrors.bind(this);
         this.isLoading = this.isLoading.bind(this);
+        this.parseErrorResponse = this.parseErrorResponse.bind(this);
     }
 
-    isLoading(value)
-    {
+    isLoading(value) {
         this.setState({isLoading: value});
     }
 
-    resetErrors()
-    {
+    resetErrors() {
         this.setState({errors: {}});
     }
 
-    handleError(jsonPromise)
-    {
-        jsonPromise.then(errorResponse =>
-        {
+    handleError(jsonPromise) {
+        jsonPromise.then(errorResponse => {
             let errors = {};
-            if (errorResponse.errors === undefined)
-            {
+            if (errorResponse.errors === undefined) {
                 errors.errorMessages = new Optional(errors.errorMessages).orElse([]);
-                if (errorResponse.detail === undefined)
-                {
+                if (errorResponse.detail === undefined) {
                     errors.errorMessages.push(JSON.stringify(errorResponse));
-                }
-                else
-                {
+                } else {
                     errors.errorMessages.push(errorResponse.detail);
                 }
-            }
-            else
-            {
+            } else {
                 errors = errorResponse.errors;
             }
             new Optional(this.setState).ifPresent(method => method({errors: errors}));
         })
     }
 
-    async createResource(resource)
-    {
+    async createResource(resource) {
         this.isLoading(true);
         this.resetErrors();
         return await fetch(this.resourcePath, {
             method: "POST",
             headers: {'Content-Type': 'application/scim+json'},
             body: JSON.stringify(resource)
-        }).then(response =>
-        {
+        }).then(response => {
             this.isLoading(false);
-            if (response.status === 201)
-            {
+            if (response.status === 201) {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            }
-            else
-            {
+            } else {
                 let tmpResponse = {
                     success: false,
                     status: response.status,
@@ -82,32 +66,27 @@ export default class ScimClient
         })
     }
 
-    async getResource(id, resourcePath, params)
-    {
+    async getResource(id, resourcePath, params) {
         this.isLoading(true);
         this.resetErrors();
 
         let path = new Optional(resourcePath).orElse(this.resourcePath);
 
         let searchParams = new Optional(params).map(parameters => "?" + new URLSearchParams(parameters).toString())
-                                               .orElse("");
+            .orElse("");
         let url = path + new Optional(id).map(val => "/" + encodeURIComponent(val)).orElse("") + searchParams;
 
         return await fetch(url, {
             method: "GET"
-        }).then(response =>
-        {
+        }).then(response => {
             this.isLoading(false);
-            if (response.status === 200)
-            {
+            if (response.status === 200) {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            }
-            else
-            {
+            } else {
                 let tmpResponse = {
                     success: false,
                     status: response.status,
@@ -119,8 +98,7 @@ export default class ScimClient
         })
     }
 
-    listResources({startIndex, count, filter, sortBy, sortOrder, attributes, excludedAttributes} = {})
-    {
+    listResources({startIndex, count, filter, sortBy, sortOrder, attributes, excludedAttributes} = {}) {
         this.isLoading(true);
         this.resetErrors();
         let startIndexParam = new Optional(startIndex).map(val => "startIndex=" + val).orElse(null);
@@ -134,8 +112,8 @@ export default class ScimClient
 
         let query = Array.of(startIndexParam, countParam, filterParam, sortByParam, sortOrderParam, attributesParam,
             excludedAttributesParam)
-                         .filter(val => val != null)
-                         .join("&");
+            .filter(val => val != null)
+            .join("&");
 
         query = new Optional(query).filter(val => val.length > 0).map(val => "?" + val).orElse("");
 
@@ -143,19 +121,15 @@ export default class ScimClient
 
         return fetch(requestUrl, {
             method: "GET"
-        }).then(response =>
-        {
+        }).then(response => {
             this.isLoading(false);
-            if (response.status === 200)
-            {
+            if (response.status === 200) {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 }
-            }
-            else
-            {
+            } else {
                 let tmpResponse = {
                     success: false,
                     status: response.status,
@@ -167,27 +141,42 @@ export default class ScimClient
         })
     }
 
-    async updateResource(resource, id)
-    {
+    listResourcesWithPost(searchRequest, onSuccess, onError) {
+        let requestUrl = this.resourcePath + "/.search";
+
+        return fetch(requestUrl, {
+            method: "POST",
+            headers: {'Content-Type': 'application/scim+json'},
+            body: JSON.stringify(searchRequest)
+        }).then(response => {
+            if (response.status === 200) {
+                response.json().then(resource => {
+                    onSuccess(resource);
+                })
+            } else {
+                response.text().then(errorResponse => {
+                    onError(this.parseErrorResponse(errorResponse));
+                })
+            }
+        })
+    }
+
+    async updateResource(resource, id) {
         this.isLoading(true);
         this.resetErrors();
         return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PUT",
             headers: {'Content-Type': 'application/scim+json'},
             body: JSON.stringify(resource)
-        }).then(response =>
-        {
+        }).then(response => {
             this.isLoading(false);
-            if (response.status === 200)
-            {
+            if (response.status === 200) {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            }
-            else
-            {
+            } else {
                 let tmpResponse = {
                     success: false,
                     status: response.status,
@@ -199,27 +188,22 @@ export default class ScimClient
         })
     }
 
-    async patchResource(patchBody, id)
-    {
+    async patchResource(patchBody, id) {
         this.isLoading(true);
         this.resetErrors();
         return await fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "PATCH",
             headers: {'Content-Type': 'application/scim+json'},
             body: JSON.stringify(patchBody)
-        }).then(response =>
-        {
+        }).then(response => {
             this.isLoading(false);
-            if (response.status === 200)
-            {
+            if (response.status === 200) {
                 return {
                     success: true,
                     status: response.status,
                     resource: response.json()
                 };
-            }
-            else
-            {
+            } else {
                 let tmpResponse = {
                     success: false,
                     status: response.status,
@@ -231,24 +215,19 @@ export default class ScimClient
         })
     }
 
-    deleteResource(id)
-    {
+    deleteResource(id) {
         this.isLoading(true);
         this.resetErrors();
         return fetch(this.resourcePath + "/" + encodeURIComponent(id), {
             method: "DELETE"
-        }).then(response =>
-        {
+        }).then(response => {
             this.isLoading(false);
-            if (response.status === 204)
-            {
+            if (response.status === 204) {
                 return {
                     success: true,
                     status: response.status
                 };
-            }
-            else
-            {
+            } else {
                 this.handleError(response.json());
                 return {
                     success: false,
@@ -262,49 +241,31 @@ export default class ScimClient
      * accesses the the form-reference with name "this.formReference" reads its input and select fields and builds a
      * scim resource from it that will be used in the following request
      */
-    async getResourceFromFormReference(formReference)
-    {
+    async getResourceFromFormReference(formReference) {
         let scimResource = {};
 
-        let handleInputField = async function (inputfield)
-        {
+        let handleInputField = async function (inputfield) {
             let name = inputfield.name;
             let inputFieldValue;
-            if (inputfield.type === 'file')
-            {
-                if (inputfield.files !== undefined && inputfield.files.length === 1)
-                {
+            if (inputfield.type === 'file') {
+                if (inputfield.files !== undefined && inputfield.files.length === 1) {
                     inputFieldValue = await toBase64(inputfield.files[0]);
-                }
-                else
-                {
+                } else {
                     inputFieldValue = undefined;
                 }
-            }
-            else if (inputfield.type === 'number')
-            {
+            } else if (inputfield.type === 'number') {
                 inputFieldValue = inputfield.valueAsNumber;
-            }
-            else if (inputfield.type === 'checkbox')
-            {
+            } else if (inputfield.type === 'checkbox') {
                 inputFieldValue = inputfield.checked;
-            }
-            else if (inputfield.type === 'radio')
-            {
-                if (inputfield.checked)
-                {
+            } else if (inputfield.type === 'radio') {
+                if (inputfield.checked) {
                     inputFieldValue = inputfield.value;
-                }
-                else
-                {
+                } else {
                     inputFieldValue = scimResource[name];
                 }
-            }
-            else
-            {
+            } else {
                 let val = lodash.trim(inputfield.value);
-                if (lodash.isEmpty(val))
-                {
+                if (lodash.isEmpty(val)) {
                     val = undefined;
                 }
                 inputFieldValue = val;
@@ -317,20 +278,26 @@ export default class ScimClient
         let formSelectFields = Array.from(formReference.current.getElementsByTagName('select'));
         let allFormFields = formInputFields.concat(formSelectFields).concat(textAreaFields);
 
-        for (let inputField of allFormFields)
-        {
+        for (let inputField of allFormFields) {
             await handleInputField(inputField);
         }
 
         return scimResource;
     }
 
-    getErrors(state, fieldName)
-    {
+    getErrors(state, fieldName) {
         return new Optional(state).map(val => val.errors)
-                                  .map(val => val.fieldErrors)
-                                  .map(fieldErrors => fieldErrors[fieldName])
-                                  .orElse([]);
+            .map(val => val.fieldErrors)
+            .map(fieldErrors => fieldErrors[fieldName])
+            .orElse([]);
+    }
+
+    parseErrorResponse(errorResponse) {
+        try {
+            return JSON.parse(errorResponse);
+        } catch (e) {
+            return {detail: errorResponse};
+        }
     }
 }
 

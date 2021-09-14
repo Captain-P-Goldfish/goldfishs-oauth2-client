@@ -11,16 +11,15 @@ import OpenidClients from "./openid/openid-clients";
 import OpenidClientOverview from "./openid/openid-client-overview";
 import {AlertListMessages} from "./base/form-base";
 import {GoFlame} from "react-icons/go";
+import {TokenCategoryList} from "./tokens/token-category";
 
 
 export const ApplicationInfoContext = React.createContext(null);
 export const ScimServiceProviderContext = React.createContext(null);
 
-class Application extends React.Component
-{
+class Application extends React.Component {
 
-    constructor(props)
-    {
+    constructor(props) {
         super(props);
         this.state = {
             serviceProviderConfig: {
@@ -36,34 +35,26 @@ class Application extends React.Component
         this.setState = this.setState.bind(this);
     }
 
-    async componentDidMount()
-    {
+    async componentDidMount() {
         let scimClient = new ScimClient("/scim/v2/ServiceProviderConfig", this.setState);
-        scimClient.listResources().then(response =>
-        {
-            if (response.success)
-            {
-                response.resource.then(serviceProviderConfig =>
-                {
+        scimClient.listResources().then(response => {
+            if (response.success) {
+                response.resource.then(serviceProviderConfig => {
                     this.setState({serviceProviderConfig: serviceProviderConfig});
                 })
             }
         })
 
-        scimClient.getResource(null, "/scim/v2/AppInfo").then(response =>
-        {
-            if (response.success)
-            {
-                response.resource.then(appInfo =>
-                {
+        scimClient.getResource(null, "/scim/v2/AppInfo").then(response => {
+            if (response.success) {
+                response.resource.then(appInfo => {
                     this.setState({appInfo: appInfo});
                 })
             }
         });
     }
 
-    render()
-    {
+    render() {
         return (
             <React.Fragment>
                 <Router>
@@ -92,6 +83,9 @@ class Application extends React.Component
                                 <LinkContainer exact to="/views/jwts">
                                     <Nav.Link>JWTs</Nav.Link>
                                 </LinkContainer>
+                                <LinkContainer exact to="/views/tokenCategories">
+                                    <Nav.Link>Tokens</Nav.Link>
+                                </LinkContainer>
                                 <LinkContainer exact to="/views/system">
                                     <Nav.Link>System</Nav.Link>
                                 </LinkContainer>
@@ -115,8 +109,7 @@ class Application extends React.Component
                                     <Route path={"/views/openIdProvider/:providerId/client/:clientId"}
                                            component={OpenidClientOverview} />
                                     <Route path={"/views/openIdProvider/:id/openIdClients"}
-                                           render={route =>
-                                           {
+                                           render={route => {
                                                return <OpenidClients match={route.match}
                                                                      serviceProviderConfig={this.state.serviceProviderConfig} />
                                            }} />
@@ -125,6 +118,9 @@ class Application extends React.Component
                                     </Route>
                                     <Route path="/views/jwts">
                                         <JwtHandler />
+                                    </Route>
+                                    <Route path="/views/tokenCategories">
+                                        <TokenCategoryList />
                                     </Route>
                                     <Route path="/">
                                         <Redirect to="/views/jwts" />

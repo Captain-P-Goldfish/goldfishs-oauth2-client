@@ -482,3 +482,55 @@ span.add-new-resource {
     font-size: larger;
     cursor: pointer;
 }
+
+/* *************************************************************************************************** */
+/* token categories and token stores */
+
+.add-list-item-icon{
+    float: right;
+    cursor: pointer;
+    margin-top: 3px;
+}
+
+.edit.save-icon, .edit.delete-icon {
+    margin-top: 10px;
+}
+
+.save-icon, .delete-icon, .edit-icon, .abort-icon {
+    margin-top: 5px;
+}
+
+.listed-icon {
+    margin-right: 7px;
+}
+
+.list-item-input, .list-item-input:focus, .list-item-input:active {
+    min-width: 80%;
+    max-width: 80%;
+    margin-top: 5px;
+    background-color: black;
+    color: white;
+    border: none;
+    box-shadow: 2px 1px 1px 1px lightgoldenrodyellow;
+}
+
+.list-delete-insertion {
+    display: block;
+    min-width: 100%;
+    min-height: 100%;
+    background-color: rgba(87, 51, 29, 0.8);
+    text-align: center;
+}
+
+.list-delete-insertion .list-delete-text {
+    color: white;
+    font-weight: bold;
+}
+
+.list-delete-insertion > button {
+    padding: 0 10px;
+    margin: 5px 5px;
+}
+
+/* *************************************************************************************************** */
+

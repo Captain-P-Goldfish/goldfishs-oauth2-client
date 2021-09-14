@@ -1,6 +1,8 @@
 export const CERT_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo";
 export const CURRENT_WORKFLOW_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CurrentWorkflowSettings";
-
+export const TOKEN_CATEGORY_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenCategory";
+export const TOKEN_STORE_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenStore";
+export const SEARCH_REQUEST_URI = "urn:ietf:params:scim:api:messages:2.0:SearchRequest";
 
 const BASE_URL = "/scim/v2";
 export const ACCESS_TOKEN_REQUEST_ENDPOINT = BASE_URL + "/AccessTokenRequest";
@@ -14,3 +16,5 @@ export const OPENID_PROVIDER_ENDPOINT = BASE_URL + "/OpenIdProvider";
 export const PROXY_ENDPOINT = BASE_URL + "/Proxy";
 export const TRUSTSTORE_ENDPOINT = BASE_URL + "/Truststore";
 export const CURRENT_WORKFLOW_SETTINGS_ENDPOINT = BASE_URL + "/CurrentWorkflowSettings";
+export const TOKEN_CATEGORY_ENDPOINT = BASE_URL + "/TokenCategory";
+export const TOKEN_STORE_ENDPOINT = BASE_URL + "/TokenStore";
