@@ -1,5 +1,11 @@
 import ScimClient from "../scim/scim-client";
-import {SEARCH_REQUEST_URI, TOKEN_STORE_ENDPOINT, TOKEN_STORE_URI} from "../scim/scim-constants";
+import {
+  BULK_ENDPOINT,
+  BULK_REQUEST_URI,
+  SEARCH_REQUEST_URI,
+  TOKEN_STORE_ENDPOINT,
+  TOKEN_STORE_URI
+} from "../scim/scim-constants";
 
 export class TokenStoreClient
 {
@@ -39,11 +45,11 @@ export class TokenStoreClient
   }
   
   listTokenStores({
-                   startIndex,
-                   filter,
-                   sortBy,
-                   sortOrder
-                 } = {}, onSuccess, onError)
+                    startIndex,
+                    filter,
+                    sortBy,
+                    sortOrder
+                  } = {}, onSuccess, onError)
   {
     let searchRequest = {
       schemas: [SEARCH_REQUEST_URI],
@@ -102,4 +108,78 @@ export class TokenStoreClient
               });
   }
   
+  bulkDeleteTokenStores(tokenStoreArray, maxOperations, onSuccess, onError)
+  {
+    
+    function sendBulkRequest(bulkOperations)
+    {
+      let bulkRequest = {
+        "schemas": [BULK_REQUEST_URI],
+        "Operations": bulkOperations
+      };
+      
+      fetch(BULK_ENDPOINT, {
+        method: "POST",
+        headers: {'Content-Type': 'application/scim+json'},
+        body: JSON.stringify(bulkRequest)
+      })
+        .then(response =>
+              {
+                if (response.status === 200)
+                {
+                  response.json()
+                          .then(resource =>
+                                {
+                                  let ops = resource.Operations;
+                                  let deleteSuccessIds = [];
+                                  let deleteFailedIds = [];
+                                  ops.forEach(deletedResponseOperations =>
+                                              {
+                                                if (deletedResponseOperations.status === 204)
+                                                {
+                                                  deleteSuccessIds.push(deletedResponseOperations.bulkId);
+                                                }
+                                                else
+                                                {
+                                                  deleteFailedIds.push(deletedResponseOperations.bulkId);
+                                                }
+                                              });
+                                  onSuccess(deleteSuccessIds, deleteFailedIds);
+                                });
+                }
+                else
+                {
+                  response.json()
+                          .then(errorResponse =>
+                                {
+                                  onError(errorResponse);
+                                });
+                }
+              });
+    }
+    
+    let operations = [];
+    for (let i = 0; i < tokenStoreArray.length; i++)
+    {
+      let tokenStore = tokenStoreArray[i];
+      operations.push(
+        {
+          method: "DELETE",
+          bulkId: tokenStore.id,
+          path: "/TokenStore/" + tokenStore.id
+        }
+      );
+      
+      if (operations.length === maxOperations)
+      {
+        sendBulkRequest([...operations]);
+        operations = [];
+      }
+    }
+    
+    if (operations.length > 0)
+    {
+      sendBulkRequest(operations);
+    }
+  }
 }

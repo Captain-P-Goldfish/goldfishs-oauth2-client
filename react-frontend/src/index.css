@@ -534,7 +534,7 @@ span.add-new-resource {
 
 .token-area, .token-overview {
     resize: both;
-    width: 350px;
+    width: 200px;
     min-height: 10vh;
     position: absolute;
     border-radius: 5px;
@@ -592,6 +592,12 @@ span.add-new-resource {
     width: 170px;
     min-width: 170px;
     max-width: 300px;
+}
+
+.checkbox-column{
+    width: 25px;
+    min-width: 25px;
+    max-width: 25px;
 }
 
 /* *************************************************************************************************** */

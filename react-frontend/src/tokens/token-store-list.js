@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {TokenStoreClient} from "./token-store-client";
 import {Alert, Table} from "react-bootstrap";
 import {CheckLg, Eye, EyeFill, PencilSquare, PlusLg, Save, Trash, XLg} from "react-bootstrap-icons";
 import {Optional} from "../services/utils";
 import {GoFlame} from "react-icons/go";
+import {ScimServiceProviderContext} from "../app";
 
 export function TokenStoreList(props)
 {
@@ -29,12 +30,34 @@ export function TokenStoreList(props)
     setTokenStoreList(copiedTokenStores);
   }
   
-  function removeTokenStore(tokenStore)
+  function removeTokenStore(tokenStoreArray)
   {
     let copiedTokenStores = [...tokenStoreList];
+    tokenStoreArray.forEach(tokenStore =>
+                            {
+                              let indexOf = copiedTokenStores.indexOf(tokenStore);
+                              copiedTokenStores.splice(indexOf, 1);
+                            });
+    setTotalResults(totalResults - tokenStoreArray.length);
+    setTokenStoreList(copiedTokenStores);
+  }
+  
+  function toggleSingleCeckbox(checked, tokenStore)
+  {
+    tokenStore.checked = checked;
+    let copiedTokenStores = [...tokenStoreList];
     let indexOf = copiedTokenStores.indexOf(tokenStore);
-    copiedTokenStores.splice(indexOf, 1);
-    setTotalResults(totalResults - 1);
+    copiedTokenStores.splice(indexOf, 1, tokenStore);
+    setTokenStoreList(copiedTokenStores);
+  }
+  
+  function toggleAllCheckboxes(checked)
+  {
+    let copiedTokenStores = [...tokenStoreList];
+    copiedTokenStores.forEach(tokenStore =>
+                              {
+                                tokenStore.checked = checked;
+                              });
     setTokenStoreList(copiedTokenStores);
   }
   
@@ -75,7 +98,9 @@ export function TokenStoreList(props)
                      tokenStoreList={tokenStoreList}
                      addNewTokenStores={addNewTokenStores}
                      updateTokenStore={updateTokenStore}
-                     removeTokenStore={removeTokenStore} />
+                     removeTokenStore={removeTokenStore}
+                     toggleSingleCeckbox={toggleSingleCeckbox}
+                     toggleAllCheckboxes={toggleAllCheckboxes} />
   </React.Fragment>;
 }
 
@@ -83,13 +108,16 @@ function TokenStoreTable(props)
 {
   
   const [error, setError] = useState();
+  const [bulkDeleteMode, setBulkDeleteMode] = useState(false);
   const [addNew, setAddNew] = useState(false);
   
-  function deleteTokenStore(tokenStore)
+  const serviceProviderContext = useContext(ScimServiceProviderContext);
+  
+  function deleteTokenStore(tokenStoreArray)
   {
     function onSuccess()
     {
-      props.removeTokenStore(tokenStore);
+      props.removeTokenStore(tokenStoreArray);
     }
     
     function onError(errorResponse)
@@ -97,7 +125,30 @@ function TokenStoreTable(props)
       setError(errorResponse);
     }
     
-    new TokenStoreClient().deleteTokenStore(tokenStore, onSuccess, onError);
+    new TokenStoreClient().deleteTokenStore(tokenStoreArray[0], onSuccess, onError);
+  }
+  
+  function bulkDeleteTokenStore()
+  {
+    let tokenStoreArray = props.tokenStoreList.filter(tokenStore => tokenStore.checked);
+    
+    function onSuccess(successfulDeleteIds, failedDeleteIds)
+    {
+      let deletedTokenStores = tokenStoreArray.filter(tokenStore => successfulDeleteIds.includes(tokenStore.id));
+      props.removeTokenStore(deletedTokenStores);
+      setBulkDeleteMode(false);
+    }
+    
+    function onError(errorResponse)
+    {
+      setError(errorResponse);
+      setBulkDeleteMode(false);
+    }
+    
+    new TokenStoreClient().bulkDeleteTokenStores(tokenStoreArray,
+                                                 serviceProviderContext.bulk.maxOperations,
+                                                 onSuccess,
+                                                 onError);
   }
   
   return <React.Fragment>
@@ -110,11 +161,30 @@ function TokenStoreTable(props)
     <Table striped bordered hover size="sm" variant={"dark"}>
       <thead>
         <tr>
+          <th className={"checkbox-column"}>
+            <input type={"checkbox"}
+                   onChange={e => props.toggleAllCheckboxes(e.target.checked)} />
+          </th>
           <th className={"token-store-id-column"}>id</th>
           <th className={"token-store-name-column"}>name</th>
           <th>token</th>
           <th className={"timestamp-column"}>timestamps</th>
-          <th className={"icon-column"}><PlusLg className={"icon"} onClick={() => setAddNew(true)} /></th>
+          <th className={"icon-column"}>
+            {
+              !bulkDeleteMode &&
+              <React.Fragment>
+                <PlusLg className={"listed-icon icon"} onClick={() => setAddNew(true)} />
+                <Trash className={"icon"} onClick={() => setBulkDeleteMode(true)} />
+              </React.Fragment>
+            }
+            {
+              bulkDeleteMode &&
+              <span className={"list-delete-insertion"}>
+                sure? <CheckLg className={"listed-icon icon"} onClick={() => bulkDeleteTokenStore()} />
+                <XLg className={"icon"} onClick={() => setBulkDeleteMode(false)} />
+              </span>
+            }
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -135,6 +205,7 @@ function TokenStoreTable(props)
         {
           props.tokenStoreList.map(tokenStore => <TokenStoreRow key={tokenStore.id}
                                                                 tokenStore={tokenStore}
+                                                                toggleSingleCeckbox={props.toggleSingleCeckbox}
                                                                 addNewTokenStores={props.addNewTokenStores}
                                                                 updateTokenStore={props.updateTokenStore}
                                                                 removeTokenStore={deleteTokenStore} />)
@@ -205,6 +276,8 @@ function TokenStoreRow(props)
   
   return <React.Fragment>
     <tr>
+      <td><input type={"checkbox"} checked={props.tokenStore.checked || false}
+                 onChange={e => props.toggleSingleCeckbox(e.target.checked, props.tokenStore)} /></td>
       <td>{props.tokenStore.id}</td>
       <td>
         {
@@ -295,7 +368,7 @@ function TokenStoreRow(props)
                            onClick={() =>
                            {
                              setDeleteMode(false);
-                             props.removeTokenStore(props.tokenStore);
+                             props.removeTokenStore([props.tokenStore]);
                            }} />
             <XLg className={"listed-icon icon"}
                  onClick={() => setDeleteMode(false)} />

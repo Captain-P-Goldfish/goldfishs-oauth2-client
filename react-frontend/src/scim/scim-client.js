@@ -236,7 +236,7 @@ export default class ScimClient {
             }
         })
     }
-
+    
     /**
      * accesses the the form-reference with name "this.formReference" reads its input and select fields and builds a
      * scim resource from it that will be used in the following request

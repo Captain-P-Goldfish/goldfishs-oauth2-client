@@ -3,6 +3,7 @@ export const CURRENT_WORKFLOW_URI = "urn:ietf:params:scim:schemas:captaingoldfis
 export const TOKEN_CATEGORY_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenCategory";
 export const TOKEN_STORE_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:TokenStore";
 export const SEARCH_REQUEST_URI = "urn:ietf:params:scim:api:messages:2.0:SearchRequest";
+export const BULK_REQUEST_URI = "urn:ietf:params:scim:api:messages:2.0:BulkRequest";
 
 const BASE_URL = "/scim/v2";
 export const ACCESS_TOKEN_REQUEST_ENDPOINT = BASE_URL + "/AccessTokenRequest";
@@ -18,3 +19,4 @@ export const TRUSTSTORE_ENDPOINT = BASE_URL + "/Truststore";
 export const CURRENT_WORKFLOW_SETTINGS_ENDPOINT = BASE_URL + "/CurrentWorkflowSettings";
 export const TOKEN_CATEGORY_ENDPOINT = BASE_URL + "/TokenCategory";
 export const TOKEN_STORE_ENDPOINT = BASE_URL + "/TokenStore";
+export const BULK_ENDPOINT = BASE_URL + "/Bulk";
