@@ -267,7 +267,7 @@ div.card-header {
     margin-bottom: 15px !important;
 }
 
-.card-control-icons {
+.card-control-icons, .popover-remove-icon {
     float: right;
     margin-top: 5px;
 }
@@ -486,7 +486,7 @@ span.add-new-resource {
 /* *************************************************************************************************** */
 /* token categories and token stores */
 
-.add-list-item-icon{
+.add-list-item-icon {
     float: right;
     cursor: pointer;
     margin-top: 3px;
@@ -530,6 +530,68 @@ span.add-new-resource {
 .list-delete-insertion > button {
     padding: 0 10px;
     margin: 5px 5px;
+}
+
+.token-area, .token-overview {
+    resize: both;
+    width: 350px;
+    min-height: 10vh;
+    position: absolute;
+    border-radius: 5px;
+}
+
+.token-overview {
+    background: #e1dede;
+    color: black;
+    border-radius: 0;
+}
+
+.overflow-column {
+    max-width: 300px;
+    overflow: hidden;
+    white-space: nowrap; /* Don't forget this one */
+    text-overflow: ellipsis;
+}
+
+.icon-column {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+}
+
+.timestamp-column {
+    width: 170px;
+    min-width: 170px;
+    max-width: 170px;
+}
+
+.eye-icon {
+    margin-top: 5px;
+}
+
+.eye-icon:hover {
+    color: gold;
+}
+
+.right-floating-icon {
+    float: right;
+    cursor: pointer;
+}
+
+.icon {
+    cursor: pointer;
+}
+
+.token-store-id-column {
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+}
+
+.token-store-name-column {
+    width: 170px;
+    min-width: 170px;
+    max-width: 300px;
 }
 
 /* *************************************************************************************************** */

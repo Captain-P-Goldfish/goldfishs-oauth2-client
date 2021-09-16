@@ -3,6 +3,7 @@ import {TokenCategoryClient} from "./token-category-client";
 import {Alert, Button, Col, Form, ListGroup, Row, Tab} from "react-bootstrap";
 import {ArrowRightCircle, PencilSquare, PlusLg, Save, Trash, XLg} from "react-bootstrap-icons";
 import {GoFlame} from "react-icons/go";
+import {TokenStoreList} from "./token-store-list";
 
 export function TokenCategoryList()
 {
@@ -99,7 +100,7 @@ export function TokenCategoryList()
                                     {
                                       return <Tab.Pane key={tokenCategory.id}
                                                        eventKey={"#" + tokenCategory.id}>
-                                        {tokenCategory.name}
+                                        <TokenStoreList category={tokenCategory} />
                                       </Tab.Pane>;
                                     })
             }
