@@ -9,6 +9,7 @@ export function TokenCategoryList()
 {
   
   const [errors, setErrors] = useState({});
+  const [loadedOnce, setloadedOnce] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [tokenCategoryList, setTokenCategoryList] = useState([]);
   
@@ -48,6 +49,7 @@ export function TokenCategoryList()
                 setTotalResults(listResponse.totalResults);
                 let newResources = listResponse.Resources || [];
                 addNewCategories([...newResources]);
+                setloadedOnce(true);
               }
     
               function onError(errorResponse)
@@ -55,7 +57,7 @@ export function TokenCategoryList()
                 setErrors(errorResponse);
               }
     
-              if (totalResults === 0 || tokenCategoryList.length < totalResults)
+              if ((totalResults === 0 && !loadedOnce) || tokenCategoryList.length < totalResults)
               {
                 new TokenCategoryClient().listCategories(searchRequest, onSuccess, onError);
               }
