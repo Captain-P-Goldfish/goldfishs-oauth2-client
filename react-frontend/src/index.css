@@ -560,9 +560,9 @@ span.add-new-resource {
 }
 
 .timestamp-column {
-    width: 170px;
-    min-width: 170px;
-    max-width: 170px;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
 }
 
 .eye-icon {

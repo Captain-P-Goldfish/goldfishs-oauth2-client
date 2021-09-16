@@ -113,8 +113,7 @@ function TokenStoreTable(props)
           <th className={"token-store-id-column"}>id</th>
           <th className={"token-store-name-column"}>name</th>
           <th>token</th>
-          <th className={"timestamp-column"}>created</th>
-          <th className={"timestamp-column"}>lastModified</th>
+          <th className={"timestamp-column"}>timestamps</th>
           <th className={"icon-column"}><PlusLg className={"icon"} onClick={() => setAddNew(true)} /></th>
         </tr>
       </thead>
@@ -247,14 +246,17 @@ function TokenStoreRow(props)
         }
       </td>
       <td>
-        {new Optional(props.tokenStore.meta).map(val => val.created)
-                                            .map(val => new Date(val).toLocaleString())
-                                            .orElse(null)}
-      </td>
-      <td>
-        {new Optional(props.tokenStore.meta).map(val => val.lastModified)
-                                            .map(val => new Date(val).toLocaleString())
-                                            .orElse(null)}
+        <span>
+          created: {new Optional(props.tokenStore.meta).map(val => val.created)
+                                                       .map(val => new Date(val).toLocaleString())
+                                                       .orElse(null)}
+        </span>
+        <br />
+        <span>
+          modified: {new Optional(props.tokenStore.meta).map(val => val.lastModified)
+                                                        .map(val => new Date(val).toLocaleString())
+                                                        .orElse(null)}
+        </span>
       </td>
       <td>
         {
