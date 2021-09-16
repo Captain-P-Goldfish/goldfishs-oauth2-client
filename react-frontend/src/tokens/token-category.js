@@ -153,7 +153,7 @@ function CategoryListItem(props)
                          action
                          href={"#" + props.category.id}
                          onKeyDown={e => editMode && e.stopPropagation()}>
-    <ArrowRightCircle style={{margin: "0 15px"}} />
+    <ArrowRightCircle style={{margin: "0 10px 0 0"}} />
     {
       !editMode &&
       value
@@ -161,6 +161,7 @@ function CategoryListItem(props)
     {
       editMode &&
       <input type={"text"}
+             className={"listed-category-header-input"}
              value={value}
              onChange={e => setValue(e.target.value)}
              onKeyUp={e =>
