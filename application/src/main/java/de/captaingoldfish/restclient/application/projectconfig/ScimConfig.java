@@ -2,9 +2,6 @@ package de.captaingoldfish.restclient.application.projectconfig;
 
 import java.util.Collections;
 
-import de.captaingoldfish.restclient.application.endpoints.tokencategory.TokenCategoryHandler;
-import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
-import de.captaingoldfish.restclient.scim.endpoints.TokenCategoryEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,6 +17,7 @@ import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHand
 import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
+import de.captaingoldfish.restclient.application.endpoints.tokencategory.TokenCategoryHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.AccessTokenRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenstore.TokenStoreHandler;
 import de.captaingoldfish.restclient.application.endpoints.truststore.TruststoreHandler;
@@ -30,6 +28,7 @@ import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
+import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
 import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.endpoints.AccessTokenRequestEndpoint;
@@ -42,6 +41,7 @@ import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.ProxyEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.TokenCategoryEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TokenStoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TruststoreEndpoint;
 import de.captaingoldfish.scim.sdk.common.resources.ServiceProvider;
@@ -292,9 +292,6 @@ public class ScimConfig
   {
     TokenStoreHandler handler = new TokenStoreHandler(tokenStoreDao);
     TokenStoreEndpoint endpoint = new TokenStoreEndpoint(handler);
-    ResourceType resourceType = resourceEndpoint.registerEndpoint(endpoint);
-    resourceType.getFeatures().setAutoFiltering(true);
-    resourceType.getFeatures().setAutoSorting(true);
-    return resourceType;
+    return resourceEndpoint.registerEndpoint(endpoint);
   }
 }

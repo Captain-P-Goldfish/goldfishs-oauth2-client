@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.captaingoldfish.restclient.application.endpoints.tokenstore.filtering.TokenStoreFilterResolver;
 import de.captaingoldfish.restclient.application.endpoints.tokenstore.validation.TokenStoreValidator;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.TokenStore;
@@ -23,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * This handler provides functionality to create and access arbitrary tokens that should be stored for later
  * retrieval
- * 
+ *
  * @author Pascal Knueppel
  * @since 28.08.2021
  */
@@ -73,10 +74,10 @@ public class TokenStoreHandler extends ResourceHandler<ScimTokenStore>
                                                            List<SchemaAttribute> excludedAttributes,
                                                            Context context)
   {
-    List<ScimTokenStore> tokenStoreList = tokenStoreDao.findAll()
-                                                       .stream()
-                                                       .map(TokenStoreConverter::toScimTokenStore)
-                                                       .collect(Collectors.toList());
+    List<ScimTokenStore> tokenStoreList = new TokenStoreFilterResolver().resolveFilter(filter)
+                                                                        .stream()
+                                                                        .map(TokenStoreConverter::toScimTokenStore)
+                                                                        .collect(Collectors.toList());
     return PartialListResponse.<ScimTokenStore> builder()
                               .totalResults(tokenStoreList.size())
                               .resources(tokenStoreList)
