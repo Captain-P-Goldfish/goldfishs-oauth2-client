@@ -9,6 +9,7 @@ export function TokenCategoryList()
 {
   
   const [errors, setErrors] = useState({});
+  const [filter, setFilter] = useState();
   const [loadedOnce, setloadedOnce] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [tokenCategoryList, setTokenCategoryList] = useState([]);
@@ -64,7 +65,6 @@ export function TokenCategoryList()
             }, [tokenCategoryList]);
   
   return <React.Fragment>
-    <h5>found a total of {totalResults} categories</h5>
     {
       errors && errors.length > 0 &&
       <Alert variant={"danger"}>
@@ -74,6 +74,28 @@ export function TokenCategoryList()
       </Alert>
     }
     <Tab.Container id="list-group-tabs-example">
+      <Row>
+        <Col sm={3}>
+          <h5>found a total of {totalResults} categories</h5>
+        </Col>
+        <Col>
+          <div className={"filter-block"}>
+              <span>
+                <span>search for token part: </span>
+                <input id={"filter-input"}
+                       onKeyUp={e =>
+                       {
+                         if (e.key === 'Enter')
+                         {
+                           setFilter(document.getElementById("filter-input").value);
+                         }
+                       }} />
+                <Button onClick={e => setFilter(document.getElementById("filter-input").value)}
+                >search</Button>
+              </span>
+          </div>
+        </Col>
+      </Row>
       <Row>
         <Col sm={3}>
           <ListGroup>
@@ -102,7 +124,7 @@ export function TokenCategoryList()
                                     {
                                       return <Tab.Pane key={tokenCategory.id}
                                                        eventKey={"#" + tokenCategory.id}>
-                                        <TokenStoreList category={tokenCategory} />
+                                        <TokenStoreList category={tokenCategory} filter={filter} />
                                       </Tab.Pane>;
                                     })
             }

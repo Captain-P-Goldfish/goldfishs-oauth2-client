@@ -540,7 +540,7 @@ span.add-new-resource {
 
 .token-area, .token-overview {
     resize: both;
-    width: 200px;
+    width: 400px;
     min-height: 10vh;
     position: absolute;
     border-radius: 5px;
@@ -550,12 +550,22 @@ span.add-new-resource {
     background: #e1dede;
     color: black;
     border-radius: 0;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+}
+
+.token-overview-short {
+    max-width: 90%;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .overflow-column {
     max-width: 300px;
     overflow: hidden;
-    white-space: nowrap; /* Don't forget this one */
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 
@@ -604,6 +614,15 @@ span.add-new-resource {
     width: 25px;
     min-width: 25px;
     max-width: 25px;
+}
+
+.filter-block {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.filter-block button {
+    margin-left: 10px;
 }
 
 /* *************************************************************************************************** */

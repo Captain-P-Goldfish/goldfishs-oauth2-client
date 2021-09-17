@@ -63,8 +63,19 @@ export function TokenStoreList(props)
   
   useEffect(() =>
             {
+              setloadedOnce(false);
+              setTotalResults(0);
+              setTokenStoreList([]);
+            }, [props.filter]);
+  
+  useEffect(() =>
+            {
               let searchRequest = {
                 startIndex: tokenStoreList.length,
+                filter: new Optional(props.filter).map(v => v.trim())
+                                                  .map(v => v.length === 0 ? undefined : v)
+                                                  .map(v => "token co \"" + v + "\" and categoryId eq " + props.category.id)
+                                                  .orElse("categoryId eq " + props.category.id),
                 sortBy: "name"
               };
     
@@ -295,13 +306,11 @@ function TokenStoreRow(props)
           <React.Fragment>
             {
               !viewTokenMode &&
-              token
+              <article className={"token-overview-short"}>{token}</article>
             }
             {
               viewTokenMode &&
-              <pre className={"token-overview"}>
-                {token}
-              </pre>
+              <textarea className={"token-overview"} readOnly={true} value={token} />
             }
             {
               !viewTokenMode &&
