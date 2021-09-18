@@ -69,7 +69,7 @@ public class DatabaseConfig
    */
   private final String databasePassword;
 
-  public DatabaseConfig(@Value("${database.url:jdbc:hsqldb:mem:consent-core}") String databaseUrl,
+  public DatabaseConfig(@Value("${database.url:jdbc:hsqldb:file:./hsql-db/application-db}") String databaseUrl,
                         @Value("${database.user:sa}") String databaseUsername,
                         @Value("${database.password:}") String databasePassword)
   {
@@ -181,10 +181,10 @@ public class DatabaseConfig
   {
 
     HSQLDB("jdbc:hsqldb", "org.hsqldb.jdbcDriver", "org.hibernate.dialect.HSQLDialect",
-    // @formatter:off  
+    // @formatter:off
          Map.of("hibernate.format_sql", "false",
                 "hibernate.show_sql", "false")
-    // @formatter:on  
+    // @formatter:on
     ),
 
     SQLSERVER("jdbc:sqlserver",
@@ -243,7 +243,7 @@ public class DatabaseConfig
     /**
      * checks the connection to the database and writes a success message into the log if the connection was
      * successfully established
-     * 
+     *
      * @param dataSource the datasource to create a valid connection
      */
     @SneakyThrows
@@ -255,10 +255,6 @@ public class DatabaseConfig
         String databaseProductname = metaData.getDatabaseProductName();
         String databaseVersion = metaData.getDatabaseProductVersion();
         log.info("Successfully connected to database: {} : {}", databaseProductname, databaseVersion);
-      }
-      if (HSQLDB.equals(this))
-      {
-        log.warn("CAUTION: Using HSQL database. Do not use this in production environment!");
       }
     }
   }
