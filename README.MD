@@ -19,6 +19,16 @@ AccessTokens on any Identity Provider.
 
 The project is based on springboot and needs a database connection which can be setup like this in
 `application.properties` file
+   
+the following is the default configuration
+
+```properties
+database.url=jdbc:hsqldb:file:./hsql-db/application-db
+database.user=sa
+database.password=
+```
+    
+to use other database use e.g.
 
 ```properties
 database.url=jdbc:mysql://localhost:3306/goldfishs_rest_client
