@@ -34,6 +34,17 @@ problems that would actually require the frontend to be reimplemented.
 
 The project requires JDK 11+
 
+# Supported databases
+
+|  type |
+| :---- | 
+| MySQL | 
+| MariaDB |
+| MS SQL Server |
+| Oracle XE |
+| Postgres |
+| HSQLDB  |
+
 # Build
 
 The executable artifact can be found at `application/target/oauth2-test-client.jar` after `maven clean package`
