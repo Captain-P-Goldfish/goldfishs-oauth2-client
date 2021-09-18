@@ -9,10 +9,11 @@ export function TokenCategoryList()
 {
   
   const [errors, setErrors] = useState({});
-  const [filter, setFilter] = useState();
+  const [filter, setFilter] = useState("");
   const [loadedOnce, setloadedOnce] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [tokenCategoryList, setTokenCategoryList] = useState([]);
+  const [tokensRemovedByFilter, setTokensRemovedByFilter] = useState([]);
   
   function addNewCategories(categoryArray)
   {
@@ -35,6 +36,13 @@ export function TokenCategoryList()
     let index = copiedList.indexOf(category);
     copiedList.splice(index, 1);
     setTotalResults(totalResults - 1);
+    setTokenCategoryList([...copiedList]);
+  }
+  
+  function setCategoryEntires(category, numberOfEntries)
+  {
+    category.numberOfEntries = numberOfEntries;
+    let copiedList = [...tokenCategoryList];
     setTokenCategoryList([...copiedList]);
   }
   
@@ -63,6 +71,11 @@ export function TokenCategoryList()
                 new TokenCategoryClient().listCategories(searchRequest, onSuccess, onError);
               }
             }, [tokenCategoryList]);
+  
+  useEffect(() =>
+            {
+    
+            }, [filter]);
   
   return <React.Fragment>
     {
@@ -124,7 +137,8 @@ export function TokenCategoryList()
                                     {
                                       return <Tab.Pane key={tokenCategory.id}
                                                        eventKey={"#" + tokenCategory.id}>
-                                        <TokenStoreList category={tokenCategory} filter={filter} />
+                                        <TokenStoreList category={tokenCategory} filter={filter}
+                                                        setcategoryEntires={setCategoryEntires} />
                                       </Tab.Pane>;
                                     })
             }
@@ -173,14 +187,18 @@ function CategoryListItem(props)
     new TokenCategoryClient().deleteCategory(props.category, onSuccess, errorResponse => setErrors(errorResponse));
   }
   
-  return <ListGroup.Item variant={"secondary"}
+  let numberOfEntries = props.category.numberOfEntries || 0;
+  
+  return <ListGroup.Item variant={(numberOfEntries === 0) ? "dark" : "light"}
                          action
                          href={"#" + props.category.id}
                          onKeyDown={e => editMode && e.stopPropagation()}>
     <ArrowRightCircle style={{margin: "0 10px 0 0"}} />
     {
       !editMode &&
-      value
+      <React.Fragment>
+        {value} [{numberOfEntries}]
+      </React.Fragment>
     }
     {
       editMode &&

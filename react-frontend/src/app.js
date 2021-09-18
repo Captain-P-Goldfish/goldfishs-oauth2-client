@@ -84,7 +84,7 @@ class Application extends React.Component {
                                     <Nav.Link>JWTs</Nav.Link>
                                 </LinkContainer>
                                 <LinkContainer exact to="/views/tokenCategories">
-                                    <Nav.Link>Tokens</Nav.Link>
+                                    <Nav.Link>Storage</Nav.Link>
                                 </LinkContainer>
                                 <LinkContainer exact to="/views/system">
                                     <Nav.Link>System</Nav.Link>

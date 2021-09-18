@@ -85,6 +85,7 @@ export function TokenStoreList(props)
                 let newResources = listResponse.Resources || [];
                 addNewTokenStores([...newResources]);
                 setloadedOnce(true);
+                props.setcategoryEntires(props.category, listResponse.totalResults);
               }
     
               function onError(errorResponse)
