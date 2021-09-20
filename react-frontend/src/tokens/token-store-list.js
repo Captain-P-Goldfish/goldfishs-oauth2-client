@@ -19,6 +19,7 @@ export function TokenStoreList(props)
     newTokenStores.sort((c1, c2) => c1.name.localeCompare(c2.name));
     setTotalResults(totalResults + tokenStoreArray.length);
     setTokenStoreList(newTokenStores);
+    props.setCategoryEntires(props.category, totalResults + tokenStoreArray.length);
   }
   
   function updateTokenStore(oldtokenStore, newTokenStore)
@@ -40,6 +41,7 @@ export function TokenStoreList(props)
                             });
     setTotalResults(totalResults - tokenStoreArray.length);
     setTokenStoreList(copiedTokenStores);
+    props.setCategoryEntires(props.category, totalResults - tokenStoreArray.length);
   }
   
   function toggleSingleCeckbox(checked, tokenStore)
@@ -85,7 +87,6 @@ export function TokenStoreList(props)
                 let newResources = listResponse.Resources || [];
                 addNewTokenStores([...newResources]);
                 setloadedOnce(true);
-                props.setcategoryEntires(props.category, listResponse.totalResults);
               }
     
               function onError(errorResponse)

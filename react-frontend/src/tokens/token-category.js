@@ -138,7 +138,7 @@ export function TokenCategoryList()
                                       return <Tab.Pane key={tokenCategory.id}
                                                        eventKey={"#" + tokenCategory.id}>
                                         <TokenStoreList category={tokenCategory} filter={filter}
-                                                        setcategoryEntires={setCategoryEntires} />
+                                                        setCategoryEntires={setCategoryEntires} />
                                       </Tab.Pane>;
                                     })
             }
