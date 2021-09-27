@@ -6,6 +6,7 @@ import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.TokenCategory;
 import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
 import de.captaingoldfish.restclient.scim.resources.ScimTokenStore;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -21,7 +22,7 @@ public class TokenStoreValidator implements RequestValidator<ScimTokenStore>
    * {@inheritDoc}
    */
   @Override
-  public void validateCreate(ScimTokenStore resource, ValidationContext validationContext)
+  public void validateCreate(ScimTokenStore resource, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -37,7 +38,8 @@ public class TokenStoreValidator implements RequestValidator<ScimTokenStore>
   @Override
   public void validateUpdate(Supplier<ScimTokenStore> oldResourceSupplier,
                              ScimTokenStore newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {

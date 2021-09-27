@@ -10,6 +10,7 @@ import de.captaingoldfish.restclient.application.crypto.JwtHandler;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.scim.resources.ScimJwtBuilder;
 import de.captaingoldfish.scim.sdk.common.utils.JsonHelper;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class ScimJwtBuilderValidator implements RequestValidator<ScimJwtBuilder>
    * appropriate error messages it was not possible
    */
   @Override
-  public void validateCreate(ScimJwtBuilder resource, ValidationContext validationContext)
+  public void validateCreate(ScimJwtBuilder resource, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -102,7 +103,8 @@ public class ScimJwtBuilderValidator implements RequestValidator<ScimJwtBuilder>
   @Override
   public void validateUpdate(Supplier<ScimJwtBuilder> oldResourceSupplier,
                              ScimJwtBuilder newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     // no updates possible
   }

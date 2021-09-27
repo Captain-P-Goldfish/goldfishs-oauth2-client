@@ -14,6 +14,7 @@ import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -29,7 +30,9 @@ public class HttpClientSettingsValidator implements RequestValidator<ScimHttpCli
    * validates if a {@link HttpClientSettings} resource is valid when it is created
    */
   @Override
-  public void validateCreate(ScimHttpClientSettings resource, ValidationContext validationContext)
+  public void validateCreate(ScimHttpClientSettings resource,
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -71,7 +74,8 @@ public class HttpClientSettingsValidator implements RequestValidator<ScimHttpCli
   @Override
   public void validateUpdate(Supplier<ScimHttpClientSettings> oldResourceSupplier,
                              ScimHttpClientSettings newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {

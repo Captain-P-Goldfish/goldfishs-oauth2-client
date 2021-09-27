@@ -14,6 +14,7 @@ import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdClient;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -29,7 +30,7 @@ public class OpenIdClientRequestValidator implements RequestValidator<ScimOpenId
    * validates the incoming resource for validity
    */
   @Override
-  public void validateCreate(ScimOpenIdClient resource, ValidationContext validationContext)
+  public void validateCreate(ScimOpenIdClient resource, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -58,7 +59,8 @@ public class OpenIdClientRequestValidator implements RequestValidator<ScimOpenId
   @Override
   public void validateUpdate(Supplier<ScimOpenIdClient> oldResourceSupplier,
                              ScimOpenIdClient newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -140,7 +142,7 @@ public class OpenIdClientRequestValidator implements RequestValidator<ScimOpenId
 
   /**
    * checks if the referenced aliases in from the resource do exist and can be used
-   * 
+   *
    * @param resource the resource that may contain alias references to the application keystore
    */
   private void validateAliasReferences(ScimOpenIdClient resource, ValidationContext validationContext)
@@ -180,7 +182,7 @@ public class OpenIdClientRequestValidator implements RequestValidator<ScimOpenId
 
   /**
    * checks that the setup authentication details are valid
-   * 
+   *
    * @param resource the resource to create or update
    */
   private void validateAuthenticationDetails(ScimOpenIdClient resource, ValidationContext validationContext)

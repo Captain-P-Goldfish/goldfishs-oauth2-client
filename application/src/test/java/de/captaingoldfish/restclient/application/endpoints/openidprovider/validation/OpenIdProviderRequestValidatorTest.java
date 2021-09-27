@@ -20,6 +20,7 @@ import de.captaingoldfish.restclient.application.utils.TestUtils;
 import de.captaingoldfish.restclient.database.config.DatabaseConfig;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdProvider;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 import de.captaingoldfish.scim.sdk.server.schemas.ResourceType;
 
@@ -42,9 +43,9 @@ public class OpenIdProviderRequestValidatorTest
 
   /**
    * simply verifies that both methods
-   * {@link OpenIdProviderRequestValidator#validateCreate(ScimOpenIdProvider, ValidationContext)} and
-   * {@link OpenIdProviderRequestValidator#validateUpdate(Supplier, ScimOpenIdProvider, ValidationContext)} will
-   * call the {@link OpenIdProviderRequestValidator#validateFields(ScimOpenIdProvider, ValidationContext)}
+   * {@link OpenIdProviderRequestValidator#validateCreate(ScimOpenIdProvider, ValidationContext, Context)} and
+   * {@link OpenIdProviderRequestValidator#validateUpdate(Supplier, ScimOpenIdProvider, ValidationContext, Context)}
+   * will call the {@link OpenIdProviderRequestValidator#validateFields(ScimOpenIdProvider, ValidationContext)}
    * method
    */
   @Test
@@ -66,12 +67,12 @@ public class OpenIdProviderRequestValidatorTest
 
     ValidationContext validationContext = new ValidationContext(Mockito.mock(ResourceType.class));
     OpenIdProviderRequestValidator validator = Mockito.spy(new OpenIdProviderRequestValidator(openIdProviderDao));
-    validator.validateCreate(scimOpenIdProvider, validationContext);
+    validator.validateCreate(scimOpenIdProvider, validationContext, null);
     Mockito.verify(validator).validateFields(Mockito.eq(scimOpenIdProvider), Mockito.eq(validationContext));
 
     Mockito.clearInvocations(validator);
 
-    validator.validateUpdate(() -> null, scimOpenIdProvider, validationContext);
+    validator.validateUpdate(() -> null, scimOpenIdProvider, validationContext, null);
     Mockito.verify(validator).validateFields(Mockito.eq(scimOpenIdProvider), Mockito.eq(validationContext));
   }
 }

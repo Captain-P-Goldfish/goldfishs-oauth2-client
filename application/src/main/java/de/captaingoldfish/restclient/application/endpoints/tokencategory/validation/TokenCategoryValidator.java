@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
 import de.captaingoldfish.restclient.scim.resources.ScimTokenCategory;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -18,7 +19,7 @@ public class TokenCategoryValidator implements RequestValidator<ScimTokenCategor
 
 
   @Override
-  public void validateCreate(ScimTokenCategory resource, ValidationContext validationContext)
+  public void validateCreate(ScimTokenCategory resource, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -36,7 +37,8 @@ public class TokenCategoryValidator implements RequestValidator<ScimTokenCategor
   @Override
   public void validateUpdate(Supplier<ScimTokenCategory> oldResourceSupplier,
                              ScimTokenCategory newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {

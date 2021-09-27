@@ -3,6 +3,7 @@ package de.captaingoldfish.restclient.application.endpoints.keystore.validation;
 import java.util.function.Supplier;
 
 import de.captaingoldfish.restclient.scim.resources.ScimKeystore;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class ScimKeystoreRequestValidator implements RequestValidator<ScimKeysto
    * validates a keystore upload
    */
   @Override
-  public void validateCreate(ScimKeystore scimKeystore, ValidationContext validationContext)
+  public void validateCreate(ScimKeystore scimKeystore, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -56,7 +57,8 @@ public class ScimKeystoreRequestValidator implements RequestValidator<ScimKeysto
   @Override
   public void validateUpdate(Supplier<ScimKeystore> originalResourceSupplier,
                              ScimKeystore scimKeystore,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     // not implemented
   }

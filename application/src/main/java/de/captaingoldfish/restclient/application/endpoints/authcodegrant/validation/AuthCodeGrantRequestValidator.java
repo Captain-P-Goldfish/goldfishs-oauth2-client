@@ -15,6 +15,7 @@ import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -30,7 +31,9 @@ public class AuthCodeGrantRequestValidator implements RequestValidator<ScimAuthC
    * verifies that the workflow settings are present in the create request and that the OpenID Client does exist
    */
   @Override
-  public void validateCreate(ScimAuthCodeGrantRequest resource, ValidationContext validationContext)
+  public void validateCreate(ScimAuthCodeGrantRequest resource,
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -76,7 +79,8 @@ public class AuthCodeGrantRequestValidator implements RequestValidator<ScimAuthC
   @Override
   public void validateUpdate(Supplier<ScimAuthCodeGrantRequest> oldResourceSupplier,
                              ScimAuthCodeGrantRequest newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     // not supported
   }

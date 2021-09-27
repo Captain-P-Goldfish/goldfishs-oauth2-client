@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import de.captaingoldfish.restclient.scim.resources.ScimTruststore;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -19,7 +20,7 @@ public class ScimTruststoreRequestValidator implements RequestValidator<ScimTrus
    * validates an upload request that might be a truststore upload or a certificate upload
    */
   @Override
-  public void validateCreate(ScimTruststore scimTruststore, ValidationContext validationContext)
+  public void validateCreate(ScimTruststore scimTruststore, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -57,7 +58,8 @@ public class ScimTruststoreRequestValidator implements RequestValidator<ScimTrus
   @Override
   public void validateUpdate(Supplier<ScimTruststore> oldResourceSupplier,
                              ScimTruststore newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     // not supported
   }

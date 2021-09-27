@@ -8,6 +8,7 @@ import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 
@@ -23,7 +24,9 @@ public class AccessTokenRequestValidator implements RequestValidator<ScimAccessT
    * verifies that the data within the access token request is sanitized
    */
   @Override
-  public void validateCreate(ScimAccessTokenRequest resource, ValidationContext validationContext)
+  public void validateCreate(ScimAccessTokenRequest resource,
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -70,7 +73,8 @@ public class AccessTokenRequestValidator implements RequestValidator<ScimAccessT
   @Override
   public void validateUpdate(Supplier<ScimAccessTokenRequest> oldResourceSupplier,
                              ScimAccessTokenRequest newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     // do nothing
   }

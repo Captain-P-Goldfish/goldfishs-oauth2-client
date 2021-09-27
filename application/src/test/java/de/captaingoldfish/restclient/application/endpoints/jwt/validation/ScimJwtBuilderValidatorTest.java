@@ -66,7 +66,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     ScimJwtBuilderValidator validator = new ScimJwtBuilderValidator(keystoreDao);
 
     ValidationContext validationContext = getValidationContext();
-    validator.validateCreate(scimJwtBuilder, validationContext);
+    validator.validateCreate(scimJwtBuilder, validationContext, null);
 
     Assertions.assertTrue(validationContext.hasErrors(), "validation context should have errors");
     Assertions.assertEquals(0, validationContext.getErrors().size());
@@ -91,7 +91,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     ScimJwtBuilderValidator validator = new ScimJwtBuilderValidator(keystoreDao);
 
     ValidationContext validationContext = getValidationContext();
-    validator.validateCreate(scimJwtBuilder, validationContext);
+    validator.validateCreate(scimJwtBuilder, validationContext, null);
 
     Assertions.assertTrue(validationContext.hasErrors(), "validation context should have errors");
     Assertions.assertEquals(0, validationContext.getErrors().size());
@@ -116,7 +116,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     ScimJwtBuilderValidator validator = new ScimJwtBuilderValidator(keystoreDao);
 
     ValidationContext validationContext = getValidationContext();
-    validator.validateCreate(scimJwtBuilder, validationContext);
+    validator.validateCreate(scimJwtBuilder, validationContext, null);
 
     Assertions.assertTrue(validationContext.hasErrors(), "validation context should have errors");
     Assertions.assertEquals(0, validationContext.getErrors().size());
@@ -143,7 +143,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     ScimJwtBuilderValidator validator = new ScimJwtBuilderValidator(keystoreDao);
 
     ValidationContext validationContext = getValidationContext();
-    validator.validateCreate(scimJwtBuilder, validationContext);
+    validator.validateCreate(scimJwtBuilder, validationContext, null);
 
     Assertions.assertTrue(validationContext.hasErrors(), "validation context should have errors");
     Assertions.assertEquals(0, validationContext.getErrors().size());
@@ -170,7 +170,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     ScimJwtBuilderValidator validator = new ScimJwtBuilderValidator(keystoreDao);
 
     ValidationContext validationContext = getValidationContext();
-    validator.validateCreate(scimJwtBuilder, validationContext);
+    validator.validateCreate(scimJwtBuilder, validationContext, null);
 
     Assertions.assertTrue(validationContext.hasErrors(), "validation context should have errors");
     Assertions.assertEquals(0, validationContext.getErrors().size());
@@ -197,7 +197,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     ScimJwtBuilderValidator validator = new ScimJwtBuilderValidator(keystoreDao);
 
     ValidationContext validationContext = getValidationContext();
-    validator.validateCreate(scimJwtBuilder, validationContext);
+    validator.validateCreate(scimJwtBuilder, validationContext, null);
 
     Assertions.assertTrue(validationContext.hasErrors(), "validation context should have errors");
     Assertions.assertEquals(0, validationContext.getErrors().size());

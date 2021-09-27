@@ -48,7 +48,7 @@
         <version.lombok>1.18.18</version.lombok>
 
         <!-- application dependencies -->
-        <version.scim.sdk>1.11.0</version.scim.sdk>
+        <version.scim.sdk>1.12.1</version.scim.sdk>
         <version.commons.lang3>3.11</version.commons.lang3>
         <version.commons.io>2.8.0</version.commons.io>
         <version.commons.codec>1.15</version.commons.codec>

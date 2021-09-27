@@ -7,6 +7,7 @@ import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenId
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.scim.resources.ScimOpenIdProvider;
+import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.ValidationContext;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
    * checks that the name of the {@link OpenIdProvider} is not already taken and more
    */
   @Override
-  public void validateCreate(ScimOpenIdProvider resource, ValidationContext validationContext)
+  public void validateCreate(ScimOpenIdProvider resource, ValidationContext validationContext, Context requestContext)
   {
     if (validationContext.hasErrors())
     {
@@ -53,7 +54,8 @@ public class OpenIdProviderRequestValidator implements RequestValidator<ScimOpen
   @Override
   public void validateUpdate(Supplier<ScimOpenIdProvider> oldResourceSupplier,
                              ScimOpenIdProvider newResource,
-                             ValidationContext validationContext)
+                             ValidationContext validationContext,
+                             Context requestContext)
   {
     validateFields(newResource, validationContext);
   }
