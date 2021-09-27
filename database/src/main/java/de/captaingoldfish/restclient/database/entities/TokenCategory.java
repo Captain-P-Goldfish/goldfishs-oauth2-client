@@ -7,8 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import lombok.Builder;
@@ -60,18 +58,15 @@ public class TokenCategory
     this.name = name;
     this.created = created;
     this.lastModified = lastModified;
-  }
-
-  @PrePersist
-  public final void setCreated()
-  {
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }
 
-  @PreUpdate
-  public final void setLastModified()
+  /**
+   * @see #lastModified
+   */
+  public void setLastModified(Instant lastModified)
   {
-    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = lastModified.truncatedTo(ChronoUnit.MILLIS);
   }
 }

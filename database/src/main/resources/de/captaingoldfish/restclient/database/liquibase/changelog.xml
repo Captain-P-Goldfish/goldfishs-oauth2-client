@@ -217,4 +217,8 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="drop-plain-content" author="pascal_knueppel">
+        <dropTable tableName="PLAIN_CONTENT"/>
+    </changeSet>
+
 </databaseChangeLog>

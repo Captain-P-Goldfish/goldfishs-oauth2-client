@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.proxy;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,7 @@ public class ProxyHandler extends ResourceHandler<ScimProxy>
     Proxy proxy = ProxyConverter.toProxy(scimProxy);
     proxy.setCreated(oldProxy.getCreated());
     proxy.setId(id);
+    proxy.setLastModified(Instant.now());
     proxy = proxyDao.save(proxy);
     return ProxyConverter.toScimProxy(proxy);
   }

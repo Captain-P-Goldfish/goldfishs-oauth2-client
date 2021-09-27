@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.tokenstore;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -96,6 +97,7 @@ public class TokenStoreHandler extends ResourceHandler<ScimTokenStore>
     });
     TokenStore newTokenStore = TokenStoreConverter.toTokenStore(resourceToUpdate);
     newTokenStore.setCreated(oldTokenStore.getCreated());
+    newTokenStore.setLastModified(Instant.now());
     tokenStoreDao.save(newTokenStore);
     return TokenStoreConverter.toScimTokenStore(newTokenStore);
   }

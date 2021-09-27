@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.tokencategory;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * the handler for managing token categories under which
  * {@link de.captaingoldfish.restclient.database.entities.TokenStore} objects will be saved
- * 
+ *
  * @author Pascal Knueppel
  * @since 02.09.2021
  */
@@ -79,6 +80,7 @@ public class TokenCategoryHandler extends ResourceHandler<ScimTokenCategory>
     });
     TokenCategory newTokenCategory = TokenCategoryConverter.toTokenCategory(resourceToUpdate);
     newTokenCategory.setCreated(oldTokenCategory.getCreated());
+    newTokenCategory.setLastModified(Instant.now());
     tokenCategoryDao.save(newTokenCategory);
     return TokenCategoryConverter.toScimTokenCategory(newTokenCategory);
   }

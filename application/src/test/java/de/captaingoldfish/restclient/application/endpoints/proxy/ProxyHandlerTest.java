@@ -274,8 +274,8 @@ public class ProxyHandlerTest extends AbstractScimClientConfig
                                                            .sendRequest();
     Assertions.assertEquals(HttpStatus.OK, response.getHttpStatus());
 
-    proxy = proxyDao.findById(proxy.getId()).orElseThrow();
-    Assertions.assertNotEquals(proxy.getCreated(), proxy.getLastModified());
+    Proxy dbProxy = proxyDao.findById(proxy.getId()).orElseThrow();
+    Assertions.assertNotEquals(dbProxy.getCreated(), dbProxy.getLastModified());
 
     ScimProxy returnedProxy = response.getResource();
     Assertions.assertEquals(newHost, returnedProxy.getHostname());
@@ -283,11 +283,12 @@ public class ProxyHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(newUsername, returnedProxy.getUsername().get());
     Assertions.assertEquals(newPassword, returnedProxy.getPassword().get());
 
-    Assertions.assertEquals(proxy.getHost(), returnedProxy.getHostname());
-    Assertions.assertEquals(proxy.getPort(), returnedProxy.getPort().get());
-    Assertions.assertEquals(proxy.getUsername(), returnedProxy.getUsername().get());
-    Assertions.assertEquals(proxy.getPassword(), returnedProxy.getPassword().get());
-    Assertions.assertEquals(proxy.getCreated(), returnedProxy.getMeta().flatMap(Meta::getCreated).get());
+    Assertions.assertEquals(dbProxy.getHost(), returnedProxy.getHostname());
+    Assertions.assertEquals(dbProxy.getPort(), returnedProxy.getPort().get());
+    Assertions.assertEquals(dbProxy.getUsername(), returnedProxy.getUsername().get());
+    Assertions.assertEquals(dbProxy.getPassword(), returnedProxy.getPassword().get());
+    Assertions.assertEquals(dbProxy.getCreated(), returnedProxy.getMeta().flatMap(Meta::getCreated).get());
+    Assertions.assertEquals(dbProxy.getLastModified(), returnedProxy.getMeta().flatMap(Meta::getLastModified).get());
     Assertions.assertNotEquals(proxy.getLastModified(), returnedProxy.getMeta().flatMap(Meta::getLastModified).get());
 
     Assertions.assertEquals(1, proxyDao.count());

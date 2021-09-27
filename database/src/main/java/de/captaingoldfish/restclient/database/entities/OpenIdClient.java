@@ -10,8 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import lombok.Builder;
@@ -126,19 +124,16 @@ public class OpenIdClient
     this.authenticationType = authenticationType;
     this.audience = audience;
     this.decryptionKeyRef = decryptionKeyRef;
-  }
-
-  @PrePersist
-  public final void setCreated()
-  {
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }
 
-  @PreUpdate
-  public final void setLastModified()
+  /**
+   * @see #lastModified
+   */
+  public void setLastModified(Instant lastModified)
   {
-    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = lastModified.truncatedTo(ChronoUnit.MILLIS);
   }
 
 }

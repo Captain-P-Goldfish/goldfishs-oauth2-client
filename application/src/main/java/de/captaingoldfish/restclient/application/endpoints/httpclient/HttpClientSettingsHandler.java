@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.httpclient;
 
+import java.time.Instant;
 import java.util.List;
 
 import de.captaingoldfish.restclient.application.endpoints.httpclient.validation.HttpClientSettingsValidator;
@@ -87,6 +88,7 @@ public class HttpClientSettingsHandler extends ResourceHandler<ScimHttpClientSet
     });
     HttpClientSettings newHttpClientSettings = HttpClientSettingsConverter.toHttpClientSettings(resourceToUpdate);
     newHttpClientSettings.setCreated(oldHttpClientSettings.getCreated());
+    newHttpClientSettings.setLastModified(Instant.now());
     newHttpClientSettings = httpClientSettingsDao.save(newHttpClientSettings);
     return HttpClientSettingsConverter.toScimHttpClientSettings(newHttpClientSettings);
   }

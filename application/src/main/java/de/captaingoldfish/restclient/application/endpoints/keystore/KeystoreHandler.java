@@ -82,7 +82,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
   /**
    * handles the upload of a keystore by storing it within the file cache and returns the present aliases from
    * the keystore and a stateId that is the reference-key to the uploaded keystore
-   * 
+   *
    * @param fileUpload the keystore upload structure
    * @return the response for the client with the aliases and a stateId that references the uploaded keystore
    */
@@ -119,7 +119,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
 
   /**
    * handles the selection of an alias from the uploaded keystore
-   * 
+   *
    * @param aliasSelection the selection of the client for the keystore entry that should be added to the
    *          application keystore
    * @return the response for the client with the certificate information of the entry that was added to the
@@ -149,6 +149,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
     byte[] newKeystoreBytes = KeyStoreSupporter.getBytes(mergedKeystore, applicationKeystore.getKeystorePassword());
     applicationKeystore.setKeystoreBytes(newKeystoreBytes);
     KeystoreEntry keystoreEntry = applicationKeystore.addKeyEntry(aliasEntry);
+    applicationKeystore.setLastModified(Instant.now());
     keystoreDao.save(applicationKeystore);
 
     X509Certificate x509Certificate = applicationKeystore.getCertificate(keystoreEntry);
@@ -198,7 +199,7 @@ public class KeystoreHandler extends ResourceHandler<ScimKeystore>
 
   /**
    * parses the application keystore to a base64 representation
-   * 
+   *
    * @param applicationKeystore the application keystore for download
    * @return the base64 representation of the application keystore if it should be downloaded
    */

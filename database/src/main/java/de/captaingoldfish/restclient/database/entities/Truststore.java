@@ -14,10 +14,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -96,38 +92,37 @@ public class Truststore
     this.truststorePassword = truststorePassword;
     this.truststoreType = truststoreType;
     this.truststore = KeyStoreSupporter.readTruststore(truststoreBytes, truststoreType, truststorePassword);
-  }
-
-  @PrePersist
-  public final void setCreated()
-  {
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }
 
-  @PreUpdate
-  public final void setLastModified()
+  /**
+   * @see #lastModified
+   */
+  public void setLastModified(Instant lastModified)
   {
-    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = lastModified.truncatedTo(ChronoUnit.MILLIS);
   }
 
   /**
    * will load the keystore instance
    */
-  @PostPersist
-  @PostLoad
-  public final void loadKeystore()
+  public KeyStore getTruststore()
   {
-    try
+    if (this.truststore == null)
     {
-      this.truststore = KeyStoreSupporter.readKeyStore(getTruststoreBytes(),
-                                                       getTruststoreType(),
-                                                       getTruststorePassword());
+      try
+      {
+        this.truststore = KeyStoreSupporter.readKeyStore(getTruststoreBytes(),
+                                                         getTruststoreType(),
+                                                         getTruststorePassword());
+      }
+      catch (Exception ex)
+      {
+        log.error(ex.getMessage(), ex);
+      }
     }
-    catch (Exception ex)
-    {
-      log.error(ex.getMessage(), ex);
-    }
+    return this.truststore;
   }
 
   /**
@@ -137,11 +132,11 @@ public class Truststore
   public List<X509Certificate> getCertificates()
   {
     List<X509Certificate> aliasList = new ArrayList<>();
-    Enumeration<String> aliases = truststore.aliases();
+    Enumeration<String> aliases = getTruststore().aliases();
     while (aliases.hasMoreElements())
     {
       String alias = aliases.nextElement();
-      X509Certificate certificate = (X509Certificate)truststore.getCertificate(alias);
+      X509Certificate certificate = (X509Certificate)getTruststore().getCertificate(alias);
       aliasList.add(certificate);
     }
     return aliasList;
@@ -154,7 +149,7 @@ public class Truststore
   @SneakyThrows
   public List<String> getTruststoreAliases()
   {
-    Enumeration<String> aliasesEnumeration = truststore.aliases();
+    Enumeration<String> aliasesEnumeration = getTruststore().aliases();
     List<String> aliases = new ArrayList<>();
     while (aliasesEnumeration.hasMoreElements())
     {

@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.openidprovider;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,6 +97,7 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
     OpenIdProvider openIdProvider = OpenIdProviderConverter.toOpenIdProvider(resourceToUpdate);
     openIdProvider.setId(dbId);
     openIdProvider.setCreated(oldProvider.getCreated());
+    openIdProvider.setLastModified(Instant.now());
     openIdProvider = openIdProviderDao.save(openIdProvider);
     return OpenIdProviderConverter.toScimOpenIdProvider(openIdProvider);
   }

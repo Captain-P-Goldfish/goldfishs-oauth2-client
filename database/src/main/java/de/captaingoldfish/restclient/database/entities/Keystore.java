@@ -30,7 +30,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -119,35 +118,35 @@ public class Keystore
                                                    keystorePassword);
     this.keystoreType = keyStoreType;
     this.keystorePassword = keystorePassword;
-  }
-
-  @PrePersist
-  public final void setCreated()
-  {
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }
 
-  @PreUpdate
-  public final void setLastModified()
+  /**
+   * @see #lastModified
+   */
+  public void setLastModified(Instant lastModified)
   {
-    this.lastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    this.lastModified = lastModified.truncatedTo(ChronoUnit.MILLIS);
   }
 
   /**
    * will load the keystore instance
    */
-  @PostLoad
-  public final void loadKeystore()
+  public KeyStore getKeyStore()
   {
-    try
+    if (this.keyStore == null)
     {
-      this.keyStore = KeyStoreSupporter.readKeyStore(getKeystoreBytes(), getKeystoreType(), getKeystorePassword());
+      try
+      {
+        this.keyStore = KeyStoreSupporter.readKeyStore(getKeystoreBytes(), getKeystoreType(), getKeystorePassword());
+      }
+      catch (Exception ex)
+      {
+        log.error(ex.getMessage(), ex);
+      }
     }
-    catch (Exception ex)
-    {
-      log.error(ex.getMessage(), ex);
-    }
+    return this.keyStore;
   }
 
   public KeystoreEntry addKeyEntry(KeystoreEntry aliasEntry)
@@ -167,7 +166,7 @@ public class Keystore
 
   /**
    * gets a key pair by its alias entry
-   * 
+   *
    * @param alias the alias of the keypair
    * @return the public and private key of the given entry
    */
@@ -182,7 +181,7 @@ public class Keystore
 
   /**
    * retrieves the private and the public key of a specific keystore entry
-   * 
+   *
    * @param keystoreEntry the keystore entry for which we would like to get the public and private key
    * @return the private and public key of the given entry
    */
@@ -190,7 +189,7 @@ public class Keystore
   public KeyPair getKeyPair(KeystoreEntry keystoreEntry)
   {
     PrivateKey privateKey = getPrivateKey(keystoreEntry);
-    PublicKey publicKey = keyStore.getCertificate(keystoreEntry.getAlias()).getPublicKey();
+    PublicKey publicKey = getKeyStore().getCertificate(keystoreEntry.getAlias()).getPublicKey();
     return new KeyPair(publicKey, privateKey);
   }
 
@@ -214,9 +213,9 @@ public class Keystore
                                                    .map(String::toCharArray)
                                                    .orElse(null);
       char[] keystorePasswordCharArray = Optional.ofNullable(keystorePassword).map(String::toCharArray).orElse(null);
-      privateKey = (PrivateKey)keyStore.getKey(keystoreEntry.getAlias(),
-                                               Optional.ofNullable(privateKeyPasswordCharArray)
-                                                       .orElse(keystorePasswordCharArray));
+      privateKey = (PrivateKey)getKeyStore().getKey(keystoreEntry.getAlias(),
+                                                    Optional.ofNullable(privateKeyPasswordCharArray)
+                                                            .orElse(keystorePasswordCharArray));
       return privateKey;
     }
     catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e)
@@ -249,7 +248,7 @@ public class Keystore
     }
     try
     {
-      X509Certificate x509Certificate = (X509Certificate)keyStore.getCertificate(keystoreEntry.getAlias());
+      X509Certificate x509Certificate = (X509Certificate)getKeyStore().getCertificate(keystoreEntry.getAlias());
       if (x509Certificate == null && log.isWarnEnabled())
       {
         log.warn("no certificate entry found for alias: {}", keystoreEntry.getAlias());
@@ -267,7 +266,7 @@ public class Keystore
    */
   private boolean keystoreEntryExists(KeystoreEntry keystoreEntry)
   {
-    return keyStore == null || StringUtils.isBlank(keystoreEntry.getAlias());
+    return StringUtils.isBlank(keystoreEntry.getAlias());
   }
 
   /**
@@ -277,7 +276,7 @@ public class Keystore
   @SneakyThrows
   public List<String> getKeyStoreAliases()
   {
-    Enumeration<String> aliasesEnumeration = keyStore.aliases();
+    Enumeration<String> aliasesEnumeration = getKeyStore().aliases();
     List<String> aliases = new ArrayList<>();
     while (aliasesEnumeration.hasMoreElements())
     {
@@ -288,7 +287,7 @@ public class Keystore
 
   /**
    * gets the key length of a specific key entry
-   * 
+   *
    * @param alias the key entry of which the keylength should be determined
    * @return the length of the key.
    */

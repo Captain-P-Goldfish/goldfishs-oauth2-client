@@ -85,6 +85,7 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
                                                                  truststore.getTruststorePassword());
     byte[] mergeKeystoreBytes = KeyStoreSupporter.getBytes(mergedKeystore, truststore.getTruststorePassword());
     truststore.setTruststoreBytes(mergeKeystoreBytes);
+    truststore.setLastModified(Instant.now());
     truststoreDao.save(truststore);
     return getTruststoreUploadResponse(truststore.getTruststore(), keyStore);
   }
@@ -146,6 +147,7 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
     KeyStoreSupporter.addCertificateEntry(truststore.getTruststore(), alias, certificate);
     byte[] truststoreBytes = KeyStoreSupporter.getBytes(truststore.getTruststore(), truststore.getTruststorePassword());
     truststore.setTruststoreBytes(truststoreBytes);
+    truststore.setLastModified(Instant.now());
     truststoreDao.save(truststore);
     CertificateUploadResponse uploadResponse = new CertificateUploadResponse(alias);
     return ScimTruststore.builder()
