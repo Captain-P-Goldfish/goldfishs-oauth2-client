@@ -62,7 +62,7 @@ export default class HttpSettings extends React.Component
             {
                 response.resource.then(listResponse =>
                 {
-                    this.setState({proxies: listResponse.Resources});
+                    this.setState({proxies: listResponse.Resources || []});
                 })
             }
             else
