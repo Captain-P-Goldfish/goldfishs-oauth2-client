@@ -60,7 +60,8 @@ public final class Utils
     final OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
     OpenIdProviderMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
                                                               .getBean(OpenIdProviderMetdatdataCache.class);
-    OIDCProviderMetadata metadata = metadataCache.getProviderMetadata(openIdProvider.getId());
+    OIDCProviderMetadata metadata = metadataCache.getProviderMetadata(openIdProvider.getId(),
+                                                                      openIdProvider.getVersion());
     if (metadata != null)
     {
       return metadata;
@@ -84,13 +85,13 @@ public final class Utils
                                     ex);
     }
     metadata = OIDCProviderMetadata.parse(responseBody);
-    metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
+    metadataCache.setProviderMetadata(openIdProvider.getId(), openIdProvider.getVersion(), metadata);
     return metadata;
   }
 
   /**
    * builds an unirest instance with the http settings for the given OpenID Connect client
-   * 
+   *
    * @param openIdClient the client that has the associated http client settings
    * @return the configured unirest instance that should be used
    */

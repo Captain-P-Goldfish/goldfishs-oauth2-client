@@ -25,8 +25,7 @@ public class TruststoreDaoImpl implements TruststoreDaoExtension
 
   @Transactional
   @Override
-  public Truststore
-  getTruststore()
+  public Truststore getTruststore()
   {
     Truststore applicationTruststore = entityManager.find(Truststore.class, 1L);
     if (applicationTruststore != null)

@@ -221,4 +221,13 @@
         <dropTable tableName="PLAIN_CONTENT"/>
     </changeSet>
 
+    <changeSet id="add-version-column-to-openid-provider" author="pascal_knueppel">
+        <addColumn tableName="OPENID_PROVIDER">
+            <column name="VERSION" type="BIGINT"/>
+        </addColumn>
+        <update tableName="OPENID_PROVIDER">
+            <column name="VERSION" value="0"/>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
