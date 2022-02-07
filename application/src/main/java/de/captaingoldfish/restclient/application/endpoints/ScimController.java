@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.scim.sdk.common.constants.HttpHeader;
 import de.captaingoldfish.scim.sdk.common.constants.enums.HttpMethod;
 import de.captaingoldfish.scim.sdk.common.response.ScimResponse;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceEndpoint;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 09.05.2021
  */
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/scim/v2")
 public class ScimController
@@ -36,14 +39,6 @@ public class ScimController
    * the resource endpoint that handles ALL SCIM requests
    */
   private final ResourceEndpoint resourceEndpoint;
-
-  /**
-   * spring injection constructor
-   */
-  public ScimController(ResourceEndpoint resourceEndpoint)
-  {
-    this.resourceEndpoint = resourceEndpoint;
-  }
 
   /**
    * the rest-endpoint for SCIM that is accessible under the path ${basepath}/scim/v2/**

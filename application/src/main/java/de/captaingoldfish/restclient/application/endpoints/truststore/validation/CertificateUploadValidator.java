@@ -1,11 +1,13 @@
 package de.captaingoldfish.restclient.application.endpoints.truststore.validation;
 
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Optional;
 
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.commons.keyhelper.KeyReader;
+import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Truststore;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
 import de.captaingoldfish.restclient.scim.resources.ScimTruststore.CertificateUpload;
@@ -94,6 +96,23 @@ public final class CertificateUploadValidator
     {
       String errormessage = String.format("Cannot add certificate for certificate is already present under alias '%s'",
                                           existingCertEntryAlias);
+      log.debug(errormessage);
+      validationContext.addError("certificateUpload.certificateFile", errormessage);
+    }
+
+    // check if certificate is a valid entry for truststore by adding it and trying to read it
+    try
+    {
+      KeyStore keyStore = KeyStoreSupporter.addCertificateEntry(truststore.getTruststore(),
+                                                                certificateUpload.getAlias(),
+                                                                certificate);
+      keyStore.getCertificate(certificateUpload.getAlias());
+    }
+    catch (Exception ex)
+    {
+      log.debug(ex.getMessage(), ex);
+      String errormessage = String.format("Cannot add certificate for it seems to be an invalid entry for the truststore: '%s'",
+                                          ex.getMessage());
       log.debug(errormessage);
       validationContext.addError("certificateUpload.certificateFile", errormessage);
     }
