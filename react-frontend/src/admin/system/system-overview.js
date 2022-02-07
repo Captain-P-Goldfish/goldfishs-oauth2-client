@@ -1,3 +1,4 @@
+import React from "react";
 import {Tab, Tabs} from "react-bootstrap";
 import ApplicationKeystore from "./application-keystore";
 import ApplicationTruststore from "./application-truststore";
