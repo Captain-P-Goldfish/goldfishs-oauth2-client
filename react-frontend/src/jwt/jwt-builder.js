@@ -287,7 +287,7 @@ export default class JwtBuilder extends React.Component
 
                     </Col>
                     <Col sm={9}>
-                        <Container>
+                        <Container>                            
                             <Row>
                                 <Col>
                                     <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>

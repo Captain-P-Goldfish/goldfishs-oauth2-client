@@ -24,8 +24,8 @@ public class OpenIdProviderMetdatdataCache
    *          {@link de.captaingoldfish.restclient.database.entities.OpenIdProvider}
    * @return the OpenID Provider metadata of an existing provider if already retrieved once
    */
-  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "{#openIdProviderId, #version}")
-  public OIDCProviderMetadata getProviderMetadata(Long openIdProviderId, long version)
+  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "{#openIdProviderId}")
+  public OIDCProviderMetadata getProviderMetadata(Long openIdProviderId)
   {
     return null;
   }
@@ -37,10 +37,8 @@ public class OpenIdProviderMetdatdataCache
    *          {@link de.captaingoldfish.restclient.database.entities.OpenIdProvider}
    * @return the OpenID Provider metadata of an existing provider
    */
-  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "{#openIdProviderId, #version}")
-  public OIDCProviderMetadata setProviderMetadata(Long openIdProviderId,
-                                                  long version,
-                                                  OIDCProviderMetadata authorizationResponseUrl)
+  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "{#openIdProviderId}")
+  public OIDCProviderMetadata setProviderMetadata(Long openIdProviderId, OIDCProviderMetadata authorizationResponseUrl)
   {
     return authorizationResponseUrl;
   }

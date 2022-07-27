@@ -60,8 +60,7 @@ public final class Utils
     final OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
     OpenIdProviderMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
                                                               .getBean(OpenIdProviderMetdatdataCache.class);
-    OIDCProviderMetadata metadata = metadataCache.getProviderMetadata(openIdProvider.getId(),
-                                                                      openIdProvider.getVersion());
+    OIDCProviderMetadata metadata = metadataCache.getProviderMetadata(openIdProvider.getId());
     if (metadata != null)
     {
       return metadata;
@@ -85,7 +84,7 @@ public final class Utils
                                     ex);
     }
     metadata = OIDCProviderMetadata.parse(responseBody);
-    metadataCache.setProviderMetadata(openIdProvider.getId(), openIdProvider.getVersion(), metadata);
+    metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
     return metadata;
   }
 

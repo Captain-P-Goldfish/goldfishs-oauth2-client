@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import lombok.Builder;
 import lombok.Data;
@@ -41,14 +40,6 @@ public class OpenIdProvider
   @GeneratedValue
   @Column(name = "ID")
   private long id;
-
-  /**
-   * used to track the current version of this provider. This will tell us e.g. if we need to reload the idp
-   * metadata or not
-   */
-  @Version
-  @Column(name = "VERSION")
-  private long version;
 
   /**
    * this name can be used to identify this provider in the view

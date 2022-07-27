@@ -12,6 +12,8 @@ import OpenidClientOverview from "./openid/openid-client-overview";
 import {AlertListMessages} from "./base/form-base";
 import {GoFlame} from "react-icons/go";
 import {TokenCategoryList} from "./tokens/token-category";
+import {APP_INFO_ENDPOINT, SERVICE_PROVIDER_CONFIG_ENDPOINT} from "./scim/scim-constants";
+import {FileParser} from "./file-parser/file-parser";
 
 
 export const ApplicationInfoContext = React.createContext(null);
@@ -36,7 +38,7 @@ class Application extends React.Component {
     }
 
     async componentDidMount() {
-        let scimClient = new ScimClient("/scim/v2/ServiceProviderConfig", this.setState);
+        let scimClient = new ScimClient(SERVICE_PROVIDER_CONFIG_ENDPOINT, this.setState);
         scimClient.listResources().then(response => {
             if (response.success) {
                 response.resource.then(serviceProviderConfig => {
@@ -45,7 +47,7 @@ class Application extends React.Component {
             }
         })
 
-        scimClient.getResource(null, "/scim/v2/AppInfo").then(response => {
+        scimClient.getResource(null, APP_INFO_ENDPOINT).then(response => {
             if (response.success) {
                 response.resource.then(appInfo => {
                     this.setState({appInfo: appInfo});
@@ -86,6 +88,9 @@ class Application extends React.Component {
                                 <LinkContainer exact to="/views/tokenCategories">
                                     <Nav.Link>Storage</Nav.Link>
                                 </LinkContainer>
+                                <LinkContainer exact to="/views/fileParser">
+                                    <Nav.Link>File Parser</Nav.Link>
+                                </LinkContainer>
                                 <LinkContainer exact to="/views/system">
                                     <Nav.Link>System</Nav.Link>
                                 </LinkContainer>
@@ -121,6 +126,9 @@ class Application extends React.Component {
                                     </Route>
                                     <Route path="/views/tokenCategories">
                                         <TokenCategoryList />
+                                    </Route>
+                                    <Route path="/views/fileParser">
+                                        <FileParser />
                                     </Route>
                                     <Route path="/">
                                         <Redirect to="/views/jwts" />

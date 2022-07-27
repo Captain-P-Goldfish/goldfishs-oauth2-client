@@ -627,3 +627,11 @@ span.add-new-resource {
 
 /* *************************************************************************************************** */
 
+#file-b64-input{
+    min-height: 30rem;
+}
+
+.drag-active {
+    background-color: #ffffff;
+}
+

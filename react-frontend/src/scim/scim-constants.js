@@ -8,6 +8,7 @@ export const BULK_REQUEST_URI = "urn:ietf:params:scim:api:messages:2.0:BulkReque
 const BASE_URL = "/scim/v2";
 export const ACCESS_TOKEN_REQUEST_ENDPOINT = BASE_URL + "/AccessTokenRequest";
 export const APP_INFO_ENDPOINT = BASE_URL + "/AppInfo";
+export const SERVICE_PROVIDER_CONFIG_ENDPOINT = BASE_URL + "/ServiceProviderConfig";
 export const AUTH_CODE_GRANT_ENDPOINT = BASE_URL + "/AuthCodeGrantRequest";
 export const HTTP_CLIENT_SETTINGS_ENDPOINT = BASE_URL + "/HttpClientSettings";
 export const JWT_BUILDER_ENDPOINT = BASE_URL + "/JwtBuilder";

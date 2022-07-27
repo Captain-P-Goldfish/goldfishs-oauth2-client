@@ -280,61 +280,6 @@ class OpenIdProviderCardEntry extends React.Component
                                                          onChange={this.scimComponentBasics.updateInput}
                                                          onError={fieldName => this.scimClient.getErrors(
                                                              this.state, fieldName)} />
-                                    {/*<ModifiableCardEntry header={"Authorization Endpoint"}*/}
-                                    {/*                     name={"authorizationEndpoint"}*/}
-                                    {/*                     resourceId={this.state.provider.id}*/}
-                                    {/*                     editMode={this.state.editMode}*/}
-                                    {/*                     resourceValue={this.state.provider.authorizationEndpoint}*/}
-                                    {/*                     placeholder={"The URL to the OpenID Providers authorization endpoint"}*/}
-                                    {/*                     onChange={this.scimComponentBasics.updateInput}*/}
-                                    {/*                     onError={fieldName => this.scimClient.getErrors(*/}
-                                    {/*                         this.state, fieldName)} />*/}
-                                    {/*<ModifiableCardEntry header={"Token Endpoint"}*/}
-                                    {/*                     name={"tokenEndpoint"}*/}
-                                    {/*                     resourceId={this.state.provider.id}*/}
-                                    {/*                     editMode={this.state.editMode}*/}
-                                    {/*                     resourceValue={this.state.provider.tokenEndpoint}*/}
-                                    {/*                     placeholder={"The URL to the OpenID Providers token endpoint"}*/}
-                                    {/*                     onChange={this.scimComponentBasics.updateInput}*/}
-                                    {/*                     onError={fieldName => this.scimClient.getErrors(*/}
-                                    {/*                         this.state, fieldName)} />*/}
-                                    {/*<ModifiableCardList header={"Resource Endpoints"}*/}
-                                    {/*                    name={"resourceEndpoints"}*/}
-                                    {/*                    resourceId={this.state.provider.id}*/}
-                                    {/*                    editMode={this.state.editMode}*/}
-                                    {/*                    resourceValue={this.state.provider.resourceEndpoints}*/}
-                                    {/*                    placeholder={"An optional resource endpoint that is provided"}*/}
-                                    {/*                    onAdd={() =>*/}
-                                    {/*                    {*/}
-                                    {/*                        let resourceEndpoints = new Optional(*/}
-                                    {/*                            this.state.provider.resourceEndpoints).map(*/}
-                                    {/*                            array => [...array]).orElse([]);*/}
-                                    {/*                        resourceEndpoints.push("");*/}
-                                    {/*                        let provider = this.state.provider;*/}
-                                    {/*                        provider.resourceEndpoints = resourceEndpoints;*/}
-                                    {/*                        this.setState({provider: provider})*/}
-                                    {/*                    }}*/}
-                                    {/*                    onRemove={(index) =>*/}
-                                    {/*                    {*/}
-                                    {/*                        let resourceEndpoints = [...this.state.provider.resourceEndpoints];*/}
-                                    {/*                        resourceEndpoints.splice(index, 1);*/}
-                                    {/*                        let provider = this.state.provider;*/}
-                                    {/*                        provider.resourceEndpoints = resourceEndpoints;*/}
-                                    {/*                        this.setState({provider: provider})*/}
-                                    {/*                    }}*/}
-                                    {/*                    onChange={this.scimComponentBasics.updateInput}*/}
-                                    {/*                    onError={fieldName => this.scimClient.getErrors(*/}
-                                    {/*                        this.state, fieldName)} />*/}
-                                    {/*<ModifiableCardFileEntry header={"Signature Verification Key"}*/}
-                                    {/*                         name={"signatureVerificationKey"}*/}
-                                    {/*                         resourceId={this.state.provider.id}*/}
-                                    {/*                         editMode={this.state.editMode}*/}
-                                    {/*                         resourceValue={this.state.provider.signatureVerificationKey}*/}
-                                    {/*                         placeholder={"Public key to verify JWT signatures"}*/}
-                                    {/*                         onChange={this.scimComponentBasics.updateInput}*/}
-                                    {/*                         onError={fieldName => this.scimClient.getErrors(*/}
-                                    {/*                             this.state, fieldName)}*/}
-                                    {/*                         onRemove={this.scimComponentBasics.updateInput} />*/}
                                     <CardDateRows resource={this.state.provider} />
                                 </tbody>
                             </Table>
