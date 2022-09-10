@@ -123,6 +123,11 @@ select {
     border-radius: 5px;
 }
 
+.menu-entry.error {
+    color: #eee2c9;
+    display: inline-block;
+}
+
 /* *************************************************************************************************** */
 
 /* *************************************************************************************************** */
@@ -132,15 +137,12 @@ nav {
     padding-left: 35px;
 }
 
-.navbar-left {
+nav.navbar-left {
+    align-items: baseline;
     float: left;
     min-height: 95.5vh;
     min-width: var(--left-navbar-width);
     max-width: var(--left-navbar-width);
-}
-
-nav.navbar-left {
-    align-items: baseline;
 }
 
 .bg-navigation {
@@ -625,9 +627,28 @@ span.add-new-resource {
     margin-left: 10px;
 }
 
+.clickable-inner-menu-entry{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.active-menu-entry {
+    background-color: lightgrey !important;
+}
+
+.new-menu-entry-input, .new-menu-entry-input:active  {
+    color: black !important;
+    outline: none !important;
+    width: 75% !important;
+    max-width: 75% !important;
+    border: 0 !important;
+    border-bottom: 1px dotted black !important;
+    background-color: transparent !important;
+}
+
 /* *************************************************************************************************** */
 
-#file-b64-input{
+#file-b64-input {
     min-height: 30rem;
 }
 
@@ -635,3 +656,36 @@ span.add-new-resource {
     background-color: #ffffff;
 }
 
+/* *************************************************************************************************** */
+/* http client */
+
+.close-icon {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+#request-body-area {
+    min-height: 30vh;
+}
+
+#http-client-category-menu {
+    float: left;
+    min-width: 225px;
+    width: 225px;
+}
+
+#http-client-category-navbar {
+    align-items: baseline;
+    float: left;
+    min-height: 87vh;
+    min-width: calc(var(--left-navbar-width) + 30px);
+    max-width: calc(var(--left-navbar-width) + 30px);
+    padding-left: 0;
+}
+
+.http-category-icon {
+    padding-right: 0 !important;
+}
+
+/* *************************************************************************************************** */

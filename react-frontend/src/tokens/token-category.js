@@ -13,7 +13,6 @@ export function TokenCategoryList()
   const [loadedOnce, setloadedOnce] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [tokenCategoryList, setTokenCategoryList] = useState([]);
-  const [tokensRemovedByFilter, setTokensRemovedByFilter] = useState([]);
   
   function addNewCategories(categoryArray)
   {
@@ -71,11 +70,6 @@ export function TokenCategoryList()
                 new TokenCategoryClient().listCategories(searchRequest, onSuccess, onError);
               }
             }, [tokenCategoryList]);
-  
-  useEffect(() =>
-            {
-    
-            }, [filter]);
   
   return <React.Fragment>
     {

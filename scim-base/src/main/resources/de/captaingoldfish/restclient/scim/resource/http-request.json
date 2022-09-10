@@ -1,0 +1,85 @@
+{
+    "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Schema"
+    ],
+    "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequest",
+    "name": "HttpRequest",
+    "description": "A representation for an http request",
+    "attributes": [
+        {
+            "name": "url",
+            "type": "reference",
+            "referenceTypes": ["url"],
+            "description": "The url that should be accessed.",
+            "mutability": "readWrite",
+            "returned": "always",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": true,
+            "caseExact": true
+        },
+        {
+            "name": "headers",
+            "type": "complex",
+            "description": "the http header values that will be added to the request",
+            "mutability": "readWrite",
+            "returned": "default",
+            "uniqueness": "none",
+            "multiValued": true,
+            "required": false,
+            "caseExact": false,
+            "subAttributes": [
+                {
+                    "name": "name",
+                    "type": "string",
+                    "description": "the http-header name.",
+                    "mutability": "readWrite",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": true,
+                    "caseExact": true
+                },
+                {
+                    "name": "values",
+                    "type": "string",
+                    "description": "the http-header values.",
+                    "mutability": "readWrite",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": true,
+                    "required": true,
+                    "caseExact": true
+                }
+            ]
+        },
+        {
+            "name": "requestBody",
+            "type": "string",
+            "description": "the request body that will be sent to the server.",
+            "mutability": "writeOnly",
+            "returned": "default",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": false,
+            "caseExact": false
+        },
+        {
+            "name": "responseBody",
+            "type": "string",
+            "description": "The response body from the service that was accessed.",
+            "mutability": "readOnly",
+            "returned": "default",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": false,
+            "caseExact": false
+        }
+    ],
+    "meta": {
+        "resourceType": "Schema",
+        "created": "2021-04-88T22:51:00+02:00",
+        "lastModified": "2021-04-88T22:51:00+02:00",
+        "location": "/Schemas/HttpRequest"
+    }
+}

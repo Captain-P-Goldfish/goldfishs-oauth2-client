@@ -14,6 +14,7 @@ import {GoFlame} from "react-icons/go";
 import {TokenCategoryList} from "./tokens/token-category";
 import {APP_INFO_ENDPOINT, SERVICE_PROVIDER_CONFIG_ENDPOINT} from "./scim/scim-constants";
 import {FileParser} from "./file-parser/file-parser";
+import {HttpClientRequester} from "./http-requests/http-client-requester";
 
 
 export const ApplicationInfoContext = React.createContext(null);
@@ -82,6 +83,9 @@ class Application extends React.Component {
                                 <LinkContainer exact to="/views/openIdProvider">
                                     <Nav.Link>OpenID</Nav.Link>
                                 </LinkContainer>
+                                <LinkContainer exact to="/views/httpClient">
+                                    <Nav.Link>Http Client</Nav.Link>
+                                </LinkContainer>
                                 <LinkContainer exact to="/views/jwts">
                                     <Nav.Link>JWTs</Nav.Link>
                                 </LinkContainer>
@@ -123,6 +127,9 @@ class Application extends React.Component {
                                     </Route>
                                     <Route path="/views/jwts">
                                         <JwtHandler />
+                                    </Route>
+                                    <Route path="/views/httpClient">
+                                        <HttpClientRequester />
                                     </Route>
                                     <Route path="/views/tokenCategories">
                                         <TokenCategoryList />
