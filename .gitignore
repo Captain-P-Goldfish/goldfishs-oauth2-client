@@ -21,6 +21,7 @@ node
 
 # production
 build
+playground
 
 # misc
 .DS_Store

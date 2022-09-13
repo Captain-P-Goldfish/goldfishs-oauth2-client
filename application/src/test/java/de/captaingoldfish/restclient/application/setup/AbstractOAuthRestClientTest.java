@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
+import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
+import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
@@ -63,6 +65,12 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @Autowired
   protected TokenStoreDao tokenStoreDao;
 
+  @Autowired
+  protected HttpRequestCategoriesDao httpRequestCategoriesDao;
+
+  @Autowired
+  protected HttpRequestsDao httpRequestsDao;
+
   @LocalServerPort
   protected int port;
 
@@ -82,6 +90,8 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
   @AfterEach
   public void clearTables()
   {
+    httpRequestsDao.deleteAll();
+    httpRequestCategoriesDao.deleteAll();
     tokenStoreDao.deleteAll();
     tokenCategoryDao.deleteAll();
     currentWorkflowSettingsDao.deleteAll();

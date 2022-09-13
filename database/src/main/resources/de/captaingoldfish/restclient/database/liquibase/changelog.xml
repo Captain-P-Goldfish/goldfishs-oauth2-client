@@ -231,7 +231,7 @@
     </changeSet>
 
     <changeSet id="remove-unwanted-version-column" author="pascal_knueppel">
-        <dropColumn tableName="OPENID_PROVIDER" columnName="VERSION" />
+        <dropColumn tableName="OPENID_PROVIDER" columnName="VERSION"/>
     </changeSet>
 
 </databaseChangeLog>

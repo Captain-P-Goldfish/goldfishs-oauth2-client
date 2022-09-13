@@ -10,6 +10,8 @@ import de.captaingoldfish.restclient.application.endpoints.appinfo.AppInfoHandle
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsHandler;
+import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestHandler;
+import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestsCategoriesHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.JwtBuilderHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
@@ -24,6 +26,8 @@ import de.captaingoldfish.restclient.application.endpoints.truststore.Truststore
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsHandler;
 import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsService;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
+import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
+import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
@@ -36,6 +40,8 @@ import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.CurrentWorkflowSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.HttpRequestCategoryEndpointDefinition;
+import de.captaingoldfish.restclient.scim.endpoints.HttpRequestEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
@@ -292,6 +298,37 @@ public class ScimConfig
   {
     TokenStoreHandler handler = new TokenStoreHandler(tokenStoreDao);
     TokenStoreEndpoint endpoint = new TokenStoreEndpoint(handler);
+    return resourceEndpoint.registerEndpoint(endpoint);
+  }
+
+  /**
+   * registers the http-request-category resourceType under the endpoint /HttpRequestsCategories.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the http-requests resource type
+   */
+  @Bean
+  public ResourceType httpRequestCategoryResourceType(ResourceEndpoint resourceEndpoint,
+                                                      HttpRequestCategoriesDao httpRequestCategoriesDao)
+  {
+    HttpRequestsCategoriesHandler handler = new HttpRequestsCategoriesHandler(httpRequestCategoriesDao);
+    HttpRequestCategoryEndpointDefinition endpoint = new HttpRequestCategoryEndpointDefinition(handler);
+    return resourceEndpoint.registerEndpoint(endpoint);
+  }
+
+  /**
+   * registers the http-request resourceType under the endpoint /HttpRequests.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the http-requests resource type
+   */
+  @Bean
+  public ResourceType httpRequestResourceType(ResourceEndpoint resourceEndpoint,
+                                              HttpRequestCategoriesDao httpRequestCategoriesDao,
+                                              HttpRequestsDao httpRequestsDao)
+  {
+    HttpRequestHandler handler = new HttpRequestHandler(httpRequestCategoriesDao, httpRequestsDao);
+    HttpRequestEndpointDefinition endpoint = new HttpRequestEndpointDefinition(handler);
     return resourceEndpoint.registerEndpoint(endpoint);
   }
 }

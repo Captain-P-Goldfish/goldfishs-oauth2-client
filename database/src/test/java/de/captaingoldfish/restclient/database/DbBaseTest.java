@@ -16,6 +16,8 @@ import de.captaingoldfish.restclient.database.entities.Keystore;
 import de.captaingoldfish.restclient.database.entities.KeystoreEntry;
 import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
+import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
+import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
@@ -61,11 +63,19 @@ public abstract class DbBaseTest implements FileReferences
   protected TokenCategoryDao tokenCategoryDao;
 
   @Autowired
-  private EntityManager entityManager;
+  protected HttpRequestCategoriesDao httpRequestCategoriesDao;
+
+  @Autowired
+  protected HttpRequestsDao httpRequestsDao;
+
+  @Autowired
+  protected EntityManager entityManager;
 
   @AfterEach
   public void clearTables()
   {
+    httpRequestsDao.deleteAll();
+    httpRequestCategoriesDao.deleteAll();
     tokenStoreDao.deleteAll();
     tokenCategoryDao.deleteAll();
     httpClientSettingsDao.deleteAll();
@@ -94,9 +104,14 @@ public abstract class DbBaseTest implements FileReferences
     return Assertions.assertDoesNotThrow(() -> keystoreDao.save(keystore));
   }
 
-  protected int countEntriesOfTable(String tableName)
+  protected int countEntriesOfTableNative(String tableName)
   {
     return ((BigInteger)entityManager.createNativeQuery("select count(*) from " + tableName)
                                      .getSingleResult()).intValue();
+  }
+
+  protected int countEntriesOfTable(String tableName)
+  {
+    return ((Long)entityManager.createQuery("select count(*) from " + tableName).getSingleResult()).intValue();
   }
 }

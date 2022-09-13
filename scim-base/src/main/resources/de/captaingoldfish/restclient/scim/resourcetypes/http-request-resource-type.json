@@ -2,15 +2,18 @@
     "schemas": [
         "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
     ],
-    "id": "HttpRequest",
-    "name": "HttpRequest",
+    "id": "HttpRequests",
+    "name": "HttpRequests",
     "description": "An endpoint to send http requests to other online-services.",
     "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequest",
-    "endpoint": "/HttpRequest",
+    "endpoint": "/HttpRequests",
+    "schemaExtensions": [
+        {
+            "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpClientSettings",
+            "required": false
+        }
+    ],
     "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
-        "endpointControl": {
-            "disableList": true
-        },
         "authorization": {
             "authenticated": false
         }

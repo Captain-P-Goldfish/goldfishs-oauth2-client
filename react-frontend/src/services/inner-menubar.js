@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ListGroup} from "react-bootstrap";
 import {PencilSquare, PlusLg, Save, Trash, XLg} from "react-bootstrap-icons";
 import {Optional} from "./utils";
@@ -11,6 +11,10 @@ export function InnerMenubar(props)
   const [menuEntryList, setMenuEntryList] = useState(props.entries || []);
   const [showAddNewEntry, setShowAddNewEntry] = useState(false);
   const [activeIndex, setActiveIndex] = useState(menuEntryList.length > 0 ? 0 : -1);
+  
+  useEffect(() => {
+    setMenuEntryList(props.entries);
+  })
   
   function addMenuEntry(value)
   {
@@ -48,7 +52,7 @@ export function InnerMenubar(props)
                                       {
                                         if (props.onMenuEntryUpdate)
                                         {
-                                          props.onMenuEntryUpdate(newValue);
+                                          props.onMenuEntryUpdate(oldValue, newValue);
                                         }
                                       });
   }
