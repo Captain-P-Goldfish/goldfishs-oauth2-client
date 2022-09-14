@@ -10,6 +10,7 @@ import de.captaingoldfish.restclient.application.endpoints.appinfo.AppInfoHandle
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsHandler;
+import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestExecutor;
 import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestsCategoriesHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.JwtBuilderHandler;
@@ -325,9 +326,10 @@ public class ScimConfig
   @Bean
   public ResourceType httpRequestResourceType(ResourceEndpoint resourceEndpoint,
                                               HttpRequestCategoriesDao httpRequestCategoriesDao,
-                                              HttpRequestsDao httpRequestsDao)
+                                              HttpRequestsDao httpRequestsDao,
+                                              HttpRequestExecutor httpRequestExecutor)
   {
-    HttpRequestHandler handler = new HttpRequestHandler(httpRequestCategoriesDao, httpRequestsDao);
+    HttpRequestHandler handler = new HttpRequestHandler(httpRequestCategoriesDao, httpRequestsDao, httpRequestExecutor);
     HttpRequestEndpointDefinition endpoint = new HttpRequestEndpointDefinition(handler);
     return resourceEndpoint.registerEndpoint(endpoint);
   }

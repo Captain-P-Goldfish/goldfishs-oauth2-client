@@ -1,19 +1,31 @@
 package de.captaingoldfish.restclient.application.endpoints.httprequests;
 
 import java.time.Instant;
+import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
 import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
+import de.captaingoldfish.restclient.application.utils.Utils;
+import de.captaingoldfish.restclient.database.entities.HttpRequest;
 import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
+import de.captaingoldfish.restclient.scim.resources.ScimProxy;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
+import de.captaingoldfish.scim.sdk.common.constants.HttpHeader;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
+import de.captaingoldfish.scim.sdk.server.endpoints.ResourceEndpoint;
+import de.captaingoldfish.scim.sdk.server.schemas.ResourceType;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -34,8 +46,15 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
 
   private HttpRequestCategory category;
 
+  @Autowired
+  private ResourceEndpoint resourceEndpoint;
+
+  private ProxyHandler originalProxyHandler;
+
+  private ProxyHandler spiedProxyHandler;
+
   @BeforeEach
-  public void testCreateCategory()
+  public void initialize()
   {
     category = HttpRequestCategory.builder()
                                   .name("keycloak")
@@ -43,8 +62,19 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
                                   .lastModified(Instant.now())
                                   .build();
     httpRequestCategoriesDao.save(category);
+
+    ResourceType resourceType = resourceEndpoint.getResourceTypeByName("Proxy").get();
+    originalProxyHandler = (ProxyHandler)resourceType.getResourceHandlerImpl();
+    spiedProxyHandler = Mockito.spy(originalProxyHandler);
+    resourceType.setResourceHandlerImpl(spiedProxyHandler);
   }
 
+  @AfterEach
+  public void rollback()
+  {
+    ResourceType resourceType = resourceEndpoint.getResourceTypeByName("HttpRequests").get();
+    resourceType.setResourceHandlerImpl(originalProxyHandler);
+  }
 
   /**
    * verifies that the request will fail if no category name is present
@@ -105,16 +135,21 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
   }
 
   /**
-   * verifies that the request will fail if no category name is present
+   * verifies that the nested http request will be sent by the application if successfully received on the
+   * server. This test nests a create request to create a proxy within the scim endpoint
    */
   @Test
   public void testCreateRequest()
   {
+    String proxyEndpoint = getScimApplicationUrl("/Proxy");
+    ScimProxy scimProxy = ScimProxy.builder().hostname("localhost").port(8888).build();
+
     ScimHttpRequest scimHttpRequest = ScimHttpRequest.builder()
                                                      .categoryName(category.getName())
                                                      .name("create-client")
-                                                     .url("https://localhost:8443")
-                                                     .requestBody("{}")
+                                                     .url(proxyEndpoint)
+                                                     .requestBody(scimProxy.toString())
+                                                     .requestHeaders(getRequestHeaders())
                                                      .httpMethod("POST")
                                                      .scimHttpClientSettings(ScimHttpClientSettings.builder()
                                                                                                    .requestTimeout(5L)
@@ -123,11 +158,29 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
                                                                                                    .useHostnameVerifier(true)
                                                                                                    .build())
                                                      .build();
+
     ServerResponse<ScimHttpRequest> response = scimRequestBuilder.create(ScimHttpRequest.class, HTTP_REQUESTS_ENDPOINT)
                                                                  .setResource(scimHttpRequest)
                                                                  .sendRequest();
     Assertions.assertEquals(HttpStatus.CREATED, response.getHttpStatus());
     ScimHttpRequest createdRequest = response.getResource();
-    log.warn(createdRequest.toPrettyString());
+    Mockito.verify(spiedProxyHandler).createResource(Mockito.any(), Mockito.any());
+    Assertions.assertEquals(1, proxyDao.count());
+    Assertions.assertEquals(1, httpRequestsDao.count());
+    HttpRequest httpRequest = httpRequestsDao.findById(Utils.parseId(createdRequest.getId().get())).get();
+    Assertions.assertEquals("POST", httpRequest.getHttpMethod());
+    Assertions.assertEquals(scimProxy.toString(), httpRequest.getRequestBody());
+    Assertions.assertEquals(proxyEndpoint, httpRequest.getUrl());
+    Assertions.assertEquals(1, httpRequest.getHttpHeaders().size());
+    Assertions.assertEquals(1, httpRequest.getHttpResponses().size());
+    Assertions.assertTrue(StringUtils.isNotBlank(httpRequest.getHttpResponses().get(0).getRequestDetails()));
+    Assertions.assertTrue(StringUtils.isNotBlank(httpRequest.getHttpResponses().get(0).getResponseHeaders()));
+    Assertions.assertTrue(StringUtils.isNotBlank(httpRequest.getHttpResponses().get(0).getResponseBody()));
+    Assertions.assertNotNull(httpRequest.getHttpResponses().get(0).getCreated());
+  }
+
+  private List<ScimHttpRequest.HttpHeaders> getRequestHeaders()
+  {
+    return List.of(new ScimHttpRequest.HttpHeaders(HttpHeader.CONTENT_TYPE_HEADER, HttpHeader.SCIM_CONTENT_TYPE));
   }
 }

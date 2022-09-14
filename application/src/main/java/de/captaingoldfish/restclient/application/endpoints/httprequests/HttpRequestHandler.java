@@ -3,10 +3,12 @@ package de.captaingoldfish.restclient.application.endpoints.httprequests;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
+import de.captaingoldfish.restclient.database.entities.HttpResponse;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
@@ -32,6 +34,8 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
 
   private final HttpRequestsDao httpRequestsDao;
 
+  private final HttpRequestExecutor httpRequestExecutor;
+
   /**
    * {@inheritDoc}
    */
@@ -39,8 +43,10 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
   public ScimHttpRequest createResource(ScimHttpRequest resource, Context context)
   {
     HttpRequest httpRequest = HttpRequestsConverter.toHttpRequest(resource, httpRequestsDao, httpRequestCategoriesDao);
+    HttpResponse httpResponse = sendHttpRequest(httpRequest);
+    addToHistory(httpRequest, httpResponse);
     httpRequest = httpRequestsDao.save(httpRequest);
-    return HttpRequestsConverter.toScimHttpRequest(httpRequest);
+    return HttpRequestsConverter.toScimHttpRequest(httpRequest, httpResponse);
   }
 
   /**
@@ -58,7 +64,7 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
     {
       throw new ResourceNotFoundException(String.format("HTTP request with id '%s' does not exist", id));
     }
-    return HttpRequestsConverter.toScimHttpRequest(httpRequest);
+    return HttpRequestsConverter.toScimHttpRequest(httpRequest, null);
   }
 
   /**
@@ -76,7 +82,7 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
   {
     List<HttpRequest> httpRequest = httpRequestsDao.findAll();
     List<ScimHttpRequest> scimHttpRequest = httpRequest.stream().map(category -> {
-      return HttpRequestsConverter.toScimHttpRequest(category);
+      return HttpRequestsConverter.toScimHttpRequest(category, null);
     }).collect(Collectors.toList());
     return PartialListResponse.<ScimHttpRequest> builder()
                               .resources(new ArrayList<>())
@@ -103,9 +109,11 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
                                                                          httpRequestCategoriesDao);
     updatedHttpRequest.setCreated(httpRequest.getCreated());
     updatedHttpRequest.setLastModified(Instant.now());
+    HttpResponse httpResponse = sendHttpRequest(updatedHttpRequest);
+    addToHistory(updatedHttpRequest, httpResponse);
     httpRequest = httpRequestsDao.save(httpRequest);
 
-    return HttpRequestsConverter.toScimHttpRequest(httpRequest);
+    return HttpRequestsConverter.toScimHttpRequest(httpRequest, httpResponse);
   }
 
   /**
@@ -120,6 +128,22 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
       throw new ResourceNotFoundException(String.format("HTTP request with id '%s' does not exist", id));
     }
     httpRequestsDao.deleteById(dbId);
+  }
+
+  private void addToHistory(HttpRequest httpRequest, HttpResponse httpResponse)
+  {
+    List<HttpResponse> history = new ArrayList<>(Optional.ofNullable(httpRequest.getHttpResponses())
+                                                         .orElseGet(ArrayList::new));
+    history.add(httpResponse);
+    httpRequest.setHttpResponses(history);
+  }
+
+  /**
+   * used for unit testing to mock this method
+   */
+  protected HttpResponse sendHttpRequest(HttpRequest httpRequest)
+  {
+    return httpRequestExecutor.sendHttpRequest(httpRequest);
   }
 
   @Override

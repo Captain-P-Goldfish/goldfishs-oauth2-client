@@ -141,7 +141,7 @@ public class ScimHttpRequest extends ResourceNode
    */
   public void setRequestHeaders(List<HttpHeaders> requestHeaders)
   {
-    setAttributeList(FieldNames.REQUESTHEADERS, requestHeaders);
+    setAttribute(FieldNames.REQUESTHEADERS, requestHeaders);
   }
 
   /**
@@ -157,7 +157,7 @@ public class ScimHttpRequest extends ResourceNode
    */
   public void setResponseHeaders(List<HttpHeaders> responseHeaders)
   {
-    setAttributeList(FieldNames.RESPONSEHEADERS, responseHeaders);
+    setAttribute(FieldNames.RESPONSEHEADERS, responseHeaders);
   }
 
   /**
@@ -192,6 +192,22 @@ public class ScimHttpRequest extends ResourceNode
     setAttribute(FieldNames.RESPONSEBODY, responseBody);
   }
 
+  /**
+   * The response history of this request
+   */
+  public List<String> getResponseHistory()
+  {
+    return getSimpleArrayAttribute(FieldNames.RESPONSEHISTORY);
+  }
+
+  /**
+   * The response history of this request
+   */
+  public void setResponseHistory(List<String> responseHistory)
+  {
+    setAttributeList(FieldNames.RESPONSEHISTORY, responseHistory);
+  }
+
 
   /**
    * the http header values that will be added to the request
@@ -203,10 +219,10 @@ public class ScimHttpRequest extends ResourceNode
     {}
 
     @Builder
-    public HttpHeaders(String name, List<String> values)
+    public HttpHeaders(String name, String value)
     {
       setName(name);
-      setValues(values);
+      setValue(value);
     }
 
     /**
@@ -226,19 +242,19 @@ public class ScimHttpRequest extends ResourceNode
     }
 
     /**
-     * the http-header values.
+     * the http-header value.
      */
-    public List<String> getValues()
+    public String getValue()
     {
-      return getSimpleArrayAttribute(FieldNames.VALUES);
+      return getStringAttribute(FieldNames.VALUE).orElse(null);
     }
 
     /**
-     * the http-header values.
+     * the http-header value.
      */
-    public void setValues(List<String> values)
+    public void setValue(String value)
     {
-      setAttributeList(FieldNames.VALUES, values);
+      setAttribute(FieldNames.VALUE, value);
     }
   }
 
@@ -262,13 +278,15 @@ public class ScimHttpRequest extends ResourceNode
 
     public static final String HTTP_METHOD = "httpMethod";
 
-    public static final String VALUES = "values";
+    public static final String VALUE = "value";
 
     public static final String RESPONSEHEADERS = "responseHeaders";
 
     public static final String REQUESTBODY = "requestBody";
 
     public static final String RESPONSEBODY = "responseBody";
+
+    public static final String RESPONSEHISTORY = "responseHistory";
 
   }
 }

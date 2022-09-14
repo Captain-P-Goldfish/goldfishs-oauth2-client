@@ -7,16 +7,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.HttpHeader;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
 import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
+import de.captaingoldfish.restclient.database.entities.HttpResponse;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
+import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest.HttpHeaders;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -31,20 +35,30 @@ import lombok.NoArgsConstructor;
 public final class HttpRequestsConverter
 {
 
-  private static final String HTTP_HEADER_DELIMITER = "###;###";
-
-  public static ScimHttpRequest toScimHttpRequest(HttpRequest httpRequest)
+  public static ScimHttpRequest toScimHttpRequest(HttpRequest httpRequest, HttpResponse httpResponse)
   {
 
     HttpClientSettings dbClientSettings = httpRequest.getHttpClientSettings();
     ScimHttpClientSettings clientSettings = HttpClientSettingsConverter.toScimHttpClientSettings(dbClientSettings);
 
-    List<ScimHttpRequest.HttpHeaders> headers = httpRequest.getHttpHeaders().stream().map(header -> {
-      return ScimHttpRequest.HttpHeaders.builder()
-                                        .name(header.getName())
-                                        .values(Arrays.asList(header.getValue().split(HTTP_HEADER_DELIMITER)))
-                                        .build();
+    List<HttpHeaders> headers = httpRequest.getHttpHeaders().stream().map(header -> {
+      return HttpHeaders.builder().name(header.getName()).value(header.getValue()).build();
     }).collect(Collectors.toList());
+
+    List<HttpHeaders> httpHeaders = Collections.emptyList();
+    boolean responseHeadersPresent = Optional.ofNullable(httpResponse)
+                                             .map(HttpResponse::getResponseHeaders)
+                                             .map(list -> !list.isEmpty())
+                                             .orElse(false);
+    if (responseHeadersPresent)
+    {
+      httpHeaders = Arrays.stream(httpResponse.getResponseHeaders().split("\n"))
+                          .map(line -> line.split(":"))
+                          .map(keyValue -> new HttpHeaders(keyValue[0],
+                                                           keyValue.length > 1 ? StringUtils.trim(keyValue[1]) : null))
+                          .collect(Collectors.toList());
+    }
+
     return ScimHttpRequest.builder()
                           .id(String.valueOf(httpRequest.getId()))
                           .name(httpRequest.getName())
@@ -53,7 +67,10 @@ public final class HttpRequestsConverter
                           .url(httpRequest.getUrl())
                           .requestHeaders(headers)
                           .requestBody(httpRequest.getRequestBody())
-                          .responseBody(null)
+                          .responseHeaders(httpHeaders)
+                          .responseBody(Optional.ofNullable(httpResponse)
+                                                .map(HttpResponse::getResponseBody)
+                                                .orElse(null))
                           .scimHttpClientSettings(clientSettings)
                           .meta(Meta.builder()
                                     .created(httpRequest.getCreated())
@@ -70,10 +87,7 @@ public final class HttpRequestsConverter
     HttpClientSettings clientSettings = HttpClientSettingsConverter.toHttpClientSettings(scimHttpRequest.getHttpClientSettings());
 
     List<HttpHeader> headers = scimHttpRequest.getRequestHeaders().stream().map(header -> {
-      return HttpHeader.builder()
-                       .name(header.getName())
-                       .value(String.join(HTTP_HEADER_DELIMITER, header.getValues()))
-                       .build();
+      return HttpHeader.builder().name(header.getName()).value(header.getValue()).build();
     }).collect(Collectors.toList());
     Optional<HttpRequest> optionalHttpRequest = httpRequestsDao.findById(scimHttpRequest.getId()
                                                                                         .map(Utils::parseId)

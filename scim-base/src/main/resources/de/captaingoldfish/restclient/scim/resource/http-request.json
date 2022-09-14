@@ -88,13 +88,13 @@
                     "caseExact": true
                 },
                 {
-                    "name": "values",
+                    "name": "value",
                     "type": "string",
                     "description": "the http-header values.",
                     "mutability": "readWrite",
                     "returned": "default",
                     "uniqueness": "none",
-                    "multiValued": true,
+                    "multiValued": false,
                     "required": true,
                     "caseExact": true
                 }
@@ -134,13 +134,13 @@
                     "caseExact": true
                 },
                 {
-                    "name": "values",
+                    "name": "value",
                     "type": "string",
                     "description": "the http-header values.",
                     "mutability": "readWrite",
                     "returned": "default",
                     "uniqueness": "none",
-                    "multiValued": true,
+                    "multiValued": false,
                     "required": true,
                     "caseExact": true
                 }
@@ -154,6 +154,17 @@
             "returned": "default",
             "uniqueness": "none",
             "multiValued": false,
+            "required": false,
+            "caseExact": false
+        },
+        {
+            "name": "responseHistory",
+            "type": "string",
+            "description": "The response history of this request.",
+            "mutability": "readOnly",
+            "returned": "default",
+            "uniqueness": "none",
+            "multiValued": true,
             "required": false,
             "caseExact": false
         }

@@ -113,6 +113,11 @@ public abstract class AbstractOAuthRestClientTest implements FileReferences
     return this.applicationUrl + StringUtils.stripToEmpty(path);
   }
 
+  public String getScimApplicationUrl(String path)
+  {
+    return this.applicationUrl + "/scim/v2" + StringUtils.stripToEmpty(path);
+  }
+
   public List<String> jsonArrayToList(JSONArray jsonArray)
   {
     List<String> values = new ArrayList<>();

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -19,6 +20,8 @@ import javax.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 
 /**
@@ -76,6 +79,7 @@ public class HttpRequest
   /**
    * the http headers associated with this http request
    */
+  @LazyCollection(LazyCollectionOption.FALSE)
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   // @formatter:off
   @JoinTable(name = "HTTP_HEADERS_REQUEST_MAPPING",
@@ -93,6 +97,7 @@ public class HttpRequest
   /**
    * the http response history of this request
    */
+  @LazyCollection(LazyCollectionOption.FALSE)
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   // @formatter:off
   @JoinTable(name = "HTTP_REQUEST_RESPONSE_MAPPING",
