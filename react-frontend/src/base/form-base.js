@@ -160,7 +160,7 @@ export function FormFileField(props)
     <Form.Group as={Row} controlId={props.name}>
       <Form.Label column sm={2}>{labelText}</Form.Label>
       <Col sm={10}>
-        <Form.Control type={"file"} name={props.name} />
+        <Form.Control type={"file"} className={"form-control"} name={props.name} />
         
         <ErrorMessageList controlId={props.name + "-error-list"}
                           fieldErrors={inputFieldErrorMessages} />
