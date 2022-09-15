@@ -10,6 +10,7 @@ import {Col, Container, Dropdown, DropdownButton, Row} from "react-bootstrap";
 import {ExclamationTriangle} from "react-bootstrap-icons";
 import {GoFlame} from "react-icons/go";
 import {JWT_BUILDER_ENDPOINT} from "../scim/scim-constants";
+import {Buffer} from 'buffer';
 
 export default class JwtParser extends React.Component
 {

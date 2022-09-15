@@ -143,6 +143,7 @@ nav.navbar-left {
     min-height: 95.5vh;
     min-width: var(--left-navbar-width);
     max-width: var(--left-navbar-width);
+    padding-left: 25px;
 }
 
 .bg-navigation {

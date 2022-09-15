@@ -544,7 +544,7 @@
                                 <configuration>
                                     <arguments>install --save react react-dom react-scripts react-bootstrap
                                         react-bootstrap-icons react-icons bootstrap async bs-custom-file-input
-                                        react-router-dom react-router-dom react-router-bootstrap lodash
+                                        react-router-dom react-router-dom react-router-bootstrap lodash buffer
                                     </arguments>
                                 </configuration>
                             </execution>
