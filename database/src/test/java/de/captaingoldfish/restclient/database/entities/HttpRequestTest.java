@@ -23,18 +23,18 @@ public class HttpRequestTest extends DbBaseTest
   @Test
   public void testCreateAndDeleteHttpRequest()
   {
-    HttpRequestCategory requestCategory = HttpRequestCategory.builder()
-                                                             .name("keycloak")
-                                                             .created(Instant.now())
-                                                             .lastModified(Instant.now())
-                                                             .build();
-    httpRequestCategoriesDao.save(requestCategory);
+    HttpRequestGroup requestGroup = HttpRequestGroup.builder()
+                                                    .name("keycloak")
+                                                    .created(Instant.now())
+                                                    .lastModified(Instant.now())
+                                                    .build();
+    httpRequestCategoriesDao.save(requestGroup);
 
     final int countOfHttpRequests = 5;
     for ( int i = 0 ; i < countOfHttpRequests ; i++ )
     {
       HttpRequest httpRequest = HttpRequest.builder()
-                                           .httpRequestCategory(requestCategory)
+                                           .httpRequestGroup(requestGroup)
                                            .httpMethod(HttpMethod.POST.name())
                                            .url("https://localhost:8443")
                                            .httpHeaders(List.of(HttpHeader.builder()
@@ -77,7 +77,7 @@ public class HttpRequestTest extends DbBaseTest
     Assertions.assertEquals(countOfHttpRequests, countEntriesOfTable(HttpClientSettings.class.getSimpleName()));
     Assertions.assertEquals(2 * countOfHttpRequests, countEntriesOfTable(HttpHeader.class.getSimpleName()));
 
-    httpRequestCategoriesDao.deleteById(requestCategory.getId());
+    httpRequestCategoriesDao.deleteById(requestGroup.getId());
 
     Assertions.assertEquals(0, httpRequestCategoriesDao.count());
     Assertions.assertEquals(0, httpRequestsDao.count());

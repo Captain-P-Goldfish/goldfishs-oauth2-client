@@ -12,7 +12,7 @@ import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCod
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsHandler;
 import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestExecutor;
 import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestHandler;
-import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestsCategoriesHandler;
+import de.captaingoldfish.restclient.application.endpoints.httprequests.HttpRequestsGroupHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.JwtBuilderHandler;
 import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
@@ -41,7 +41,7 @@ import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.CurrentWorkflowSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
-import de.captaingoldfish.restclient.scim.endpoints.HttpRequestCategoryEndpointDefinition;
+import de.captaingoldfish.restclient.scim.endpoints.HttpRequestGroupEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.HttpRequestEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
@@ -303,17 +303,17 @@ public class ScimConfig
   }
 
   /**
-   * registers the http-request-category resourceType under the endpoint /HttpRequestsCategories.
+   * registers the http-requests-group resourceType under the endpoint /HttpRequestsGroup.
    *
    * @param resourceEndpoint the resource endpoint that was previously defined
    * @return the http-requests resource type
    */
   @Bean
-  public ResourceType httpRequestCategoryResourceType(ResourceEndpoint resourceEndpoint,
-                                                      HttpRequestCategoriesDao httpRequestCategoriesDao)
+  public ResourceType httpRequestsGroupResourceType(ResourceEndpoint resourceEndpoint,
+                                                    HttpRequestCategoriesDao httpRequestCategoriesDao)
   {
-    HttpRequestsCategoriesHandler handler = new HttpRequestsCategoriesHandler(httpRequestCategoriesDao);
-    HttpRequestCategoryEndpointDefinition endpoint = new HttpRequestCategoryEndpointDefinition(handler);
+    HttpRequestsGroupHandler handler = new HttpRequestsGroupHandler(httpRequestCategoriesDao);
+    HttpRequestGroupEndpointDefinition endpoint = new HttpRequestGroupEndpointDefinition(handler);
     return resourceEndpoint.registerEndpoint(endpoint);
   }
 

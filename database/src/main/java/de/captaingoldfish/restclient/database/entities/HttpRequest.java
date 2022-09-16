@@ -7,7 +7,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -17,11 +16,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 
 /**
@@ -45,11 +45,11 @@ public class HttpRequest
   private long id;
 
   /**
-   * the foreign key reference to the category of this http request
+   * the foreign key reference to the group of this http request
    */
   @ManyToOne
-  @JoinColumn(name = "HTTP_REQUEST_CATEGORY_ID", referencedColumnName = "ID")
-  private HttpRequestCategory httpRequestCategory;
+  @JoinColumn(name = "HTTP_REQUEST_GROUPS_ID", referencedColumnName = "ID")
+  private HttpRequestGroup httpRequestGroup;
 
   /**
    * a name that will be unique within the requests category
@@ -121,7 +121,7 @@ public class HttpRequest
 
   @Builder
   public HttpRequest(long id,
-                     HttpRequestCategory httpRequestCategory,
+                     HttpRequestGroup httpRequestGroup,
                      String name,
                      HttpClientSettings httpClientSettings,
                      String httpMethod,
@@ -133,7 +133,7 @@ public class HttpRequest
                      Instant lastModified)
   {
     this.id = id;
-    this.httpRequestCategory = httpRequestCategory;
+    this.httpRequestGroup = httpRequestGroup;
     this.name = name;
     this.httpClientSettings = httpClientSettings;
     this.httpMethod = httpMethod;

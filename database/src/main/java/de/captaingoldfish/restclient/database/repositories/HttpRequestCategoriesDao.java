@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import de.captaingoldfish.restclient.database.ScimCrudRepository;
-import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
+import de.captaingoldfish.restclient.database.entities.HttpRequestGroup;
 
 
 /**
@@ -14,11 +14,11 @@ import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
  */
 @Repository
 public interface HttpRequestCategoriesDao
-  extends ScimCrudRepository<HttpRequestCategory, Long>, HttpRequestCategoriesDaoExtension
+  extends ScimCrudRepository<HttpRequestGroup, Long>, HttpRequestCategoriesDaoExtension
 {
 
   /**
    * finds a category by its name value
    */
-  Optional<HttpRequestCategory> findByName(String name);
+  Optional<HttpRequestGroup> findByName(String name);
 }

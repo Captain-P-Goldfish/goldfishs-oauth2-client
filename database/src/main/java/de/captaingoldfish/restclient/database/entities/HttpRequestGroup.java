@@ -22,12 +22,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "HTTP_REQUEST_CATEGORY")
-public class HttpRequestCategory
+@Table(name = "HTTP_REQUEST_GROUPS")
+public class HttpRequestGroup
 {
 
   /**
-   * the unique identifier of this category
+   * the unique identifier of this group
    */
   @Id
   @GeneratedValue
@@ -35,7 +35,7 @@ public class HttpRequestCategory
   private long id;
 
   /**
-   * the name of this category
+   * the name of this group
    */
   @Column(name = "NAME")
   private String name;
@@ -53,7 +53,7 @@ public class HttpRequestCategory
   private Instant lastModified;
 
   @Builder
-  public HttpRequestCategory(long id, String name, Instant created, Instant lastModified)
+  public HttpRequestGroup(long id, String name, Instant created, Instant lastModified)
   {
     this.id = id;
     this.name = name;

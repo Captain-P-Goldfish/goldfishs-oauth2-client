@@ -2,9 +2,9 @@
     "schemas": [
         "urn:ietf:params:scim:schemas:core:2.0:Schema"
     ],
-    "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequestCategory",
-    "name": "HttpRequestCategory",
-    "description": "A category that groups http requests together",
+    "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequestGroup",
+    "name": "HttpRequestGroup",
+    "description": "A group of http requests",
     "attributes": [
         {
             "name": "id",
@@ -20,7 +20,7 @@
         {
             "name": "name",
             "type": "string",
-            "description": "the name of the http request category.",
+            "description": "the name of the http request group.",
             "mutability": "readWrite",
             "returned": "always",
             "uniqueness": "server",
@@ -33,6 +33,6 @@
         "resourceType": "Schema",
         "created": "2021-04-88T22:51:00+02:00",
         "lastModified": "2021-04-88T22:51:00+02:00",
-        "location": "/Schemas/HttpRequestCategory"
+        "location": "/Schemas/HttpRequestsGroup"
     }
 }

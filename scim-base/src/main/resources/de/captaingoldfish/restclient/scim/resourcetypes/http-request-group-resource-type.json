@@ -2,11 +2,11 @@
     "schemas": [
         "urn:ietf:params:scim:schemas:core:2.0:ResourceType"
     ],
-    "id": "HttpRequestsCategories",
-    "name": "HttpRequestsCategories",
-    "description": "An endpoint to manage categories that will group http requests.",
-    "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequestCategory",
-    "endpoint": "/HttpRequestCategories",
+    "id": "HttpRequestGroups",
+    "name": "HttpRequestGroups",
+    "description": "An endpoint to manage groups of http requests.",
+    "schema": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequestGroup",
+    "endpoint": "/HttpRequestGroups",
     "urn:gold:params:scim:schemas:extension:url:2.0:ResourceTypeFeatures": {
         "authorization": {
             "authenticated": false
@@ -16,6 +16,6 @@
         "resourceType": "ResourceType",
         "created": "2021-05-08T22:51:00+02:00",
         "lastModified": "2021-05-08T22:51:00+02:00",
-        "location": "/ResourceTypes/HttpRequestCategory"
+        "location": "/ResourceTypes/HttpRequestGroups"
     }
 }

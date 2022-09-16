@@ -53,9 +53,9 @@ public class KeystoreTest extends DbBaseTest
     Keystore loadedKeystore = keystoreDao.findById(1L).get();
     Assertions.assertEquals(1, loadedKeystore.getKeystoreEntries().size());
 
-    Assertions.assertEquals(1, countEntriesOfTable("KEYSTORE_ENTRIES"));
+    Assertions.assertEquals(1, countEntriesOfTableNative("KEYSTORE_ENTRIES"));
     keystoreDao.deleteAll();
     Assertions.assertEquals(0, keystoreDao.count());
-    Assertions.assertEquals(0, countEntriesOfTable("KEYSTORE_ENTRIES"));
+    Assertions.assertEquals(0, countEntriesOfTableNative("KEYSTORE_ENTRIES"));
   }
 }

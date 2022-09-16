@@ -16,7 +16,7 @@ import de.captaingoldfish.restclient.application.setup.AbstractScimClientConfig;
 import de.captaingoldfish.restclient.application.setup.OAuthRestClientTest;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
-import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
+import de.captaingoldfish.restclient.database.entities.HttpRequestGroup;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpClientSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimProxy;
@@ -44,7 +44,7 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
    */
   private static final String HTTP_REQUESTS_ENDPOINT = "/HttpRequests";
 
-  private HttpRequestCategory category;
+  private HttpRequestGroup group;
 
   @Autowired
   private ResourceEndpoint resourceEndpoint;
@@ -56,12 +56,8 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
   @BeforeEach
   public void initialize()
   {
-    category = HttpRequestCategory.builder()
-                                  .name("keycloak")
-                                  .created(Instant.now())
-                                  .lastModified(Instant.now())
-                                  .build();
-    httpRequestCategoriesDao.save(category);
+    group = HttpRequestGroup.builder().name("keycloak").created(Instant.now()).lastModified(Instant.now()).build();
+    httpRequestCategoriesDao.save(group);
 
     ResourceType resourceType = resourceEndpoint.getResourceTypeByName("Proxy").get();
     originalProxyHandler = (ProxyHandler)resourceType.getResourceHandlerImpl();
@@ -72,7 +68,7 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
   @AfterEach
   public void rollback()
   {
-    ResourceType resourceType = resourceEndpoint.getResourceTypeByName("HttpRequests").get();
+    ResourceType resourceType = resourceEndpoint.getResourceTypeByName("Proxy").get();
     resourceType.setResourceHandlerImpl(originalProxyHandler);
   }
 
@@ -101,8 +97,8 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
     ErrorResponse errorResponse = response.getErrorResponse();
     Assertions.assertEquals(1, errorResponse.getFieldErrors().size());
     Assertions.assertEquals("Required 'READ_WRITE' attribute 'urn:ietf:params:scim:schemas:captaingoldfish:"
-                            + "2.0:HttpRequest:categoryName' is missing",
-                            errorResponse.getFieldErrors().get(ScimHttpRequest.FieldNames.CATEGORY_NAME).get(0));
+                            + "2.0:HttpRequest:groupName' is missing",
+                            errorResponse.getFieldErrors().get(ScimHttpRequest.FieldNames.GROUP_NAME).get(0));
   }
 
   /**
@@ -112,7 +108,7 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
   public void testCreateRequestWithUnknownCategoryName()
   {
     ScimHttpRequest scimHttpRequest = ScimHttpRequest.builder()
-                                                     .categoryName("unknown-category")
+                                                     .groupName("unknown-category")
                                                      .name("create-client")
                                                      .url("https://localhost:8443")
                                                      .requestBody("{}")
@@ -131,7 +127,7 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
     ErrorResponse errorResponse = response.getErrorResponse();
     Assertions.assertEquals(1, errorResponse.getFieldErrors().size());
     Assertions.assertEquals("Unknown http request category 'unknown-category'",
-                            errorResponse.getFieldErrors().get(ScimHttpRequest.FieldNames.CATEGORY_NAME).get(0));
+                            errorResponse.getFieldErrors().get(ScimHttpRequest.FieldNames.GROUP_NAME).get(0));
   }
 
   /**
@@ -145,7 +141,7 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
     ScimProxy scimProxy = ScimProxy.builder().hostname("localhost").port(8888).build();
 
     ScimHttpRequest scimHttpRequest = ScimHttpRequest.builder()
-                                                     .categoryName(category.getName())
+                                                     .groupName(group.getName())
                                                      .name("create-client")
                                                      .url(proxyEndpoint)
                                                      .requestBody(scimProxy.toString())
@@ -158,7 +154,6 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
                                                                                                    .useHostnameVerifier(true)
                                                                                                    .build())
                                                      .build();
-
     ServerResponse<ScimHttpRequest> response = scimRequestBuilder.create(ScimHttpRequest.class, HTTP_REQUESTS_ENDPOINT)
                                                                  .setResource(scimHttpRequest)
                                                                  .sendRequest();

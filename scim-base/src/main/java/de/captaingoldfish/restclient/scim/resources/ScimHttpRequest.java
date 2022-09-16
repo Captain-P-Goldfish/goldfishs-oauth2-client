@@ -24,7 +24,7 @@ public class ScimHttpRequest extends ResourceNode
   @Builder
   public ScimHttpRequest(String id,
                          Meta meta,
-                         String categoryName,
+                         String groupName,
                          String name,
                          String httpMethod,
                          String url,
@@ -37,7 +37,7 @@ public class ScimHttpRequest extends ResourceNode
     setSchemas(Arrays.asList(FieldNames.SCHEMA));
     setId(id);
     setMeta(meta);
-    setCategoryName(categoryName);
+    setGroupName(groupName);
     setHttpMethod(httpMethod);
     setName(name);
     setUrl(url);
@@ -67,17 +67,17 @@ public class ScimHttpRequest extends ResourceNode
   /**
    * the name of the parent category into which this request will be grouped.
    */
-  public String getCategoryName()
+  public String getGroupName()
   {
-    return getStringAttribute(FieldNames.CATEGORY_NAME).orElse(null);
+    return getStringAttribute(FieldNames.GROUP_NAME).orElse(null);
   }
 
   /**
    * the name of the parent category into which this request will be grouped.
    */
-  public void setCategoryName(String categoryName)
+  public void setGroupName(String categoryName)
   {
-    setAttribute(FieldNames.CATEGORY_NAME, categoryName);
+    setAttribute(FieldNames.GROUP_NAME, categoryName);
   }
 
   /**
@@ -269,7 +269,7 @@ public class ScimHttpRequest extends ResourceNode
 
     public static final String URL = "url";
 
-    public static final String CATEGORY_NAME = "categoryName";
+    public static final String GROUP_NAME = "groupName";
 
     public static final String REQUESTHEADERS = "requestHeaders";
 

@@ -18,10 +18,10 @@
             "caseExact": true
         },
         {
-            "name": "categoryName",
+            "name": "groupName",
             "type": "string",
             "pattern": "[\\w-]+",
-            "description": "the name of the parent category into which this request will be grouped.",
+            "description": "the name of the parent group into which this request will be grouped.",
             "mutability": "readWrite",
             "returned": "always",
             "uniqueness": "none",

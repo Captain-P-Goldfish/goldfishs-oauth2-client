@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
-import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
+import de.captaingoldfish.restclient.database.entities.HttpRequestGroup;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
@@ -46,11 +46,10 @@ public class HttpRequestValidator implements RequestValidator<ScimHttpRequest>
 
   private void validateScimHttpRequest(ScimHttpRequest scimHttpRequest, ValidationContext validationContext)
   {
-    if (httpRequestCategoriesDao.findByName(scimHttpRequest.getCategoryName()).isEmpty())
+    if (httpRequestCategoriesDao.findByName(scimHttpRequest.getGroupName()).isEmpty())
     {
-      validationContext.addError(ScimHttpRequest.FieldNames.CATEGORY_NAME,
-                                 String.format("Unknown http request category '%s'",
-                                               scimHttpRequest.getCategoryName()));
+      validationContext.addError(ScimHttpRequest.FieldNames.GROUP_NAME,
+                                 String.format("Unknown http request category '%s'", scimHttpRequest.getGroupName()));
     }
 
     String name = scimHttpRequest.getName();
@@ -64,8 +63,8 @@ public class HttpRequestValidator implements RequestValidator<ScimHttpRequest>
         && optionalHttpRequest.get().getId() != scimHttpRequest.getId().map(Utils::parseId).orElse(0L))
     {
       HttpRequest httpRequest = optionalHttpRequest.get();
-      HttpRequestCategory httpRequestCategory = httpRequest.getHttpRequestCategory();
-      if (!httpRequestCategory.getName().equals(scimHttpRequest.getCategoryName()))
+      HttpRequestGroup httpRequestGroup = httpRequest.getHttpRequestGroup();
+      if (!httpRequestGroup.getName().equals(scimHttpRequest.getGroupName()))
       {
         validationContext.setHttpResponseStatus(HttpStatus.CONFLICT);
         validationContext.addError(String.format("HTTP Request with name '%s' does already exist", name));

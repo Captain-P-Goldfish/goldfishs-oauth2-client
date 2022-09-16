@@ -10,16 +10,16 @@ import lombok.Builder;
 /**
  * A category that groups http requests together
  */
-public class ScimHttpRequestCategory extends ResourceNode
+public class ScimHttpRequestGroup extends ResourceNode
 {
 
-  public ScimHttpRequestCategory()
+  public ScimHttpRequestGroup()
   {
     setSchemas(Arrays.asList(FieldNames.SCHEMA));
   }
 
   @Builder
-  public ScimHttpRequestCategory(String id, Meta meta, String name)
+  public ScimHttpRequestGroup(String id, Meta meta, String name)
   {
     setSchemas(Arrays.asList(FieldNames.SCHEMA));
     setId(id);
@@ -50,7 +50,7 @@ public class ScimHttpRequestCategory extends ResourceNode
   public static class FieldNames
   {
 
-    public static final String SCHEMA = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequestCategory";
+    public static final String SCHEMA = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpRequestGroup";
 
 
     public static final String NAME = "name";

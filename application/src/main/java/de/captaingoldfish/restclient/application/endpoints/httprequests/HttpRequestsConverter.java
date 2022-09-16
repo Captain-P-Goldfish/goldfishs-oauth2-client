@@ -14,7 +14,7 @@ import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.HttpHeader;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
-import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
+import de.captaingoldfish.restclient.database.entities.HttpRequestGroup;
 import de.captaingoldfish.restclient.database.entities.HttpResponse;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
@@ -62,7 +62,7 @@ public final class HttpRequestsConverter
     return ScimHttpRequest.builder()
                           .id(String.valueOf(httpRequest.getId()))
                           .name(httpRequest.getName())
-                          .categoryName(httpRequest.getHttpRequestCategory().getName())
+                          .groupName(httpRequest.getHttpRequestGroup().getName())
                           .httpMethod(httpRequest.getHttpMethod())
                           .url(httpRequest.getUrl())
                           .requestHeaders(headers)
@@ -83,7 +83,7 @@ public final class HttpRequestsConverter
                                           HttpRequestsDao httpRequestsDao,
                                           HttpRequestCategoriesDao httpRequestCategoriesDao)
   {
-    HttpRequestCategory category = httpRequestCategoriesDao.findByName(scimHttpRequest.getCategoryName()).orElse(null);
+    HttpRequestGroup group = httpRequestCategoriesDao.findByName(scimHttpRequest.getGroupName()).orElse(null);
     HttpClientSettings clientSettings = HttpClientSettingsConverter.toHttpClientSettings(scimHttpRequest.getHttpClientSettings());
 
     List<HttpHeader> headers = scimHttpRequest.getRequestHeaders().stream().map(header -> {
@@ -96,7 +96,7 @@ public final class HttpRequestsConverter
                       .id(scimHttpRequest.getId().map(Utils::parseId).orElse(0L))
                       .name(scimHttpRequest.getName())
                       .httpClientSettings(clientSettings)
-                      .httpRequestCategory(category)
+                      .httpRequestGroup(group)
                       .httpMethod(scimHttpRequest.getHttpMethod())
                       .url(scimHttpRequest.getUrl())
                       .httpHeaders(headers)

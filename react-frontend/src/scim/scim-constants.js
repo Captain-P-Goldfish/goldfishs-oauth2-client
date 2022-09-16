@@ -21,5 +21,5 @@ export const CURRENT_WORKFLOW_SETTINGS_ENDPOINT = BASE_URL + "/CurrentWorkflowSe
 export const TOKEN_CATEGORY_ENDPOINT = BASE_URL + "/TokenCategory";
 export const TOKEN_STORE_ENDPOINT = BASE_URL + "/TokenStore";
 export const BULK_ENDPOINT = BASE_URL + "/Bulk";
-export const HTTP_REQUEST_CATEGORIES_ENDPOINT = BASE_URL + "/HttpRequestCategories";
+export const HTTP_REQUEST_CATEGORIES_ENDPOINT = BASE_URL + "/HttpRequestsGroup";
 export const HTTP_REQUESTS_ENDPOINT = BASE_URL + "/HttpRequests";

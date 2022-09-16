@@ -80,9 +80,9 @@ public final class ClasspathReferences
 
   public static final String HTTP_REQUESTS_SCHEMA = BASE_PATH + "/resource/http-request.json";
 
-  public static final String HTTP_REQUESTS_CATEGORY_RESOURCE_TYPE = BASE_PATH
-                                                                    + "/resourcetypes/http-request-category-resource-type.json";
+  public static final String HTTP_REQUESTS_GROUP_RESOURCE_TYPE = BASE_PATH
+                                                                 + "/resourcetypes/http-request-group-resource-type.json";
 
-  public static final String HTTP_REQUESTS_CATEGORY_SCHEMA = BASE_PATH + "/resource/http-request-category.json";
+  public static final String HTTP_REQUESTS_GROUP_SCHEMA = BASE_PATH + "/resource/http-request-group.json";
 
 }

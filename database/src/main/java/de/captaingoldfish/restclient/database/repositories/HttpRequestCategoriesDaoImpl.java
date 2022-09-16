@@ -4,14 +4,12 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
-import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
-import de.captaingoldfish.restclient.database.entities.HttpRequestCategory;
+import de.captaingoldfish.restclient.database.entities.HttpRequestGroup;
 import lombok.RequiredArgsConstructor;
 
 
@@ -37,21 +35,21 @@ public class HttpRequestCategoriesDaoImpl implements HttpRequestCategoriesDaoExt
   {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-    HttpRequestCategory httpRequestCategory = entityManager.find(HttpRequestCategory.class, id);
-    List<HttpRequest> httpRequests = getHttpRequests(criteriaBuilder, httpRequestCategory);
+    HttpRequestGroup httpRequestGroup = entityManager.find(HttpRequestGroup.class, id);
+    List<HttpRequest> httpRequests = getHttpRequests(criteriaBuilder, httpRequestGroup);
 
     httpRequests.forEach(entityManager::remove);
-    entityManager.remove(httpRequestCategory);
+    entityManager.remove(httpRequestGroup);
   }
 
   /**
    * retrieves all http requests that belong to a specific category
    */
-  private List<HttpRequest> getHttpRequests(CriteriaBuilder criteriaBuilder, HttpRequestCategory httpRequestCategory)
+  private List<HttpRequest> getHttpRequests(CriteriaBuilder criteriaBuilder, HttpRequestGroup httpRequestGroup)
   {
     CriteriaQuery<HttpRequest> criteriaQuery = criteriaBuilder.createQuery(HttpRequest.class);
     Root<HttpRequest> root = criteriaQuery.from(HttpRequest.class);
-    criteriaQuery.where(criteriaBuilder.equal(root.get("httpRequestCategory"), httpRequestCategory));
+    criteriaQuery.where(criteriaBuilder.equal(root.get("httpRequestGroup"), httpRequestGroup));
     return entityManager.createQuery(criteriaQuery).getResultList();
   }
 
