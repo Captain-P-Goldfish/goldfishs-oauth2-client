@@ -46,14 +46,11 @@ public class HttpRequestValidator implements RequestValidator<ScimHttpRequest>
 
   private void validateScimHttpRequest(ScimHttpRequest scimHttpRequest, ValidationContext validationContext)
   {
-    if (httpRequestCategoriesDao.findByName(scimHttpRequest.getGroupName()).isEmpty())
+    if (httpRequestCategoriesDao.findByName(scimHttpRequest.getGroupName()).isPresent())
     {
-      validationContext.addError(ScimHttpRequest.FieldNames.GROUP_NAME,
-                                 String.format("Unknown http request category '%s'", scimHttpRequest.getGroupName()));
+      String name = scimHttpRequest.getName();
+      isNameDuplicate(scimHttpRequest, validationContext, name);
     }
-
-    String name = scimHttpRequest.getName();
-    isNameDuplicate(scimHttpRequest, validationContext, name);
   }
 
   private void isNameDuplicate(ScimHttpRequest scimHttpRequest, ValidationContext validationContext, String name)

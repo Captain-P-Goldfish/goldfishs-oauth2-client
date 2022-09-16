@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
 import de.captaingoldfish.restclient.database.entities.HttpResponse;
@@ -45,7 +47,11 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
     HttpRequest httpRequest = HttpRequestsConverter.toHttpRequest(resource, httpRequestsDao, httpRequestCategoriesDao);
     HttpResponse httpResponse = sendHttpRequest(httpRequest);
     addToHistory(httpRequest, httpResponse);
-    httpRequest = httpRequestsDao.save(httpRequest);
+    boolean isSaveable = httpRequest.getHttpRequestGroup() != null && StringUtils.isNotBlank(httpRequest.getName());
+    if (isSaveable)
+    {
+      httpRequest = httpRequestsDao.save(httpRequest);
+    }
     return HttpRequestsConverter.toScimHttpRequest(httpRequest, httpResponse);
   }
 

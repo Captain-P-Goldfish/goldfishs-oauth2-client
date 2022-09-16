@@ -23,7 +23,6 @@ import de.captaingoldfish.restclient.scim.resources.ScimProxy;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpHeader;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
-import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceEndpoint;
 import de.captaingoldfish.scim.sdk.server.schemas.ResourceType;
 import lombok.extern.slf4j.Slf4j;
@@ -73,15 +72,19 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
   }
 
   /**
-   * verifies that the request will fail if no category name is present
+   * verifies that the request will fail if no group name is present
    */
   @Test
-  public void testCreateRequestWithoutCategory()
+  public void testCreateRequestWithoutGroupName()
   {
+    String proxyEndpoint = getScimApplicationUrl("/Proxy");
+    ScimProxy scimProxy = ScimProxy.builder().hostname("localhost").port(8888).build();
+
     ScimHttpRequest scimHttpRequest = ScimHttpRequest.builder()
                                                      .name("create-client")
-                                                     .url("https://localhost:8443")
-                                                     .requestBody("{}")
+                                                     .url(proxyEndpoint)
+                                                     .requestHeaders(getRequestHeaders())
+                                                     .requestBody(scimProxy.toString())
                                                      .httpMethod("POST")
                                                      .scimHttpClientSettings(ScimHttpClientSettings.builder()
                                                                                                    .requestTimeout(5L)
@@ -93,25 +96,28 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
     ServerResponse<ScimHttpRequest> response = scimRequestBuilder.create(ScimHttpRequest.class, HTTP_REQUESTS_ENDPOINT)
                                                                  .setResource(scimHttpRequest)
                                                                  .sendRequest();
-    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
-    ErrorResponse errorResponse = response.getErrorResponse();
-    Assertions.assertEquals(1, errorResponse.getFieldErrors().size());
-    Assertions.assertEquals("Required 'READ_WRITE' attribute 'urn:ietf:params:scim:schemas:captaingoldfish:"
-                            + "2.0:HttpRequest:groupName' is missing",
-                            errorResponse.getFieldErrors().get(ScimHttpRequest.FieldNames.GROUP_NAME).get(0));
+    Assertions.assertEquals(HttpStatus.CREATED, response.getHttpStatus());
+    Mockito.verify(spiedProxyHandler).createResource(Mockito.any(), Mockito.any());
+    Assertions.assertEquals(1, proxyDao.count());
+    Assertions.assertEquals(0, httpRequestsDao.count());
   }
 
   /**
-   * verifies that the request will fail if an unknown category name is present
+   * verifies that the request will still be sent even if no group name is present within the request. In such a
+   * case the request will not be saved within the database
    */
   @Test
-  public void testCreateRequestWithUnknownCategoryName()
+  public void testCreateRequestWithUnsaveableData()
   {
+    String proxyEndpoint = getScimApplicationUrl("/Proxy");
+    ScimProxy scimProxy = ScimProxy.builder().hostname("localhost").port(8888).build();
+
     ScimHttpRequest scimHttpRequest = ScimHttpRequest.builder()
                                                      .groupName("unknown-category")
                                                      .name("create-client")
-                                                     .url("https://localhost:8443")
-                                                     .requestBody("{}")
+                                                     .url(proxyEndpoint)
+                                                     .requestHeaders(getRequestHeaders())
+                                                     .requestBody(scimProxy.toString())
                                                      .httpMethod("POST")
                                                      .scimHttpClientSettings(ScimHttpClientSettings.builder()
                                                                                                    .requestTimeout(5L)
@@ -123,11 +129,10 @@ public class HttpRequestHandlerTest extends AbstractScimClientConfig
     ServerResponse<ScimHttpRequest> response = scimRequestBuilder.create(ScimHttpRequest.class, HTTP_REQUESTS_ENDPOINT)
                                                                  .setResource(scimHttpRequest)
                                                                  .sendRequest();
-    Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getHttpStatus());
-    ErrorResponse errorResponse = response.getErrorResponse();
-    Assertions.assertEquals(1, errorResponse.getFieldErrors().size());
-    Assertions.assertEquals("Unknown http request category 'unknown-category'",
-                            errorResponse.getFieldErrors().get(ScimHttpRequest.FieldNames.GROUP_NAME).get(0));
+    Assertions.assertEquals(HttpStatus.CREATED, response.getHttpStatus());
+    Mockito.verify(spiedProxyHandler).createResource(Mockito.any(), Mockito.any());
+    Assertions.assertEquals(1, proxyDao.count());
+    Assertions.assertEquals(0, httpRequestsDao.count());
   }
 
   /**
