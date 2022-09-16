@@ -6,7 +6,8 @@ import Form from "react-bootstrap/Form";
 import {ErrorListItem, FormCheckbox, FormInputField, LoadingSpinner} from "../base/form-base";
 import Button from "react-bootstrap/Button";
 import {Optional} from "../services/utils";
-import {Alert, Col, Container, Dropdown, DropdownButton, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
+import {Alert, Col, Container, Dropdown, DropdownButton, Row, Tooltip} from "react-bootstrap";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import * as lodash from "lodash";
 
 export default class JwtBuilder extends React.Component
@@ -287,7 +288,7 @@ export default class JwtBuilder extends React.Component
 
                     </Col>
                     <Col sm={9}>
-                        <Container>                            
+                        <Container>
                             <Row>
                                 <Col>
                                     <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>

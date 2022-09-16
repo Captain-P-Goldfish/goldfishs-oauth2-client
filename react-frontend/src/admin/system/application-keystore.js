@@ -6,7 +6,7 @@ import Button from "react-bootstrap/Button";
 import {ErrorMessagesAlert, FormFileField, FormInputField, FormSelectField, LoadingSpinner} from "../../base/form-base";
 import {downloadBase64Data, Optional} from "../../services/utils";
 import ScimClient from "../../scim/scim-client";
-import {Alert, Badge, CardDeck, Image} from "react-bootstrap";
+import {Alert, Badge, Card, CardGroup, Image} from "react-bootstrap";
 import downloadIcon from "../../media/secure-download-icon.png";
 import {InfoCircle} from "react-bootstrap-icons";
 import {GoThumbsup} from "react-icons/go";
@@ -326,7 +326,7 @@ class KeystoreEntryList extends React.Component
                         <GoThumbsup /> Key entry for alias "{this.state.aliasDeleted}" was successfully deleted
                     </Form.Text>
                 </Alert>
-                <CardDeck id="keystore-certificate-entries">
+                <CardGroup id="keystore-certificate-entries">
                     {
                         this.state.keyInfos.map(keyInfo =>
                         {
@@ -337,7 +337,7 @@ class KeystoreEntryList extends React.Component
                                                          onDeleteSuccess={this.onDeleteSuccess} />
                         })
                     }
-                </CardDeck>
+                </CardGroup>
             </React.Fragment>
         );
     }

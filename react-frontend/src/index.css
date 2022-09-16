@@ -176,11 +176,11 @@ nav.navbar-left {
     margin-bottom: 20px;
 }
 
-.nav.nav-tabs[role="tablist"] a {
+.nav.nav-tabs[role="tablist"] button {
     color: gold;
 }
 
-.nav.nav-tabs[role="tablist"] a.active {
+.nav.nav-tabs[role="tablist"] button.active {
     background-color: black;
 }
 
@@ -198,6 +198,10 @@ nav.navbar-left {
     opacity: 0.5;
 }
 
+div.row {
+    margin-bottom: 10px;
+}
+
 /* *************************************************************************************************** */
 
 
@@ -208,23 +212,22 @@ div.card-header {
     background-color: #403e3f;
 }
 
-.card-deck table th {
+.card-group table th {
     min-width: 33%;
     max-width: 33%;
 }
 
-
-.card-deck table td.card-value-cell {
+.card-group table td.card-value-cell {
     word-wrap: anywhere;
 }
 
-.card-deck table input.list-item {
+.card-group table input.list-item {
     min-width: 90%;
     max-width: 90%;
     margin-bottom: 5px;
 }
 
-.card-deck table button.add-item {
+.card-group table button.add-item {
     min-width: 90%;
     max-width: 90%;
     margin-top: 5px;
@@ -233,7 +236,7 @@ div.card-header {
     box-shadow: 2px 1px 1px 1px lightgoldenrodyellow;
 }
 
-.card-deck table button.add-item:focus {
+.card-group table button.add-item:focus {
     min-width: 90%;
     max-width: 90%;
     margin-top: 5px;
@@ -242,7 +245,7 @@ div.card-header {
     outline: none;
 }
 
-.card-deck table .remove-index {
+.card-group table .remove-index {
     float: right;
     width: 20px;
     height: 20px;
@@ -265,8 +268,8 @@ div.card-header {
 }
 
 .card.resource-card {
-    min-width: 47%;
-    max-width: 47%;
+    /*min-width: 47%;*/
+    /*max-width: 47%;*/
     margin-bottom: 15px !important;
 }
 
@@ -320,15 +323,6 @@ div.card-name-header {
     padding: 5px 5px 5px 10px;
 }
 
-.card-deck {
-    display: block;
-}
-
-.card-deck > div {
-    display: inline-flex;
-    margin-right: 15px;
-}
-
 input.form-control.card-input-field, input.form-control.card-input-field:focus {
     color: white;
     background-color: transparent;
@@ -349,6 +343,10 @@ input.form-control.card-input-field, input.form-control.card-input-field:focus {
     padding: 3px;
     background-color: white;
     border-radius: 5px;
+}
+
+.card.resource-card.modifiable-card {
+    min-width: 550px;
 }
 
 /* *************************************************************************************************** */
@@ -463,10 +461,11 @@ div.workflow-card {
 /* *************************************************************************************************** */
 /* keystore / truststore */
 
-.download-keystore-icon {
+.download-keystore-icon.badge {
     text-align: center;
     display: inline-block;
     float: right;
+    background-color: transparent !important;
 }
 
 .download-keystore-icon img {

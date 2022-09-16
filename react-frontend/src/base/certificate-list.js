@@ -1,5 +1,6 @@
 import React from "react";
-import {Card, CardDeck, Image, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Card, CardGroup, Image, Tooltip} from "react-bootstrap";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Modal from "./modal";
 import {AwardFill, KeyFill, TrashFill} from "react-bootstrap-icons";
 import CertIcon from "../media/certificate.png";
@@ -8,6 +9,8 @@ import ScimClient from "../scim/scim-client";
 import * as ScimConstants from "../scim/scim-constants";
 import {LoadingSpinner} from "./form-base";
 import {Optional} from "../services/utils";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 
 export class CertificateCardEntry extends React.Component
@@ -187,18 +190,20 @@ export default function CertificateList(props)
 
     return (
         <React.Fragment>
-            <CardDeck id="keystore-certificate-entries">
+            <Row>
                 {
                     props.certificateAliases !== undefined &&
                     props.certificateAliases.map((certAlias) =>
                     {
-                        return <CertificateCardEntry key={certAlias}
+                        return <Col>
+                            <CertificateCardEntry key={certAlias}
                                                      scimResourcePath={props.scimResourcePath}
                                                      alias={certAlias}
-                                                     onDeleteSuccess={props.onDeleteSuccess} />
+                                                           onDeleteSuccess={props.onDeleteSuccess} />
+                        </Col>
                     })
                 }
-            </CardDeck>
+            </Row>
         </React.Fragment>
     );
 }
