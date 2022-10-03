@@ -127,13 +127,13 @@ export function HttpRequest(props)
     
     const httpMethods = ["POST", "GET", "PUT", "PATCH", "DELETE"];
     const [selectedMethod, setSelectedMethod] = useState(props.method || httpMethods[1]);
-    const [url, setUrl] = useState(props.url || "http://localhost:8080");
+    const [url, setUrl] = useState(new Optional(props.url).orElse("http://localhost:8080"));
     const [httpHeader, setHttpHeader] = useState(props.httpHeader || "");
     const [requestBody, setRequestBody] = useState(props.requestBody || "");
     
     useEffect(() =>
     {
-        setUrl(props.url);
+        setUrl(new Optional(props.url).orElse("http://localhost:8080"));
     }, [props.url]);
     
     function sendHttpRequest()
@@ -196,7 +196,8 @@ export function HttpResponse(props)
 {
     
     const [showResponse, setShowResponse] = useState(true);
-    const [body, setBody] = useState(props.responseBody);
+    const [body, setBody] = useState(props.responseBody || "");
+    const [error, setError] = useState();
     
     useEffect(() =>
     {
@@ -227,21 +228,51 @@ export function HttpResponse(props)
         <pre id={"response-http-header"}>
       {props.httpHeader}
     </pre>
-        <b>Response Body</b> <a className={"ms-3 cursor-pointer"}
-                                onClick={e =>
-                                {
-                                    e.preventDefault()
-                                    try
-                                    {
-                                        let json = JSON.parse(body);
-                                        setBody(JSON.stringify(json, undefined, 2));
-                                    } catch (e)
-                                    {
-                                    }
+        <b>Response Body</b>
+        <a className={"ms-3 cursor-pointer"}
+           onClick={e =>
+           {
+               setError(null)
+               e.preventDefault();
+               try
+               {
+                   let json = JSON.parse(body);
+                   setBody(JSON.stringify(json, undefined, 2));
+               } catch (e)
+               {
+                   setError(e.message)
+               }
             
-                                }} >pretty print JSON</a>
+           }}>pretty print JSON</a>
+        <a className={"ms-3 cursor-pointer"}
+           onClick={e =>
+           {
+               setError(null)
+               e.preventDefault();
+               fetch("/pretty-print-xml", {
+                   method: "POST",
+                   body: body
+               }).then(response =>
+               {
+                   if (response.status === 200)
+                   {
+                       response.text().then(responseBody => setBody(responseBody));
+                   }
+                   else
+                   {
+                       response.text().then(responseBody => setError("Could not parse xml: " + responseBody));
+                   }
+               });
+            
+           }}>pretty print XML</a>
         <pre id={"response-http-header"}>
-      {body}
-    </pre>
+          {body}
+        </pre>
+        {
+          new Optional(error).isPresent() &&
+          <Alert variant={"danger"} dismissible onClick={() => setError(null)}>
+              {error}
+          </Alert>
+        }
     </Alert>;
 }
