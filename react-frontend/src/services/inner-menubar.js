@@ -80,8 +80,13 @@ export function InnerMenubar(props)
                                                updateMenuEntry={updateMenuEntry}
                                                onClick={menuEnty =>
                                                {
-                                                 setActiveIndex(index);
-                                                 props.onClick(menuEnty);
+                                                 if (activeIndex === index) {
+                                                   setActiveIndex(-1);
+                                                   props.onClick(null);
+                                                 } else {
+                                                   setActiveIndex(index);
+                                                   props.onClick(menuEnty);
+                                                 }
                                                }} />;
                         })
     }

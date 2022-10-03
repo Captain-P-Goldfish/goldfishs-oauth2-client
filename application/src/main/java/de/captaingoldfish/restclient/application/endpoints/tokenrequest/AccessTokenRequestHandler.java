@@ -49,6 +49,8 @@ public class AccessTokenRequestHandler extends ResourceHandler<ScimAccessTokenRe
 
       HttpResponse<String> accessTokenResponse = requestBuilder.sendAccessTokenRequest();
 
+      String metadata = requestBuilder.getMetaDataString();
+
       return ScimAccessTokenRequest.builder()
                                    .id(UUID.randomUUID().toString())
                                    .requestHeadersList(requestHeaders.entrySet().stream().map(entry -> {
@@ -62,6 +64,7 @@ public class AccessTokenRequestHandler extends ResourceHandler<ScimAccessTokenRe
                                      return new ResponseHeaders(header.getName(), header.getValue());
                                    }).collect(Collectors.toList()))
                                    .plainResponse(accessTokenResponse.getBody())
+                                   .metaDataJson(metadata)
                                    .meta(Meta.builder().created(Instant.now()).build())
                                    .build();
     }

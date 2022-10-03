@@ -112,6 +112,17 @@
             "caseExact": false
         },
         {
+            "name": "responseStatus",
+            "type": "string",
+            "description": "the http response status.",
+            "mutability": "readOnly",
+            "returned": "default",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": false,
+            "caseExact": false
+        },
+        {
             "name": "responseHeaders",
             "type": "complex",
             "description": "the http header values that will be added to the request",

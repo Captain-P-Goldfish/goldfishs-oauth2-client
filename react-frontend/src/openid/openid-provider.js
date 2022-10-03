@@ -19,7 +19,6 @@ import Button from "react-bootstrap/Button";
 import {CardInputField} from "../base/card-base";
 import {LinkContainer} from "react-router-bootstrap";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 
 export default class OpenidProvider extends React.Component
 {
@@ -47,28 +46,22 @@ export default class OpenidProvider extends React.Component
         let count = this.props.serviceProviderConfig.filter.maxResults;
         
         await this.scimClient.listResources({
-                                                startIndex: startIndex,
-                                                count: count,
-                                                sortBy: 'name'
-                                            }).then(listResponse =>
-                                                    {
-                                                        listResponse.resource.then(listResponse =>
-                                                                                   {
-                                                                                       let newResources = new Optional(
-                                                                                         listResponse.Resources).orElse(
-                                                                                         []);
-                                                                                       let oldResources = new Optional(
-                                                                                         this.state.providerList).orElse(
-                                                                                         []);
-                                                                                       let concatedResources = lodash.concat(
-                                                                                         oldResources,
-                                                                                         newResources);
-                                                                                       this.setState({
-                                                                                                         providerList: concatedResources,
-                                                                                                         errors: {}
-                                                                                                     });
-                                                                                   });
-                                                    });
+            startIndex: startIndex,
+            count: count,
+            sortBy: 'name'
+        }).then(listResponse =>
+        {
+            listResponse.resource.then(listResponse =>
+            {
+                let newResources = new Optional(listResponse.Resources).orElse([]);
+                let oldResources = new Optional(this.state.providerList).orElse([]);
+                let concatedResources = lodash.concat(oldResources, newResources);
+                this.setState({
+                    providerList: concatedResources,
+                    errors: {}
+                });
+            });
+        });
     }
     
     addNewProvider()
@@ -79,20 +72,20 @@ export default class OpenidProvider extends React.Component
         {
             providerList.unshift({});
             this.setState({
-                              providerList: providerList,
-                              newProvider: undefined,
-                              deletedProviderName: undefined
-                          });
+                providerList: providerList,
+                newProvider: undefined,
+                deletedProviderName: undefined
+            });
         }
         else
         {
             this.setState({
-                              errors: {
-                                  errorMessages: ["There is already a new form available in the view."]
-                              },
-                              newProvider: undefined,
-                              deletedProviderName: undefined
-                          });
+                errors: {
+                    errorMessages: ["There is already a new form available in the view."]
+                },
+                newProvider: undefined,
+                deletedProviderName: undefined
+            });
         }
     }
     
@@ -102,10 +95,10 @@ export default class OpenidProvider extends React.Component
         let oldProvider = lodash.find(providerList, p => p.id === provider.id);
         lodash.merge(oldProvider, provider);
         this.setState({
-                          providerList: providerList,
-                          newProvider: undefined,
-                          deletedProviderName: undefined
-                      });
+            providerList: providerList,
+            newProvider: undefined,
+            deletedProviderName: undefined
+        });
     }
     
     onCreateSuccess(provider)
@@ -114,10 +107,10 @@ export default class OpenidProvider extends React.Component
         let oldProvider = lodash.find(providerList, p => p.id === undefined);
         lodash.merge(oldProvider, provider);
         this.setState({
-                          providerList: providerList,
-                          newProvider: oldProvider,
-                          deletedProviderName: undefined
-                      });
+            providerList: providerList,
+            newProvider: oldProvider,
+            deletedProviderName: undefined
+        });
     }
     
     removeProvider(id)
@@ -126,11 +119,11 @@ export default class OpenidProvider extends React.Component
         let oldProvider = providerList.filter(provider => provider.id === id)[0];
         lodash.remove(providerList, provider => provider.id === id);
         this.setState({
-                          providerList: providerList,
-                          newProvider: undefined,
-                          deletedProviderName: oldProvider.name,
-                          errors: {}
-                      });
+            providerList: providerList,
+            newProvider: undefined,
+            deletedProviderName: oldProvider.name,
+            errors: {}
+        });
     }
     
     render()
@@ -162,17 +155,14 @@ export default class OpenidProvider extends React.Component
               <Row>
                   {
                       this.state.providerList.map((provider) =>
-                                                  {
-                                                      return <Col>
-                                                          <OpenIdProviderCardEntry
-                                                            key={new Optional(provider.id).orElse("new")}
-                                                            scimResourcePath={this.scimResourcePath}
-                                                            provider={provider}
-                                                            onCreateSuccess={this.onCreateSuccess}
-                                                            onUpdateSuccess={this.onUpdateSuccess}
-                                                            onDeleteSuccess={this.removeProvider} />
-                                                      </Col>;
-                                                  })
+                      {
+                          return <OpenIdProviderCardEntry key={new Optional(provider.id).orElse("new")}
+                                                          scimResourcePath={this.scimResourcePath}
+                                                          provider={provider}
+                                                          onCreateSuccess={this.onCreateSuccess}
+                                                          onUpdateSuccess={this.onUpdateSuccess}
+                                                          onDeleteSuccess={this.removeProvider} />;
+                      })
                   }
               </Row>
           </React.Fragment>
@@ -195,16 +185,16 @@ class OpenIdProviderCardEntry extends React.Component
         this.formReference = createRef();
         
         this.scimComponentBasics = new ScimComponentBasics({
-                                                               scimClient: this.scimClient,
-                                                               formReference: this.formReference,
-                                                               getOriginalResource: () => this.props.provider,
-                                                               getCurrentResource: () => this.state.provider,
-                                                               setCurrentResource: resource => this.setState({provider: resource}),
-                                                               setState: this.setState,
-                                                               onCreateSuccess: this.props.onCreateSuccess,
-                                                               onUpdateSuccess: this.props.onUpdateSuccess,
-                                                               onDeleteSuccess: this.props.onDeleteSuccess
-                                                           });
+            scimClient: this.scimClient,
+            formReference: this.formReference,
+            getOriginalResource: () => this.props.provider,
+            getCurrentResource: () => this.state.provider,
+            setCurrentResource: resource => this.setState({provider: resource}),
+            setState: this.setState,
+            onCreateSuccess: this.props.onCreateSuccess,
+            onUpdateSuccess: this.props.onUpdateSuccess,
+            onDeleteSuccess: this.props.onDeleteSuccess
+        });
     }
     
     render()

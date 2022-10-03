@@ -85,4 +85,13 @@ public abstract class AccessTokenRequestBuilder
                     .asString();
     }
   }
+
+  /**
+   * retrieves the current metadata from the OpenID Connect provider as json string
+   */
+  public String getMetaDataString()
+  {
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    return metadata.toJSONObject().toJSONString();
+  }
 }

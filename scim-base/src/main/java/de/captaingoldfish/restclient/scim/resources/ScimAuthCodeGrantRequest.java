@@ -11,7 +11,7 @@ import lombok.Builder;
 /**
  * Can be used to get the authorization code grant url to redirect the user to the identity provider and to
  * retrieve the authorization code after it was received by the backend
- * 
+ *
  * @author Pascal Knueppel
  * @since 20.08.2021
  */
@@ -26,6 +26,7 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   public ScimAuthCodeGrantRequest(String id,
                                   String authorizationCodeGrantUrl,
                                   String authorizationResponseUrl,
+                                  String metaDataJson,
                                   ScimCurrentWorkflowSettings currentWorkflowSettings,
                                   Meta meta)
   {
@@ -33,6 +34,7 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
     setId(id);
     setAuthorizationCodeGrantUrl(authorizationCodeGrantUrl);
     setAuthorizationResponseUrl(authorizationResponseUrl);
+    setMetaDataJson(metaDataJson);
     setCurrentWorkflowSettings(currentWorkflowSettings);
     setMeta(meta);
   }
@@ -74,6 +76,22 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   }
 
   /**
+   * the json string that represents the metadata of the openId provider
+   */
+  public Optional<String> getMetaDataJson()
+  {
+    return getStringAttribute(FieldNames.META_DATA_JSON);
+  }
+
+  /**
+   * the json string that represents the metadata of the openId provider
+   */
+  public void setMetaDataJson(String metaDataJson)
+  {
+    setAttribute(FieldNames.META_DATA_JSON, metaDataJson);
+  }
+
+  /**
    * only returned if the get-resource method is called. It contains the last used settings of previous OpenID
    * Connect workflows for this client.
    */
@@ -101,5 +119,7 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
     public static final String ID = "id";
 
     public static final String AUTHORIZATION_RESPONSE_URL = "authorizationResponseUrl";
+
+    public static final String META_DATA_JSON = "metaDataJson";
   }
 }

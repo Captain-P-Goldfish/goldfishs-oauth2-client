@@ -45,38 +45,39 @@
         <!--suppress UnresolvedMavenProperty -->
         <formatter-path>${project.parent.basedir}</formatter-path>
 
-        <version.lombok>1.18.18</version.lombok>
+        <version.lombok>1.18.24</version.lombok>
 
         <!-- application dependencies -->
-        <version.scim.sdk>1.12.1</version.scim.sdk>
+        <version.scim.sdk>1.15.0</version.scim.sdk>
         <version.commons.lang3>3.11</version.commons.lang3>
         <version.commons.io>2.8.0</version.commons.io>
         <version.commons.codec>1.15</version.commons.codec>
-        <version.spring>5.3.7</version.spring>
-        <version.springboot>2.4.3</version.springboot>
-        <version.spring.data>2.4.3</version.spring.data>
-        <version.hsqldb>2.5.1</version.hsqldb>
+        <version.spring>5.3.23</version.spring>
+        <version.springboot>2.7.4</version.springboot>
+        <version.spring.data>2.7.3</version.spring.data>
+        <version.hsqldb>2.7.0</version.hsqldb>
         <version.sqlserver.driver>9.2.1.jre11</version.sqlserver.driver>
-        <version.mysql.driver>8.0.25</version.mysql.driver>
+        <version.mysql.driver>8.0.30</version.mysql.driver>
         <version.mariadb.driver>2.7.3</version.mariadb.driver>
         <version.postgres.driver>42.2.20</version.postgres.driver>
         <version.oracle.driver>19.10.0.0</version.oracle.driver>
-        <version.liquibase>4.3.5</version.liquibase>
-        <version.bouncy.castle>1.68</version.bouncy.castle>
+        <version.liquibase>4.16.1</version.liquibase>
+        <version.bouncy.castle>1.70</version.bouncy.castle>
         <version.validation.api>2.0.1.Final</version.validation.api>
-        <version.nimbus.jose.jwt>9.12.1</version.nimbus.jose.jwt>
-        <version.nimbus.oauth2>9.13</version.nimbus.oauth2>
-        <version.caffeine>3.0.2</version.caffeine>
+        <version.nimbus.jose.jwt>9.25.4</version.nimbus.jose.jwt>
+        <version.nimbus.oauth2>9.43.1</version.nimbus.oauth2>
+        <version.caffeine>3.1.1</version.caffeine>
         <version.commons.fileupload>1.4</version.commons.fileupload>
-        <version.unirest>3.11.11</version.unirest>
+        <version.unirest>3.13.11</version.unirest>
 
         <!-- version conflicts -->
         <version.javassist>3.27.0-GA</version.javassist>
         <version.checker.qual>3.11.0</version.checker.qual>
+        <version.apiguardian>1.1.2</version.apiguardian>
 
         <!-- logging dependencies -->
-        <version.log4j2>2.14.0</version.log4j2>
-        <version.slf4j>1.7.30</version.slf4j>
+        <version.log4j2>2.18.0</version.log4j2>
+        <version.slf4j>1.7.36</version.slf4j>
 
         <!-- test dependencies -->
         <version.junit.jupiter>5.7.0</version.junit.jupiter>
@@ -256,9 +257,19 @@
                 <artifactId>checker-qual</artifactId>
                 <version>${version.checker.qual}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apiguardian</groupId>
+                <artifactId>apiguardian-api</artifactId>
+                <version>${version.apiguardian}</version>
+            </dependency>
 
 
             <!-- logging dependencies -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${version.log4j2}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
@@ -365,6 +376,10 @@
         </dependency>
 
         <!-- logging dependencies -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>

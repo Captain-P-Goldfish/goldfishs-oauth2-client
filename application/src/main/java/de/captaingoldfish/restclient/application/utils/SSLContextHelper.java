@@ -75,7 +75,14 @@ public final class SSLContextHelper
     try
     {
       trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-      trustManagerFactory.init(truststore.getTruststore());
+      if (truststore.getTruststore().size() > 0)
+      {
+        trustManagerFactory.init(truststore.getTruststore());
+      }
+      else
+      {
+        trustManagerFactory.init((KeyStore)null);
+      }
     }
     catch (NoSuchAlgorithmException | KeyStoreException e)
     {
@@ -123,7 +130,7 @@ public final class SSLContextHelper
   /**
    * builds a temporary keystore that contains a single key entry. This is necessary because the
    * KeyManagerFactory requires a keystore with a single entry only
-   * 
+   *
    * @param keyPair contains the private key
    * @param certificate the certificate that belongs to the private key
    * @param keystorePassword the password for the keystore that is also used for the private key within the

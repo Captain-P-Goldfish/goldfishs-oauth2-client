@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 
 import de.captaingoldfish.restclient.application.utils.Utils;
@@ -15,6 +16,7 @@ import de.captaingoldfish.restclient.database.repositories.HttpRequestCategories
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
+import de.captaingoldfish.scim.sdk.common.exceptions.InternalServerException;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
 import de.captaingoldfish.scim.sdk.server.endpoints.Context;
@@ -44,15 +46,24 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
   @Override
   public ScimHttpRequest createResource(ScimHttpRequest resource, Context context)
   {
-    HttpRequest httpRequest = HttpRequestsConverter.toHttpRequest(resource, httpRequestsDao, httpRequestCategoriesDao);
-    HttpResponse httpResponse = sendHttpRequest(httpRequest);
-    addToHistory(httpRequest, httpResponse);
-    boolean isSaveable = httpRequest.getHttpRequestGroup() != null && StringUtils.isNotBlank(httpRequest.getName());
-    if (isSaveable)
+    try
     {
-      httpRequest = httpRequestsDao.save(httpRequest);
+      HttpRequest httpRequest = HttpRequestsConverter.toHttpRequest(resource,
+                                                                    httpRequestsDao,
+                                                                    httpRequestCategoriesDao);
+      HttpResponse httpResponse = sendHttpRequest(httpRequest);
+      addToHistory(httpRequest, httpResponse);
+      boolean isSaveable = httpRequest.getHttpRequestGroup() != null && StringUtils.isNotBlank(httpRequest.getName());
+      if (isSaveable)
+      {
+        httpRequest = httpRequestsDao.save(httpRequest);
+      }
+      return HttpRequestsConverter.toScimHttpRequest(httpRequest, httpResponse);
     }
-    return HttpRequestsConverter.toScimHttpRequest(httpRequest, httpResponse);
+    catch (Exception ex)
+    {
+      throw new BadRequestException(ex.getMessage());
+    }
   }
 
   /**

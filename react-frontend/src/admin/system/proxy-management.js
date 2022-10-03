@@ -17,7 +17,6 @@ import * as lodash from "lodash";
 import Button from "react-bootstrap/Button";
 import ScimComponentBasics from "../../scim/scim-component-basics";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 
 export default class ProxyManagement extends React.Component
 {
@@ -45,29 +44,29 @@ export default class ProxyManagement extends React.Component
         let count = window.MAX_RESULTS;
         
         await this.scimClient.listResources({
-                                                startIndex: startIndex,
-                                                count: count,
-                                                sortBy: 'id'
-                                            }).then(listResponse =>
-                                                    {
-                                                        listResponse.resource.then(listResponse =>
-                                                                                   {
-                                                                                       let newResources = new Optional(
-                                                                                         listResponse.Resources).orElse(
-                                                                                         []);
-                                                                                       let oldResources = new Optional(
-                                                                                         this.state.proxyList).orElse([]);
-                                                                                       let concatedResources = lodash.concat(
-                                                                                         oldResources,
-                                                                                         newResources);
-                                                                                       this.setState({
-                                                                                                         proxyList: concatedResources,
-                                                                                                         errors: {},
-                                                                                                         newProxy: undefined,
-                                                                                                         deletedProxyId: undefined
-                                                                                                     });
-                                                                                   });
-                                                    });
+            startIndex: startIndex,
+            count: count,
+            sortBy: 'id'
+        }).then(listResponse =>
+        {
+            listResponse.resource.then(listResponse =>
+            {
+                let newResources = new Optional(
+                  listResponse.Resources).orElse(
+                  []);
+                let oldResources = new Optional(
+                  this.state.proxyList).orElse([]);
+                let concatedResources = lodash.concat(
+                  oldResources,
+                  newResources);
+                this.setState({
+                    proxyList: concatedResources,
+                    errors: {},
+                    newProxy: undefined,
+                    deletedProxyId: undefined
+                });
+            });
+        });
     }
     
     addNewProxy()
@@ -78,20 +77,20 @@ export default class ProxyManagement extends React.Component
         {
             proxyList.unshift({});
             this.setState({
-                              proxyList: proxyList,
-                              newProxy: undefined,
-                              deletedProxyId: undefined
-                          });
+                proxyList: proxyList,
+                newProxy: undefined,
+                deletedProxyId: undefined
+            });
         }
         else
         {
             this.setState({
-                              errors: {
-                                  errorMessages: ["There is already a new form available in the view."]
-                              },
-                              newProxy: undefined,
-                              deletedProxyId: undefined
-                          });
+                errors: {
+                    errorMessages: ["There is already a new form available in the view."]
+                },
+                newProxy: undefined,
+                deletedProxyId: undefined
+            });
         }
     }
     
@@ -101,10 +100,10 @@ export default class ProxyManagement extends React.Component
         let oldProxy = lodash.find(proxyList, p => p.id === proxy.id);
         lodash.merge(oldProxy, proxy);
         this.setState({
-                          proxyList: proxyList,
-                          newProxy: undefined,
-                          deletedProxyId: undefined
-                      });
+            proxyList: proxyList,
+            newProxy: undefined,
+            deletedProxyId: undefined
+        });
     }
     
     onCreateSuccess(proxy)
@@ -113,10 +112,10 @@ export default class ProxyManagement extends React.Component
         let oldProxy = lodash.find(proxyList, p => p.id === undefined);
         lodash.merge(oldProxy, proxy);
         this.setState({
-                          proxyList: proxyList,
-                          newProxy: oldProxy,
-                          deletedProxyId: undefined
-                      });
+            proxyList: proxyList,
+            newProxy: oldProxy,
+            deletedProxyId: undefined
+        });
     }
     
     addProxy(proxy)
@@ -125,10 +124,10 @@ export default class ProxyManagement extends React.Component
         proxyList.unshift(proxy);
         
         this.setState({
-                          proxyList: proxyList,
-                          newProxy: undefined,
-                          deletedProxyId: undefined
-                      });
+            proxyList: proxyList,
+            newProxy: undefined,
+            deletedProxyId: undefined
+        });
     }
     
     removeProxy(id)
@@ -136,11 +135,11 @@ export default class ProxyManagement extends React.Component
         let proxyList = [...this.state.proxyList];
         const newProxyList = proxyList.filter(proxy => proxy.id !== id);
         this.setState({
-                          proxyList: newProxyList,
-                          newProxy: undefined,
-                          deletedProxyId: id,
-                          errors: {}
-                      });
+            proxyList: newProxyList,
+            newProxy: undefined,
+            deletedProxyId: id,
+            errors: {}
+        });
     }
     
     render()
@@ -169,16 +168,14 @@ export default class ProxyManagement extends React.Component
               <Row>
                   {
                       this.state.proxyList.map((proxy) =>
-                                               {
-                                                   return <Col>
-                                                       <ProxyCardEntry key={new Optional(proxy.id).orElse("new")}
-                                                                       scimResourcePath={this.scimResourcePath}
-                                                                       proxy={proxy}
-                                                                       onCreateSuccess={this.onCreateSuccess}
-                                                                       onUpdateSuccess={this.onUpdateSuccess}
-                                                                       onDeleteSuccess={this.removeProxy} />
-                                                   </Col>;
-                                               })
+                      {
+                          return <ProxyCardEntry key={new Optional(proxy.id).orElse("new")}
+                                                 scimResourcePath={this.scimResourcePath}
+                                                 proxy={proxy}
+                                                 onCreateSuccess={this.onCreateSuccess}
+                                                 onUpdateSuccess={this.onUpdateSuccess}
+                                                 onDeleteSuccess={this.removeProxy} />;
+                      })
                   }
               </Row>
           </React.Fragment>
@@ -202,16 +199,16 @@ class ProxyCardEntry extends React.Component
         this.formReference = createRef();
         
         this.scimComponentBasics = new ScimComponentBasics({
-                                                               scimClient: this.scimClient,
-                                                               formReference: this.formReference,
-                                                               getOriginalResource: () => this.props.proxy,
-                                                               getCurrentResource: () => this.state.proxy,
-                                                               setCurrentResource: resource => this.setState({proxy: resource}),
-                                                               setState: this.setState,
-                                                               onCreateSuccess: this.props.onCreateSuccess,
-                                                               onUpdateSuccess: this.props.onUpdateSuccess,
-                                                               onDeleteSuccess: this.props.onDeleteSuccess
-                                                           });
+            scimClient: this.scimClient,
+            formReference: this.formReference,
+            getOriginalResource: () => this.props.proxy,
+            getCurrentResource: () => this.state.proxy,
+            setCurrentResource: resource => this.setState({proxy: resource}),
+            setState: this.setState,
+            onCreateSuccess: this.props.onCreateSuccess,
+            onUpdateSuccess: this.props.onUpdateSuccess,
+            onDeleteSuccess: this.props.onDeleteSuccess
+        });
     }
     
     render()

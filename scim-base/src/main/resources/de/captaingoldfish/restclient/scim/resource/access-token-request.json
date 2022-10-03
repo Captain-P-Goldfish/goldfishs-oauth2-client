@@ -225,6 +225,17 @@
       "multiValued": false,
       "required": true,
       "caseExact": false
+    },
+    {
+      "name": "metaDataJson",
+      "type": "string",
+      "description": "the json string that represents the metadata of the openId provider",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": false
     }
   ],
   "meta": {

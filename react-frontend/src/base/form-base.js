@@ -185,7 +185,6 @@ export function FormObjectList(props)
         <Form.Control as="select"
                       size="sm"
                       type={"number"}
-                      custom
                       name={props.name}
                       onChange={props.onChange}
                       value={props.selected}>
@@ -297,7 +296,7 @@ export function AlertListMessages(props)
     <React.Fragment>
       {
         (props.messages || []).length > 0 &&
-        <Alert variant={variant}>
+        <Alert variant={variant} dismissible={new Optional(props.onClose).isPresent()} onClick={props.onClose}>
           <ul className="error-list">
             {
               props.messages.map((message, index) =>

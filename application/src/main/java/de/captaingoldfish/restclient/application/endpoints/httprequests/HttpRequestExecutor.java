@@ -74,6 +74,7 @@ public class HttpRequestExecutor
       String responseBodyString = toResponseBody(response);
       return HttpResponse.builder()
                          .requestDetails(requestDetailsString)
+                         .responseStatus(response.getStatusLine().getStatusCode())
                          .responseHeaders(responseHeaderString)
                          .responseBody(responseBodyString)
                          .created(Instant.now())
@@ -223,17 +224,17 @@ public class HttpRequestExecutor
     if (clientSettings.getConnectionTimeout() > 0)
     {
       configBuilder.setConnectTimeout(clientSettings.getConnectionTimeout() * TIMEOUT_MILLIS);
-      log.debug("Connection timeout '{}' seconds", clientSettings.getConnectionTimeout());
+      log.trace("Connection timeout '{}' seconds", clientSettings.getConnectionTimeout());
     }
     if (clientSettings.getSocketTimeout() > 0)
     {
       configBuilder.setSocketTimeout(clientSettings.getSocketTimeout() * TIMEOUT_MILLIS);
-      log.debug("Socket timeout '{}' seconds", clientSettings.getSocketTimeout());
+      log.trace("Socket timeout '{}' seconds", clientSettings.getSocketTimeout());
     }
     if (clientSettings.getRequestTimeout() > 0)
     {
       configBuilder.setConnectionRequestTimeout(clientSettings.getRequestTimeout() * TIMEOUT_MILLIS);
-      log.debug("Request timeout '{}' seconds", clientSettings.getRequestTimeout());
+      log.trace("Request timeout '{}' seconds", clientSettings.getRequestTimeout());
     }
 
     return configBuilder.build();

@@ -1,0 +1,51 @@
+import React, {useState} from "react";
+import {Optional} from "../../services/utils";
+import {HttpRequest, HttpResponse} from "../../http-requests/http-client-requester";
+import {scimHttpHeaderToString} from "../../scim/scim-constants";
+import {AlertListMessages} from "../../base/form-base";
+import {GoFlame} from "react-icons/go";
+
+export function ResourceEndpointDetailsView(props)
+{
+    
+    const [responses, setResponses] = useState([]);
+    const [errors, setErrors] = useState({});
+    
+    return <React.Fragment>
+        <h5>Access Resource Endpoints</h5>
+        <HttpRequest url={JSON.parse(props.metaData).userinfo_endpoint}
+                     httpHeader={"Authorization: Bearer " +
+                                 JSON.parse(props.accessTokenDetails.plainResponse).access_token}
+                     onSuccess={resource =>
+                     {
+                         let resources = [...responses];
+                         resources.splice(0, 0, resource);
+                         setResponses(resources);
+                     }}
+                     onError={errorResponse =>
+                     {
+                         setErrors(errorResponse);
+                     }} />
+        {
+            (responses || []).map((response, index) =>
+            {
+                return <HttpResponse key={index}
+                                     responseStatus={response.responseStatus}
+                                     httpHeader={scimHttpHeaderToString(response.responseHeaders)}
+                                     responseBody={response.responseBody}
+                                     onClose={() =>
+                                     {
+                                         let resources = [...responses];
+                                         let indexOf = resources.indexOf(response);
+                                         resources.splice(indexOf, 1);
+                                         setResponses(resources);
+                                     }} />;
+            })
+        }
+        <AlertListMessages variant={"danger"} icon={<GoFlame />}
+                           messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
+                                                                                        .orElse(
+                                                                                          [])}
+                           onClose={() => setErrors(null)} />
+    </React.Fragment>;
+}

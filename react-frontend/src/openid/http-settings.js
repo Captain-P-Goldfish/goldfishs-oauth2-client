@@ -12,11 +12,11 @@ import {Optional} from "../services/utils";
 
 export default class HttpSettings extends React.Component
 {
-
+    
     constructor(props)
     {
         super(props);
-
+        
         let httpSettings = this.props.client['urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpClientSettings'];
         this.state = {
             success: false,
@@ -27,12 +27,12 @@ export default class HttpSettings extends React.Component
             originalSetting: JSON.parse(JSON.stringify(httpSettings)),
             httpSettings: httpSettings,
             enableHostnameVerifier: httpSettings.useHostnameVerifier
-        }
+        };
         this.setState = this.setState.bind(this);
         let resourcePath = "/scim/v2/HttpClientSettings";
         this.scimClient = new ScimClient(resourcePath, this.setState);
         this.formReference = createRef();
-
+        
         this.scimComponentBasics = new ScimComponentBasics({
             scimClient: this.scimClient,
             formReference: this.formReference,
@@ -43,16 +43,16 @@ export default class HttpSettings extends React.Component
             onCreateSuccess: (resource) => console.error("create must not be called!"),
             onUpdateSuccess: this.onUpdateSuccess
         });
-
+        
         this.onUpdateSuccess = this.onUpdateSuccess.bind(this);
     }
-
+    
     async componentDidMount()
     {
         await this.loadProxies();
         await this.loadKeystoreInfos();
     }
-
+    
     async loadProxies()
     {
         let proxyResourcePath = "/scim/v2/Proxy";
@@ -63,7 +63,7 @@ export default class HttpSettings extends React.Component
                 response.resource.then(listResponse =>
                 {
                     this.setState({proxies: listResponse.Resources || []});
-                })
+                });
             }
             else
             {
@@ -73,12 +73,12 @@ export default class HttpSettings extends React.Component
                         errors: {
                             errorMessages: [errorResponse.detail]
                         }
-                    })
-                })
+                    });
+                });
             }
         });
     }
-
+    
     async loadKeystoreInfos()
     {
         let keystoreResourcePath = "/scim/v2/Keystore";
@@ -90,9 +90,9 @@ export default class HttpSettings extends React.Component
                 {
                     this.setState({
                         keyInfos: new Optional(listResponse).map(lr => lr.Resources).map(r => r[0]).map(
-                            keystore => keystore.keyInfos).orElse([])
+                          keystore => keystore.keyInfos).orElse([])
                     });
-                })
+                });
             }
             else
             {
@@ -102,25 +102,28 @@ export default class HttpSettings extends React.Component
                         errors: {
                             errorMessages: [errorResponse.detail]
                         }
-                    })
-                })
+                    });
+                });
             }
-        })
+        });
     }
-
+    
     onUpdateSuccess()
     {
-
+    
     }
-
+    
     render()
     {
         let proxies = [];
         this.state.proxies.forEach(proxy =>
         {
-            proxies.push({id: proxy.id, value: proxy.hostname + ":" + proxy.port});
+            proxies.push({
+                id: proxy.id,
+                value: proxy.hostname + ":" + proxy.port
+            });
         });
-
+        
         let aliases = [];
         this.state.keyInfos.forEach(keyInfo =>
         {
@@ -132,75 +135,78 @@ export default class HttpSettings extends React.Component
                 });
             }
         });
-
+        
         return (
-            <React.Fragment>
-                <h2>Http Client Settings for {this.props.client.clientId}</h2>
-                <Alert id={"uploadForm-alert-success"} variant={"success"} show={this.state.success}>
-                    <Form.Text><GoThumbsup /> Http Client Settings were successfully saved</Form.Text>
-                </Alert>
-                <ErrorMessagesAlert errors={this.state.errors} />
-                <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
-                    <FormInputField name="id"
-                                    isHidden={true}
-                                    type="string"
-                                    readOnly={true}
-                                    value={this.state.httpSettings.id}
-                                    onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
-                    <FormInputField name="openIdClientReference"
-                                    isHidden={true}
-                                    type="number"
-                                    readOnly={true}
-                                    value={new Optional(this.props.client.id).orElse("")}
-                                    onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
-                    <FormInputField name="requestTimeout"
-                                    type="number"
-                                    label="Request Timeout"
-                                    value={this.state.httpSettings.requestTimeout}
-                                    onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
-                                    onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
-                    <FormInputField name="connectionTimeout"
-                                    label="Connection Timeout"
-                                    type="number"
-                                    value={this.state.httpSettings.connectionTimeout}
-                                    onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
-                                    onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
-                    <FormInputField name="socketTimeout"
-                                    label="Socket Timeout"
-                                    type="number"
-                                    value={this.state.httpSettings.socketTimeout}
-                                    onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
-                                    onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
-                    <FormCheckbox id={"useHostnameVerifier"}
-                                  name="useHostnameVerifier"
-                                  label="Enable Hostname Verifier"
-                                  checked={this.state.enableHostnameVerifier}
-                                  onChange={(e) => this.setState({enableHostnameVerifier: e.target.checked})}
+          <React.Fragment>
+              <h2>Http Client Settings for {this.props.client.clientId}</h2>
+              <Alert id={"uploadForm-alert-success"} variant={"success"} show={this.state.success}>
+                  <Form.Text><GoThumbsup /> Http Client Settings were successfully saved</Form.Text>
+              </Alert>
+              <ErrorMessagesAlert errors={this.state.errors} />
+              <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
+                  <FormInputField name="id"
+                                  isHidden={true}
+                                  type="string"
+                                  readOnly={true}
+                                  value={this.state.httpSettings.id}
                                   onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
-                    <FormObjectList name={"proxyReference"}
-                                    label={"Proxy"}
-                                    selections={["", ...proxies]}
-                                    selected={this.state.httpSettings.proxyReference}
-                                    onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
-                                    onError={fieldName => this.scimClient.getErrors(
-                                        this.state, fieldName)} />
-                    <FormObjectList name={"tlsClientAuthAliasReference"}
-                                    label={"TLS Client Auth Key Reference"}
-                                    selections={["", ...aliases]}
-                                    selected={this.state.httpSettings.tlsClientAuthAliasReference}
-                                    onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
-                                    onError={fieldName => this.scimClient.getErrors(
-                                        this.state, fieldName)} />
-
-                    <Form.Group as={Row}>
-                        <Col sm={{span: 10, offset: 2}}>
-                            <Button id={"upload"} type="submit">
-                                <LoadingSpinner show={this.state.isLoading} /> Save
-                            </Button>
-                        </Col>
-                    </Form.Group>
-                </Form>
-            </React.Fragment>
-        )
+                  <FormInputField name="openIdClientReference"
+                                  isHidden={true}
+                                  type="number"
+                                  readOnly={true}
+                                  value={new Optional(this.props.client.id).orElse("")}
+                                  onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
+                  <FormInputField name="requestTimeout"
+                                  type="number"
+                                  label="Request Timeout"
+                                  value={this.state.httpSettings.requestTimeout}
+                                  onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
+                                  onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
+                  <FormInputField name="connectionTimeout"
+                                  label="Connection Timeout"
+                                  type="number"
+                                  value={this.state.httpSettings.connectionTimeout}
+                                  onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
+                                  onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
+                  <FormInputField name="socketTimeout"
+                                  label="Socket Timeout"
+                                  type="number"
+                                  value={this.state.httpSettings.socketTimeout}
+                                  onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
+                                  onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
+                  <FormCheckbox id={"useHostnameVerifier"}
+                                name="useHostnameVerifier"
+                                label="Enable Hostname Verifier"
+                                checked={this.state.enableHostnameVerifier}
+                                onChange={(e) => this.setState({enableHostnameVerifier: e.target.checked})}
+                                onError={fieldName => this.scimClient.getErrors(this.state, fieldName)} />
+                  <FormObjectList name={"proxyReference"}
+                                  label={"Proxy"}
+                                  selections={["", ...proxies]}
+                                  selected={this.state.httpSettings.proxyReference}
+                                  onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
+                                  onError={fieldName => this.scimClient.getErrors(
+                                    this.state, fieldName)} />
+                  <FormObjectList name={"tlsClientAuthAliasReference"}
+                                  label={"TLS Client Auth Key Reference"}
+                                  selections={["", ...aliases]}
+                                  selected={this.state.httpSettings.tlsClientAuthAliasReference}
+                                  onChange={e => this.scimComponentBasics.updateInput(e.target.name, e.target.value)}
+                                  onError={fieldName => this.scimClient.getErrors(
+                                    this.state, fieldName)} />
+                  
+                  <Form.Group as={Row}>
+                      <Col sm={{
+                          span: 10,
+                          offset: 2
+                      }}>
+                          <Button id={"upload"} type="submit">
+                              <LoadingSpinner show={this.state.isLoading} /> Save
+                          </Button>
+                      </Col>
+                  </Form.Group>
+              </Form>
+          </React.Fragment>
+        );
     }
 }

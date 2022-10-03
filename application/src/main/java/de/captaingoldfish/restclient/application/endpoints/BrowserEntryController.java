@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -64,24 +63,26 @@ public class BrowserEntryController
 
   /**
    * the endpoint that accepts OpenID Connect authorization codes.
-   * 
+   *
    * @return a note for the user to return to the main-window
    */
   @GetMapping
   @RequestMapping(value = AUTH_CODE_ENDPOINT, produces = "text/html")
-  public @ResponseBody String acceptAuthorizationCode(HttpServletRequest request, HttpServletResponse response)
+  public ModelAndView acceptAuthorizationCode(HttpServletRequest request, HttpServletResponse response)
   {
     try
     {
       final String query = request.getQueryString() == null ? "" : "?" + request.getQueryString();
       final String fullRequestUrl = request.getRequestURL().toString() + query;
       authCodeGrantRequestService.handleAuthorizationResponse(fullRequestUrl);
-      return "<html><body><h3>Authorization Code accepted. Please return to the main-window</h3></body></html>";
+      return new ModelAndView("auth-success.html");
     }
     catch (Exception ex)
     {
       response.setStatus(HttpStatus.BAD_REQUEST);
-      return String.format("<html><body><span style='color: \"red\"'>%s</span></body></html>", ex.getMessage());
+      ModelAndView modelAndView = new ModelAndView("auth-success.html");
+      modelAndView.addObject("error", ex.getMessage());
+      return modelAndView;
     }
   }
 }

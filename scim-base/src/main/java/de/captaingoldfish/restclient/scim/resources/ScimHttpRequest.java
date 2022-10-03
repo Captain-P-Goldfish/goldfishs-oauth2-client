@@ -31,6 +31,7 @@ public class ScimHttpRequest extends ResourceNode
                          List<HttpHeaders> requestHeaders,
                          List<HttpHeaders> responseHeaders,
                          String requestBody,
+                         String responseStatus,
                          String responseBody,
                          ScimHttpClientSettings scimHttpClientSettings)
   {
@@ -44,6 +45,7 @@ public class ScimHttpRequest extends ResourceNode
     setRequestHeaders(requestHeaders);
     setResponseHeaders(responseHeaders);
     setRequestBody(requestBody);
+    setHttpResponseStatus(responseStatus);
     setResponseBody(responseBody);
     setHttpClientSettings(scimHttpClientSettings);
   }
@@ -53,7 +55,8 @@ public class ScimHttpRequest extends ResourceNode
    */
   public ScimHttpClientSettings getHttpClientSettings()
   {
-    return getObjectAttribute(ScimHttpClientSettings.FieldNames.SCHEMA_ID, ScimHttpClientSettings.class).orElseThrow();
+    return getObjectAttribute(ScimHttpClientSettings.FieldNames.SCHEMA_ID,
+                              ScimHttpClientSettings.class).orElseGet(() -> ScimHttpClientSettings.builder().build());
   }
 
   /**
@@ -85,7 +88,7 @@ public class ScimHttpRequest extends ResourceNode
    */
   public String getName()
   {
-    return getStringAttribute(FieldNames.NAME).get();
+    return getStringAttribute(FieldNames.NAME).orElse(null);
   }
 
   /**
@@ -142,6 +145,22 @@ public class ScimHttpRequest extends ResourceNode
   public void setRequestHeaders(List<HttpHeaders> requestHeaders)
   {
     setAttribute(FieldNames.REQUESTHEADERS, requestHeaders);
+  }
+
+  /**
+   * the http response status.
+   */
+  public String getHttpResponseStatus()
+  {
+    return getStringAttribute(FieldNames.RESPONSESTATUS).orElse(null);
+  }
+
+  /**
+   * the http response status.
+   */
+  public void setHttpResponseStatus(String status)
+  {
+    setAttribute(FieldNames.RESPONSESTATUS, status);
   }
 
   /**
@@ -279,6 +298,8 @@ public class ScimHttpRequest extends ResourceNode
     public static final String HTTP_METHOD = "httpMethod";
 
     public static final String VALUE = "value";
+
+    public static final String RESPONSESTATUS = "responseStatus";
 
     public static final String RESPONSEHEADERS = "responseHeaders";
 

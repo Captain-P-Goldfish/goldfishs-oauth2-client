@@ -25,7 +25,10 @@ code, .code {
     height: 3vmin;
     pointer-events: none;
     display: inline;
+}
 
+.cursor-pointer {
+    cursor: pointer;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -255,6 +258,7 @@ div.card-header {
 .card.alias-card {
     min-width: var(--card-width);
     max-width: var(--card-width);
+    padding: 0;
     margin-bottom: 15px !important;
 }
 
@@ -267,15 +271,23 @@ div.card-header {
     max-height: 15px;
 }
 
+.card {
+    margin-right: 15px;
+}
+
+.card.alias-card .card-header{
+    padding: 10px;
+}
+
 .card.resource-card {
-    /*min-width: 47%;*/
-    /*max-width: 47%;*/
+    min-width: 47%;
+    max-width: 47%;
+    padding: 0;
     margin-bottom: 15px !important;
 }
 
 .card-control-icons, .popover-remove-icon {
     float: right;
-    margin-top: 5px;
 }
 
 .card-load-icon, .card-control-icons:hover {
@@ -627,7 +639,7 @@ span.add-new-resource {
     margin-left: 10px;
 }
 
-.clickable-inner-menu-entry{
+.clickable-inner-menu-entry {
     text-decoration: underline;
     cursor: pointer;
 }
@@ -636,7 +648,7 @@ span.add-new-resource {
     background-color: lightgrey !important;
 }
 
-.new-menu-entry-input, .new-menu-entry-input:active  {
+.new-menu-entry-input, .new-menu-entry-input:active {
     color: black !important;
     outline: none !important;
     width: 75% !important;
@@ -686,6 +698,11 @@ span.add-new-resource {
 
 .http-category-icon {
     padding-right: 0 !important;
+}
+
+pre {
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
 }
 
 /* *************************************************************************************************** */

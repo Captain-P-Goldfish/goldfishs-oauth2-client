@@ -44,6 +44,17 @@
       "referenceTypes": [
         "url"
       ]
+    },
+    {
+      "name": "metaDataJson",
+      "type": "string",
+      "description": "the json string that represents the metadata of the openId provider",
+      "mutability": "readOnly",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
     }
   ],
   "meta": {

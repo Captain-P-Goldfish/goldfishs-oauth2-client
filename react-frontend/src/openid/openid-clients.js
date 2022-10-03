@@ -23,7 +23,6 @@ import {LinkContainer} from "react-router-bootstrap";
 import {ApplicationInfoContext} from "../app";
 import {OPENID_CLIENT_ENDPOINT, OPENID_PROVIDER_ENDPOINT} from "../scim/scim-constants";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 
 export default class OpenidClients extends React.Component
 {
@@ -55,54 +54,52 @@ export default class OpenidClients extends React.Component
         let openIdProviderId = this.props.match.params.id;
         let openIdProviderResourcePath = OPENID_PROVIDER_ENDPOINT;
         await this.scimClient.getResource(openIdProviderId, openIdProviderResourcePath).then(response =>
-                                                                                             {
-                                                                                                 if (response.success)
-                                                                                                 {
-                                                                                                     response.resource.then(
-                                                                                                       openIdProvider =>
-                                                                                                       {
-                                                                                                           this.setState(
-                                                                                                             {provider: openIdProvider});
-                                                                                                       });
-                                                                                                 }
-                                                                                                 else
-                                                                                                 {
-                                                                                                     response.resource.then(
-                                                                                                       errorResponse =>
-                                                                                                       {
-                                                                                                           this.setState(
-                                                                                                             {
-                                                                                                                 errors: {
-                                                                                                                     errorMessages: [errorResponse.detail]
-                                                                                                                 }
-                                                                                                             });
-                                                                                                       });
-                                                                                                 }
-                                                                                             });
+        {
+            if (response.success)
+            {
+                response.resource.then(openIdProvider =>
+                {
+                    this.setState(
+                      {provider: openIdProvider});
+                });
+            }
+            else
+            {
+                response.resource.then(errorResponse =>
+                {
+                    this.setState(
+                      {
+                          errors: {
+                              errorMessages: [errorResponse.detail]
+                          }
+                      });
+                });
+            }
+        });
         
         await this.scimClient.listResources({
-                                                startIndex: startIndex,
-                                                count: count,
-                                                sortBy: 'clientId',
-                                                filter: 'openIDProviderId eq ' + openIdProviderId
-                                            }).then(listResponse =>
-                                                    {
-                                                        listResponse.resource.then(listResponse =>
-                                                                                   {
-                                                                                       let newResources = new Optional(
-                                                                                         listResponse.Resources).orElse(
-                                                                                         []);
-                                                                                       let oldResources = new Optional(
-                                                                                         this.state.clientList).orElse([]);
-                                                                                       let concatedResources = lodash.concat(
-                                                                                         oldResources,
-                                                                                         newResources);
-                                                                                       this.setState({
-                                                                                                         clientList: concatedResources,
-                                                                                                         errors: {}
-                                                                                                     });
-                                                                                   });
-                                                    });
+            startIndex: startIndex,
+            count: count,
+            sortBy: 'clientId',
+            filter: 'openIDProviderId eq ' + openIdProviderId
+        }).then(listResponse =>
+        {
+            listResponse.resource.then(listResponse =>
+            {
+                let newResources = new Optional(
+                  listResponse.Resources).orElse(
+                  []);
+                let oldResources = new Optional(
+                  this.state.clientList).orElse([]);
+                let concatedResources = lodash.concat(
+                  oldResources,
+                  newResources);
+                this.setState({
+                    clientList: concatedResources,
+                    errors: {}
+                });
+            });
+        });
         
         this.loadKeystoreInfos();
     }
@@ -111,38 +108,28 @@ export default class OpenidClients extends React.Component
     {
         let keystoreResourcePath = "/scim/v2/Keystore";
         this.scimClient.getResource(undefined, keystoreResourcePath).then(response =>
-                                                                          {
-                                                                              if (response.success)
-                                                                              {
-                                                                                  response.resource.then(listResponse =>
-                                                                                                         {
-                                                                                                             this.setState(
-                                                                                                               {
-                                                                                                                   keyInfos: new Optional(
-                                                                                                                     listResponse).map(
-                                                                                                                     lr => lr.Resources)
-                                                                                                                                  .map(
-                                                                                                                                    r => r[0])
-                                                                                                                                  .map(
-                                                                                                                                    keystore => keystore.keyInfos)
-                                                                                                                                  .orElse(
-                                                                                                                                    [])
-                                                                                                               });
-                                                                                                         });
-                                                                              }
-                                                                              else
-                                                                              {
-                                                                                  response.resource.then(errorResponse =>
-                                                                                                         {
-                                                                                                             this.setState(
-                                                                                                               {
-                                                                                                                   errors: {
-                                                                                                                       errorMessages: [errorResponse.detail]
-                                                                                                                   }
-                                                                                                               });
-                                                                                                         });
-                                                                              }
-                                                                          });
+        {
+            if (response.success)
+            {
+                response.resource.then(listResponse =>
+                {
+                    this.setState(
+                      {
+                          keyInfos: new Optional(listResponse).map(lr => lr.Resources)
+                                                              .map(r => r[0])
+                                                              .map(keystore => keystore.keyInfos)
+                                                              .orElse([])
+                      });
+                });
+            }
+            else
+            {
+                response.resource.then(errorResponse =>
+                {
+                    this.setState({errors: {errorMessages: [errorResponse.detail]}});
+                });
+            }
+        });
     }
     
     addNewClient()
@@ -153,20 +140,20 @@ export default class OpenidClients extends React.Component
         {
             clientList.unshift({});
             this.setState({
-                              clientList: clientList,
-                              newClient: undefined,
-                              deletedClientId: undefined
-                          });
+                clientList: clientList,
+                newClient: undefined,
+                deletedClientId: undefined
+            });
         }
         else
         {
             this.setState({
-                              errors: {
-                                  errorMessages: ["There is already a new form available in the view."]
-                              },
-                              newClient: undefined,
-                              deletedClientId: undefined
-                          });
+                errors: {
+                    errorMessages: ["There is already a new form available in the view."]
+                },
+                newClient: undefined,
+                deletedClientId: undefined
+            });
         }
     }
     
@@ -176,10 +163,10 @@ export default class OpenidClients extends React.Component
         let oldClient = lodash.find(clientList, c => c.id === undefined);
         lodash.merge(oldClient, client);
         this.setState({
-                          providerList: clientList,
-                          newProvider: oldClient,
-                          deletedClientId: undefined
-                      });
+            providerList: clientList,
+            newProvider: oldClient,
+            deletedClientId: undefined
+        });
     }
     
     onUpdateSuccess(client)
@@ -188,10 +175,10 @@ export default class OpenidClients extends React.Component
         let oldClient = lodash.find(clientList, p => p.id === client.id);
         lodash.merge(oldClient, client);
         this.setState({
-                          clientList: clientList,
-                          newProxy: undefined,
-                          deletedClientId: undefined
-                      });
+            clientList: clientList,
+            newProxy: undefined,
+            deletedClientId: undefined
+        });
     }
     
     removeClient(id)
@@ -200,11 +187,11 @@ export default class OpenidClients extends React.Component
         let oldClient = clientList.filter(client => client.id === id)[0];
         lodash.remove(clientList, client => client.id === id);
         this.setState({
-                          clientList: clientList,
-                          newClient: undefined,
-                          deletedClientId: oldClient.clientId,
-                          errors: {}
-                      });
+            clientList: clientList,
+            newClient: undefined,
+            deletedClientId: oldClient.clientId,
+            errors: {}
+        });
     }
     
     render()
@@ -251,19 +238,16 @@ export default class OpenidClients extends React.Component
               <Row>
                   {
                       this.state.clientList.map((client) =>
-                                                {
-                                                    return <Col>
-                                                        <OpenIdClientCardEntry
-                                                          key={new Optional(client.id).orElse("new")}
-                                                          provider={this.state.provider}
-                                                          scimResourcePath={this.scimResourcePath}
-                                                          client={client}
-                                                          keyInfos={this.state.keyInfos}
-                                                          onCreateSuccess={this.onCreateSuccess}
-                                                          onUpdateSuccess={this.onUpdateSuccess}
-                                                          onDeleteSuccess={this.removeClient} />
-                                                    </Col>;
-                                                })
+                      {
+                          return <OpenIdClientCardEntry key={new Optional(client.id).orElse("new")}
+                                                        provider={this.state.provider}
+                                                        scimResourcePath={this.scimResourcePath}
+                                                        client={client}
+                                                        keyInfos={this.state.keyInfos}
+                                                        onCreateSuccess={this.onCreateSuccess}
+                                                        onUpdateSuccess={this.onUpdateSuccess}
+                                                        onDeleteSuccess={this.removeClient} />;
+                      })
                   }
               </Row>
           </React.Fragment>
@@ -288,16 +272,16 @@ class OpenIdClientCardEntry extends React.Component
         this.formReference = createRef();
         
         this.scimComponentBasics = new ScimComponentBasics({
-                                                               scimClient: this.scimClient,
-                                                               formReference: this.formReference,
-                                                               getOriginalResource: () => this.props.client,
-                                                               getCurrentResource: () => this.state.client,
-                                                               setCurrentResource: resource => this.setState({client: resource}),
-                                                               setState: this.setState,
-                                                               onCreateSuccess: this.props.onCreateSuccess,
-                                                               onUpdateSuccess: this.props.onUpdateSuccess,
-                                                               onDeleteSuccess: this.props.onDeleteSuccess
-                                                           });
+            scimClient: this.scimClient,
+            formReference: this.formReference,
+            getOriginalResource: () => this.props.client,
+            getCurrentResource: () => this.state.client,
+            setCurrentResource: resource => this.setState({client: resource}),
+            setState: this.setState,
+            onCreateSuccess: this.props.onCreateSuccess,
+            onUpdateSuccess: this.props.onUpdateSuccess,
+            onDeleteSuccess: this.props.onDeleteSuccess
+        });
     }
     
     async resetEditMode()
@@ -305,21 +289,21 @@ class OpenIdClientCardEntry extends React.Component
         this.scimComponentBasics.resetEditMode();
         let client = JSON.parse(JSON.stringify(this.props.client));
         await this.setState({
-                                client: client,
-                                authenticationType: client.authenticationType
-                            });
+            client: client,
+            authenticationType: client.authenticationType
+        });
     }
     
     render()
     {
         let aliases = [];
         this.props.keyInfos.forEach(keyInfo =>
-                                    {
-                                        if (keyInfo.hasPrivateKey === true)
-                                        {
-                                            aliases.push(keyInfo.alias);
-                                        }
-                                    });
+        {
+            if (keyInfo.hasPrivateKey === true)
+            {
+                aliases.push(keyInfo.alias);
+            }
+        });
         return (
           <Card id={"client-card-" + this.state.client.id} key={this.state.client.id}
                 border={"warning"} bg={"dark"} className={"resource-card modifiable-card"}>
@@ -385,7 +369,7 @@ class OpenIdClientCardEntry extends React.Component
                                                    type="number"
                                                    value={this.props.provider.id}
                                                    onError={fieldName => this.scimClient.getErrors(this.state,
-                                                                                                   fieldName)} />
+                                                     fieldName)} />
                                   <ModifiableCardEntry header={"Client ID"}
                                                        name={"clientId"}
                                                        resourceId={this.state.client.id}
@@ -404,11 +388,11 @@ class OpenIdClientCardEntry extends React.Component
                                                      onChange={e =>
                                                      {
                                                          this.scimComponentBasics.updateInput(e.target.name,
-                                                                                              e.target.value);
+                                                           e.target.value);
                                                          this.setState({authenticationType: e.target.value});
                                                      }}
                                                      onError={fieldName => this.scimClient.getErrors(this.state,
-                                                                                                     fieldName)}
+                                                       fieldName)}
                                   />
                                   {
                                     (this.state.authenticationType === undefined ||

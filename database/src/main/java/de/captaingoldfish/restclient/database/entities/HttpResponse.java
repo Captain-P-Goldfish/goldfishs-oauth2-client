@@ -41,6 +41,12 @@ public class HttpResponse
   private String requestDetails;
 
   /**
+   * the http response status.
+   */
+  @Column(name = "RESPONSE_STATUS")
+  private int responseStatus;
+
+  /**
    * the response headers as simple string representation
    */
   @Column(name = "RESPONSE_HEADERS")
@@ -60,10 +66,16 @@ public class HttpResponse
 
 
   @Builder
-  public HttpResponse(long id, String requestDetails, String responseHeaders, String responseBody, Instant created)
+  public HttpResponse(long id,
+                      String requestDetails,
+                      int responseStatus,
+                      String responseHeaders,
+                      String responseBody,
+                      Instant created)
   {
     this.id = id;
     this.requestDetails = requestDetails;
+    this.responseStatus = responseStatus;
     this.responseHeaders = responseHeaders;
     this.responseBody = responseBody;
     this.created = created;

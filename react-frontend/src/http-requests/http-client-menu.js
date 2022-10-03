@@ -23,7 +23,7 @@ export function HttpClientMenu(props)
   
   function selectMenuEntry(menuEntry)
   {
-    props.selectMenuEntry(menuEntry);
+      props.selectMenuEntry(menuEntry);
   }
   
   function onMenuEntryAdd(menuEntry)

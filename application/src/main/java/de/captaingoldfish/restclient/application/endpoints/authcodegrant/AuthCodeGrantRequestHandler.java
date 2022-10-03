@@ -5,8 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.validation.AuthCodeGrantRequestValidator;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
+import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
@@ -47,10 +50,12 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
     final String authCodeGrantUrl = requestService.generateAuthCodeRequestUrl(openIdClient,
                                                                               resource.getCurrentWorkflowSettings()
                                                                                       .orElseThrow());
-
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    String metaDataString = metadata.toJSONObject().toJSONString();
     return ScimAuthCodeGrantRequest.builder()
                                    .id(id)
                                    .authorizationCodeGrantUrl(authCodeGrantUrl)
+                                   .metaDataJson(metaDataString)
                                    .meta(Meta.builder().created(Instant.now()).build())
                                    .build();
   }

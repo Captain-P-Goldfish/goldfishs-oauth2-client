@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.httprequests;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,8 +59,9 @@ public class HttpRequestsGroupHandlerTest extends AbstractScimClientConfig
     HttpRequestGroup dbCategory = httpRequestCategoriesDao.findById(Utils.parseId(category.getId().get())).get();
     Assertions.assertEquals(name, dbCategory.getName());
     Assertions.assertEquals(name, category.getName());
-    Assertions.assertEquals(dbCategory.getCreated(), category.getMeta().flatMap(Meta::getCreated).orElse(null));
-    Assertions.assertEquals(dbCategory.getLastModified(),
+    Assertions.assertEquals(dbCategory.getCreated().truncatedTo(ChronoUnit.MILLIS),
+                            category.getMeta().flatMap(Meta::getCreated).orElse(null));
+    Assertions.assertEquals(dbCategory.getLastModified().truncatedTo(ChronoUnit.MILLIS),
                             category.getMeta().flatMap(Meta::getLastModified).orElse(null));
   }
 

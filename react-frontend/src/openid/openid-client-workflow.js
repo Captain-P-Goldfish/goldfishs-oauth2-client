@@ -60,7 +60,8 @@ export default class OpenidClientWorkflow extends React.Component
         responseDetailsArray.unshift(responseDetails);
         let wrapperObject = {};
         wrapperObject.responseDetails = responseDetailsArray
-        this.setState(wrapperObject);
+        let metaData = new Optional(responseDetails.metaDataJson).orElse(this.state.metaData)
+        this.setState({responseDetails: responseDetailsArray, metaData: metaData})
     }
 
     handleNestedElementChange(fieldname, value)
@@ -150,6 +151,7 @@ export default class OpenidClientWorkflow extends React.Component
                         return <ResponseDetailsView key={"response-details-" + responseDetails.id}
                                                     responseDetails={responseDetails}
                                                     client={this.props.client}
+                                                    metaData={this.state.metaData}
                                                     removeGrantTypeDetails={this.removeGrantTypeDetails} />
                     })
                 }
@@ -182,6 +184,7 @@ function ResponseDetailsView(props)
         return <React.Fragment key={clientCredentialsGrantType + "-" + responseDetails.id}>
             <AccessTokenView header={"Client Credentials Grant"}
                              headerClass={"client-credentials-grant"}
+                             metaData={props.metaData}
                              accessTokenDetails={responseDetails}
                              onRemove={() => props.removeGrantTypeDetails(
                                  responseDetails)} />
@@ -191,6 +194,7 @@ function ResponseDetailsView(props)
     return <React.Fragment key={resourceOwnerGrantType + "-" + responseDetails.id}>
         <AccessTokenView header={"Resource Owner Password Credentials Grant"}
                          headerClass={"resource-owner-password-credentials-grant"}
+                         metaData={props.metaData}
                          accessTokenDetails={responseDetails}
                          onRemove={() => props.removeGrantTypeDetails(
                              responseDetails)} />

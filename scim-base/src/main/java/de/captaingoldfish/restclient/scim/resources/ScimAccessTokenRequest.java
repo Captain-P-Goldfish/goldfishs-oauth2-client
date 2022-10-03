@@ -13,7 +13,7 @@ import lombok.Builder;
 
 /**
  * This resource is used to show details about an access token request
- * 
+ *
  * @author Pascal Knueppel
  * @since 21.08.2021
  */
@@ -37,6 +37,7 @@ public class ScimAccessTokenRequest extends ResourceNode
                                 Integer statusCode,
                                 List<ResponseHeaders> responseHeadersList,
                                 String plainResponse,
+                                String metaDataJson,
                                 Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -53,6 +54,7 @@ public class ScimAccessTokenRequest extends ResourceNode
     setStatusCode(statusCode);
     setResponseHeaders(responseHeadersList);
     setPlainResponse(plainResponse);
+    setMetaDataJson(metaDataJson);
     setMeta(meta);
   }
 
@@ -175,6 +177,22 @@ public class ScimAccessTokenRequest extends ResourceNode
   public void setPlainResponse(String plainResponse)
   {
     setAttribute(FieldNames.PLAIN_RESPONSE, plainResponse);
+  }
+
+  /**
+   * the json string that represents the metadata of the openId provider
+   */
+  public Optional<String> getMetaDataJson()
+  {
+    return getStringAttribute(FieldNames.META_DATA_JSON);
+  }
+
+  /**
+   * the json string that represents the metadata of the openId provider
+   */
+  public void setMetaDataJson(String metaDataJson)
+  {
+    setAttribute(FieldNames.META_DATA_JSON, metaDataJson);
   }
 
   /** Contains the HTTP request headers that were send in the AccessToken request */
@@ -347,6 +365,8 @@ public class ScimAccessTokenRequest extends ResourceNode
     public static final String OPEN_ID_CLIENT_ID = "openIdClientId";
 
     public static final String PLAIN_RESPONSE = "plainResponse";
+
+    public static final String META_DATA_JSON = "metaDataJson";
 
     public static final String PASSWORD = "password";
 

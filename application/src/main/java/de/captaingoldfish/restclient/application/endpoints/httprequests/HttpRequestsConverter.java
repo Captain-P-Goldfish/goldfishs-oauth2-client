@@ -69,6 +69,7 @@ public final class HttpRequestsConverter
                           .url(httpRequest.getUrl())
                           .requestHeaders(headers)
                           .requestBody(httpRequest.getRequestBody())
+                          .responseStatus(String.valueOf(httpResponse.getResponseStatus()))
                           .responseHeaders(httpHeaders)
                           .responseBody(Optional.ofNullable(httpResponse)
                                                 .map(HttpResponse::getResponseBody)
