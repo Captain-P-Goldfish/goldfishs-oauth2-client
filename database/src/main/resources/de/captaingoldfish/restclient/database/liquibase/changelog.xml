@@ -234,4 +234,90 @@
         <dropColumn tableName="OPENID_PROVIDER" columnName="VERSION"/>
     </changeSet>
 
+    <changeSet id="create-http-request-table" author="pascal_knueppel">
+        <createTable tableName="HTTP_REQUEST_GROUPS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="HTTP_REQUEST_GROUPS_PK" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
+
+        <createTable tableName="HTTP_REQUESTS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="HTTP_REQUESTS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="HTTP_REQUEST_GROUPS_ID" type="BIGINT">
+                <constraints foreignKeyName="HTTP_REQUEST_GROUPS_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_REQUEST_GROUPS"/>
+            </column>
+            <column name="HTTP_CLIENT_SETTINGS_ID" type="BIGINT">
+                <constraints foreignKeyName="HTTP_REQUEST_CLIENT_SETTING_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_CLIENT_SETTINGS"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="HTTP_METHOD" type="VARCHAR(10)"/>
+            <column name="URL" type="VARCHAR(255)"/>
+            <column name="REQUEST_BODY" type="${clob_type}"/>
+            <column name="CREATED" type="${datetime}"/>
+            <column name="LAST_MODIFIED" type="${datetime}"/>
+        </createTable>
+
+        <createTable tableName="HTTP_HEADERS">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="HTTP_HEADERS_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(100)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="HTTP_RESPONSES">
+            <column name="ID" type="BIGINT">
+                <constraints primaryKeyName="HTTP_RESPONSES_PRIME_KEY" primaryKey="true"/>
+            </column>
+            <column name="HTTP_REQUEST_ID" type="BIGINT">
+                <constraints foreignKeyName="HTTP_REQUESTS_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_REQUESTS"/>
+            </column>
+            <column name="REQUEST_DETAILS" type="${clob_type}"/>
+            <column name="RESPONSE_STATUS" type="VARCHAR(3)"/>
+            <column name="RESPONSE_HEADERS" type="${clob_type}"/>
+            <column name="RESPONSE_BODY" type="${clob_type}"/>
+            <column name="CREATED" type="${datetime}"/>
+        </createTable>
+
+        <createTable tableName="HTTP_HEADERS_REQUEST_MAPPING">
+            <column name="HTTP_REQUEST_ID" type="BIGINT">
+                <constraints foreignKeyName="REQUEST_HEADERS_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_REQUESTS"/>
+            </column>
+            <column name="HTTP_HEADER_ID" type="BIGINT">
+                <constraints foreignKeyName="HEADERS_REQUEST_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_HEADERS"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="HTTP_REQUEST_RESPONSE_MAPPING">
+            <column name="HTTP_REQUEST_ID" type="BIGINT">
+                <constraints foreignKeyName="REQUEST_RESPONSE_MAP_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_REQUESTS"/>
+            </column>
+            <column name="HTTP_RESPONSE_ID" type="BIGINT">
+                <constraints foreignKeyName="RESPONSE_REQUEST_MAP_FK" referencedColumnNames="ID"
+                             referencedTableName="HTTP_RESPONSES"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="HTTP_HEADERS_REQUEST_MAPPING" indexName="HTTP_REQUEST_HEADER_MAP_IDX">
+            <column name="HTTP_REQUEST_ID"/>
+        </createIndex>
+        <createIndex tableName="HTTP_REQUEST_RESPONSE_MAPPING" indexName="HTTP_REQUEST_RESPONSE_MAP_IDX">
+            <column name="HTTP_REQUEST_ID"/>
+        </createIndex>
+        <createIndex tableName="HTTP_REQUESTS" indexName="HTTP_REQUEST_GROUPS_ID_IDX">
+            <column name="HTTP_REQUEST_GROUPS_ID"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
