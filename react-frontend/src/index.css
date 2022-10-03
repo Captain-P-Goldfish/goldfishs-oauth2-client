@@ -422,8 +422,17 @@ div.workflow-details .collapse-header {
     margin: 0;
 }
 
+div.alert-workflow-details.collapse-header {
+    padding: 0;
+    margin: 0;
+}
+
 .card.workflow-card {
     background-color: transparent;
+    margin-right: 0;
+}
+.card.workflow-card-details {
+    margin-right: 0;
 }
 
 div.workflow-card {

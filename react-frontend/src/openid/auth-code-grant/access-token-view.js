@@ -64,6 +64,16 @@ function AccessTokenCollapsible(props)
 export function AccessTokenDetailsView(props)
 {
     return <div className={"workflow-details"}>
+        {
+          props.metaData &&
+          <Collapseable header={"OpenID Connect Discovery Details"}
+                        headerClass={"mb-2"}
+                        variant={"workflow-details"}
+                        content={() =>
+                        {
+                            return <pre>{JSON.stringify(JSON.parse(props.metaData), undefined, 2)}</pre>;
+                        }} />
+        }
         <AccessTokenRequestView accessTokenDetails={props.accessTokenDetails} />
         <AccessTokenResponseView accessTokenDetails={props.accessTokenDetails} />
         {

@@ -85,25 +85,27 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                   popup blocker does not block this. If you closed this window before finishing the
                                   login process. Close this workflow and start again.
             </Alert>
-            <Collapseable header={"Authorization Request Details"} variant={"workflow-details"} content={() =>
-            {
-                return <React.Fragment>
-                    <Row>
-                        <Col sm={2} className={"url-base-value"}>authCodeUrl</Col>
-                        <Col sm={10}
-                             className={"url-base-value"}>{this.props.requestDetails.authorizationCodeGrantUrl}</Col>
-                    </Row>
-                    {
-                        Object.keys(authCodeQueryParams).map((key, index) =>
-                        {
-                            return <Row key={"auth-code-request-row-" + index}>
-                                <Col sm={2}>{key}</Col>
-                                <Col sm={10}>{authCodeQueryParams[key]}</Col>
-                            </Row>;
-                        })
-                    }
-                </React.Fragment>;
-            }} />
+            <Collapseable header={"Authorization Request Details"} variant={"workflow-details"}
+                          bodyClass={"workflow-card-details"}
+                          content={() =>
+                          {
+                              return <React.Fragment>
+                                  <Row>
+                                      <Col sm={2} className={"url-base-value"}>authCodeUrl</Col>
+                                      <Col sm={10}
+                                           className={"url-base-value"}>{this.props.requestDetails.authorizationCodeGrantUrl}</Col>
+                                  </Row>
+                                  {
+                                      Object.keys(authCodeQueryParams).map((key, index) =>
+                                      {
+                                          return <Row key={"auth-code-request-row-" + index}>
+                                              <Col sm={2}>{key}</Col>
+                                              <Col sm={10}>{authCodeQueryParams[key]}</Col>
+                                          </Row>;
+                                      })
+                                  }
+                              </React.Fragment>;
+                          }} />
         </div>;
     }
     
@@ -151,6 +153,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                     <Collapseable header={"Authorization Response Details"}
                                   open={true}
                                   variant={"workflow-details"}
+                                  bodyClass={"workflow-card-details"}
                                   content={() =>
                                   {
                                       return <React.Fragment>
@@ -224,6 +227,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                         <Collapseable header={"OpenID Connect Discovery Details"}
                                       headerClass={"mb-2"}
                                       variant={"workflow-details"}
+                                      bodyClass={"workflow-card-details"}
                                       content={() =>
                                       {
                                           return <pre>
