@@ -13,7 +13,8 @@ export function ResourceEndpointDetailsView(props)
     
     return <React.Fragment>
         <h5>Access Resource Endpoints</h5>
-        <HttpRequest url={JSON.parse(props.metaData).userinfo_endpoint}
+        <HttpRequest minHeight={"10vh"}
+                     url={JSON.parse(props.metaData).userinfo_endpoint}
                      httpHeader={"Authorization: Bearer " +
                                  JSON.parse(props.accessTokenDetails.plainResponse).access_token}
                      onSuccess={resource =>

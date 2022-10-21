@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 
 import de.captaingoldfish.restclient.application.utils.Utils;
@@ -16,7 +15,7 @@ import de.captaingoldfish.restclient.database.repositories.HttpRequestCategories
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
 import de.captaingoldfish.restclient.scim.resources.ScimHttpRequest;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
-import de.captaingoldfish.scim.sdk.common.exceptions.InternalServerException;
+import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
 import de.captaingoldfish.scim.sdk.server.endpoints.Context;
@@ -98,8 +97,8 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
                                                             Context context)
   {
     List<HttpRequest> httpRequest = httpRequestsDao.findAll();
-    List<ScimHttpRequest> scimHttpRequest = httpRequest.stream().map(category -> {
-      return HttpRequestsConverter.toScimHttpRequest(category, null);
+    List<ScimHttpRequest> scimHttpRequest = httpRequest.stream().map(request -> {
+      return HttpRequestsConverter.toScimHttpRequest(request, null);
     }).collect(Collectors.toList());
     return PartialListResponse.<ScimHttpRequest> builder()
                               .resources(new ArrayList<>())

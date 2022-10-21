@@ -331,6 +331,9 @@ public class ScimConfig
   {
     HttpRequestHandler handler = new HttpRequestHandler(httpRequestCategoriesDao, httpRequestsDao, httpRequestExecutor);
     HttpRequestEndpointDefinition endpoint = new HttpRequestEndpointDefinition(handler);
-    return resourceEndpoint.registerEndpoint(endpoint);
+    ResourceType resourceType = resourceEndpoint.registerEndpoint(endpoint);
+    resourceType.getFeatures().setAutoFiltering(true);
+    resourceType.getFeatures().setAutoSorting(true);
+    return resourceType;
   }
 }

@@ -58,18 +58,23 @@ export function InnerMenubar(props)
   }
   
   return <ListGroup>
-    <ListGroup.Item variant={"warning"}>
-      {props.header} <PlusLg className={"add-list-item-icon"}
-                             onClick={() =>
-                             {
-                               setShowAddNewEntry(true);
-                             }} />
-    </ListGroup.Item>
-    {
-      showAddNewEntry &&
-      <NewMenuEntry abort={() => setShowAddNewEntry(false)}
-                    addMenuEntry={addMenuEntry} />
-    }
+    <React.Fragment>
+      {
+        new Optional(props.headerOff).isEmpty() &&
+        <ListGroup.Item variant={"warning"}>
+          {props.header} <PlusLg className={"add-list-item-icon"}
+                                 onClick={() =>
+                                 {
+                                   setShowAddNewEntry(true);
+                                 }} />
+        </ListGroup.Item>
+      }
+      {
+        showAddNewEntry &&
+        <NewMenuEntry abort={() => setShowAddNewEntry(false)}
+                      addMenuEntry={addMenuEntry} />
+      }
+    </React.Fragment>
     {
       menuEntryList.map((entry, index) =>
                         {

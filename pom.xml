@@ -547,8 +547,8 @@
                                     <goal>install-node-and-npm</goal>
                                 </goals>
                                 <configuration>
-                                    <nodeVersion>v16.13.2</nodeVersion>
-                                    <npmVersion>8.3.2</npmVersion>
+                                    <nodeVersion>v16.18.0</nodeVersion>
+                                    <npmVersion>8.19.2</npmVersion>
                                 </configuration>
                             </execution>
                             <execution>
@@ -557,9 +557,21 @@
                                     <goal>npm</goal>
                                 </goals>
                                 <configuration>
-                                    <arguments>install --save react react-dom react-scripts react-bootstrap@2.5.0
-                                        react-bootstrap-icons react-icons bootstrap async bs-custom-file-input
-                                        react-router-dom react-router-dom react-router-bootstrap lodash buffer
+                                    <arguments>install --save
+                                        react@18.2.0
+                                        react-dom@18.2.0
+                                        react-scripts@5.0.1
+                                        react-bootstrap@2.5.0
+                                        web-vitals@2.1.4
+                                        react-bootstrap-icons@1.9.1
+                                        react-icons@4.4.0
+                                        bootstrap@5.2.2
+                                        async@3.2.4
+                                        bs-custom-file-input@1.3.4
+                                        react-router-dom@5.3.4
+                                        react-router-bootstrap@0.25.0
+                                        lodash@4.17.21
+                                        buffer@6.0.3
                                     </arguments>
                                 </configuration>
                             </execution>

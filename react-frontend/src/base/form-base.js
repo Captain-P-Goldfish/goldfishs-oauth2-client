@@ -18,6 +18,9 @@ import {
   XSquare
 } from "react-bootstrap-icons";
 import {CardInputField} from "./card-base";
+import {FaInfoCircle} from "react-icons/fa";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 /**
  * a simple input field that might also display error messages directly bound to this input field

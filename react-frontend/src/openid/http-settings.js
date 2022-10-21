@@ -9,6 +9,7 @@ import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import ScimComponentBasics from "../scim/scim-component-basics";
 import {Optional} from "../services/utils";
+import {HTTP_CLIENT_SETTINGS_ENDPOINT, KEYSTORE_ENDPOINT, PROXY_ENDPOINT} from "../scim/scim-constants";
 
 export default class HttpSettings extends React.Component
 {
@@ -29,7 +30,7 @@ export default class HttpSettings extends React.Component
             enableHostnameVerifier: httpSettings.useHostnameVerifier
         };
         this.setState = this.setState.bind(this);
-        let resourcePath = "/scim/v2/HttpClientSettings";
+        let resourcePath = HTTP_CLIENT_SETTINGS_ENDPOINT;
         this.scimClient = new ScimClient(resourcePath, this.setState);
         this.formReference = createRef();
         
@@ -55,7 +56,7 @@ export default class HttpSettings extends React.Component
     
     async loadProxies()
     {
-        let proxyResourcePath = "/scim/v2/Proxy";
+        let proxyResourcePath = PROXY_ENDPOINT;
         await new ScimClient(proxyResourcePath, this.setState).listResources().then(response =>
         {
             if (response.success)
@@ -81,7 +82,7 @@ export default class HttpSettings extends React.Component
     
     async loadKeystoreInfos()
     {
-        let keystoreResourcePath = "/scim/v2/Keystore";
+        let keystoreResourcePath = KEYSTORE_ENDPOINT;
         this.scimClient.getResource(undefined, keystoreResourcePath).then(response =>
         {
             if (response.success)

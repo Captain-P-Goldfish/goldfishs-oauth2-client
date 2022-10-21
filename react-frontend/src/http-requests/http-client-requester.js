@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Alert, Badge, Container, ListGroup} from "react-bootstrap";
+import {Alert, Card, Container, Tab, Table, Tabs} from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -9,11 +9,52 @@ import {HttpClientMenu} from "./http-client-menu";
 import {HTTP_REQUESTS_ENDPOINT, httpHeaderToScimJson, scimHttpHeaderToString} from "../scim/scim-constants";
 import {ScimClient2} from "../scim/scim-client-2";
 import {Optional} from "../services/utils";
+import {HttpClientSettings} from "./http-client-settings";
+import {FaInfoCircle} from "react-icons/fa";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+import {InnerMenubar} from "../services/inner-menubar";
+import * as lodash from "lodash";
 
 export function HttpClientRequester(props)
 {
     
-    const [selectedGroup, setSelectedGroup] = useState("unattached");
+    const [activeTab, setActiveTab] = useState(1);
+    const [selectedGroup, setSelectedGroup] = useState();
+    const [currentHttpClientSettings, setCurrentHttpClientSettings] = useState({
+        id: -1,
+        requestTimeout: 5,
+        connectionTimeout: 5,
+        socketTimeout: 5,
+        useHostnameVerifier: true,
+        proxyReference: undefined,
+        tlsClientAuthAliasReference: undefined
+    });
+    const [selectedHttpRequest, setSelectedHttpRequest] = useState();
+    
+    function selectNewGroup(group)
+    {
+        if (new Optional(group).isEmpty())
+        {
+            setSelectedGroup(null);
+            return;
+        }
+        setSelectedGroup(group);
+        // let scimClient = new ScimClient2();
+        // let onSuccess = resource => setSelectedGroup(resource);
+        // let onError = errorResponse => setError(errorResponse);
+        // scimClient.getResource(HTTP_REQUEST_GROUPS_ENDPOINT, group.id, null, onSuccess, onError);
+    }
+    
+    function saveHttpClientSettings(httpClientSettings)
+    {
+        setCurrentHttpClientSettings(httpClientSettings);
+    }
+    
+    function onTabSelect(key)
+    {
+        setActiveTab(key);
+    }
     
     return <React.Fragment>
         
@@ -22,10 +63,34 @@ export function HttpClientRequester(props)
         <Container>
             <Row>
                 <Col sm={"2"}>
-                    <HttpClientMenu selectMenuEntry={setSelectedGroup} />
+                    <HttpClientMenu selectMenuEntry={selectNewGroup} />
                 </Col>
                 <Col sm={"10"}>
-                    <HttpRequestDetails group={selectedGroup} />
+                    <Tabs activeKey={activeTab} defaultActiveKey={"http-request"} onSelect={onTabSelect}>
+                        <Tab eventKey={1} title={"HTTP Request"}
+                             onClick={e => setActiveTab(1)}>
+                            <HttpRequestDetails group={selectedGroup} />
+                        </Tab>
+                        <Tab eventKey={2} title={"HTTP Client Settings"}
+                             onClick={e => setActiveTab(2)}>
+                            <HttpClientSettings clientSettings={currentHttpClientSettings}
+                                                save={saveHttpClientSettings} />
+                        </Tab>
+                        {
+                          new Optional(selectedGroup).isPresent() &&
+                          <Tab eventKey={3} title={"Saved Requests"}
+                               onClick={e => setActiveTab(3)}>
+                              <HttpRequestSelections selectedGroup={selectedGroup}
+                                                     selectedHttpRequest={selectedHttpRequest}
+                                                     selectHttpRequestsTab={() => setActiveTab(3)}
+                                                     doRequestSelection={httpRequest =>
+                                                     {
+                                                         setSelectedHttpRequest(httpRequest);
+                                                         setActiveTab(1);
+                                                     }} />
+                          </Tab>
+                        }
+                    </Tabs>
                 </Col>
             </Row>
         </Container>
@@ -36,43 +101,92 @@ export function HttpClientRequester(props)
 function HttpRequestSelections(props)
 {
     
-    const [categories, setCategories] = useState(props.categories);
+    const [savedRequests, setSavedRequests] = useState([]);
+    const [selectedSavedRequest, setSelectedSavedRequest] = useState();
+    const [errorResponse, setErrorResponse] = useState([]);
     
-    return <React.Fragment>
-        <ListGroup as="ol">
+    useEffect(() =>
+    {
+        setErrorResponse(null);
+        let scimClient = new ScimClient2();
+        let onSuccess = listedResources =>
+        {
+            setSavedRequests(listedResources.Resources || []);
+            if (listedResources.itemsPerPage > 0)
             {
-                categories.map(category =>
-                {
-                    return <CategorySelection key={category.name} category={category} />;
-                })
+                props.selectHttpRequestsTab();
             }
-        </ListGroup>
-    </React.Fragment>;
-}
-
-function CategorySelection(props)
-{
-    return <ListGroup.Item as="li" className="d-flex justify-content-between align-items-start">
-        <div className="me-auto">
-            <div className="fw-bold">{props.category.name}</div>
-            <ListGroup className={"ms-3 w-100"}>
-                {
-                    props.category.requests.map(request =>
-                    {
-                        return <ListGroup.Item key={request.name}
-                                               action href={"#" + request.name}
-                                               variant={"secondary"}>
-                            {request.name}
-                        </ListGroup.Item>;
-                    })
-                }
-            </ListGroup>
-        </div>
-        
-        <Badge className={"bg-primary rounded-pill"}>
-            {props.category.requests.length}
-        </Badge>
-    </ListGroup.Item>;
+        };
+        let onError = errorResponse =>
+        {
+            setErrorResponse(errorResponse);
+        };
+        scimClient.listResources({
+            resourcePath: HTTP_REQUESTS_ENDPOINT,
+            filter: "groupName eq \"" + props.selectedGroup.name + "\"",
+            onSuccess: onSuccess,
+            onError: onError
+        });
+    }, [props.selectedGroup]);
+    
+    return <Row>
+        {
+          savedRequests.length === 0 &&
+          <Alert variant={"info"}>
+              No requests were saved for group "{props.selectedGroup.name}" yet
+          </Alert>
+        }
+        <Col sm={3}>
+            <InnerMenubar headerOff={true}
+                          entries={lodash.map(savedRequests, 'name').sort((c1, c2) => c1.localeCompare(c2))}
+                          onClick={element =>
+                          {
+                              setSelectedSavedRequest(lodash.find(savedRequests, {name: element}));
+                          }}
+                          onMenuEntryUpdate={() =>
+                          {
+                          }}
+                          onMenuEntryDelete={() =>
+                          {
+                          }}
+            />
+        </Col>
+        {
+          new Optional(selectedSavedRequest).isPresent() &&
+          <Col sm={9}>
+              <Card className={"resource-card w-100 mw-100"}>
+                  <Card.Body className={"text-dark"}>
+                      <Table>
+                          <tbody>
+                              <tr className={"border-0"}>
+                                  <th className={"w-25"}>
+                                      HTTP Method
+                                  </th>
+                                  <td>
+                                      {selectedSavedRequest.httpMethod}
+                                  </td>
+                              </tr>
+                              <tr className={"border-0"}>
+                                  <th>
+                                      URL
+                                  </th>
+                                  <td>
+                                      {selectedSavedRequest.url}
+                                  </td>
+                              </tr>
+                          </tbody>
+                      </Table>
+                      <Form.Label className={"fw-bold"}>Request Body</Form.Label>
+                      <pre>
+                          {new Optional(selectedSavedRequest.requestBody).map(s => s.length === 0 ? null : s)
+                                                                         .orElse("- no request body -")}
+                      </pre>
+                      <Form.Label className={"fw-bold"}>Response History</Form.Label>
+                  </Card.Body>
+              </Card>
+          </Col>
+        }
+    </Row>;
 }
 
 export function HttpRequestDetails(props)
@@ -89,7 +203,7 @@ export function HttpRequestDetails(props)
             <pre className={"mb-0"}>{error}</pre>
         </Alert>
         
-        <HttpRequest menuEntry={props.group || ""}
+        <HttpRequest group={props.group}
                      onSuccess={resource =>
                      {
                          setError(null);
@@ -111,7 +225,8 @@ export function HttpRequestDetails(props)
                         {
                             return <HttpResponse key={index}
                                                  responseStatus={response.responseStatus}
-                                                 httpHeader={scimHttpHeaderToString(response.responseHeaders)}
+                                                 httpHeader={scimHttpHeaderToString(
+                                                   response.responseHeaders)}
                                                  responseBody={response.responseBody} />;
                         })
                     }
@@ -130,6 +245,7 @@ export function HttpRequest(props)
     const [url, setUrl] = useState(new Optional(props.url).orElse("http://localhost:8080"));
     const [httpHeader, setHttpHeader] = useState(props.httpHeader || "");
     const [requestBody, setRequestBody] = useState(props.requestBody || "");
+    const [requestName, setRequestName] = useState("");
     
     useEffect(() =>
     {
@@ -139,11 +255,14 @@ export function HttpRequest(props)
     function sendHttpRequest()
     {
         let httpRequest = {
+            groupName: props.group?.name,
+            name: requestName,
             httpMethod: selectedMethod,
             url: url,
             requestHeaders: httpHeaderToScimJson(httpHeader),
             requestBody: requestBody,
-            "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpClientSettings": props.httpClientSettings || {}
+            "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpClientSettings": props.httpClientSettings
+                                                                                   || {}
         };
         let scimClient = new ScimClient2();
         scimClient.createResource(HTTP_REQUESTS_ENDPOINT, httpRequest, props.onSuccess, props.onError);
@@ -183,10 +302,42 @@ export function HttpRequest(props)
             <Col>
                 <h4>Request Body</h4>
                 <Form.Control id={"request-body-area"} as={"textarea"}
+                              style={{minHeight: new Optional(props.minHeight).orElse("30vh")}}
                               value={requestBody}
                               onChange={e => setRequestBody(e.target.value)} />
                 
-                <Button className={"mt-3"} onClick={() => sendHttpRequest()}>send request</Button>
+                <Row className={"mt-3"}>
+                    <Col sm={"3"}>
+                        <Button onClick={() => sendHttpRequest()}>send request</Button>
+                    </Col>
+                    {
+                      new Optional(props.group).isPresent() &&
+                      <React.Fragment>
+                          <Col sm={"2"}>
+                              <Form.Label className={"m-0 mt-2"} htmlFor={"request-name"}>Request Name</Form.Label>
+                              <OverlayTrigger placement={'top'}
+                                              overlay={
+                                                  <Tooltip id={"tooltip-test"}>
+                                                      When setting a name the request will be saved within the database.
+                                                      If the name does already exist the next response will be added to
+                                                      the history of the saved request. If left empty nothing will be
+                                                      stored within the database
+                                                  </Tooltip>
+                                              }>
+                                  <Button variant="link" className={"m-0 p-0 text-warning"}>
+                                      <FaInfoCircle className={"ms-2 mb-3"} />
+                                  </Button>
+                              </OverlayTrigger>
+                          
+                          </Col>
+                          <Col>
+                              <Form.Control id={"request-name"}
+                                            value={requestName}
+                                            onChange={e => setRequestName(e.target.value)} />
+                          </Col>
+                      </React.Fragment>
+                    }
+                </Row>
             </Col>
         </Row>
     </Container>;
@@ -232,7 +383,7 @@ export function HttpResponse(props)
         <a className={"ms-3 cursor-pointer"}
            onClick={e =>
            {
-               setError(null)
+               setError(null);
                e.preventDefault();
                try
                {
@@ -240,14 +391,14 @@ export function HttpResponse(props)
                    setBody(JSON.stringify(json, undefined, 2));
                } catch (e)
                {
-                   setError(e.message)
+                   setError(e.message);
                }
             
            }}>pretty print JSON</a>
         <a className={"ms-3 cursor-pointer"}
            onClick={e =>
            {
-               setError(null)
+               setError(null);
                e.preventDefault();
                fetch("/pretty-print-xml", {
                    method: "POST",
@@ -260,7 +411,8 @@ export function HttpResponse(props)
                    }
                    else
                    {
-                       response.text().then(responseBody => setError("Could not parse xml: " + responseBody));
+                       response.text().then(
+                         responseBody => setError("Could not parse xml: " + responseBody));
                    }
                });
             

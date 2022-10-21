@@ -39,7 +39,7 @@ public class OpenIdClientHandler extends ResourceHandler<ScimOpenIdClient>
 {
 
   /**
-   * to peform CRUD operations on OpenID Clients
+   * to perform CRUD operations on OpenID Clients
    */
   private final OpenIdClientDao openIdClientDao;
 
