@@ -23,7 +23,7 @@ import {toHttpResponseForHistory} from "./response-builder";
 export function HttpClientRequester(props)
 {
     
-    const [activeTab, setActiveTab] = useState(3);
+    const [activeTab, setActiveTab] = useState(1);
     const [currentHttpClientSettings, setCurrentHttpClientSettings] = useState({
         id: -1,
         requestTimeout: 5,
