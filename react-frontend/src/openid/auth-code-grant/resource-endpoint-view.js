@@ -1,9 +1,10 @@
 import React, {useState} from "react";
 import {Optional} from "../../services/utils";
-import {HttpRequest, HttpResponse} from "../../http-requests/http-client-requester";
+import {HttpRequest} from "../../http-requests/http-client-requester";
 import {scimHttpHeaderToString} from "../../scim/scim-constants";
 import {AlertListMessages} from "../../base/form-base";
 import {GoFlame} from "react-icons/go";
+import {HttpResponse} from "../../http-requests/http-request-menu-bar";
 
 export function ResourceEndpointDetailsView(props)
 {

@@ -1,11 +1,16 @@
 package de.captaingoldfish.restclient.database.entities;
 
 import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Builder;
@@ -29,9 +34,21 @@ public class HttpResponse
    * the unique identifier of this category
    */
   @Id
-  @GeneratedValue
   @Column(name = "ID")
-  private long id;
+  private String id;
+
+  /**
+   * this transition to httprequest is needed to be able to directly delete {@link HttpResponse} objects when
+   * not needed anymore. It is not used within the sourcecode but hibernate needs the information about the
+   * join-table in order to delete the foreign-key relation.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  // @formatter:off
+  @JoinTable(name = "HTTP_REQUEST_RESPONSE_MAPPING",
+             joinColumns = @JoinColumn(name = "HTTP_RESPONSE_ID", referencedColumnName = "ID"),
+             inverseJoinColumns = @JoinColumn(name = "HTTP_REQUEST_ID", referencedColumnName = "ID"))
+  // @formatter:on
+  private HttpRequest httpRequest;
 
   /**
    * the request details merged into a single string representation that have led to this response (the parent
@@ -66,14 +83,14 @@ public class HttpResponse
 
 
   @Builder
-  public HttpResponse(long id,
+  public HttpResponse(String id,
                       String requestDetails,
                       int responseStatus,
                       String responseHeaders,
                       String responseBody,
                       Instant created)
   {
-    this.id = id;
+    this.id = Optional.ofNullable(id).orElseGet(() -> UUID.randomUUID().toString());
     this.requestDetails = requestDetails;
     this.responseStatus = responseStatus;
     this.responseHeaders = responseHeaders;

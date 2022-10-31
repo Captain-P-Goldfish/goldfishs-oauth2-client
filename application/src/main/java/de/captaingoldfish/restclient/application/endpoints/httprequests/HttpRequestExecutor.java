@@ -118,7 +118,8 @@ public class HttpRequestExecutor
                          httpRequest.getHttpMethod(),
                          httpRequest.getUrl(),
                          httpRequestHeaders,
-                         httpRequest.getRequestBody());
+                         httpRequest.getRequestBody())
+                 .trim();
   }
 
 

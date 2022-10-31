@@ -28,9 +28,10 @@ public class ScimHttpRequest extends ResourceNode
                          String name,
                          String httpMethod,
                          String url,
+                         String requestBody,
+                         String responseId,
                          List<HttpHeaders> requestHeaders,
                          List<HttpHeaders> responseHeaders,
-                         String requestBody,
                          String responseStatus,
                          String responseBody,
                          ScimHttpClientSettings scimHttpClientSettings)
@@ -42,9 +43,10 @@ public class ScimHttpRequest extends ResourceNode
     setHttpMethod(httpMethod);
     setName(name);
     setUrl(url);
-    setRequestHeaders(requestHeaders);
-    setResponseHeaders(responseHeaders);
     setRequestBody(requestBody);
+    setRequestHeaders(requestHeaders);
+    setHttpResponseId(responseId);
+    setResponseHeaders(responseHeaders);
     setHttpResponseStatus(responseStatus);
     setResponseBody(responseBody);
     setHttpClientSettings(scimHttpClientSettings);
@@ -148,6 +150,22 @@ public class ScimHttpRequest extends ResourceNode
   }
 
   /**
+   * the databaseId of the response if it was saved within the history table.
+   */
+  public String getHttpResponseId()
+  {
+    return getStringAttribute(FieldNames.RESPONSEID).orElse(null);
+  }
+
+  /**
+   * the databaseId of the response if it was saved within the history table.
+   */
+  public void setHttpResponseId(String responseId)
+  {
+    setAttribute(FieldNames.RESPONSEID, responseId);
+  }
+
+  /**
    * the http response status.
    */
   public String getHttpResponseStatus()
@@ -210,23 +228,6 @@ public class ScimHttpRequest extends ResourceNode
   {
     setAttribute(FieldNames.RESPONSEBODY, responseBody);
   }
-
-  /**
-   * The response history of this request
-   */
-  public List<String> getResponseHistory()
-  {
-    return getSimpleArrayAttribute(FieldNames.RESPONSEHISTORY);
-  }
-
-  /**
-   * The response history of this request
-   */
-  public void setResponseHistory(List<String> responseHistory)
-  {
-    setAttributeList(FieldNames.RESPONSEHISTORY, responseHistory);
-  }
-
 
   /**
    * the http header values that will be added to the request
@@ -307,7 +308,6 @@ public class ScimHttpRequest extends ResourceNode
 
     public static final String RESPONSEBODY = "responseBody";
 
-    public static final String RESPONSEHISTORY = "responseHistory";
-
+    public static final String RESPONSEID = "responseId";
   }
 }

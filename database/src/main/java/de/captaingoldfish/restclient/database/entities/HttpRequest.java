@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -97,8 +98,7 @@ public class HttpRequest
   /**
    * the http response history of this request
    */
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   // @formatter:off
   @JoinTable(name = "HTTP_REQUEST_RESPONSE_MAPPING",
              joinColumns = @JoinColumn(name = "HTTP_REQUEST_ID", referencedColumnName = "ID"),

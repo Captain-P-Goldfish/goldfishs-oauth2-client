@@ -1,0 +1,128 @@
+{
+    "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Schema"
+    ],
+    "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpResponseHistory",
+    "name": "HttpResponseHistory",
+    "description": "the response history for a saved http request",
+    "attributes": [
+        {
+            "name": "id",
+            "type": "string",
+            "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+            "mutability": "readOnly",
+            "returned": "always",
+            "uniqueness": "server",
+            "multiValued": false,
+            "required": true,
+            "caseExact": true
+        },
+        {
+            "name": "groupName",
+            "type": "string",
+            "description": "the name of the group to which the request belongs.",
+            "mutability": "readOnly",
+            "returned": "always",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": false,
+            "caseExact": true
+        },
+        {
+            "name": "requestName",
+            "type": "string",
+            "description": "the name of the saved http request.",
+            "mutability": "readOnly",
+            "returned": "always",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": false,
+            "caseExact": true
+        },
+        {
+            "name": "responseHistory",
+            "type": "complex",
+            "description": "the response history of the http request.",
+            "mutability": "readOnly",
+            "returned": "always",
+            "uniqueness": "none",
+            "multiValued": true,
+            "required": false,
+            "caseExact": false,
+            "subAttributes": [
+                {
+                    "name": "id",
+                    "type": "string",
+                    "description": "a unique identifier that must be addressed to delete this specific response object.",
+                    "mutability": "readOnly",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": false,
+                    "caseExact": false
+                },
+                {
+                    "name": "status",
+                    "type": "integer",
+                    "description": "the status of the http response.",
+                    "mutability": "readOnly",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": false,
+                    "caseExact": false
+                },
+                {
+                    "name": "originalRequest",
+                    "type": "string",
+                    "description": "the pre-formatted http request that caused this response.",
+                    "mutability": "readOnly",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": false,
+                    "caseExact": false
+                },
+                {
+                    "name": "responseHeaders",
+                    "type": "string",
+                    "description": "the pre-formatted http headers from the response.",
+                    "mutability": "readOnly",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": false,
+                    "caseExact": false
+                },
+                {
+                    "name": "responseBody",
+                    "type": "string",
+                    "description": "The response body from the service that was accessed.",
+                    "mutability": "readOnly",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": false,
+                    "caseExact": false
+                },
+                {
+                    "name": "created",
+                    "type": "datetime",
+                    "description": "The timestamp when this response was returned to this application.",
+                    "mutability": "readOnly",
+                    "returned": "default",
+                    "uniqueness": "none",
+                    "multiValued": false,
+                    "required": false,
+                    "caseExact": false
+                }
+            ]
+        }
+    ],
+    "meta": {
+        "resourceType": "Schema",
+        "created": "2021-04-88T22:51:00+02:00",
+        "lastModified": "2021-04-88T22:51:00+02:00",
+        "location": "/Schemas/HttpResponseHistory"
+    }
+}

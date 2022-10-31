@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import de.captaingoldfish.restclient.application.endpoints.httpclient.HttpClientSettingsConverter;
-import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.HttpHeader;
 import de.captaingoldfish.restclient.database.entities.HttpRequest;
@@ -69,6 +68,10 @@ public final class HttpRequestsConverter
                           .url(httpRequest.getUrl())
                           .requestHeaders(headers)
                           .requestBody(httpRequest.getRequestBody())
+                          .responseId(Optional.ofNullable(httpResponse)
+                                              .map(HttpResponse::getId)
+                                              .map(String::valueOf)
+                                              .orElse(null))
                           .responseStatus(Optional.ofNullable(httpResponse)
                                                   .map(HttpResponse::getResponseStatus)
                                                   .map(String::valueOf)
@@ -85,7 +88,8 @@ public final class HttpRequestsConverter
                           .build();
   }
 
-  public static HttpRequest toHttpRequest(ScimHttpRequest scimHttpRequest,
+  public static HttpRequest toHttpRequest(long resourceId,
+                                          ScimHttpRequest scimHttpRequest,
                                           HttpRequestsDao httpRequestsDao,
                                           HttpRequestCategoriesDao httpRequestCategoriesDao)
   {
@@ -95,11 +99,9 @@ public final class HttpRequestsConverter
     List<HttpHeader> headers = scimHttpRequest.getRequestHeaders().stream().map(header -> {
       return HttpHeader.builder().name(header.getName()).value(header.getValue()).build();
     }).collect(Collectors.toList());
-    Optional<HttpRequest> optionalHttpRequest = httpRequestsDao.findById(scimHttpRequest.getId()
-                                                                                        .map(Utils::parseId)
-                                                                                        .orElse(0L));
+    Optional<HttpRequest> optionalHttpRequest = httpRequestsDao.findById(resourceId);
     return HttpRequest.builder()
-                      .id(scimHttpRequest.getId().map(Utils::parseId).orElse(0L))
+                      .id(resourceId)
                       .name(scimHttpRequest.getName())
                       .httpClientSettings(clientSettings)
                       .httpRequestGroup(group)

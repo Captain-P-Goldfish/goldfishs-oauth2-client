@@ -1,3 +1,5 @@
+import {useEffect, useRef, useState} from "react";
+
 export function toBase64(file)
 {
     return new Promise((resolve, reject) =>
@@ -56,7 +58,7 @@ export function parseJws(token)
         return decodeURIComponent(Buffer.from(base64, "base64").toString().split('').map(function (c)
         {
             return '%' + ('00' + c.charCodeAt(
-              0).toString(16)).slice(-2);
+                0).toString(16)).slice(-2);
         }).join(''));
     }
     
@@ -157,7 +159,8 @@ export function prettyPrintXml(sourceXml)
         // describes how we want to modify the XML - indent everything
         '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
         '  <xsl:strip-space elements="*"/>',
-        '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text nodes
+        '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text
+                                                                     // nodes
         '    <xsl:value-of select="normalize-space(.)"/>',
         '  </xsl:template>',
         '  <xsl:template match="node()|@*">',
@@ -172,4 +175,32 @@ export function prettyPrintXml(sourceXml)
     var resultDoc = xsltProcessor.transformToDocument(xmlDoc);
     var resultXml = new XMLSerializer().serializeToString(resultDoc);
     return resultXml;
+}
+
+export function useRenderCount()
+{
+    const renderCount = useRef(1);
+    
+    useEffect(() =>
+    {
+        renderCount.current = renderCount.current + 1;
+    });
+    
+    return [renderCount.current];
+}
+
+export function useScimErrorResponse()
+{
+    const [errorResponse, setErrorResponse] = useState();
+    
+    useEffect(() =>
+    {
+        if (new Optional(errorResponse).isPresent())
+        {
+            
+            alert("Server returned an error:\n" + JSON.stringify(errorResponse, null, 2));
+        }
+    }, [errorResponse]);
+    
+    return [setErrorResponse];
 }

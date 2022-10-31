@@ -26,6 +26,7 @@ export const TOKEN_STORE_ENDPOINT = BASE_URL + "/TokenStore";
 export const BULK_ENDPOINT = BASE_URL + "/Bulk";
 export const HTTP_REQUEST_GROUPS_ENDPOINT = BASE_URL + "/HttpRequestGroups";
 export const HTTP_REQUESTS_ENDPOINT = BASE_URL + "/HttpRequests";
+export const HTTP_RESPONSE_HISTORY_ENDPOINT = BASE_URL + "/HttpResponseHistory";
 
 /**
  * translates a http header string into its SCIM json representation for sending http requests at the backend

@@ -20,6 +20,7 @@ import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHand
 import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
+import de.captaingoldfish.restclient.application.endpoints.responsehistory.HttpResponseHistoryResourceHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokencategory.TokenCategoryHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.AccessTokenRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenstore.TokenStoreHandler;
@@ -29,6 +30,7 @@ import de.captaingoldfish.restclient.application.endpoints.workflowsettings.Curr
 import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestCategoriesDao;
 import de.captaingoldfish.restclient.database.repositories.HttpRequestsDao;
+import de.captaingoldfish.restclient.database.repositories.HttpResponseDao;
 import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
@@ -41,8 +43,9 @@ import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.CurrentWorkflowSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
-import de.captaingoldfish.restclient.scim.endpoints.HttpRequestGroupEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.HttpRequestEndpointDefinition;
+import de.captaingoldfish.restclient.scim.endpoints.HttpRequestGroupEndpointDefinition;
+import de.captaingoldfish.restclient.scim.endpoints.HttpResponseHistoryEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
@@ -335,5 +338,22 @@ public class ScimConfig
     resourceType.getFeatures().setAutoFiltering(true);
     resourceType.getFeatures().setAutoSorting(true);
     return resourceType;
+  }
+
+  /**
+   * registers the http-response history resourceType under the endpoint /HttpResponseHistory.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the http-response-history resource type
+   */
+  @Bean
+  public ResourceType httpResponseHistoryResourceType(ResourceEndpoint resourceEndpoint,
+                                                      HttpRequestsDao httpRequestsDao,
+                                                      HttpResponseDao httpResponseDao)
+  {
+    HttpResponseHistoryResourceHandler handler = new HttpResponseHistoryResourceHandler(httpRequestsDao,
+                                                                                        httpResponseDao);
+    HttpResponseHistoryEndpointDefinition endpoint = new HttpResponseHistoryEndpointDefinition(handler);
+    return resourceEndpoint.registerEndpoint(endpoint);
   }
 }

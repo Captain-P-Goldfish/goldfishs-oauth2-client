@@ -47,7 +47,10 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
   {
     try
     {
-      HttpRequest httpRequest = HttpRequestsConverter.toHttpRequest(resource,
+      Optional<HttpRequest> optionalHttpRequest = httpRequestsDao.findByName(resource.getName());
+      HttpRequest httpRequest = HttpRequestsConverter.toHttpRequest(optionalHttpRequest.map(HttpRequest::getId)
+                                                                                       .orElse(0L),
+                                                                    resource,
                                                                     httpRequestsDao,
                                                                     httpRequestCategoriesDao);
       HttpResponse httpResponse = sendHttpRequest(httpRequest);
@@ -61,7 +64,7 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
     }
     catch (Exception ex)
     {
-      throw new BadRequestException(ex.getMessage());
+      throw new BadRequestException(ex.getMessage(), ex);
     }
   }
 
@@ -120,14 +123,20 @@ public class HttpRequestHandler extends ResourceHandler<ScimHttpRequest>
       throw new ResourceNotFoundException(String.format("HTTP request with id '%s' does not exist", dbId));
     }
 
-    HttpRequest updatedHttpRequest = HttpRequestsConverter.toHttpRequest(resource,
+    HttpRequest updatedHttpRequest = HttpRequestsConverter.toHttpRequest(dbId,
+                                                                         resource,
                                                                          httpRequestsDao,
                                                                          httpRequestCategoriesDao);
     updatedHttpRequest.setCreated(httpRequest.getCreated());
     updatedHttpRequest.setLastModified(Instant.now());
-    HttpResponse httpResponse = sendHttpRequest(updatedHttpRequest);
-    addToHistory(updatedHttpRequest, httpResponse);
-    httpRequest = httpRequestsDao.save(httpRequest);
+    boolean sendHttpRequest = httpRequest.getName().equals(resource.getName());
+    HttpResponse httpResponse = null;
+    if (sendHttpRequest)
+    {
+      httpResponse = sendHttpRequest(updatedHttpRequest);
+      addToHistory(updatedHttpRequest, httpResponse);
+    }
+    httpRequest = httpRequestsDao.save(updatedHttpRequest);
 
     return HttpRequestsConverter.toScimHttpRequest(httpRequest, httpResponse);
   }

@@ -726,3 +726,28 @@ pre {
 }
 
 /* *************************************************************************************************** */
+
+.request-success {
+    color: green;
+}
+
+.request-warning {
+    color: #fff3cd;;
+}
+
+.request-danger {
+    color: lightcoral;
+}
+
+.timestamp {
+    font-style: italic;
+    color: #c58e02;
+}
+
+.alert-danger{
+    background-color: #f8d7da;
+}
+
+.response-history-item.accordion-item .alert-danger.accordion-header .accordion-button {
+    background-color: #f8d7da;
+}

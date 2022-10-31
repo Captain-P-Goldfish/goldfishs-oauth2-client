@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import de.captaingoldfish.restclient.database.ScimCrudRepository;
-import de.captaingoldfish.restclient.database.entities.HttpRequest;
+import de.captaingoldfish.restclient.database.entities.HttpResponse;
 
 
 /**
@@ -13,7 +13,7 @@ import de.captaingoldfish.restclient.database.entities.HttpRequest;
  * @since 31.05.2021
  */
 @Repository
-public interface HttpRequestsDao extends ScimCrudRepository<HttpRequest, Long>
+public interface HttpResponseDao extends ScimCrudRepository<HttpResponse, Long>
 {
 
   /**
@@ -22,11 +22,8 @@ public interface HttpRequestsDao extends ScimCrudRepository<HttpRequest, Long>
    * @param id must not be {@literal null}.
    * @throws IllegalArgumentException in case the given {@literal id} is {@literal null}
    */
-  void deleteById(Long id);
+  void deleteById(String id);
 
-  /**
-   * gets an http request by its name
-   */
-  Optional<HttpRequest> findByName(String name);
+  Optional<HttpResponse> findById(String id);
 
 }
