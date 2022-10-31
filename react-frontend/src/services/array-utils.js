@@ -2,19 +2,19 @@ import {useState} from "react";
 import * as lodash from "lodash";
 import {Optional} from "./utils";
 
-export function useUniqueArray(initialArray, comparisonAttribute, isDate)
+export function useUniqueArray(initialArray, comparisonAttribute, sortOverride)
 {
     const [array, setArrayInternal] = useState(initialArray.sort(sort) || []);
     
     function sort(c1, c2)
     {
-        if (!isDate)
+        if (sortOverride === undefined || sortOverride === null)
         {
             return comparisonAttribute(c1).localeCompare(comparisonAttribute(c2));
         }
         else
         {
-            return new Date(comparisonAttribute(c2)) - new Date(comparisonAttribute(c1));
+            sortOverride(comparisonAttribute(c1), comparisonAttribute(c2));
         }
     }
     

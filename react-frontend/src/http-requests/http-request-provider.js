@@ -20,7 +20,10 @@ export function HttpRequestProvider({children})
     const [httpResponses, setHttpResponses, isInsertable,
               addHttpResponse, updateHttpResponse, removeHttpResponse] = useUniqueArray([],
         response => response.created,
-        true
+        (val1, val2) =>
+        {
+            return new Date(val1) - new Date(val2);
+        }
     );
     
     function loadResponseHistory()
