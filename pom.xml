@@ -59,7 +59,7 @@
         <version.sqlserver.driver>9.2.1.jre11</version.sqlserver.driver>
         <version.mysql.driver>8.0.30</version.mysql.driver>
         <version.mariadb.driver>2.7.3</version.mariadb.driver>
-        <version.postgres.driver>42.2.20</version.postgres.driver>
+        <version.postgres.driver>42.3.8</version.postgres.driver>
         <version.oracle.driver>19.10.0.0</version.oracle.driver>
         <version.liquibase>4.16.1</version.liquibase>
         <version.bouncy.castle>1.70</version.bouncy.castle>
