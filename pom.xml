@@ -67,7 +67,7 @@
         <version.nimbus.jose.jwt>9.25.4</version.nimbus.jose.jwt>
         <version.nimbus.oauth2>9.43.1</version.nimbus.oauth2>
         <version.caffeine>3.1.1</version.caffeine>
-        <version.commons.fileupload>1.4</version.commons.fileupload>
+        <version.commons.fileupload>1.5</version.commons.fileupload>
         <version.unirest>3.13.11</version.unirest>
 
         <!-- version conflicts -->
