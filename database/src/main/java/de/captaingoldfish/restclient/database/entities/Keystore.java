@@ -17,6 +17,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
@@ -274,13 +275,10 @@ public class Keystore
   @SneakyThrows
   public List<String> getKeyStoreAliases()
   {
-    Enumeration<String> aliasesEnumeration = getKeyStore().aliases();
-    List<String> aliases = new ArrayList<>();
-    while (aliasesEnumeration.hasMoreElements())
-    {
-      aliases.add(aliasesEnumeration.nextElement());
-    }
-    return aliases;
+    KeyStore javaKeystore = getKeyStore();
+    Enumeration<String> aliasesEnumeration = javaKeystore == null ? Collections.emptyEnumeration()
+      : javaKeystore.aliases();
+    return Collections.list(aliasesEnumeration);
   }
 
   /**
