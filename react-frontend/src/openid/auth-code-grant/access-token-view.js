@@ -5,7 +5,6 @@ import {Collapseable, ErrorListItem} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {Optional} from "../../services/utils";
-import {ResourceEndpointDetailsView} from "./resource-endpoint-view";
 
 export default function AccessTokenView(props)
 {
@@ -76,18 +75,7 @@ export function AccessTokenDetailsView(props)
         }
         <AccessTokenRequestView accessTokenDetails={props.accessTokenDetails} />
         <AccessTokenResponseView accessTokenDetails={props.accessTokenDetails} />
-        {
-          new Optional(props.accessTokenDetails).map(details => JSON.parse(details.plainResponse))
-                                                .map(json => json.access_token).isPresent() && props.metaData &&
-          <Collapseable header={"Access Resource Endpoints"}
-                        variant={"workflow-details"}
-                        headerClass={"nested-workflow-details-header"}
-                        bodyClass={"nested-workflow-details-body"}
-                        open={true}
-                        content={() => <ResourceEndpointDetailsView
-                          metaData={props.metaData}
-                          accessTokenDetails={props.accessTokenDetails} />} />
-        }
+
     </div>;
 }
 

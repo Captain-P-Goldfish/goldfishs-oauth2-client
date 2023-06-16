@@ -10,7 +10,6 @@ import Button from "react-bootstrap/Button";
 import {AccessTokenDetailsView} from "./access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../../services/utils";
-import {ResourceEndpointDetailsView} from "./resource-endpoint-view";
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -194,15 +193,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                     
                     {
                       new Optional(this.state.accessTokenDetails).map(details => JSON.parse(details.plainResponse))
-                                                                 .map(json => json.access_token).isPresent() &&
-                      <Collapseable header={"Access Resource Endpoints"}
-                                    variant={"workflow-details"}
-                                    headerClass={"nested-workflow-details-header"}
-                                    bodyClass={"nested-workflow-details-body"}
-                                    open={true}
-                                    content={() => <ResourceEndpointDetailsView
-                                      metaData={this.props.requestDetails.metaDataJson}
-                                      accessTokenDetails={this.state.accessTokenDetails} />} />
+                          .map(json => json.access_token).isPresent()
                     }
                     
                     <AlertListMessages variant={"danger"} icon={<GoFlame />}
