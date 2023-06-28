@@ -71,7 +71,7 @@ public final class KeyStoreSupporter
   {
     if (keyStoreType.equals(KeyStoreType.PKCS12))
     {
-      return SecurityProvider.BOUNCY_CASTLE_PROVIDER;
+      return Security.getProvider(SUN_PROVIDER);
     }
     else if (keyStoreType.equals(KeyStoreType.JKS))
     {
