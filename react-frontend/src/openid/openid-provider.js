@@ -135,7 +135,7 @@ export default class OpenidProvider extends React.Component
                   <span className={"add-new-resource"}>Add new Provider <br /><FileEarmarkPlus /></span>
               </p>
               <h2>
-                  <span>OpenID Provider List</span>
+                  OpenID Provider List
               </h2>
               <Alert id={"save-alert-success"} variant={"success"}
                      show={new Optional(this.state.newProvider).isPresent()}>
@@ -232,10 +232,9 @@ class OpenIdProviderCardEntry extends React.Component
                             <React.Fragment>
                                 <LinkContainer exact
                                                to={"/views/openIdProvider/" + this.props.provider.id + "/openIdClients"}>
-                                    <a href={"/#"}>
+                                    <a href={"/#"} className={"action-link"}>
                                         <h5>
                                             <ArrowRightCircle style={{
-                                                color: "bisque",
                                                 marginRight: "15px"
                                             }}
                                                               size={"20px"} height={"30px"} />

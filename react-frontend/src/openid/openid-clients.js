@@ -200,13 +200,13 @@ export default class OpenidClients extends React.Component
           <React.Fragment>
               <LinkContainer exact
                              to={"/views/openIdProvider/"}>
-                  <a href={"/#"}>
+                  <a href={"/#"} className={"action-link"}>
                       <h5 style={{
                           height: "35px",
                           padding: "0",
                           paddingLeft: "10px"
                       }}>
-                          <ArrowLeftCircle style={{color: "bisque"}} height={"35px"} size={"25px"} />
+                          <ArrowLeftCircle height={"35px"} size={"25px"} />
                           <span style={{marginLeft: "15px"}}>Back to Provider Overview</span>
                       </h5>
                   </a>
@@ -218,7 +218,7 @@ export default class OpenidClients extends React.Component
                   <span className={"add-new-resource"}>Add new Client <br /><FileEarmarkPlus /></span>
               </p>
               <h2>
-                  <span>OpenID Client List</span>
+                  OpenID Client List
               </h2>
               <Alert id={"save-alert-success"} variant={"success"}
                      show={new Optional(this.state.newClient).isPresent()}>
@@ -335,10 +335,9 @@ class OpenIdClientCardEntry extends React.Component
                                 <LinkContainer exact
                                                to={"/views/openIdProvider/" + this.props.provider.id + "/client/"
                                                    + this.state.client.id}>
-                                    <a href={"/#"}>
+                                    <a href={"/#"} className={"action-link"}>
                                         <h5>
                                             <ArrowRightCircle style={{
-                                                color: "bisque",
                                                 marginRight: "15px"
                                             }}
                                                               size={"20px"} height={"30px"} />

@@ -269,11 +269,11 @@
                 <constraints primaryKeyName="HTTP_HEADERS_PRIME_KEY" primaryKey="true"/>
             </column>
             <column name="NAME" type="VARCHAR(100)"/>
-            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="VALUE" type="${clob_type}"/>
         </createTable>
 
         <createTable tableName="HTTP_RESPONSES">
-            <column name="ID" type="BIGINT">
+            <column name="ID" type="VARCHAR(36)">
                 <constraints primaryKeyName="HTTP_RESPONSES_PRIME_KEY" primaryKey="true"/>
             </column>
             <column name="HTTP_REQUEST_ID" type="BIGINT">
@@ -303,7 +303,7 @@
                 <constraints foreignKeyName="REQUEST_RESPONSE_MAP_FK" referencedColumnNames="ID"
                              referencedTableName="HTTP_REQUESTS"/>
             </column>
-            <column name="HTTP_RESPONSE_ID" type="BIGINT">
+            <column name="HTTP_RESPONSE_ID" type="VARCHAR(36)">
                 <constraints foreignKeyName="RESPONSE_REQUEST_MAP_FK" referencedColumnNames="ID"
                              referencedTableName="HTTP_RESPONSES"/>
             </column>

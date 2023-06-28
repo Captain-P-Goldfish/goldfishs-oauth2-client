@@ -227,15 +227,18 @@ class AuthorizationCodeGrantForm extends React.Component
         })
     }
 
-    loadAuthorizationRequestDetails(e)
+    async loadAuthorizationRequestDetails(e)
     {
         e.preventDefault();
         this.patchWorkflowSettings();
         this.setState({getAuthcode: true, errorMessage: undefined});
 
         let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
-        let resource = scimClient.getResourceFromFormReference(this.props.formReference);
+        let resource = await scimClient.getResourceFromFormReference(this.props.formReference);
         resource[CURRENT_WORKFLOW_URI] = this.props.workflowDetails;
+        lodash.set(resource[CURRENT_WORKFLOW_URI], "authCodeParameters.redirectUri", resource.authCodeParameters.redirectUri)
+
+        console.log(resource)
 
         let handleResponse = this.props.handleResponse;
         scimClient.createResource(resource).then(response =>
@@ -266,11 +269,10 @@ class AuthorizationCodeGrantForm extends React.Component
                                                                      .orElse(undefined);
         let redirectUri = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
                                                                   .map(a => a.redirectUri)
-                                                                  .orElse(undefined);
+                                                                  .orElse(this.props.originalRedirectUri);
         let queryParams = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
                                                                   .map(a => a.queryParameters)
                                                                   .orElse(undefined);
-
         workflowSettingsClient.updateAuthCodeSettings(openIdClientId, redirectUri, queryParams);
     }
 

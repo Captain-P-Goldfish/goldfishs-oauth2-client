@@ -5,6 +5,18 @@
     --card-modal-width: calc(var(--card-width) - 2rem);
 }
 
+path {
+    color: lightgrey !important;
+}
+
+div.alert path {
+    color: #757474 !important;
+}
+
+div.card-body {
+    color: whitesmoke !important;
+}
+
 body {
     margin: 0;
     height: 100%;
@@ -25,10 +37,7 @@ code, .code {
     height: 3vmin;
     pointer-events: none;
     display: inline;
-}
 
-.cursor-pointer {
-    cursor: pointer;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -58,7 +67,11 @@ code, .code {
 /* common */
 
 
-h1, h2, h3, h4, h5 {
+/*
+https://localhost:6443/realms/id-crucis/protocol/openid-connect/auth?response_type=code&client_id=id-crucis-admin-ui&state=f6202263-1506-4f18-950f-dc54f1c48fba
+*/
+
+div > h1, div > h2, div > h3, div > h4, div > h5 {
     color: sandybrown;
 }
 
@@ -100,6 +113,14 @@ ul.error-list {
 
 a.action-link {
     color: bisque;
+}
+
+a.action-link path {
+    color: bisque !important;
+}
+
+a.action-link span {
+    color: gold !important;
 }
 
 a.action-link:hover {
@@ -258,8 +279,24 @@ div.card-header {
 .card.alias-card {
     min-width: var(--card-width);
     max-width: var(--card-width);
-    padding: 0;
     margin-bottom: 15px !important;
+    padding: 0;
+    border-radius: 15px !important;
+}
+
+.card-group > .card + .card {
+    margin-left: 5px !important;
+    border-left: 1px !important;;
+    border-left-color: gold !important;;
+}
+
+.card.alias-card .card-header {
+    border-top-right-radius: 15px !important;
+    border-top-left-radius: 15px !important;
+}
+
+.card.alias-card {
+    margin-left: 15px;
 }
 
 .card.alias-card .keyInfo {
@@ -271,14 +308,6 @@ div.card-header {
     max-height: 15px;
 }
 
-.card {
-    margin-right: 15px;
-}
-
-.card.alias-card .card-header{
-    padding: 10px;
-}
-
 .card.resource-card {
     min-width: 47%;
     max-width: 47%;
@@ -287,7 +316,9 @@ div.card-header {
 }
 
 .card-control-icons, .popover-remove-icon {
+    color: lightgrey;
     float: right;
+    margin-top: 5px;
 }
 
 .card-load-icon, .card-control-icons:hover {
@@ -304,6 +335,7 @@ div.card-header {
 }
 
 .card-modal-content {
+    color: darkgrey;
     background-color: rgba(55, 49, 49, 0.8);
     position: absolute;
     top: 50%;
@@ -337,6 +369,7 @@ div.card-name-header {
 
 input.form-control.card-input-field, input.form-control.card-input-field:focus {
     color: white;
+
     background-color: transparent;
     border: none;
     border-bottom: gold dashed thin;
@@ -346,6 +379,10 @@ input.form-control.card-input-field, input.form-control.card-input-field:focus {
     display: inline-block;
     height: 25px;
     border-radius: unset;
+}
+
+input.form-control.card-input-field::placeholder {
+    color: dimgrey;
 }
 
 .resource-card select {
@@ -390,6 +427,14 @@ input.form-control.card-input-field, input.form-control.card-input-field:focus {
 /* *************************************************************************************************** */
 /* openid workflow */
 
+.card {
+    margin-right: 5px;
+}
+
+.card-header {
+    color: lightgrey !important;
+}
+
 .collapse.card, .collapsing.card {
     background-color: #313131;
 }
@@ -417,22 +462,17 @@ div.grant-type-workflow {
     margin-top: 20px;
 }
 
-div.workflow-details .collapse-header {
-    padding: 0;
-    margin: 0;
+div.workflow-details{
+    color: whitesmoke;
 }
 
-div.alert-workflow-details.collapse-header {
+div.workflow-details .collapse-header {
     padding: 0;
     margin: 0;
 }
 
 .card.workflow-card {
     background-color: transparent;
-    margin-right: 0;
-}
-.card.workflow-card-details {
-    margin-right: 0;
 }
 
 div.workflow-card {
@@ -442,6 +482,10 @@ div.workflow-card {
 .alert-workflow-details {
     background: #824e9929 linear-gradient(200deg, #43935b45 0%, #d71c1c21 30%, rgba(177, 148, 0, 0.35) 100%);
     border: none;
+}
+
+div.alert-workflow-details {
+    color: whitesmoke;
 }
 
 .nested-workflow-details-header {
@@ -461,8 +505,13 @@ div.workflow-card {
     border: none
 }
 
-.grant-type-workflow .alert.authorization-code-grant {
-    color: black;
+div.grant-type-workflow .alert.authorization-code-grant {
+    color: black !important;
+    background-color: floralwhite;
+}
+
+div.grant-type-workflow .alert.authorization-code-grant > * {
+    color: black !important;
     background-color: floralwhite;
 }
 
@@ -471,7 +520,17 @@ div.workflow-card {
     background-color: burlywood;
 }
 
+.grant-type-workflow .alert.client-credentials-grant > * {
+    color: black;
+    background-color: burlywood;
+}
+
 .grant-type-workflow .alert.resource-owner-password-credentials-grant {
+    color: black;
+    background-color: sandybrown;
+}
+
+.grant-type-workflow .alert.resource-owner-password-credentials-grant > * {
     color: black;
     background-color: sandybrown;
 }
@@ -648,7 +707,7 @@ span.add-new-resource {
     margin-left: 10px;
 }
 
-.clickable-inner-menu-entry {
+.clickable-inner-menu-entry{
     text-decoration: underline;
     cursor: pointer;
 }
@@ -657,7 +716,7 @@ span.add-new-resource {
     background-color: lightgrey !important;
 }
 
-.new-menu-entry-input, .new-menu-entry-input:active {
+.new-menu-entry-input, .new-menu-entry-input:active  {
     color: black !important;
     outline: none !important;
     width: 75% !important;
@@ -707,11 +766,6 @@ span.add-new-resource {
 
 .http-category-icon {
     padding-right: 0 !important;
-}
-
-pre {
-    white-space: pre-wrap; /* css-3 */
-    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
 }
 
 /* *************************************************************************************************** */

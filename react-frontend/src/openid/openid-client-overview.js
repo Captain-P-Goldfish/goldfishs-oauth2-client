@@ -80,9 +80,9 @@ export default class OpenidClientOverview extends React.Component
                 <LinkContainer exact
                                to={"/views/openIdProvider/" + this.props.match.params.providerId
                                    + "/openIdClients"}>
-                    <a href={"/#"}>
+                    <a href={"/#"} className={"action-link"}>
                         <h5 style={{height: "35px", padding: "0", paddingLeft: "10px"}}>
-                            <ArrowLeftCircle style={{color: "bisque"}} height={"35px"} size={"25px"} />
+                            <ArrowLeftCircle height={"35px"} size={"25px"} />
                             <span style={{marginLeft: "15px"}}>Back to
                                 <span style={{color: "lightgray"}}> "{provider.map(val => val.name).orElse("")}" </span>
                                                                Overview
