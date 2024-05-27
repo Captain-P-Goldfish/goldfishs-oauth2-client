@@ -40,6 +40,17 @@
       "caseExact": false
     },
     {
+      "name": "addPublicKeyHeader",
+      "type": "boolean",
+      "description": "If the public key should be added into the JWT-header",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "header",
       "type": "string",
       "description": "The header of the JWT that should be created",

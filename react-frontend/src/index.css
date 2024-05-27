@@ -3,6 +3,7 @@
     --main-padding-left: calc(var(--left-navbar-width) + 2vw);
     --card-width: 18rem;
     --card-modal-width: calc(var(--card-width) - 2rem);
+    --card-border-radius: 15px;
 }
 
 path {
@@ -281,22 +282,9 @@ div.card-header {
     max-width: var(--card-width);
     margin-bottom: 15px !important;
     padding: 0;
-    border-radius: 15px !important;
-}
-
-.card-group > .card + .card {
-    margin-left: 5px !important;
-    border-left: 1px !important;;
-    border-left-color: gold !important;;
-}
-
-.card.alias-card .card-header {
-    border-top-right-radius: 15px !important;
-    border-top-left-radius: 15px !important;
-}
-
-.card.alias-card {
-    margin-left: 15px;
+    margin-bottom: 15px !important;
+    border: 1px solid gold !important;
+    border-radius: var(--card-border-radius) !important;
 }
 
 .card.alias-card .keyInfo {
@@ -306,6 +294,15 @@ div.card-header {
 
 .card.alias-card .public-cert-icon {
     max-height: 15px;
+}
+
+.card {
+    margin-right: 15px;
+}
+
+.card.alias-card .card-header {
+    padding: 10px;
+    border-radius: var(--card-border-radius) !important;
 }
 
 .card.resource-card {
@@ -332,6 +329,7 @@ div.card-header {
     background-color: rgba(160, 52, 52, 0.8);
     display: flex;
     justify-content: center;
+    border-radius: var(--card-border-radius) !important;
 }
 
 .card-modal-content {
@@ -396,6 +394,11 @@ input.form-control.card-input-field::placeholder {
 
 .card.resource-card.modifiable-card {
     min-width: 550px;
+    border-radius: var(--card-border-radius);
+}
+
+.card.resource-card.modifiable-card .card-header {
+    border-radius: var(--card-border-radius);
 }
 
 /* *************************************************************************************************** */
@@ -473,6 +476,11 @@ div.workflow-details .collapse-header {
 
 .card.workflow-card {
     background-color: transparent;
+    margin-right: 0;
+}
+
+.card.workflow-card-details {
+    margin-right: 0;
 }
 
 div.workflow-card {
@@ -769,3 +777,28 @@ span.add-new-resource {
 }
 
 /* *************************************************************************************************** */
+
+.request-success {
+    color: green;
+}
+
+.request-warning {
+    color: #fff3cd;;
+}
+
+.request-danger {
+    color: lightcoral;
+}
+
+.timestamp {
+    font-style: italic;
+    color: #c58e02;
+}
+
+.alert-danger{
+    background-color: #f8d7da;
+}
+
+.response-history-item.accordion-item .alert-danger.accordion-header .accordion-button {
+    background-color: #f8d7da;
+}

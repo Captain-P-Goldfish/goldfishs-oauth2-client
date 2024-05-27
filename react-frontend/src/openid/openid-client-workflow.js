@@ -238,8 +238,6 @@ class AuthorizationCodeGrantForm extends React.Component
         resource[CURRENT_WORKFLOW_URI] = this.props.workflowDetails;
         lodash.set(resource[CURRENT_WORKFLOW_URI], "authCodeParameters.redirectUri", resource.authCodeParameters.redirectUri)
 
-        console.log(resource)
-
         let handleResponse = this.props.handleResponse;
         scimClient.createResource(resource).then(response =>
         {

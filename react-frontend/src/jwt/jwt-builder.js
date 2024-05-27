@@ -9,11 +9,10 @@ import {Optional} from "../services/utils";
 import {Alert, Col, Container, Dropdown, DropdownButton, Row, Tooltip} from "react-bootstrap";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import * as lodash from "lodash";
+import {uuidv4} from "../base/utils";
 
-export default class JwtBuilder extends React.Component
-{
-    constructor(props)
-    {
+export default class JwtBuilder extends React.Component {
+    constructor(props) {
         super(props);
         this.state = {
             jwtBuilder: {},
@@ -33,63 +32,56 @@ export default class JwtBuilder extends React.Component
         this.handleBodyChange = this.handleBodyChange.bind(this);
         this.addJwtBody = this.addJwtBody.bind(this);
         this.addDefaultJwtAttributes = this.addDefaultJwtAttributes.bind(this);
+        this.createDpopJwt = this.createDpopJwt.bind(this);
         this.addKeyIdToHeader = this.addKeyIdToHeader.bind(this);
         this.handleAddSha256Thumbprint = this.handleAddSha256Thumbprint.bind(this);
+        this.handleAddPublicKeyToHeader = this.handleAddPublicKeyToHeader.bind(this);
 
         this.scimComponentBasics = new ScimComponentBasics({
             scimClient: this.scimClient,
             formReference: this.formReference,
             getOriginalResource: () => this.props.jwtBuilder,
             getCurrentResource: () => this.state.jwtBuilder,
-            setCurrentResource: resource =>
-            {
+            setCurrentResource: resource => {
             },
             setState: this.setState,
             onCreateSuccess: this.onCreateSuccess
         });
     }
 
-    componentDidMount()
-    {
+    componentDidMount() {
         this.addHeader();
         this.addDefaultJwtAttributes();
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot)
-    {
-        if (prevProps.jwtInfo !== this.props.jwtInfo && this.props.jwtInfo !== undefined)
-        {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.jwtInfo !== this.props.jwtInfo && this.props.jwtInfo !== undefined) {
             this.handleSignatureAlgorithmSelection(this.props.jwtInfo.signatureAlgorithms[0])
             this.addHeader();
         }
     }
 
-    onCreateSuccess(resource)
-    {
+    async onCreateSuccess(resource) {
         let jwtArea = document.getElementById("jwt");
         jwtArea.value = resource.jwt;
 
-        this.setState({header: JSON.parse(resource.header)});
-        this.addHeader();
+        await this.setState({header: JSON.parse(resource.header)}, this.addHeader);
     }
 
-    async handleKeySelectionSelection(value)
-    {
+    async handleKeySelectionSelection(value) {
         await this.setState({selectedKey: value})
         let hiddenKeyIdInputField = document.getElementById("keyId");
         hiddenKeyIdInputField.value = value;
     }
 
-    addKeyIdToHeader()
-    {
+    addKeyIdToHeader() {
         let header = this.state.header;
         header["kid"] = this.state.selectedKey
         this.setState({header: header})
         this.addHeader();
     }
 
-    handleSignatureAlgorithmSelection(value)
-    {
+    handleSignatureAlgorithmSelection(value) {
         let header = this.state.header;
         header["alg"] = value
         header["enc"] = undefined
@@ -97,8 +89,7 @@ export default class JwtBuilder extends React.Component
         this.addHeader();
     }
 
-    handleEncryptionAlgorithmSelection(value)
-    {
+    handleEncryptionAlgorithmSelection(value) {
         let header = this.state.header;
         header["alg"] = value
         header["enc"] = new Optional(this.state.header.enc).orElse(new Optional(this.state.jwtInfo)
@@ -107,44 +98,35 @@ export default class JwtBuilder extends React.Component
         this.addHeader();
     }
 
-    handleContentEncryptionAlgorithmSelection(value)
-    {
+    handleContentEncryptionAlgorithmSelection(value) {
         let header = this.state.header;
         header["enc"] = value
         this.setState({header: header})
         this.addHeader();
     }
 
-    handleHeaderChange(e)
-    {
-        try
-        {
+    handleHeaderChange(e) {
+        try {
             let header = JSON.parse(e.target.value);
             this.setState({header: header})
-        } catch (Exception)
-        {
+        } catch (Exception) {
         }
     }
 
-    handleBodyChange(e)
-    {
-        try
-        {
+    handleBodyChange(e) {
+        try {
             let body = JSON.parse(e.target.value);
             this.setState({body: body})
-        } catch (Exception)
-        {
+        } catch (Exception) {
         }
     }
 
-    addHeader()
-    {
+    addHeader() {
         let headerArea = document.getElementById("jwt-builder-header");
         headerArea.value = JSON.stringify(this.state.header, undefined, 4);
     }
 
-    async addDefaultJwtAttributes()
-    {
+    async addDefaultJwtAttributes() {
         let body = {
             iss: new Optional(this.state.body.iss).orElse(""),
             aud: new Optional(this.state.body.aud).orElse(""),
@@ -159,20 +141,50 @@ export default class JwtBuilder extends React.Component
         this.addJwtBody();
     }
 
-    addJwtBody()
-    {
+    async createDpopJwt() {
+        let header = {
+            typ: "dpop+jwt",
+            alg: this.state.header.alg ? this.state.header.alg : "ES256"
+        }
+        let body = {
+            iat: new Date().getTime(),
+            jti: this.state.body.jti ? this.state.body.jti : uuidv4(),
+            htm: "POST",
+            htu: "https://localhost:8443/realms/master/protocol/openid-connect/token"
+        }
+        let mergedHeader = lodash.merge(this.state.header, header)
+        let mergedBody = lodash.merge(this.state.body, body)
+        delete mergedBody.iss;
+        delete mergedBody.aud;
+        delete mergedBody.sub;
+        delete mergedBody.exp;
+
+        await this.setState({header: mergedHeader});
+        await this.setState({body: mergedBody});
+        let addPublicKeyCheckbox = document.getElementById("jwt-add-public-key-checkbox");
+        if (!addPublicKeyCheckbox.checked) {
+            addPublicKeyCheckbox.click();
+        }
+        this.addHeader()
+        this.addJwtBody();
+    }
+
+    addJwtBody() {
         let bodyArea = document.getElementById("jwt-builder-body");
         bodyArea.value = JSON.stringify(this.state.body, undefined, 4);
     }
 
-    handleAddSha256Thumbprint(event)
-    {
+    handleAddSha256Thumbprint(event) {
         let isSelected = event.target.checked;
         this.setState({addX5Sha256tHeader: isSelected});
     }
 
-    render()
-    {
+    handleAddPublicKeyToHeader(event) {
+        let isSelected = event.target.checked;
+        this.setState({addPublicKeyHeader: isSelected});
+    }
+
+    render() {
         let kidMatchesHeader = this.state.selectedKey === this.state.header.kid;
 
         return (
@@ -184,7 +196,7 @@ export default class JwtBuilder extends React.Component
                             <Alert variant={"danger"}>
                                 <ul className="error-list">
                                     {this.state.errors.errorMessages.map((message, index) =>
-                                        <ErrorListItem key={"error-message-" + index} message={message} />)}
+                                        <ErrorListItem key={"error-message-" + index} message={message}/>)}
                                 </ul>
                             </Alert>
                         }
@@ -198,13 +210,12 @@ export default class JwtBuilder extends React.Component
                                             onSelect={this.handleKeySelectionSelection}>
                                 {
                                     new Optional(this.props.keyInfos).isPresent() &&
-                                    this.props.keyInfos.map((keyInfo) =>
-                                    {
+                                    this.props.keyInfos.map((keyInfo) => {
                                         return <Dropdown.Item key={keyInfo.alias}
                                                               eventKey={keyInfo.alias}>{keyInfo.alias + " ("
-                                                                                        + keyInfo.keyAlgorithm
-                                                                                        + "-" + keyInfo.keyLength
-                                                                                        + "-bit)"}</Dropdown.Item>
+                                            + keyInfo.keyAlgorithm
+                                            + "-" + keyInfo.keyLength
+                                            + "-bit)"}</Dropdown.Item>
                                     })
                                 }
                             </DropdownButton>
@@ -238,8 +249,7 @@ export default class JwtBuilder extends React.Component
                                 {
                                     new Optional(this.props.jwtInfo).map(val => val["signatureAlgorithms"]).isPresent()
                                     &&
-                                    this.props.jwtInfo["signatureAlgorithms"].map((value) =>
-                                    {
+                                    this.props.jwtInfo["signatureAlgorithms"].map((value) => {
                                         return <Dropdown.Item key={value}
                                                               eventKey={value}>{value}</Dropdown.Item>
                                     })
@@ -254,8 +264,7 @@ export default class JwtBuilder extends React.Component
                                 {
                                     new Optional(this.props.jwtInfo).map(val => val["keyWrapAlgorithms"]).isPresent()
                                     &&
-                                    this.props.jwtInfo["keyWrapAlgorithms"].map((value) =>
-                                    {
+                                    this.props.jwtInfo["keyWrapAlgorithms"].map((value) => {
                                         return <Dropdown.Item key={value}
                                                               eventKey={value}>{value}</Dropdown.Item>
                                     })
@@ -269,8 +278,7 @@ export default class JwtBuilder extends React.Component
                                             onSelect={this.handleContentEncryptionAlgorithmSelection}>
                                 {
                                     new Optional(this.props.jwtInfo).isPresent() &&
-                                    this.props.jwtInfo["encryptionAlgorithms"].map((value) =>
-                                    {
+                                    this.props.jwtInfo["encryptionAlgorithms"].map((value) => {
                                         return <Dropdown.Item key={value}
                                                               eventKey={value}>{value}</Dropdown.Item>
                                     })
@@ -282,54 +290,72 @@ export default class JwtBuilder extends React.Component
                             extend by JWT attributes
                         </Button>
 
+                        <Button type={"button"} className={"functional-button"} onClick={this.createDpopJwt}>
+                            Create DPoP JWT
+                        </Button>
+
                         <Form.Check onChange={this.handleAddSha256Thumbprint}
-                                    className={"jwt sha-256-check"}
-                                    label={"Add SHA-256 thumbprint to header"} />
+                                    className={"jwt jwt-checkbox"}
+                                    label={"Add SHA-256 thumbprint to header"}/>
+
+                        <Form.Check id={"jwt-add-public-key-checkbox"}
+                                    onChange={this.handleAddPublicKeyToHeader}
+                                    className={"jwt jwt-checkbox"}
+                                    label={"Add public key to header"}/>
 
                     </Col>
                     <Col sm={9}>
                         <Container>
                             <Row>
                                 <Col>
-                                    <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
+                                    <Form onSubmit={() => {
+                                        this.scimComponentBasics.onSubmit();
+
+                                    }} ref={this.formReference}>
                                         <FormInputField name="keyId"
                                                         type="hidden"
                                                         value={this.state.selectedKey || ""}
                                                         onError={fieldName => this.scimClient.getErrors(this.state,
-                                                            fieldName)} />
+                                                            fieldName)}/>
                                         <FormCheckbox name="addX5Sha256tHeader"
                                                       type="hidden"
                                                       readOnly={true}
                                                       checked={this.state.addX5Sha256tHeader}
                                                       onError={fieldName => this.scimClient.getErrors(this.state,
-                                                          fieldName)} />
+                                                          fieldName)}/>
+                                        <FormCheckbox name="addPublicKeyHeader"
+                                                      type="hidden"
+                                                      readOnly={true}
+                                                      checked={this.state.addPublicKeyHeader}
+                                                      onError={fieldName => this.scimClient.getErrors(this.state,
+                                                          fieldName)}/>
                                         <FormInputField id={"jwt-builder-header"}
                                                         name="header"
                                                         type="text"
                                                         as="textarea"
                                                         onChange={this.handleHeaderChange}
                                                         onError={fieldName => this.scimClient.getErrors(this.state,
-                                                            fieldName)} />
+                                                            fieldName)}/>
                                         <FormInputField id={"jwt-builder-body"}
                                                         name="body"
                                                         type="text"
                                                         as="textarea"
                                                         onChange={this.handleBodyChange}
                                                         onError={fieldName => this.scimClient.getErrors(this.state,
-                                                            fieldName)} />
+                                                            fieldName)}/>
                                     </Form>
                                 </Col>
                                 <Col sm={5}>
                                     <Form.Control id={"jwt"}
                                                   sm={5}
                                                   as={"textarea"}
-                                                  onChange={this.handleBodyChange} />
+                                                  onChange={this.handleBodyChange}/>
 
                                 </Col>
                             </Row>
                         </Container>
                         <Button id={"create-jwt"} type={"button"} onClick={this.scimComponentBasics.onSubmit}>
-                            <LoadingSpinner show={this.state.isLoading} /> Create
+                            <LoadingSpinner show={this.state.isLoading}/> Create
                         </Button>
                     </Col>
                 </Row>

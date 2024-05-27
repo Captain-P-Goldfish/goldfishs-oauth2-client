@@ -1,4 +1,5 @@
 import {Optional} from "../services/utils";
+import {ScimClient2} from "./scim-client-2";
 
 export const CERT_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CertificateInfo";
 export const CURRENT_WORKFLOW_URI = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:CurrentWorkflowSettings";
@@ -23,8 +24,9 @@ export const CURRENT_WORKFLOW_SETTINGS_ENDPOINT = BASE_URL + "/CurrentWorkflowSe
 export const TOKEN_CATEGORY_ENDPOINT = BASE_URL + "/TokenCategory";
 export const TOKEN_STORE_ENDPOINT = BASE_URL + "/TokenStore";
 export const BULK_ENDPOINT = BASE_URL + "/Bulk";
-export const HTTP_REQUEST_CATEGORIES_ENDPOINT = BASE_URL + "/HttpRequestGroups";
+export const HTTP_REQUEST_GROUPS_ENDPOINT = BASE_URL + "/HttpRequestGroups";
 export const HTTP_REQUESTS_ENDPOINT = BASE_URL + "/HttpRequests";
+export const HTTP_RESPONSE_HISTORY_ENDPOINT = BASE_URL + "/HttpResponseHistory";
 
 /**
  * translates a http header string into its SCIM json representation for sending http requests at the backend
@@ -74,4 +76,38 @@ export function scimHttpHeaderToString(scimHttpHeader)
         httpHeaderString += keyValue.name + ": " + keyValue.value + "\n";
     }
     return httpHeaderString;
+}
+
+export function loadProxies(setResources)
+{
+    let scimClient = new ScimClient2();
+    let onSuccess = listResponse =>
+    {
+        setResources(listResponse.Resources);
+    };
+    scimClient.listResources({
+                                 resourcePath: PROXY_ENDPOINT,
+                                 onSuccess: onSuccess
+                             });
+}
+
+export function loadKeystoreInfos(setResources)
+{
+    let scimClient = new ScimClient2();
+    let onSuccess = listResponse =>
+    {
+        setResources(new Optional(listResponse).map(lr => lr.Resources).map(r => r[0]).map(
+            keystore => keystore.keyInfos).orElse([]));
+    };
+    scimClient.listResources({
+                                 resourcePath: KEYSTORE_ENDPOINT,
+                                 onSuccess: onSuccess
+                             });
+}
+
+export function getFieldError(errorResponse, fieldName)
+{
+    return new Optional(errorResponse).map(val => val.fieldErrors)
+                                      .map(fieldErrors => fieldErrors[fieldName])
+                                      .orElse([]);
 }

@@ -24,6 +24,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   @Builder
   public ScimCurrentWorkflowSettings(String id,
                                      Long openIdClientId,
+                                     Dpop dpop,
                                      AuthCodeParameters authCodeParameters,
                                      ClientCredentialsParameters clientCredentialsParameters,
                                      ResourceOwnerPasswordParameters resourceOwnerPasswordParameters,
@@ -32,6 +33,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
     setOpenIdClientId(openIdClientId);
+    setDpop(dpop);
     setAuthCodeParameters(authCodeParameters);
     setClientCredentialsParameters(clientCredentialsParameters);
     setResourceOwnerPasswordParameters(resourceOwnerPasswordParameters);
@@ -48,6 +50,23 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   public void setOpenIdClientId(Long openIdClientId)
   {
     setAttribute(FieldNames.OPENID_CLIENT_ID, openIdClientId);
+  }
+
+  /**
+   * If the AccessToken should be bound to a DPoP token (https://datatracker.ietf.org/doc/html/rfc9449).
+   */
+  public Optional<Dpop> getDpop()
+  {
+
+    return getObjectAttribute(FieldNames.DPOP, Dpop.class);
+  }
+
+  /**
+   * If the AccessToken should be bound to a DPoP token (https://datatracker.ietf.org/doc/html/rfc9449).
+   */
+  public void setDpop(Dpop dpop)
+  {
+    setAttribute(FieldNames.DPOP, dpop);
   }
 
   /** The settings that have been used for the authorization code grant in the last request. */
@@ -84,6 +103,145 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   public void setResourceOwnerPasswordParameters(ResourceOwnerPasswordParameters resourceOwnerPasswordParameters)
   {
     setAttribute(FieldNames.RESOURCE_OWNER_PASSWORD_PARAMETERS, resourceOwnerPasswordParameters);
+  }
+
+  /**
+   * If the AccessToken should be bound to a DPoP token (https://datatracker.ietf.org/doc/html/rfc9449).
+   */
+  public static class Dpop extends ScimObjectNode
+  {
+
+    public Dpop()
+    {}
+
+    @Builder
+    public Dpop(String keyId, String signatureAlgorithm, String nonce, String jti, String htm, String htu, String ath)
+    {
+      setKeyId(keyId);
+      setSignatureAlgorithm(signatureAlgorithm);
+      setNonce(nonce);
+      setJti(jti);
+      setHtm(htm);
+      setHtu(htu);
+      setAth(ath);
+    }
+
+    /**
+     * The ID of the key the DPoP should reference.
+     */
+    public String getKeyId()
+    {
+      return getStringAttribute(FieldNames.KEYID).orElseThrow();
+    }
+
+    /**
+     * The ID of the key the DPoP should reference.
+     */
+    public void setKeyId(String keyId)
+    {
+      setAttribute(FieldNames.KEYID, keyId);
+    }
+
+    /**
+     * The algorithm to sign the DPoP JWT.
+     */
+    public String getSignatureAlgorithm()
+    {
+      return getStringAttribute(FieldNames.SIGNATUREALGORITHM).orElseThrow();
+    }
+
+    /**
+     * The algorithm to sign the DPoP JWT.
+     */
+    public void setSignatureAlgorithm(String signatureAlgorithm)
+    {
+      setAttribute(FieldNames.SIGNATUREALGORITHM, signatureAlgorithm);
+    }
+
+    /**
+     * The expected nonce of the remote system that must be added to the DPoP.
+     */
+    public Optional<String> getNonce()
+    {
+      return getStringAttribute(FieldNames.NONCE);
+    }
+
+    /**
+     * The expected nonce of the remote system that must be added to the DPoP.
+     */
+    public void setNonce(String nonce)
+    {
+      setAttribute(FieldNames.NONCE, nonce);
+    }
+
+    /**
+     * Optional value to use as 'jti'. Will be auto-generated if left empty.
+     */
+    public Optional<String> getJti()
+    {
+      return getStringAttribute(FieldNames.JTI);
+    }
+
+    /**
+     * Optional value to use as 'jti'. Will be auto-generated if left empty.
+     */
+    public void setJti(String jti)
+    {
+      setAttribute(FieldNames.JTI, jti);
+    }
+
+    /**
+     * The value of the HTTP method (Section 9.1 of [RFC9110]) of the request to which the JWT is attached.
+     */
+    public Optional<String> getHtm()
+    {
+      return getStringAttribute(FieldNames.HTM);
+    }
+
+    /**
+     * The value of the HTTP method (Section 9.1 of [RFC9110]) of the request to which the JWT is attached.
+     */
+    public void setHtm(String htm)
+    {
+      setAttribute(FieldNames.HTM, htm);
+    }
+
+    /**
+     * The HTTP target URI (Section 7.1 of [RFC9110]) of the request to which the JWT is attached, without query
+     * and fragment parts.
+     */
+    public Optional<String> getHtu()
+    {
+      return getStringAttribute(FieldNames.HTU);
+    }
+
+    /**
+     * The HTTP target URI (Section 7.1 of [RFC9110]) of the request to which the JWT is attached, without query
+     * and fragment parts.
+     */
+    public void setHtu(String htu)
+    {
+      setAttribute(FieldNames.HTU, htu);
+    }
+
+    /**
+     * Hash of the access token. The value MUST be the result of a base64url encoding (as defined in Section 2 of
+     * [RFC7515]) the SHA-256 [SHS] hash of the ASCII encoding of the associated access token's value.
+     */
+    public Optional<String> getAth()
+    {
+      return getStringAttribute(FieldNames.ATH);
+    }
+
+    /**
+     * Hash of the access token. The value MUST be the result of a base64url encoding (as defined in Section 2 of
+     * [RFC7515]) the SHA-256 [SHS] hash of the ASCII encoding of the associated access token's value.
+     */
+    public void setAth(String ath)
+    {
+      setAttribute(FieldNames.ATH, ath);
+    }
+
   }
 
   /** The settings that have been used for the authorization code grant in the last request. */
@@ -232,5 +390,21 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     public static final String OPENID_CLIENT_ID = "openIdClientId";
 
     public static final String USERNAME = "username";
+
+    public static final String DPOP = "dpop";
+
+    public static final String SIGNATUREALGORITHM = "signatureAlgorithm";
+
+    public static final String KEYID = "keyId";
+
+    public static final String NONCE = "nonce";
+
+    public static final String JTI = "jti";
+
+    public static final String HTM = "htm";
+
+    public static final String HTU = "htu";
+
+    public static final String ATH = "ath";
   }
 }

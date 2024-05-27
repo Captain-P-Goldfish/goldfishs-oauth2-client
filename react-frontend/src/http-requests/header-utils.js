@@ -18,3 +18,12 @@ export function toHeadersObject(headerText)
         
     }
 }
+
+export function toHeaderString(headerArray)
+{
+    if (new Optional(headerArray).map(a => a.length === 0).isEmpty())
+    {
+        return "";
+    }
+    return headerArray.map(keyValue => keyValue.name + ": " + keyValue.value).join("\n");
+}

@@ -85,4 +85,9 @@ public final class ClasspathReferences
 
   public static final String HTTP_REQUESTS_GROUP_SCHEMA = BASE_PATH + "/resource/http-request-group.json";
 
+  public static final String HTTP_RESPONSE_HISTORY_RESOURCE_TYPE = BASE_PATH
+                                                                   + "/resourcetypes/http-response-history-resource-type.json";
+
+  public static final String HTTP_RESPONSE_HISTORY_SCHEMA = BASE_PATH + "/resource/http-response-history.json";
+
 }

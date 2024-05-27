@@ -112,6 +112,17 @@
             "caseExact": false
         },
         {
+            "name": "responseId",
+            "type": "string",
+            "description": "the databaseId of the response if it was saved within the history table.",
+            "mutability": "readOnly",
+            "returned": "default",
+            "uniqueness": "none",
+            "multiValued": false,
+            "required": false,
+            "caseExact": false
+        },
+        {
             "name": "responseStatus",
             "type": "string",
             "description": "the http response status.",
@@ -165,17 +176,6 @@
             "returned": "default",
             "uniqueness": "none",
             "multiValued": false,
-            "required": false,
-            "caseExact": false
-        },
-        {
-            "name": "responseHistory",
-            "type": "string",
-            "description": "The response history of this request.",
-            "mutability": "readOnly",
-            "returned": "default",
-            "uniqueness": "none",
-            "multiValued": true,
             "required": false,
             "caseExact": false
         }

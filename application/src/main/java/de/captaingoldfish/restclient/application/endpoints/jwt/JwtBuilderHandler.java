@@ -68,6 +68,10 @@ public class JwtBuilderHandler extends ResourceHandler<ScimJwtBuilder>
     {
       jwtAttributeList.add(JwtHandler.JwtAttribute.X5T_SHA256);
     }
+    if (resource.isAddPublicKeyHeader())
+    {
+      jwtAttributeList.add(JwtHandler.JwtAttribute.ADD_PUBLIC_KEY);
+    }
     return jwtAttributeList.toArray(JwtHandler.JwtAttribute[]::new);
   }
 

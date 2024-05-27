@@ -1,9 +1,10 @@
 import React, {useState} from "react";
 import {Optional} from "../../services/utils";
-import {HttpRequest, HttpResponse} from "../../http-requests/http-client-requester";
+import {HttpRequest} from "../../http-requests/http-client-requester";
 import {scimHttpHeaderToString} from "../../scim/scim-constants";
 import {AlertListMessages} from "../../base/form-base";
 import {GoFlame} from "react-icons/go";
+import {HttpResponse} from "../../http-requests/http-request-menu-bar";
 
 export function ResourceEndpointDetailsView(props)
 {
@@ -13,7 +14,8 @@ export function ResourceEndpointDetailsView(props)
     
     return <React.Fragment>
         <h5>Access Resource Endpoints</h5>
-        <HttpRequest url={JSON.parse(props.metaData).userinfo_endpoint}
+        <HttpRequest minHeight={"10vh"}
+                     url={JSON.parse(props.metaData).userinfo_endpoint}
                      httpHeader={"Authorization: Bearer " +
                                  JSON.parse(props.accessTokenDetails.plainResponse).access_token}
                      onSuccess={resource =>

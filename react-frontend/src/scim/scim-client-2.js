@@ -39,7 +39,7 @@ export class ScimClient2
     }).then(response =>
             {
               let tmpResponse = {
-                success: response.status === 201,
+                success: response.status === 200,
                 status: response.status,
                 resource: response.json()
               };
@@ -55,7 +55,7 @@ export class ScimClient2
             });
   }
   
-  listResources({
+  async listResources({
                   resourcePath,
                   startIndex,
                   count,

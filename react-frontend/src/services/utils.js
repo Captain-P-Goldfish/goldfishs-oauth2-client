@@ -1,3 +1,5 @@
+import {useEffect, useRef, useState} from "react";
+
 export function toBase64(file)
 {
     return new Promise((resolve, reject) =>
@@ -49,17 +51,17 @@ export function parseJws(token)
     {
         return null;
     }
-    
+
     function decode(content)
     {
         let base64 = content.replace(/-/g, '+').replace(/_/g, '/');
         return decodeURIComponent(Buffer.from(base64, "base64").toString().split('').map(function (c)
         {
             return '%' + ('00' + c.charCodeAt(
-              0).toString(16)).slice(-2);
+                0).toString(16)).slice(-2);
         }).join(''));
     }
-    
+
     let header = decode(jws[0]);
     let payload = decode(jws[1]);
     let signature = jws[2];
@@ -76,17 +78,17 @@ export class Optional
     {
         this.value = value;
     }
-    
+
     get()
     {
         return this.value;
     }
-    
+
     isPresent()
     {
         return this.value !== undefined && this.value !== null;
     }
-    
+
     ifPresent(handler)
     {
         if (this.isPresent())
@@ -95,7 +97,7 @@ export class Optional
         }
         return this;
     }
-    
+
     ifNotPresent(handler)
     {
         if (!this.isPresent())
@@ -104,12 +106,12 @@ export class Optional
         }
         return this;
     }
-    
+
     isEmpty()
     {
         return this.value === undefined || this.value === null;
     }
-    
+
     filter(handler)
     {
         if (this.isPresent() && !handler(this.value))
@@ -118,7 +120,7 @@ export class Optional
         }
         return this;
     }
-    
+
     map(handler)
     {
         if (this.isPresent())
@@ -127,7 +129,7 @@ export class Optional
         }
         return this;
     }
-    
+
     do(handler)
     {
         if (this.isPresent())
@@ -136,7 +138,7 @@ export class Optional
         }
         return this;
     }
-    
+
     orElse(defaultValue)
     {
         if (this.isPresent())
@@ -157,7 +159,8 @@ export function prettyPrintXml(sourceXml)
         // describes how we want to modify the XML - indent everything
         '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
         '  <xsl:strip-space elements="*"/>',
-        '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text nodes
+        '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text
+                                                                     // nodes
         '    <xsl:value-of select="normalize-space(.)"/>',
         '  </xsl:template>',
         '  <xsl:template match="node()|@*">',
@@ -166,10 +169,38 @@ export function prettyPrintXml(sourceXml)
         '  <xsl:output indent="yes"/>',
         '</xsl:stylesheet>',
     ].join('\n'), 'application/xml');
-    
+
     var xsltProcessor = new XSLTProcessor();
     xsltProcessor.importStylesheet(xsltDoc);
     var resultDoc = xsltProcessor.transformToDocument(xmlDoc);
     var resultXml = new XMLSerializer().serializeToString(resultDoc);
     return resultXml;
+}
+
+export function useRenderCount()
+{
+    const renderCount = useRef(1);
+
+    useEffect(() =>
+    {
+        renderCount.current = renderCount.current + 1;
+    });
+
+    return [renderCount.current];
+}
+
+export function useScimErrorResponse()
+{
+    const [errorResponse, setErrorResponse] = useState();
+
+    useEffect(() =>
+    {
+        if (new Optional(errorResponse).isPresent())
+        {
+
+            alert("Server returned an error:\n" + JSON.stringify(errorResponse, null, 2));
+        }
+    }, [errorResponse]);
+
+    return [setErrorResponse];
 }

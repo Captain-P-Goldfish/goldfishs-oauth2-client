@@ -38,6 +38,7 @@ public class ScimAccessTokenRequest extends ResourceNode
                                 List<ResponseHeaders> responseHeadersList,
                                 String plainResponse,
                                 String metaDataJson,
+                                ScimCurrentWorkflowSettings currentWorkflowSettings,
                                 Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -55,6 +56,7 @@ public class ScimAccessTokenRequest extends ResourceNode
     setResponseHeaders(responseHeadersList);
     setPlainResponse(plainResponse);
     setMetaDataJson(metaDataJson);
+    setCurrentWorkflowSettings(currentWorkflowSettings);
     setMeta(meta);
   }
 
@@ -229,6 +231,24 @@ public class ScimAccessTokenRequest extends ResourceNode
   public void setResponseHeaders(List<ResponseHeaders> responseHeadersList)
   {
     setAttribute(FieldNames.RESPONSE_HEADERS, responseHeadersList);
+  }
+
+  /**
+   * only returned if the get-resource method is called. It contains the last used settings of previous OpenID
+   * Connect workflows for this client.
+   */
+  public Optional<ScimCurrentWorkflowSettings> getCurrentWorkflowSettings()
+  {
+    return getObjectAttribute(ScimCurrentWorkflowSettings.FieldNames.SCHEMA_ID, ScimCurrentWorkflowSettings.class);
+  }
+
+  /**
+   * only returned if the get-resource method is called. It contains the last used settings of previous OpenID
+   * Connect workflows for this client.
+   */
+  public void setCurrentWorkflowSettings(ScimCurrentWorkflowSettings currentWorkflowSettings)
+  {
+    setAttribute(ScimCurrentWorkflowSettings.FieldNames.SCHEMA_ID, currentWorkflowSettings);
   }
 
   /** Contains the HTTP request headers that were send in the AccessToken request */

@@ -59,7 +59,7 @@ public class JwtHandler
 
   /**
    * creates either an encrypted JWT (JWE) or a signed JWT (JWS) based on the contents of the JOSE header
-   * 
+   *
    * @param keyId the keyId to use. If left empty the code will look into the header of the JWT and tries to get
    *          the 'kid' value
    * @param header the JOSE header that contains the information on what needs to be done
@@ -110,6 +110,10 @@ public class JwtHandler
                                                                    .digest(certificate.getEncoded()));
         builder.x509CertSHA256Thumbprint(sha256Thumbprint);
       }
+      else if (attribute == JwtAttribute.ADD_PUBLIC_KEY)
+      {
+        builder.jwk(toJwk(applicationKeystore.getKeyPair(keyId)).toPublicJWK());
+      }
     }
     return builder.build();
   }
@@ -137,15 +141,17 @@ public class JwtHandler
                                                                    .digest(certificate.getEncoded()));
         builder.x509CertSHA256Thumbprint(sha256Thumbprint);
       }
+      else if (attribute == JwtAttribute.ADD_PUBLIC_KEY)
+      {
+        builder.jwk(toJwk(applicationKeystore.getKeyPair(keyId)).toPublicJWK());
+      }
     }
     return builder.build();
   }
 
-
-
   /**
    * verifies either the signature of a signed JWT (JWS) or tries to decrypt the given JWT (JWE)
-   * 
+   *
    * @param keyId used to verify the signature or to decrypt the JWT. If left empty the application will try to
    *          get the id from the 'kid' field within the header of the JWT
    * @param jwt the signed or encrypted JWT
@@ -200,7 +206,7 @@ public class JwtHandler
 
   /**
    * encrypts the body based on the data within the header
-   * 
+   *
    * @return the encrypted JWT
    */
   @SneakyThrows
@@ -214,7 +220,7 @@ public class JwtHandler
 
   /**
    * decrypts the JWT based on the data within the header
-   * 
+   *
    * @return the decrypted content of the JWT
    */
   @SneakyThrows
@@ -232,7 +238,7 @@ public class JwtHandler
 
   /**
    * decrypts the given encrypted JWT with the given keypair
-   * 
+   *
    * @return the plain content of the decrypted JWT
    */
   @SneakyThrows
@@ -245,7 +251,7 @@ public class JwtHandler
 
   /**
    * gets fitting decrypter based on the type of key that was selected
-   * 
+   *
    * @param keyPair the key pair that is used to decrypt the JWT
    */
 
@@ -268,7 +274,7 @@ public class JwtHandler
 
   /**
    * builds an encrypted JWT with the given public key based on the data within the header
-   * 
+   *
    * @param publicKey the key used for encrypting
    * @param jweHeader contains the algorithm to use for encryption
    * @param body the body that should be encrypted
@@ -288,7 +294,7 @@ public class JwtHandler
 
   /**
    * selects an encrypter based on the given key
-   * 
+   *
    * @param publicKey the key that determines the encrypter to use
    */
   @SneakyThrows
@@ -310,7 +316,7 @@ public class JwtHandler
 
   /**
    * builds a signature with the given key and builds the signed JWT from it
-   * 
+   *
    * @param keyPair the key pair used for signing
    * @param jwsHeader contains the algorithm to use for signature
    * @param body the body to sign together with the header
@@ -330,7 +336,7 @@ public class JwtHandler
 
   /**
    * parsed an RSA or EC key to its JWK representation
-   * 
+   *
    * @param keyPair the keypair to parse
    */
   private JWK toJwk(KeyPair keyPair)
@@ -400,7 +406,7 @@ public class JwtHandler
    */
   public static enum JwtAttribute
   {
-    X5T_SHA256
+    X5T_SHA256, ADD_PUBLIC_KEY
   }
 
   /**

@@ -27,6 +27,7 @@ public class ScimJwtBuilder extends ResourceNode
                         String body,
                         String jwt,
                         Boolean addX5tSHa256Header,
+                        Boolean addPublicKeyHeader,
                         Meta meta)
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
@@ -36,6 +37,7 @@ public class ScimJwtBuilder extends ResourceNode
     setBody(body);
     setJwt(jwt);
     setAddX5tSha256tHeader(Optional.ofNullable(addX5tSHa256Header).orElse(false));
+    setAddPublicKeyHeader(Optional.ofNullable(addPublicKeyHeader).orElse(false));
     setMeta(meta);
   }
 
@@ -77,7 +79,7 @@ public class ScimJwtBuilder extends ResourceNode
    */
   public Boolean isAddX5tSha256tHeader()
   {
-    return getBooleanAttribute(FieldNames.ADD_X5T_SHA_256_HEADER).orElse(null);
+    return getBooleanAttribute(FieldNames.ADD_X5T_SHA_256_HEADER).orElse(false);
   }
 
   /**
@@ -87,6 +89,24 @@ public class ScimJwtBuilder extends ResourceNode
   public void setAddX5tSha256tHeader(boolean addX5tSHa256Header)
   {
     setAttribute(FieldNames.ADD_X5T_SHA_256_HEADER, addX5tSHa256Header);
+  }
+
+  /**
+   * Tells if the SHA-256 of the certificate corresponding to the key used to sign the JWS should be added to
+   * the header
+   */
+  public Boolean isAddPublicKeyHeader()
+  {
+    return getBooleanAttribute(FieldNames.ADD_PUBLIC_KEY_HEADER).orElse(false);
+  }
+
+  /**
+   * Tells if the SHA-256 of the certificate corresponding to the key used to sign the JWS should be added to
+   * the header
+   */
+  public void setAddPublicKeyHeader(boolean addPublicKeyHeader)
+  {
+    setAttribute(FieldNames.ADD_PUBLIC_KEY_HEADER, addPublicKeyHeader);
   }
 
   /** The body of a plain JWT */
@@ -130,5 +150,7 @@ public class ScimJwtBuilder extends ResourceNode
     public static final String JWT = "jwt";
 
     public static final String ADD_X5T_SHA_256_HEADER = "addX5Sha256tHeader";
+
+    public static final String ADD_PUBLIC_KEY_HEADER = "addPublicKeyHeader";
   }
 }

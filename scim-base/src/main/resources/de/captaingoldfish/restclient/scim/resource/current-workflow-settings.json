@@ -29,6 +29,96 @@
       "caseExact": false
     },
     {
+      "name": "dpop",
+      "type": "complex",
+      "description": "If the AccessToken should be bound to a DPoP token (https://datatracker.ietf.org/doc/html/rfc9449).",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "keyId",
+          "type": "string",
+          "description": "The ID of the key the DPoP should reference.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "signatureAlgorithm",
+          "type": "string",
+          "description": "The algorithm to sign the DPoP JWT.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "nonce",
+          "type": "string",
+          "description": "The expected nonce of the remote system that must be added to the DPoP.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "jti",
+          "type": "string",
+          "description": "Optional value to use as 'jti'. Will be auto-generated if left empty.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "htm",
+          "type": "string",
+          "description": "The value of the HTTP method (Section 9.1 of [RFC9110]) of the request to which the JWT is attached.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "htu",
+          "type": "string",
+          "description": "The HTTP target URI (Section 7.1 of [RFC9110]) of the request to which the JWT is attached, without query and fragment parts.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "ath",
+          "type": "string",
+          "description": "Hash of the access token. The value MUST be the result of a base64url encoding (as defined in Section 2 of [RFC7515]) the SHA-256 [SHS] hash of the ASCII encoding of the associated access token's value.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    },
+    {
       "name": "authCodeParameters",
       "type": "complex",
       "description": "The settings that have been used for the authorization code grant in the last request.",
