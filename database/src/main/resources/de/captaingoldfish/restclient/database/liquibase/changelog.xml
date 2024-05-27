@@ -320,4 +320,15 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="dpop" author="pascal_knueppel">
+        <addColumn tableName="CURRENT_WORKFLOW_SETTINGS">
+            <column name="DPOP_KEY_ID" type="VARCHAR(64)"/>
+            <column name="DPOP_JWS_ALGORITHM" type="VARCHAR(50)"/>
+            <column name="DPOP_NONCE" type="VARCHAR(36)"/>
+            <column name="DPOP_JTI" type="VARCHAR(36)"/>
+            <column name="DPOP_HTM" type="VARCHAR(50)"/>
+            <column name="DPOP_HTU" type="VARCHAR(1024)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

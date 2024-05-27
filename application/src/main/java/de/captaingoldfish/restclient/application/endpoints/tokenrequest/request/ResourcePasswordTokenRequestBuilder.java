@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
+import de.captaingoldfish.restclient.application.crypto.DpopBuilder;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 
 
 /**
@@ -31,9 +33,14 @@ public class ResourcePasswordTokenRequestBuilder extends AccessTokenRequestBuild
    */
   private final String scope;
 
-  public ResourcePasswordTokenRequestBuilder(OpenIdClient openIdClient, String username, String password, String scope)
+  public ResourcePasswordTokenRequestBuilder(OpenIdClient openIdClient,
+                                             String username,
+                                             String password,
+                                             String scope,
+                                             ScimCurrentWorkflowSettings currentWorkflowSettings,
+                                             DpopBuilder dpopBuilder)
   {
-    super(openIdClient);
+    super(openIdClient, currentWorkflowSettings, dpopBuilder);
     this.username = username;
     this.password = password;
     this.scope = StringUtils.stripToNull(scope);

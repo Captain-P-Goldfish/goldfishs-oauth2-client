@@ -557,7 +557,7 @@
                                     <goal>npm</goal>
                                 </goals>
                                 <configuration>
-                                    <arguments>install --save react react-dom react-scripts react-bootstrap@2.5.0
+                                    <arguments>install --save react react-dom react-scripts react-bootstrap@2.10.0
                                         react-bootstrap-icons react-icons bootstrap async bs-custom-file-input
                                         react-router-dom react-router-dom react-router-bootstrap lodash buffer
                                     </arguments>

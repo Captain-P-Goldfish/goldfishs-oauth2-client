@@ -8,9 +8,12 @@ import java.util.UUID;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.validation.AuthCodeGrantRequestValidator;
+import de.captaingoldfish.restclient.application.endpoints.workflowsettings.CurrentWorkflowSettingsConverter;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.application.utils.Utils;
+import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
@@ -42,6 +45,8 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
   public ScimAuthCodeGrantRequest createResource(ScimAuthCodeGrantRequest resource, Context context)
   {
     OpenIdClientDao openIdClientDao = WebAppConfig.getApplicationContext().getBean(OpenIdClientDao.class);
+    CurrentWorkflowSettingsDao currentWorkflowSettingsDao = WebAppConfig.getApplicationContext()
+                                                                        .getBean(CurrentWorkflowSettingsDao.class);
     OpenIdClient openIdClient = resource.getCurrentWorkflowSettings()
                                         .map(ScimCurrentWorkflowSettings::getOpenIdClientId)
                                         .flatMap(openIdClientDao::findById)
@@ -52,11 +57,17 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
                                                                                       .orElseThrow());
     OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String metaDataString = metadata.toJSONObject().toJSONString();
+
+    CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
+                                                                                .orElseGet(CurrentWorkflowSettings::new);
+    ScimCurrentWorkflowSettings scimWorkflowSettings = //
+      CurrentWorkflowSettingsConverter.toScimWorkflowSettings(currentWorkflowSettings);
     return ScimAuthCodeGrantRequest.builder()
                                    .id(id)
                                    .authorizationCodeGrantUrl(authCodeGrantUrl)
                                    .metaDataJson(metaDataString)
                                    .meta(Meta.builder().created(Instant.now()).build())
+                                   .currentWorkflowSettings(scimWorkflowSettings)
                                    .build();
   }
 

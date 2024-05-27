@@ -3,13 +3,15 @@ package de.captaingoldfish.restclient.application.endpoints.tokenrequest.request
 import java.util.Map;
 import java.util.Optional;
 
+import de.captaingoldfish.restclient.application.crypto.DpopBuilder;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 
 
 /**
  * builds the request headers and parameters for an authorization-code-grant access-token request
- * 
+ *
  * @author Pascal Knueppel
  * @since 21.08.2021
  */
@@ -28,9 +30,13 @@ public class AuthCodeTokenRequestBuilder extends AccessTokenRequestBuilder
   private final String redirectUri;
 
 
-  public AuthCodeTokenRequestBuilder(OpenIdClient openIdClient, String authorizationCode, String redirectUri)
+  public AuthCodeTokenRequestBuilder(OpenIdClient openIdClient,
+                                     String authorizationCode,
+                                     String redirectUri,
+                                     ScimCurrentWorkflowSettings currentWorkflowSettings,
+                                     DpopBuilder dpopBuilder)
   {
-    super(openIdClient);
+    super(openIdClient, currentWorkflowSettings, dpopBuilder);
     this.authorizationCode = authorizationCode;
     this.redirectUri = redirectUri;
   }

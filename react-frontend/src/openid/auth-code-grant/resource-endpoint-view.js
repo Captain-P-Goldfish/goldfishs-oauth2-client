@@ -8,16 +8,21 @@ import {HttpResponse} from "../../http-requests/http-request-menu-bar";
 
 export function ResourceEndpointDetailsView(props)
 {
-    
+
     const [responses, setResponses] = useState([]);
     const [errors, setErrors] = useState({});
-    
+
+    let accessTokenDetails = JSON.parse(props.accessTokenDetails.plainResponse);
+
     return <React.Fragment>
         <h5>Access Resource Endpoints</h5>
         <HttpRequest minHeight={"10vh"}
                      url={JSON.parse(props.metaData).userinfo_endpoint}
-                     httpHeader={"Authorization: Bearer " +
-                                 JSON.parse(props.accessTokenDetails.plainResponse).access_token}
+                     httpHeader={"Authorization: " + accessTokenDetails.token_type + " " +
+                                 accessTokenDetails.access_token +
+                                 (props.accessTokenDetails.resourceEndpointHeaders || []).map(header => {
+                                   return "\n" + header.name + ": " + header.value
+                                 })}
                      onSuccess={resource =>
                      {
                          let resources = [...responses];

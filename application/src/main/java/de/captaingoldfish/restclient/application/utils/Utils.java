@@ -1,5 +1,8 @@
 package de.captaingoldfish.restclient.application.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
@@ -112,5 +115,16 @@ public final class Utils
     Optional.ofNullable(proxy)
             .ifPresent(p -> unirestConfig.proxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword()));
     return unirest;
+  }
+
+  /**
+   * uses the given value calculates a SHA-256 sum of it and encodes it base64Url-encoding
+   */
+  @SneakyThrows
+  public static String toSha256Base64UrlEncoded(String value)
+  {
+    MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+    byte[] sha256 = messageDigest.digest(value.getBytes(StandardCharsets.UTF_8));
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(sha256);
   }
 }

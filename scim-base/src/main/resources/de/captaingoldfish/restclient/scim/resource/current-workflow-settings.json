@@ -40,6 +40,17 @@
       "caseExact": false,
       "subAttributes": [
         {
+          "name": "useDpop",
+          "type": "boolean",
+          "description": "If a DPoP should be send in the access-token request or not.",
+          "mutability": "readWrite",
+          "returned": "default",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
           "name": "keyId",
           "type": "string",
           "description": "The ID of the key the DPoP should reference.",
@@ -47,7 +58,7 @@
           "returned": "default",
           "uniqueness": "server",
           "multiValued": false,
-          "required": true,
+          "required": false,
           "caseExact": false
         },
         {
@@ -58,7 +69,7 @@
           "returned": "default",
           "uniqueness": "server",
           "multiValued": false,
-          "required": true,
+          "required": false,
           "caseExact": false
         },
         {

@@ -83,6 +83,42 @@ public class CurrentWorkflowSettings
   private String resourcePasswordGrantScope;
 
   /**
+   * the key that should be used for DPoP binding
+   */
+  @Column(name = "DPOP_KEY_ID")
+  private String dpopKeyId;
+
+  /**
+   * the signature algorithm to use with DPoP
+   */
+  @Column(name = "DPOP_JWS_ALGORITHM")
+  private String dpopJwsAlgorithm;
+
+  /**
+   * the nonce to use in the next request
+   */
+  @Column(name = "DPOP_NONCE")
+  private String dpopNonce;
+
+  /**
+   * the jti to use in the next request
+   */
+  @Column(name = "DPOP_JTI")
+  private String dpopJti;
+
+  /**
+   * the htm value to use in the next request
+   */
+  @Column(name = "DPOP_HTM")
+  private String dpopHtm;
+
+  /**
+   * the htu value to use in the next request
+   */
+  @Column(name = "DPOP_HTU")
+  private String dpopHtu;
+
+  /**
    * the moment this instance was created
    */
   @Column(name = "CREATED")
@@ -101,7 +137,13 @@ public class CurrentWorkflowSettings
                                  String clientCredentialsGrantScope,
                                  String username,
                                  String userPassword,
-                                 String resourcePasswordGrantScope)
+                                 String resourcePasswordGrantScope,
+                                 String dpopKeyId,
+                                 String dpopJwsAlgorithm,
+                                 String dpopNonce,
+                                 String dpopJti,
+                                 String dpopHtm,
+                                 String dpopHtu)
   {
     this.openIdClient = openIdClient;
     this.redirectUri = redirectUri;
@@ -110,6 +152,12 @@ public class CurrentWorkflowSettings
     this.username = username;
     this.userPassword = userPassword;
     this.resourcePasswordGrantScope = resourcePasswordGrantScope;
+    this.dpopKeyId = dpopKeyId;
+    this.dpopJwsAlgorithm = dpopJwsAlgorithm;
+    this.dpopNonce = dpopNonce;
+    this.dpopJti = dpopJti;
+    this.dpopHtm = dpopHtm;
+    this.dpopHtu = dpopHtu;
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }

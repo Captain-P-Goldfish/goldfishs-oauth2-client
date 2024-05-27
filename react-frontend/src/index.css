@@ -688,6 +688,10 @@ span.add-new-resource {
     cursor: pointer;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
+
 .token-store-id-column {
     width: 70px;
     min-width: 70px;

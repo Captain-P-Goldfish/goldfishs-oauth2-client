@@ -236,6 +236,41 @@
       "multiValued": false,
       "required": true,
       "caseExact": false
+    },
+    {
+      "name": "resourceEndpointHeaders",
+      "type": "complex",
+      "description": "This may contain additional headers that must be added to access resource-endpoints together with the AccessToken",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": true,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "The name of the HTTP header",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "The value of the HTTP header",
+          "mutability": "readOnly",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": true,
+          "caseExact": false
+        }
+      ]
     }
   ],
   "meta": {

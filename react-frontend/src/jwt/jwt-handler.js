@@ -5,49 +5,50 @@ import {Tab, Tabs} from "react-bootstrap";
 import JwtParser from "./jwt-parser";
 import JwtBuilder from "./jwt-builder";
 import {ApplicationInfoContext} from "../app";
+import {KEYSTORE_ENDPOINT} from "../scim/scim-constants";
 
 export default class JwtHandler extends React.Component
 {
 
-    constructor(props)
-    {
-        super(props);
-        this.state = {};
-        this.setState = this.setState.bind(this);
-        this.scimClient = new ScimClient("/scim/v2/JwtBuilder", this.setState);
-    }
+  constructor(props)
+  {
+    super(props);
+    this.state = {};
+    this.setState = this.setState.bind(this);
+    this.scimClient = new ScimClient("/scim/v2/JwtBuilder", this.setState);
+  }
 
-    componentDidMount()
+  componentDidMount()
+  {
+    this.scimClient.getResource(null, KEYSTORE_ENDPOINT).then(response =>
     {
-        this.scimClient.getResource(null, "/scim/v2/Keystore").then(response =>
+      if (response.success)
+      {
+        response.resource.then(listResponse =>
         {
-            if (response.success)
-            {
-                response.resource.then(listResponse =>
-                {
-                    this.setState({keyInfos: listResponse.Resources[0].keyInfos});
-                })
-            }
-        });
-    }
+          this.setState({keyInfos: listResponse.Resources[0].keyInfos});
+        })
+      }
+    });
+  }
 
 
-    render()
-    {
-        return (
-            <ApplicationInfoContext.Consumer>
-                {appInfo =>
-                    appInfo &&
-                    <Tabs defaultActiveKey="jwtparser" id="uncontrolled-tab-example">
-                        <Tab eventKey="jwtparser" title="JWT Parser">
-                            <JwtParser keyInfos={this.state.keyInfos} jwtInfo={appInfo.jwtInfo} />
-                        </Tab>
-                        <Tab eventKey="jwtbuilder" title="JWT Builder">
-                            <JwtBuilder keyInfos={this.state.keyInfos} jwtInfo={appInfo.jwtInfo} />
-                        </Tab>
-                    </Tabs>
-                }
-            </ApplicationInfoContext.Consumer>
-        )
-    }
+  render()
+  {
+    return (
+      <ApplicationInfoContext.Consumer>
+        {appInfo =>
+          appInfo &&
+          <Tabs defaultActiveKey="jwtparser" id="uncontrolled-tab-example">
+            <Tab eventKey="jwtparser" title="JWT Parser">
+              <JwtParser keyInfos={this.state.keyInfos} jwtInfo={appInfo.jwtInfo}/>
+            </Tab>
+            <Tab eventKey="jwtbuilder" title="JWT Builder">
+              <JwtBuilder keyInfos={this.state.keyInfos} jwtInfo={appInfo.jwtInfo}/>
+            </Tab>
+          </Tabs>
+        }
+      </ApplicationInfoContext.Consumer>
+    )
+  }
 }

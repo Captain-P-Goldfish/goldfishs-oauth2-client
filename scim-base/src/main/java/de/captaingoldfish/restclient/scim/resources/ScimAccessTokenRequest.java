@@ -35,7 +35,8 @@ public class ScimAccessTokenRequest extends ResourceNode
                                 List<RequestHeaders> requestHeadersList,
                                 List<RequestParams> requestParamsList,
                                 Integer statusCode,
-                                List<ResponseHeaders> responseHeadersList,
+                                List<HttpHeaders> responseHeadersList,
+                                List<HttpHeaders> resourceEndpointHeaders,
                                 String plainResponse,
                                 String metaDataJson,
                                 ScimCurrentWorkflowSettings currentWorkflowSettings,
@@ -54,6 +55,7 @@ public class ScimAccessTokenRequest extends ResourceNode
     setRequestParams(requestParamsList);
     setStatusCode(statusCode);
     setResponseHeaders(responseHeadersList);
+    setResourceEndpoint(resourceEndpointHeaders);
     setPlainResponse(plainResponse);
     setMetaDataJson(metaDataJson);
     setCurrentWorkflowSettings(currentWorkflowSettings);
@@ -222,15 +224,33 @@ public class ScimAccessTokenRequest extends ResourceNode
   }
 
   /** Contains the HTTP response headers that were received with the AccessToken response */
-  public List<ResponseHeaders> getResponseHeaders()
+  public List<HttpHeaders> getResponseHeaders()
   {
-    return getArrayAttribute(FieldNames.RESPONSE_HEADERS, ResponseHeaders.class);
+    return getArrayAttribute(FieldNames.RESPONSE_HEADERS, HttpHeaders.class);
   }
 
   /** Contains the HTTP response headers that were received with the AccessToken response */
-  public void setResponseHeaders(List<ResponseHeaders> responseHeadersList)
+  public void setResponseHeaders(List<HttpHeaders> responseHeadersList)
   {
     setAttribute(FieldNames.RESPONSE_HEADERS, responseHeadersList);
+  }
+
+  /**
+   * This may contain additional headers that must be added to access resource-endpoints together with the
+   * AccessToken
+   */
+  public List<HttpHeaders> getResourceEndpointHeaders()
+  {
+    return getArrayAttribute(FieldNames.RESOURCE_ENDPOINT_HEADERS, HttpHeaders.class);
+  }
+
+  /**
+   * This may contain additional headers that must be added to access resource-endpoints together with the
+   * AccessToken
+   */
+  public void setResourceEndpoint(List<HttpHeaders> responseHeadersList)
+  {
+    setAttribute(FieldNames.RESOURCE_ENDPOINT_HEADERS, responseHeadersList);
   }
 
   /**
@@ -332,13 +352,13 @@ public class ScimAccessTokenRequest extends ResourceNode
   }
 
   /** Contains the HTTP response headers that were received with the AccessToken response */
-  public static class ResponseHeaders extends ScimObjectNode
+  public static class HttpHeaders extends ScimObjectNode
   {
 
-    public ResponseHeaders()
+    public HttpHeaders()
     {}
 
-    public ResponseHeaders(String name, String value)
+    public HttpHeaders(String name, String value)
     {
       setName(name);
       setValue(value);
@@ -393,6 +413,8 @@ public class ScimAccessTokenRequest extends ResourceNode
     public static final String REQUEST_HEADERS = "requestHeaders";
 
     public static final String RESPONSE_HEADERS = "responseHeaders";
+
+    public static final String RESOURCE_ENDPOINT_HEADERS = "resourceEndpointHeaders";
 
     public static final String SCOPE = "scope";
 

@@ -127,11 +127,27 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     }
 
     /**
+     * If a DPoP should be sent in the access-token request or not.
+     */
+    public boolean isUseDpop()
+    {
+      return getBooleanAttribute(FieldNames.USE_DPOP).orElse(false);
+    }
+
+    /**
+     * If a DPoP should be sent in the access-token request or not.
+     */
+    public void setUseDpop(boolean useDpop)
+    {
+      setAttribute(FieldNames.USE_DPOP, useDpop);
+    }
+
+    /**
      * The ID of the key the DPoP should reference.
      */
-    public String getKeyId()
+    public Optional<String> getKeyId()
     {
-      return getStringAttribute(FieldNames.KEYID).orElseThrow();
+      return getStringAttribute(FieldNames.KEYID);
     }
 
     /**
@@ -145,9 +161,9 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     /**
      * The algorithm to sign the DPoP JWT.
      */
-    public String getSignatureAlgorithm()
+    public Optional<String> getSignatureAlgorithm()
     {
-      return getStringAttribute(FieldNames.SIGNATUREALGORITHM).orElseThrow();
+      return getStringAttribute(FieldNames.SIGNATUREALGORITHM);
     }
 
     /**
@@ -394,6 +410,8 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     public static final String DPOP = "dpop";
 
     public static final String SIGNATUREALGORITHM = "signatureAlgorithm";
+
+    public static final String USE_DPOP = "useDpop";
 
     public static final String KEYID = "keyId";
 

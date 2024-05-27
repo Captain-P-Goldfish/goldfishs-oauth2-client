@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.http.HttpHeaders;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +22,7 @@ import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.RequestHeaders;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.RequestParams;
-import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.ResponseHeaders;
+import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.HttpHeaders;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -92,10 +91,10 @@ public class AccessTokenRequestHandlerTest extends AbstractScimClientConfig
     {
       Assertions.assertEquals(2, accessTokenRequest.getRequestHeaders().size());
       RequestHeaders authorization = accessTokenRequest.getRequestHeaders().get(0);
-      Assertions.assertEquals(HttpHeaders.AUTHORIZATION, authorization.getName());
+      Assertions.assertEquals(org.apache.http.HttpHeaders.AUTHORIZATION, authorization.getName());
       Assertions.assertEquals("Basic Z29sZGZpc2g6MTIzNDU2", authorization.getValue());
       RequestHeaders contentType = accessTokenRequest.getRequestHeaders().get(1);
-      Assertions.assertEquals(HttpHeaders.CONTENT_TYPE, contentType.getName());
+      Assertions.assertEquals(org.apache.http.HttpHeaders.CONTENT_TYPE, contentType.getName());
       Assertions.assertEquals(MediaType.APPLICATION_FORM_URLENCODED, contentType.getValue());
     }
     // validate request parameters
@@ -118,12 +117,12 @@ public class AccessTokenRequestHandlerTest extends AbstractScimClientConfig
     Assertions.assertEquals(HttpStatus.OK, accessTokenRequest.getStatusCode());
     // validate response headers
     {
-      ResponseHeaders contentType = accessTokenRequest.getResponseHeaders()
-                                                      .stream()
-                                                      .filter(header -> header.getName()
-                                                                              .equals(HttpHeaders.CONTENT_TYPE))
-                                                      .findAny()
-                                                      .orElseThrow();
+      HttpHeaders contentType = accessTokenRequest.getResponseHeaders()
+                                                  .stream()
+                                                  .filter(header -> header.getName()
+                                                                          .equals(org.apache.http.HttpHeaders.CONTENT_TYPE))
+                                                  .findAny()
+                                                  .orElseThrow();
       MatcherAssert.assertThat(contentType.getValue(),
                                Matchers.containsString(TestIdentityProvider.accessTokenResponseContentTypeSupplier.get()));
     }
