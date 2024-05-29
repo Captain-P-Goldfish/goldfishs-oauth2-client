@@ -93,6 +93,7 @@
         <version.maven.surefire.plugin>3.0.0-M5</version.maven.surefire.plugin>
         <version.maven.jar.plugin>3.2.0</version.maven.jar.plugin>
         <version.maven.frontend.plugin>1.11.3</version.maven.frontend.plugin>
+        <version.maven.antrun.plugin>3.1.0</version.maven.antrun.plugin>
     </properties>
 
     <dependencyManagement>
@@ -559,7 +560,7 @@
                                 <configuration>
                                     <arguments>install --save react react-dom react-scripts react-bootstrap@2.10.0
                                         react-bootstrap-icons react-icons bootstrap async bs-custom-file-input
-                                        react-router-dom react-router-dom react-router-bootstrap lodash buffer
+                                        react-router-dom react-router-bootstrap lodash buffer
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -586,15 +587,6 @@
                         <version>${version.maven.frontend.plugin}</version>
                         <inherited>false</inherited>
                         <executions>
-                            <!--                            <execution>-->
-                            <!--                                <id>npm run test</id>-->
-                            <!--                                <goals>-->
-                            <!--                                    <goal>npm</goal>-->
-                            <!--                                </goals>-->
-                            <!--                                <configuration>-->
-                            <!--                                    <arguments>run test &#45;&#45; &#45;&#45;watchAll=false</arguments>-->
-                            <!--                                </configuration>-->
-                            <!--                            </execution>-->
                             <execution>
                                 <id>npm run build</id>
                                 <goals>

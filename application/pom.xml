@@ -12,6 +12,15 @@
 
     <artifactId>application</artifactId>
 
+    <properties>
+        <base-resources-location>${project.basedir}/../react-frontend</base-resources-location>
+        <base-resources-destination>
+            ${project.build.directory}/generated-sources/resources/de/captaingoldfish/restclient/application
+        </base-resources-destination>
+        <webadmin-location>${base-resources-location}/build/</webadmin-location>
+        <webadmin-destination>${base-resources-destination}/</webadmin-destination>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.captaingoldfish</groupId>
@@ -73,6 +82,18 @@
     <build>
         <finalName>oauth2-test-client</finalName>
 
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.build.directory}/generated-sources/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -83,6 +104,28 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${version.maven.antrun.plugin}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target name="Copy webadmin resources">
+                                <mkdir dir="${webadmin-destination}"/>
+                                <copy todir="${webadmin-destination}">
+                                    <fileSet dir="${webadmin-location}" />
+                                </copy>
+                            </target>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

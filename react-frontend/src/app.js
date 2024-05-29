@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "./logo.svg";
+import logo from "./media/logo.svg";
 import {Container, Nav, Navbar} from "react-bootstrap";
 import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
 import {LinkContainer} from 'react-router-bootstrap'
