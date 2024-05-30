@@ -84,4 +84,19 @@ public final class OAuthConstants
    * the AccessToken constant to get the AccessToken-value
    */
   public static final String ACCESS_TOKEN = "access_token";
+
+  /**
+   * the code-verifier parameter of the Proof Key for Code Exchange specification: RFC7636
+   */
+  public static final String CODE_VERIFIER = "code_verifier";
+
+  /**
+   * the code-challenge parameter of the Proof Key for Code Exchange specification: RFC7636
+   */
+  public static final String CODE_CHALLENGE = "code_challenge";
+
+  /**
+   * the code-challenge-method parameter of the Proof Key for Code Exchange specification: RFC7636
+   */
+  public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
 }

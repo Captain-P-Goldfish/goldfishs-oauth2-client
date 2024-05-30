@@ -2,6 +2,7 @@ package de.captaingoldfish.restclient.application.endpoints.tokenrequest.request
 
 import de.captaingoldfish.restclient.application.crypto.DpopBuilder;
 import de.captaingoldfish.restclient.application.crypto.JwtHandler;
+import de.captaingoldfish.restclient.application.endpoints.authcodegrant.PkceCodeVerifierCache;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
@@ -29,14 +30,18 @@ public class AccessTokenRequestBuilderFactory
   public static AccessTokenRequestBuilder getBuilder(ScimAccessTokenRequest accessTokenRequest)
   {
     OpenIdClientDao openIdClientDao = WebAppConfig.getApplicationContext().getBean(OpenIdClientDao.class);
+    PkceCodeVerifierCache pkceCodeVerifierCache = WebAppConfig.getApplicationContext()
+                                                              .getBean(PkceCodeVerifierCache.class);
     KeystoreDao keystoreDao = WebAppConfig.getApplicationContext().getBean(KeystoreDao.class);
     DpopBuilder dpopBuilder = new DpopBuilder(new JwtHandler(keystoreDao));
     OpenIdClient openIdClient = openIdClientDao.findById(accessTokenRequest.getOpenIdClientId()).orElseThrow();
     if (OAuthConstants.AUTH_CODE_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
     {
       return new AuthCodeTokenRequestBuilder(openIdClient, accessTokenRequest.getAuthorizationCode().orElseThrow(),
+                                             accessTokenRequest.getState().orElse(null),
                                              accessTokenRequest.getRedirectUri().orElse(null),
-                                             accessTokenRequest.getCurrentWorkflowSettings().orElse(null), dpopBuilder);
+                                             accessTokenRequest.getCurrentWorkflowSettings().orElse(null), dpopBuilder,
+                                             pkceCodeVerifierCache);
     }
     if (OAuthConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
     {

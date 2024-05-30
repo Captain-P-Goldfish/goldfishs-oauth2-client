@@ -28,6 +28,7 @@ public class ScimAccessTokenRequest extends ResourceNode
                                 Long openIdClientId,
                                 String grantType,
                                 String authorizationCode,
+                                String state,
                                 String redirectUri,
                                 String username,
                                 String password,
@@ -47,6 +48,7 @@ public class ScimAccessTokenRequest extends ResourceNode
     setOpenIdClientId(openIdClientId);
     setGrantType(grantType);
     setAuthorizationCode(authorizationCode);
+    setState(state);
     setRedirectUri(redirectUri);
     setUsername(username);
     setPassword(password);
@@ -102,6 +104,24 @@ public class ScimAccessTokenRequest extends ResourceNode
   public void setAuthorizationCode(String authorizationCode)
   {
     setAttribute(FieldNames.AUTHORIZATION_CODE, authorizationCode);
+  }
+
+  /**
+   * The state from the authorizationRequest. We use it here to access the optional PKCE code_verifier if one
+   * was created in the AuthorizationRequest
+   */
+  public Optional<String> getState()
+  {
+    return getStringAttribute(FieldNames.STATE);
+  }
+
+  /**
+   * The state from the authorizationRequest. We use it here to access the optional PKCE code_verifier if one
+   * was created in the AuthorizationRequest
+   */
+  public void setState(String state)
+  {
+    setAttribute(FieldNames.STATE, state);
   }
 
   /**
@@ -399,6 +419,8 @@ public class ScimAccessTokenRequest extends ResourceNode
     public static final String REDIRECT_URI = "redirectUri";
 
     public static final String AUTHORIZATION_CODE = "authorizationCode";
+
+    public static final String STATE = "state";
 
     public static final String REQUEST_PARAMS = "requestParams";
 

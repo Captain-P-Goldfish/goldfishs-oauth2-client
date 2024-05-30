@@ -36,6 +36,11 @@ public class CacheConfiguration
   public static final String AUTH_CODE_GRANT_RESPONSE_CACHE = "auth-code-grant-response-cache";
 
   /**
+   * the name of the cache that contains the PKCE code-verifiers
+   */
+  public static final String PKCE_CODE_VERIFIER_CACHE = "pkce-code-verifier-cache";
+
+  /**
    * creates a cache with a short lifetime
    */
   @Bean

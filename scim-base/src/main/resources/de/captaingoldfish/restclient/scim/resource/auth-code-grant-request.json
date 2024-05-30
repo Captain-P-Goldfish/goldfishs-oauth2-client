@@ -18,6 +18,41 @@
       "caseExact": true
     },
     {
+      "name": "pkce",
+      "type": "complex",
+      "description": "Tells us if PKCE should be used for the authorization-request and token-request and what value to use",
+      "mutability": "readWrite",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "use",
+          "type": "boolean",
+          "description": "If PKCE should be used or not",
+          "mutability": "readWrite",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "codeVerifier",
+          "type": "string",
+          "description": "optional value. If present this value is used as code_verifier. If missing a value will be generated.",
+          "mutability": "readWrite",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    },
+    {
       "name": "authorizationCodeGrantUrl",
       "type": "reference",
       "description": "The authorization code grant request url that is used by the frontend to delegate the user to the identity provider and to show the specific request details",

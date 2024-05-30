@@ -1,22 +1,14 @@
 package de.captaingoldfish.restclient.application.endpoints.tokenrequest;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import de.captaingoldfish.restclient.application.crypto.DpopBuilder;
-import de.captaingoldfish.restclient.application.crypto.JwtHandler;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.request.AccessTokenRequestBuilder;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.request.AccessTokenRequestBuilderFactory;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.validation.AccessTokenRequestValidator;
-import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
-import de.captaingoldfish.restclient.application.utils.OAuthConstants;
-import de.captaingoldfish.restclient.database.repositories.KeystoreDao;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.HttpHeaders;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.RequestHeaders;
@@ -25,7 +17,6 @@ import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import de.captaingoldfish.scim.sdk.common.schemas.SchemaAttribute;
-import de.captaingoldfish.scim.sdk.common.utils.JsonHelper;
 import de.captaingoldfish.scim.sdk.server.endpoints.Context;
 import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;

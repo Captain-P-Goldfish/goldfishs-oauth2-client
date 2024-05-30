@@ -119,6 +119,18 @@ public class CurrentWorkflowSettings
   private String dpopHtu;
 
   /**
+   * If PKCE should be used or not
+   */
+  @Column(name = "PKCE_USE")
+  private boolean pkceUse;
+
+  /**
+   * optional value. If present this value is used as code_verifier. If missing a value will be generated.
+   */
+  @Column(name = "PKCE_CODE_VERIFIER")
+  private String pkceCodeVerifier;
+
+  /**
    * the moment this instance was created
    */
   @Column(name = "CREATED")
@@ -143,7 +155,9 @@ public class CurrentWorkflowSettings
                                  String dpopNonce,
                                  String dpopJti,
                                  String dpopHtm,
-                                 String dpopHtu)
+                                 String dpopHtu,
+                                 boolean pkceUse,
+                                 String pkceCodeVerifier)
   {
     this.openIdClient = openIdClient;
     this.redirectUri = redirectUri;
@@ -158,6 +172,8 @@ public class CurrentWorkflowSettings
     this.dpopJti = dpopJti;
     this.dpopHtm = dpopHtm;
     this.dpopHtu = dpopHtu;
+    this.pkceUse = pkceUse;
+    this.pkceCodeVerifier = pkceCodeVerifier;
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }

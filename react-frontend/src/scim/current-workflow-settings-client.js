@@ -10,12 +10,16 @@ export default class CurrentWorkflowSettingsClient
         this.scimClient = new ScimClient(CURRENT_WORKFLOW_SETTINGS_ENDPOINT, setState);
     }
 
-    updateAuthCodeSettings(openidClientId, redirectUri, queryParameters, callback)
+    updateAuthCodeSettings(openidClientId, redirectUri, usePkce, pkceCodeVerifier, queryParameters, callback)
     {
         let resource = {
             authCodeParameters: {
                 redirectUri: redirectUri,
-                queryParameters: queryParameters
+                queryParameters: queryParameters,
+            },
+            pkce: {
+                use: usePkce,
+                codeVerifier: pkceCodeVerifier
             }
         };
         this.patchResource(openidClientId, resource, callback);

@@ -25,7 +25,7 @@ import AccessTokenView from "./auth-code-grant/access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../services/utils";
 import CurrentWorkflowSettingsClient from "../scim/current-workflow-settings-client";
-import {Alert, FormCheck} from "react-bootstrap";
+import {Alert, FormCheck, FormText} from "react-bootstrap";
 import {value} from "lodash/seq";
 import {ApplicationInfoContext} from "../app";
 
@@ -240,7 +240,9 @@ class AuthorizationCodeGrantForm extends React.Component
     super(props);
     this.state = {
       intervals: [],
-      requestDetails: []
+      requestDetails: [],
+      pkce: props.workflowDetails.pkce,
+      pkceCodeVerifierLength: props.workflowDetails.pkce?.codeVerifier?.length || 0
     }
     this.setState = this.setState.bind(this);
     this.forceUpdate = this.forceUpdate.bind(this);
@@ -302,7 +304,9 @@ class AuthorizationCodeGrantForm extends React.Component
     let queryParams = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
       .map(a => a.queryParameters)
       .orElse(undefined);
-    workflowSettingsClient.updateAuthCodeSettings(openIdClientId, redirectUri, queryParams);
+    let usePkce = new Optional(this.state.pkce).map(a => a.use).orElse(undefined);
+    let pkceCodeVerifier = new Optional(this.state.pkce).map(a => a.codeVerifier).orElse(undefined);
+    workflowSettingsClient.updateAuthCodeSettings(openIdClientId, redirectUri, usePkce, pkceCodeVerifier, queryParams);
   }
 
   render()
@@ -329,6 +333,49 @@ class AuthorizationCodeGrantForm extends React.Component
                         placeholder="add an optional query string that is appended to the request URL"
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                         onError={fieldname => this.props.onError(fieldname)}/>
+        <Form.Group as={Row}>
+          <Col sm={2}>
+            Proof Key for Code Exchange (RFC7636)
+          </Col>
+          <Col>
+            <FormCheck type="switch"
+                       id="pkce.use"
+                       name="pkce.use"
+                       key={"pkce.use-" + this.state.pkce?.use}
+                       checked={this.state.pkce?.use}
+                       className={"d-inline-block"}
+                       onChange={e =>
+                       {
+                         let pkce = this.state.pkce || {}
+                         this.props.handleChange(e.target.name, e.target.checked)
+                         lodash.set(pkce, "use", e.target.checked);
+                         this.setState({pkce: pkce})
+                       }}/>
+            {
+              this.state.pkce?.use &&
+              <>
+                <FormInputField name="pkce.codeVerifier"
+                                label="Code Verifier"
+                                placeholder="Optional. Will be auto-generated if not entered manually"
+                                value={this.state.pkce?.codeVerifier}
+                                onChange={e =>
+                                {
+                                  let pkce = this.state.pkce || {}
+                                  this.props.handleChange(e.target.name, e.target.value)
+                                  lodash.set(pkce, "codeVerifier", e.target.value);
+                                  this.setState({
+                                    pkce: pkce,
+                                    pkceCodeVerifierLength: e.target.value.length
+                                  })
+                                }}
+                                onError={fieldname => this.props.onError(fieldname)}>
+                  <FormText className={"text-secondary"}>Must have a minimum length of 43 characters </FormText>
+                  <FormText className={"text-secondary"}>({this.state.pkceCodeVerifierLength || 0} / 43)</FormText>
+                </FormInputField>
+              </>
+            }
+          </Col>
+        </Form.Group>
         <Form.Group as={Row}>
           <Col sm={{span: 10, offset: 2}}>
             <Button type="submit" onClick={this.loadAuthorizationRequestDetails}>
@@ -368,7 +415,7 @@ class ClientCredentialsGrantForm extends React.Component
       dpopSignatureAlgorithm: previousDpopSignatureAlgorithm ||
         ((props.appInfo.jwtInfo.signatureAlgorithms || []).length > 0
           ? props.appInfo.jwtInfo.signatureAlgorithms[0] : null),
-      dpopNonce: previousDpopNonce  || "",
+      dpopNonce: previousDpopNonce || "",
       dpopJti: previousDpopJti || "",
       dpopHtm: previousDpopHtm || "",
       dpopHtu: previousDpopHtu || ""
@@ -504,7 +551,7 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
       dpopSignatureAlgorithm: previousDpopSignatureAlgorithm ||
         ((props.appInfo.jwtInfo.signatureAlgorithms || []).length > 0
           ? props.appInfo.jwtInfo.signatureAlgorithms[0] : null),
-      dpopNonce: previousDpopNonce  || "",
+      dpopNonce: previousDpopNonce || "",
       dpopJti: previousDpopJti || "",
       dpopHtm: previousDpopHtm || "",
       dpopHtu: previousDpopHtu || ""

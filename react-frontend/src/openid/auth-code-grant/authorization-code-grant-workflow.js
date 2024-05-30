@@ -184,6 +184,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
       openIdClientId: parseInt(this.props.client.id),
       redirectUri: authCodeQueryParams.redirect_uri,
       authorizationCode: queryParamsObject.code,
+      state: queryParamsObject.state
     };
 
     if (this.state.useDpop)
@@ -265,9 +266,11 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                              onClose={() => this.setState({errors: null})}/>
           <Row>
             <Col>
-              <Button type="submit" onClick={e =>
+              <Button type="submit" onClick={async e =>
               {
-                this.setState({isLoading: true});
+                await this.setState({
+                  isLoading: true
+                });
                 this.retrieveAccessTokenDetails(e);
               }}
                       style={{

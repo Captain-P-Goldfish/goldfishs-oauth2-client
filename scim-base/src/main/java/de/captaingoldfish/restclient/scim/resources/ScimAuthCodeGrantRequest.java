@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import de.captaingoldfish.scim.sdk.common.resources.ResourceNode;
+import de.captaingoldfish.scim.sdk.common.resources.base.ScimObjectNode;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 import lombok.Builder;
 
@@ -24,6 +25,7 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
 
   @Builder
   public ScimAuthCodeGrantRequest(String id,
+                                  Pkce pkce,
                                   String authorizationCodeGrantUrl,
                                   String authorizationResponseUrl,
                                   String metaDataJson,
@@ -32,11 +34,29 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
+    setPkce(pkce);
     setAuthorizationCodeGrantUrl(authorizationCodeGrantUrl);
     setAuthorizationResponseUrl(authorizationResponseUrl);
     setMetaDataJson(metaDataJson);
     setCurrentWorkflowSettings(currentWorkflowSettings);
     setMeta(meta);
+  }
+
+  /**
+   * Tells us if PKCE should be used for the authorization-request and token-request and what value to use
+   */
+  public Optional<Pkce> getPkce()
+  {
+
+    return getObjectAttribute(FieldNames.PKCE, Pkce.class);
+  }
+
+  /**
+   * Tells us if PKCE should be used for the authorization-request and token-request and what value to use
+   */
+  public void setPkce(Pkce pkce)
+  {
+    setAttribute(FieldNames.PKCE, pkce);
   }
 
   /**
@@ -109,10 +129,66 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
     setAttribute(ScimCurrentWorkflowSettings.FieldNames.SCHEMA_ID, currentWorkflowSettings);
   }
 
+  /**
+   * Tells us if PKCE should be used for the authorization-request and token-request and what value to use
+   */
+  public static class Pkce extends ScimObjectNode
+  {
+
+    public Pkce()
+    {}
+
+    @Builder
+    public Pkce(Boolean use, String codeVerifier)
+    {
+      setUse(use);
+      setCodeVerifier(codeVerifier);
+    }
+
+    /**
+     * If PKCE should be used or not
+     */
+    public boolean isUse()
+    {
+      return getBooleanAttribute(FieldNames.USE).orElse(false);
+    }
+
+    /**
+     * If PKCE should be used or not
+     */
+    public void setUse(Boolean use)
+    {
+      setAttribute(FieldNames.USE, use);
+    }
+
+    /**
+     * optional value. If present this value is used as code_verifier. If missing a value will be generated.
+     */
+    public Optional<String> getCodeVerifier()
+    {
+      return getStringAttribute(FieldNames.CODEVERIFIER);
+    }
+
+    /**
+     * optional value. If present this value is used as code_verifier. If missing a value will be generated.
+     */
+    public void setCodeVerifier(String codeVerifier)
+    {
+      setAttribute(FieldNames.CODEVERIFIER, codeVerifier);
+    }
+
+  }
+
   public static class FieldNames
   {
 
     public static final String SCHEMA_ID = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:AuthCodeGrantRequest";
+
+    public static final String PKCE = "pkce";
+
+    public static final String USE = "use";
+
+    public static final String CODEVERIFIER = "codeVerifier";
 
     public static final String AUTHORIZATION_CODE_GRANT_URL = "authorizationCodeGrantUrl";
 

@@ -331,4 +331,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="pkce" author="pascal_knueppel">
+        <addColumn tableName="CURRENT_WORKFLOW_SETTINGS">
+            <column name="PKCE_USE" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="PKCE_CODE_VERIFIER" type="VARCHAR(1024)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

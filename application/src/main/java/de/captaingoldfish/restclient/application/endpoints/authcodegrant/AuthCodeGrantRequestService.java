@@ -10,7 +10,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -18,11 +18,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.nimbusds.jose.util.Pair;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
+import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest.Pkce;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
@@ -42,10 +45,12 @@ public class AuthCodeGrantRequestService
 
   private final AuthCodeGrantResponseCache authCodeGrantResponseCache;
 
+  private final PkceCodeVerifierCache pkceCodeVerifierCache;
+
   /**
    * generates the authorization code grant request and caches it in {@link #authCodeGrantRequestCache} under
    * the state parameter as key
-   * 
+   *
    * @param openIdClient the owner of the authorization code grant request
    * @param workflowSettings the dynamic settings from the javascript frontend
    * @return the authorization code grant url
@@ -62,44 +67,45 @@ public class AuthCodeGrantRequestService
     final String additionalQueryParams = workflowSettings.getAuthCodeParameters()
                                                          .flatMap(AuthCodeParameters::getQueryParameters)
                                                          .orElse(null);
-    UriComponents requestUrl = this.addRequiredQueryParams(UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri),
-                                                           openIdClient.getClientId(),
-                                                           redirectUri,
-                                                           additionalQueryParams)
-                                   .build();
-    final String authCodeRequestUrl = requestUrl.toString();
+    Pair<String, UriComponentsBuilder> requestPair = //
+      this.addRequiredQueryParams(UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri),
+                                  openIdClient.getClientId(),
+                                  redirectUri,
+                                  additionalQueryParams);
 
-    cacheAuthCodeRequestUrl(authCodeRequestUrl);
-    return authCodeRequestUrl;
-  }
+    final String state = requestPair.getLeft();
+    UriComponentsBuilder requestUrlBuilder = requestPair.getRight();
+    if (workflowSettings.getPkce().map(Pkce::isUse).orElse(false))
+    {
+      final String pkceCodeVerifier = workflowSettings.getPkce()
+                                                      .flatMap(Pkce::getCodeVerifier)
+                                                      .map(StringUtils::stripToNull)
+                                                      .orElseGet(() -> RandomStringUtils.randomAlphabetic(50));
+      final String pkceCodeChallenge = Utils.toSha256Base64UrlEncoded(pkceCodeVerifier);
+      requestUrlBuilder.queryParam(OAuthConstants.CODE_CHALLENGE, pkceCodeChallenge);
+      requestUrlBuilder.queryParam(OAuthConstants.CODE_CHALLENGE_METHOD, "S256");
+      pkceCodeVerifierCache.setCodeVerifier(state, pkceCodeVerifier);
+    }
+    final String authCodeRequestUrl = requestUrlBuilder.build().toString();
 
-  /**
-   * will cache the authCodeRequestUrl under the given state parameter that should be present within the request
-   * 
-   * @param authCodeRequestUrl the url to put into the cache
-   */
-  private void cacheAuthCodeRequestUrl(String authCodeRequestUrl)
-  {
-    UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authCodeRequestUrl).build();
-    List<String> stateParams = uriComponents.getQueryParams().get(OAuthConstants.STATE);
-    final String state = stateParams.get(0);
     authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
+    return authCodeRequestUrl;
   }
 
   /**
    * will add the required query parameters if they have not been added yet by the field
    * {@code additionalQueryParams}
-   * 
+   *
    * @param uriComponentsBuilder the uri-components builder to which the parameters should be added
    * @param clientId the clientId parameter
    * @param redirectUri the redirect uri parameter
    * @param additionalQueryParams the optional additional query that might contain some required parameters
-   * @return the extended {@link UriComponentsBuilder}
+   * @return {@code Pair<state, the extended {@link UriComponentsBuilder}>}
    */
-  private UriComponentsBuilder addRequiredQueryParams(UriComponentsBuilder uriComponentsBuilder,
-                                                      String clientId,
-                                                      String redirectUri,
-                                                      String additionalQueryParams)
+  private Pair<String, UriComponentsBuilder> addRequiredQueryParams(UriComponentsBuilder uriComponentsBuilder,
+                                                                    String clientId,
+                                                                    String redirectUri,
+                                                                    String additionalQueryParams)
   {
     UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://localhost")
                                                       .query(additionalQueryParams)
@@ -112,16 +118,16 @@ public class AuthCodeGrantRequestService
       queryParamMap.putIfAbsent(OAuthConstants.REDIRECT_URI,
                                 Collections.singletonList(URLEncoder.encode(uri, StandardCharsets.UTF_8)));
     });
-    queryParamMap.putIfAbsent(OAuthConstants.STATE,
-                              Collections.singletonList(URLEncoder.encode(UUID.randomUUID().toString(),
-                                                                          StandardCharsets.UTF_8)));
-    return uriComponentsBuilder.queryParams(queryParamMap);
+    String state = Optional.ofNullable(queryParamMap.getFirst(OAuthConstants.STATE))
+                           .orElseGet(() -> URLEncoder.encode(UUID.randomUUID().toString(), StandardCharsets.UTF_8));
+    queryParamMap.put(OAuthConstants.STATE, List.of(state));
+    return Pair.of(state, uriComponentsBuilder.queryParams(queryParamMap));
   }
 
   /**
    * this method will handle the authorization response from an identity provider by identifying the necessary
    * data based on the given state parameter that should be present within the request
-   * 
+   *
    * @param fullRequestUrl the full url that should contain the authorization code and the state parameter or
    *          maybe some error details
    */
@@ -140,7 +146,7 @@ public class AuthCodeGrantRequestService
 
   /**
    * retrieves the state-parameter from an authorization code grant response url
-   * 
+   *
    * @param uriComponents the parsed response url
    * @return the state-parameter from the url
    */
@@ -159,7 +165,7 @@ public class AuthCodeGrantRequestService
 
   /**
    * simply returns the authorization code response url from the cache if it is already present
-   * 
+   *
    * @param state the state parameter from the request that was used to save the response url
    * @return the full authorization code response
    * @see #handleAuthorizationResponse(String)

@@ -56,6 +56,17 @@
       "caseExact": false
     },
     {
+      "name": "state",
+      "type": "string",
+      "description": "The state from the authorizationRequest. We use it here to access the optional PKCE code_verifier if one was created in the AuthorizationRequest",
+      "mutability": "writeOnly",
+      "returned": "never",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "redirectUri",
       "type": "string",
       "description": "If the redirect uri was present in the authorization code request it must also be added to the access token request",

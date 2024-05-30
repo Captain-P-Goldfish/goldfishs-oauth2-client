@@ -25,6 +25,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   public ScimCurrentWorkflowSettings(String id,
                                      Long openIdClientId,
                                      Dpop dpop,
+                                     ScimAuthCodeGrantRequest.Pkce pkce,
                                      AuthCodeParameters authCodeParameters,
                                      ClientCredentialsParameters clientCredentialsParameters,
                                      ResourceOwnerPasswordParameters resourceOwnerPasswordParameters,
@@ -34,6 +35,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     setId(id);
     setOpenIdClientId(openIdClientId);
     setDpop(dpop);
+    setPkce(pkce);
     setAuthCodeParameters(authCodeParameters);
     setClientCredentialsParameters(clientCredentialsParameters);
     setResourceOwnerPasswordParameters(resourceOwnerPasswordParameters);
@@ -67,6 +69,23 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   public void setDpop(Dpop dpop)
   {
     setAttribute(FieldNames.DPOP, dpop);
+  }
+
+  /**
+   * Tells us if PKCE should be used for the authorization-request and token-request and what value to use
+   */
+  public Optional<ScimAuthCodeGrantRequest.Pkce> getPkce()
+  {
+
+    return getObjectAttribute(ScimAuthCodeGrantRequest.FieldNames.PKCE, ScimAuthCodeGrantRequest.Pkce.class);
+  }
+
+  /**
+   * Tells us if PKCE should be used for the authorization-request and token-request and what value to use
+   */
+  public void setPkce(ScimAuthCodeGrantRequest.Pkce pkce)
+  {
+    setAttribute(ScimAuthCodeGrantRequest.FieldNames.PKCE, pkce);
   }
 
   /** The settings that have been used for the authorization code grant in the last request. */
