@@ -43,13 +43,13 @@ public class ScimOpenIdProvider extends ResourceNode
     setMeta(meta);
   }
 
-  /** A name that is used as human readable identifier that will be displayed in the UI */
+  /** A name that is used as human-readable identifier that will be displayed in the UI */
   public String getName()
   {
     return getStringAttribute(FieldNames.NAME).orElse(null);
   }
 
-  /** A name that is used as human readable identifier that will be displayed in the UI */
+  /** A name that is used as human-readable identifier that will be displayed in the UI */
   public void setName(String name)
   {
     setAttribute(FieldNames.NAME, name);

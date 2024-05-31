@@ -45,12 +45,12 @@ export default class OpenidClients extends React.Component
         this.onCreateSuccess = this.onCreateSuccess.bind(this);
         this.removeClient = this.removeClient.bind(this);
     }
-    
+
     async componentDidMount()
     {
         let startIndex = (this.state.currentPage * this.props.serviceProviderConfig.filter.maxResults) + 1;
         let count = this.props.serviceProviderConfig.filter.maxResults;
-        
+
         let openIdProviderId = this.props.match.params.id;
         let openIdProviderResourcePath = OPENID_PROVIDER_ENDPOINT;
         await this.scimClient.getResource(openIdProviderId, openIdProviderResourcePath).then(response =>
@@ -76,7 +76,7 @@ export default class OpenidClients extends React.Component
                 });
             }
         });
-        
+
         await this.scimClient.listResources({
             startIndex: startIndex,
             count: count,
@@ -100,10 +100,10 @@ export default class OpenidClients extends React.Component
                 });
             });
         });
-        
+
         this.loadKeystoreInfos();
     }
-    
+
     async loadKeystoreInfos()
     {
         let keystoreResourcePath = "/scim/v2/Keystore";
@@ -131,7 +131,7 @@ export default class OpenidClients extends React.Component
             }
         });
     }
-    
+
     addNewClient()
     {
         let clientList = [...this.state.clientList];
@@ -156,7 +156,7 @@ export default class OpenidClients extends React.Component
             });
         }
     }
-    
+
     onCreateSuccess(client)
     {
         let clientList = [...this.state.clientList];
@@ -168,7 +168,7 @@ export default class OpenidClients extends React.Component
             deletedClientId: undefined
         });
     }
-    
+
     onUpdateSuccess(client)
     {
         let clientList = [...this.state.clientList];
@@ -180,7 +180,7 @@ export default class OpenidClients extends React.Component
             deletedClientId: undefined
         });
     }
-    
+
     removeClient(id)
     {
         let clientList = [...this.state.clientList];
@@ -193,7 +193,7 @@ export default class OpenidClients extends React.Component
             errors: {}
         });
     }
-    
+
     render()
     {
         return (
@@ -211,9 +211,9 @@ export default class OpenidClients extends React.Component
                       </h5>
                   </a>
               </LinkContainer>
-              
+
               <h5>Provider: <span style={{color: "lightgray"}}>{this.state.provider.name}</span></h5>
-              
+
               <p className={"add-new-resource"} onClick={this.addNewClient}>
                   <span className={"add-new-resource"}>Add new Client <br /><FileEarmarkPlus /></span>
               </p>
@@ -263,14 +263,14 @@ class OpenIdClientCardEntry extends React.Component
         this.state = {
             showModal: false,
             editMode: new Optional(props.client).map(val => val.id).map(val => false).orElse(true),
-            authenticationType: props.client.authenticationType,
-            client: JSON.parse(JSON.stringify(props.client))
+            authenticationType: props.client.authenticationType || "basic",
+            client: JSON.parse(JSON.stringify(props.client)),
         };
         this.setState = this.setState.bind(this);
         this.resetEditMode = this.resetEditMode.bind(this);
         this.scimClient = new ScimClient(this.props.scimResourcePath, this.setState);
         this.formReference = createRef();
-        
+
         this.scimComponentBasics = new ScimComponentBasics({
             scimClient: this.scimClient,
             formReference: this.formReference,
@@ -283,7 +283,7 @@ class OpenIdClientCardEntry extends React.Component
             onDeleteSuccess: this.props.onDeleteSuccess
         });
     }
-    
+
     async resetEditMode()
     {
         this.scimComponentBasics.resetEditMode();
@@ -293,7 +293,7 @@ class OpenIdClientCardEntry extends React.Component
             authenticationType: client.authenticationType
         });
     }
-    
+
     render()
     {
         let aliases = [];
@@ -308,7 +308,7 @@ class OpenIdClientCardEntry extends React.Component
           <Card id={"client-card-" + this.state.client.id} key={this.state.client.id}
                 border={"warning"} bg={"dark"} className={"resource-card modifiable-card"}>
               <Form onSubmit={this.scimComponentBasics.onSubmit} ref={this.formReference}>
-                  
+
                   <Modal id={"delete-dialog-" + this.state.client.id}
                          show={this.state.showModal}
                          variant="danger"
@@ -319,14 +319,14 @@ class OpenIdClientCardEntry extends React.Component
                          cancelButtonText="cancel"
                          onCancel={() => this.scimComponentBasics.setStateValue("showModal", false)}>
                   </Modal>
-                  
+
                   <Alert id={"save-alert-success"} variant={"success"}
                          show={new Optional(this.state.success).orElse(false)}>
                       <Form.Text><GoThumbsup /> OpenID Client was successfully updated</Form.Text>
                   </Alert>
-                  
+
                   <ErrorMessagesAlert errors={this.state.errors} />
-                  
+
                   <Card.Header id={"client-card-header-" + this.state.client.id}>
                       <div className={"card-name-header"}>
                           <div className={"card-name-header"}>
@@ -359,7 +359,7 @@ class OpenIdClientCardEntry extends React.Component
                       {/* this button enables pressing enter in the edit form */}
                       <Button id={"upload"} type="submit" hidden={true} />
                   </Card.Header>
-                  
+
                   <Card.Body>
                       <React.Fragment>
                           <Table size="sm" variant="dark" borderless striped>
@@ -381,7 +381,7 @@ class OpenIdClientCardEntry extends React.Component
                                   <CardRadioSelector header={"Authentication Type"}
                                                      name={"authenticationType"}
                                                      editMode={this.state.editMode}
-                                                     selections={["basic", "jwt"]}
+                                                     selections={["public", "basic", "jwt"]}
                                                      selected={new Optional(this.state.authenticationType).orElse(
                                                        "basic")}
                                                      onChange={e =>
@@ -394,8 +394,7 @@ class OpenIdClientCardEntry extends React.Component
                                                        fieldName)}
                                   />
                                   {
-                                    (this.state.authenticationType === undefined ||
-                                     this.state.authenticationType === "basic") &&
+                                    this.state.authenticationType === "basic" &&
                                     <ModifiableCardEntry header={"Client Secret"}
                                                          name={"clientSecret"}
                                                          resourceId={this.state.client.id}
@@ -405,7 +404,7 @@ class OpenIdClientCardEntry extends React.Component
                                                          onChange={this.scimComponentBasics.updateInput}
                                                          onError={fieldName => this.scimClient.getErrors(
                                                            this.state, fieldName)} />
-                                      
+
                                   }
                                   {
                                     this.state.authenticationType === "jwt" &&
@@ -419,7 +418,7 @@ class OpenIdClientCardEntry extends React.Component
                                                             e.target.name, e.target.value)}
                                                           onError={fieldName => this.scimClient.getErrors(
                                                             this.state, fieldName)}
-                                        
+
                                         />
                                         <ApplicationInfoContext.Consumer>
                                             {appInfo =>
@@ -433,7 +432,7 @@ class OpenIdClientCardEntry extends React.Component
                                                                   e.target.name, e.target.value)}
                                                                 onError={fieldName => this.scimClient.getErrors(
                                                                   this.state, fieldName)}
-                                              
+
                                               />
                                             }
                                         </ApplicationInfoContext.Consumer>
@@ -453,7 +452,7 @@ class OpenIdClientCardEntry extends React.Component
                                                           selected={this.state.client.decryptionKeyRef}
                                                           onChange={e => this.scimComponentBasics.updateInput(
                                                             e.target.name, e.target.value)}
-                                        
+
                                         />
                                     </React.Fragment>
                                   }

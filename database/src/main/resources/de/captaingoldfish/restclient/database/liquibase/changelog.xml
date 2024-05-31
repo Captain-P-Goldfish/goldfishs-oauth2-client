@@ -336,6 +336,8 @@
             <column name="PKCE_USE" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="PKCE_CODE_VERIFIER" type="VARCHAR(1024)"/>
         </addColumn>
+        <modifyDataType tableName="OPENID_CLIENT" columnName="AUTHENTICATION_TYPE" newDataType="VARCHAR(50)" />
+
     </changeSet>
 
 </databaseChangeLog>

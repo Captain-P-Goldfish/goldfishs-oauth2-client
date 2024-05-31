@@ -17,6 +17,8 @@ public final class AuthenticatorFactory
   {
     switch (openIdClient.getAuthenticationType())
     {
+      case "public":
+        return new PublicClientAuthenticator();
       case "basic":
         return new BasicAuthenticator(openIdClient.getClientId(), openIdClient.getClientSecret());
       case "jwt":
