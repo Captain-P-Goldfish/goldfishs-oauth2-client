@@ -6,11 +6,12 @@ import Form from "react-bootstrap/Form";
 import {AlertListMessages, FormInputField, LoadingSpinner} from "../base/form-base";
 import Button from "react-bootstrap/Button";
 import {Optional} from "../services/utils";
-import {Col, Container, Dropdown, DropdownButton, Row} from "react-bootstrap";
+import {Col, Container, Dropdown, DropdownButton, FormText, Row} from "react-bootstrap";
 import {ExclamationTriangle} from "react-bootstrap-icons";
 import {GoFlame} from "react-icons/go";
 import {JWT_BUILDER_ENDPOINT} from "../scim/scim-constants";
 import {Buffer} from 'buffer';
+import {decodeBase64, isJson, prettyPrintJson} from "../base/utils";
 
 export default class JwtParser extends React.Component
 {
@@ -93,13 +94,13 @@ export default class JwtParser extends React.Component
       let parseHeader = jwtPartDecoder(base64Header);
       jwtDetails.header = this.prettyPrintJwtJson(parseHeader);
       jwtDetails.infoMessages = ["JWE must be parsed at backend"];
-      return jwtDetails;
+      return [jwtDetails, null];
     }
 
     if (parts.length !== 3)
     {
       jwtDetails.warnMessages = ["Not a valid JSON Web Token"];
-      return jwtDetails;
+      return [jwtDetails, {}];
     }
 
     let base64Header = parts[0];
@@ -109,7 +110,65 @@ export default class JwtParser extends React.Component
     let parsedBody = jwtPartDecoder(base64Body);
     jwtDetails.header = this.prettyPrintJwtJson(parseHeader);
     jwtDetails.body = this.prettyPrintJwtJson(parsedBody);
-    return jwtDetails;
+
+
+    let signatureAndDisclosures = this.getDisclosuresFromSignature(parts);
+
+    return [jwtDetails, signatureAndDisclosures];
+  }
+
+  getDisclosuresFromSignature(parts)
+  {
+    if (parts.length !== 3)
+    {
+      return {
+        signature: parts[2]
+      };
+    }
+    let signature = parts[2];
+
+    if (!signature.includes("~"))
+    {
+      return {
+        signature: signature
+      }
+    }
+
+    let signatureAndDisclosures = signature.split("~");
+    if (signatureAndDisclosures.length === 1)
+    {
+      return {
+        signature: signatureAndDisclosures[0]
+      }
+    }
+
+    let disclosureArray = [];
+    let disclosureEncodedArray = [];
+    let keyBindingJwt = null;
+    // we start at index 1 because index 0 is the signature of the SD-JWT. The disclosures come after
+    for (let i = 1; i < signatureAndDisclosures.length; i++)
+    {
+      let encodedDisclosure = signatureAndDisclosures[i];
+      disclosureEncodedArray.push(encodedDisclosure);
+
+      let disclosure = decodeBase64(encodedDisclosure);
+      let isDisclosureJson = isJson(disclosure);
+      if (isDisclosureJson)
+      {
+        disclosure = prettyPrintJson(disclosure);
+        disclosureArray.push(disclosure);
+      } else
+      {
+        keyBindingJwt = encodedDisclosure;
+      }
+    }
+
+    return {
+      signature: signatureAndDisclosures[0],
+      disclosuresEncoded: disclosureEncodedArray,
+      disclosures: disclosureArray,
+      keyBindingJwt: keyBindingJwt
+    }
   }
 
   prettyPrintJwtJson(decodedTokenString)
@@ -127,7 +186,7 @@ export default class JwtParser extends React.Component
   render()
   {
     let jwtParts = this.getJwtParts();
-    let jwtDetails = this.parseJwt(jwtParts) || {};
+    let [jwtDetails, signatureAndDisclosures] = this.parseJwt(jwtParts) || [{}, {}];
     let isJws = new Optional(jwtParts).map(parts => parts.length === 3).orElse(false);
     let isJwe = new Optional(jwtParts).map(parts => parts.length === 5).orElse(false);
 
@@ -223,6 +282,20 @@ export default class JwtParser extends React.Component
                     {
                       (jwtDetails.parts || []).map((part, index) =>
                       {
+                        if (jwtDetails.parts.length === 3 && index === 2)
+                        {
+                          return <span key={"jwt-part-" + index}
+                                       className={"jwt-part jwt-part-" + (index <= 4 ? index
+                                         : "over")}>
+                                                {
+                                                  index > 0 &&
+                                                  <span className={"jwt-dot-separator"}>
+                                                        .<br/>
+                                                    </span>
+                                                }
+                            {signatureAndDisclosures.signature}
+                        </span>
+                        }
                         return <span key={"jwt-part-" + index}
                                      className={"jwt-part jwt-part-" + (index <= 4 ? index
                                        : "over")}>
@@ -233,8 +306,40 @@ export default class JwtParser extends React.Component
                                                     </span>
                                                 }
                           {part}
-                                            </span>
+                        </span>
                       })
+                    }
+                    {
+                      jwtDetails.parts && jwtDetails.parts.length === 3 && signatureAndDisclosures.disclosuresEncoded &&
+                      signatureAndDisclosures.disclosuresEncoded.length > 0 &&
+                      <>
+                        <br/>
+                        <FormText>Disclosures</FormText>
+                        <br/>
+                        {
+                          signatureAndDisclosures.disclosuresEncoded.map((disclosure, index) =>
+                          {
+                            if (signatureAndDisclosures.keyBindingJwt
+                              && index === signatureAndDisclosures.disclosuresEncoded.length - 1)
+                            {
+                              return <span key={"disclosure-paragraph-" + index} className={"text-black"}>
+                                <span className={"jwt-dot-separator"}>
+                                  <br/>~<br/>
+                                </span>
+                                  {disclosure}
+                              </span>
+                            }
+                            return <span key={"disclosure-paragraph-" + index}
+                                         className={"disclosure disclosure-" + (index <= 4 ? index
+                                           : "over")}>
+                              <span className={"jwt-dot-separator"}>
+                                <br/>~<br/>
+                              </span>
+                              {disclosure}
+                            </span>
+                          })
+                        }
+                      </>
                     }
                   </div>
                 }
@@ -269,6 +374,46 @@ export default class JwtParser extends React.Component
                                 }}
                                 onError={fieldName => this.scimClient.getErrors(this.state,
                                   fieldName)}/>
+                {
+                  signatureAndDisclosures && signatureAndDisclosures.disclosures &&
+                  <>
+                    {
+                      signatureAndDisclosures.disclosures.map((disclosure, index) =>
+                      {
+                        return <div className={"plain-disclosure"}>
+                          <FormText key={"jwt-disclosure-text-" + index}>
+                            {"Disclosure " + index}
+                          </FormText>
+                          <Form.Control id={"jwt-disclosure-" + index}
+                                        key={"jwt-disclosure-" + index}
+                                        name={"jwt-disclosure-" + index}
+                                        type="text"
+                                        as="textarea"
+                                        value={disclosure}
+                          />
+                        </div>
+                      })
+                    }
+                  </>
+                }
+                {
+                  signatureAndDisclosures && signatureAndDisclosures.keyBindingJwt &&
+                  <>
+                    <FormText className={"text-secondary"}>KB-JWT</FormText>
+                    <FormInputField id={"sd-key-binding-jwt"}
+                                    name={"sd-key-binding-jwt"}
+                      // className={"jwt-part-1"}
+                                    type="text"
+                                    as="textarea"
+                                    value={signatureAndDisclosures.keyBindingJwt}
+                                    onChange={() =>
+                                    {/*do nothing*/
+                                    }}
+                                    onError={() =>
+                                    {/* do nothing */
+                                    }}/>
+                  </>
+                }
               </Col>
             </Row>
           </Container>

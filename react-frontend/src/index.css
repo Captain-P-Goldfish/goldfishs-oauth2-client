@@ -806,3 +806,24 @@ span.add-new-resource {
 .response-history-item.accordion-item .alert-danger.accordion-header .accordion-button {
     background-color: #f8d7da;
 }
+
+
+.disclosure:nth-child(3n-2), .plain-disclosure:nth-child(3n-2) > *
+{
+    color: #a1a042;
+}
+
+.disclosure:nth-child(3n-1),.plain-disclosure:nth-child(3n-1) > *
+{
+    color: #35cd31 !important;
+}
+
+.disclosure:nth-child(3n),.plain-disclosure:nth-child(3n) > *
+{
+    color: #ff26a7 !important;;
+}
+
+.plain-disclosure > textarea
+{
+    min-height: 137px !important;
+}
