@@ -145,43 +145,43 @@ export default class OpenidClientWorkflow extends React.Component
                                         {
                                         }}/>
           }
-            <ApplicationInfoContext.Consumer>
-              {appInfo =>
-                appInfo &&
-                <>
-                  {
-                    this.state.authenticationType === this.clientCredentialsGrantType &&
-                        <ClientCredentialsGrantForm formReference={this.formReference}
-                                                    appInfo={appInfo}
-                                                    workflowDetails={this.state.workflowDetails}
-                                                    client={this.props.client}
-                                                    keyInfos={this.state.keyInfos}
-                                                    isLoading={this.state.isLoading}
-                                                    handleChange={this.handleNestedElementChange}
-                                                    handleResponse={details => this.handleGrantTypeResponseDetails(
-                                                      this.clientCredentialsGrantType, details)}
-                                                    onError={() =>
-                                                    {
-                                                    }}/>
-                  }
-                  {
-                    this.state.authenticationType === this.resourceOwnerGrantType &&
-                    <ResourceOwnerPasswordCredentialsForm
-                      client={this.props.client}
-                      appInfo={appInfo}
-                      keyInfos={this.state.keyInfos}
-                      workflowDetails={this.state.workflowDetails}
-                      isLoading={this.state.isLoading}
-                      handleChange={this.handleNestedElementChange}
-                      handleResponse={details => this.handleGrantTypeResponseDetails(
-                        this.state.authenticationType, details)}
-                      onError={() =>
-                      {
-                      }}/>
-                  }
-                </>
-              }
-            </ApplicationInfoContext.Consumer>
+          <ApplicationInfoContext.Consumer>
+            {appInfo =>
+              appInfo &&
+              <>
+                {
+                  this.state.authenticationType === this.clientCredentialsGrantType &&
+                  <ClientCredentialsGrantForm formReference={this.formReference}
+                                              appInfo={appInfo}
+                                              workflowDetails={this.state.workflowDetails}
+                                              client={this.props.client}
+                                              keyInfos={this.state.keyInfos}
+                                              isLoading={this.state.isLoading}
+                                              handleChange={this.handleNestedElementChange}
+                                              handleResponse={details => this.handleGrantTypeResponseDetails(
+                                                this.clientCredentialsGrantType, details)}
+                                              onError={() =>
+                                              {
+                                              }}/>
+                }
+                {
+                  this.state.authenticationType === this.resourceOwnerGrantType &&
+                  <ResourceOwnerPasswordCredentialsForm
+                    client={this.props.client}
+                    appInfo={appInfo}
+                    keyInfos={this.state.keyInfos}
+                    workflowDetails={this.state.workflowDetails}
+                    isLoading={this.state.isLoading}
+                    handleChange={this.handleNestedElementChange}
+                    handleResponse={details => this.handleGrantTypeResponseDetails(
+                      this.state.authenticationType, details)}
+                    onError={() =>
+                    {
+                    }}/>
+                }
+              </>
+            }
+          </ApplicationInfoContext.Consumer>
         </Form>
         {
           (this.state.responseDetails || []).map(responseDetails =>

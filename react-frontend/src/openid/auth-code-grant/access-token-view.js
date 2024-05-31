@@ -165,7 +165,7 @@ function NameValueList(props)
       {
         return <Row key={props.keyPrefix + index}>
           <Col sm={2}>{nameValuePair.name}</Col>
-          <Col sm={10}><JwsOffCanvas name={nameValuePair.name} value={nameValuePair.value} /></Col>
+          <Col sm={10}><JwsOffCanvas name={nameValuePair.name} value={nameValuePair.value}/></Col>
         </Row>;
       })
     }
@@ -232,7 +232,7 @@ export class AccessTokenResponse extends React.Component
           {
             return <Row key={"access-token-response-json-param-" + index}>
               <Col sm={2}>{key}</Col>
-              <Col sm={10}> <JwsOffCanvas name={key} value={this.state.json[key]} /> </Col>
+              <Col sm={10}> <JwsOffCanvas name={key} value={this.state.json[key]}/> </Col>
             </Row>;
           })
         }

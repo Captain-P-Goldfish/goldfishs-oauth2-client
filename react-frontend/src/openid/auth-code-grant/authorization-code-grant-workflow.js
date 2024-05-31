@@ -3,7 +3,7 @@ import Col from "react-bootstrap/Col";
 import {AlertListMessages, Collapseable, DpopDetails, LoadingSpinner} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
-import {Alert, Card, Collapse, FormCheck, FormControl, FormLabel, FormSelect} from "react-bootstrap";
+import {Alert, Card, Collapse, FormCheck} from "react-bootstrap";
 import ScimClient from "../../scim/scim-client";
 import {
   ACCESS_TOKEN_REQUEST_ENDPOINT,
@@ -36,7 +36,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
       dpopSignatureAlgorithm: previousDpopSignatureAlgorithm ||
         ((props.appInfo.jwtInfo.signatureAlgorithms || []).length > 0
           ? props.appInfo.jwtInfo.signatureAlgorithms[0] : null),
-      dpopNonce: previousDpopNonce  || "",
+      dpopNonce: previousDpopNonce || "",
       dpopJti: previousDpopJti || "",
       dpopHtm: previousDpopHtm || "",
       dpopHtu: previousDpopHtu || "",
@@ -292,7 +292,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
             {
               this.state.useDpop &&
               <Col md={7}>
-                <DpopDetails props={this.props} state={this.state} setState={this.setState} />
+                <DpopDetails props={this.props} state={this.state} setState={this.setState}/>
               </Col>
             }
           </Row>

@@ -12,7 +12,7 @@ export function TokenStoreList(props)
   const [loadedOnce, setloadedOnce] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [tokenStoreList, setTokenStoreList] = useState([]);
-  
+
   function addNewTokenStores(tokenStoreArray)
   {
     let newTokenStores = [...tokenStoreList].concat(tokenStoreArray);
@@ -21,7 +21,7 @@ export function TokenStoreList(props)
     setTokenStoreList(newTokenStores);
     props.setCategoryEntires(props.category, totalResults + tokenStoreArray.length);
   }
-  
+
   function updateTokenStore(oldtokenStore, newTokenStore)
   {
     let copiedTokenStores = [...tokenStoreList];
@@ -30,20 +30,20 @@ export function TokenStoreList(props)
     copiedTokenStores.sort((c1, c2) => c1.name.localeCompare(c2.name));
     setTokenStoreList(copiedTokenStores);
   }
-  
+
   function removeTokenStore(tokenStoreArray)
   {
     let copiedTokenStores = [...tokenStoreList];
     tokenStoreArray.forEach(tokenStore =>
-                            {
-                              let indexOf = copiedTokenStores.indexOf(tokenStore);
-                              copiedTokenStores.splice(indexOf, 1);
-                            });
+    {
+      let indexOf = copiedTokenStores.indexOf(tokenStore);
+      copiedTokenStores.splice(indexOf, 1);
+    });
     setTotalResults(totalResults - tokenStoreArray.length);
     setTokenStoreList(copiedTokenStores);
     props.setCategoryEntires(props.category, totalResults - tokenStoreArray.length);
   }
-  
+
   function toggleSingleCeckbox(checked, tokenStore)
   {
     tokenStore.checked = checked;
@@ -52,59 +52,59 @@ export function TokenStoreList(props)
     copiedTokenStores.splice(indexOf, 1, tokenStore);
     setTokenStoreList(copiedTokenStores);
   }
-  
+
   function toggleAllCheckboxes(checked)
   {
     let copiedTokenStores = [...tokenStoreList];
     copiedTokenStores.forEach(tokenStore =>
-                              {
-                                tokenStore.checked = checked;
-                              });
+    {
+      tokenStore.checked = checked;
+    });
     setTokenStoreList(copiedTokenStores);
   }
-  
+
   useEffect(() =>
-            {
-              setloadedOnce(false);
-              setTotalResults(0);
-              setTokenStoreList([]);
-            }, [props.filter]);
-  
+  {
+    setloadedOnce(false);
+    setTotalResults(0);
+    setTokenStoreList([]);
+  }, [props.filter]);
+
   useEffect(() =>
-            {
-              let searchRequest = {
-                startIndex: tokenStoreList.length,
-                filter: new Optional(props.filter).map(v => v.trim())
-                                                  .map(v => v.length === 0 ? undefined : v)
-                                                  .map(v => "token co \"" + v + "\" and categoryId eq " + props.category.id)
-                                                  .orElse("categoryId eq " + props.category.id),
-                sortBy: "name"
-              };
-    
-              function onSuccess(listResponse)
-              {
-                setTotalResults(listResponse.totalResults);
-                let newResources = listResponse.Resources || [];
-                addNewTokenStores([...newResources]);
-                setloadedOnce(true);
-              }
-    
-              function onError(errorResponse)
-              {
-                setErrors(errorResponse);
-              }
-    
-              if ((totalResults === 0 && !loadedOnce) || tokenStoreList.length < totalResults)
-              {
-                new TokenStoreClient().listTokenStores(searchRequest, onSuccess, onError);
-              }
-            }, [tokenStoreList]);
-  
+  {
+    let searchRequest = {
+      startIndex: tokenStoreList.length,
+      filter: new Optional(props.filter).map(v => v.trim())
+        .map(v => v.length === 0 ? undefined : v)
+        .map(v => "token co \"" + v + "\" and categoryId eq " + props.category.id)
+        .orElse("categoryId eq " + props.category.id),
+      sortBy: "name"
+    };
+
+    function onSuccess(listResponse)
+    {
+      setTotalResults(listResponse.totalResults);
+      let newResources = listResponse.Resources || [];
+      addNewTokenStores([...newResources]);
+      setloadedOnce(true);
+    }
+
+    function onError(errorResponse)
+    {
+      setErrors(errorResponse);
+    }
+
+    if ((totalResults === 0 && !loadedOnce) || tokenStoreList.length < totalResults)
+    {
+      new TokenStoreClient().listTokenStores(searchRequest, onSuccess, onError);
+    }
+  }, [tokenStoreList]);
+
   return <React.Fragment>
     {
       errors && errors.length > 0 &&
       <Alert variant={"danger"}>
-        <GoFlame /> {errors.details}
+        <GoFlame/> {errors.details}
       </Alert>
     }
     <TokenStoreTable category={props.category}
@@ -113,62 +113,62 @@ export function TokenStoreList(props)
                      updateTokenStore={updateTokenStore}
                      removeTokenStore={removeTokenStore}
                      toggleSingleCeckbox={toggleSingleCeckbox}
-                     toggleAllCheckboxes={toggleAllCheckboxes} />
+                     toggleAllCheckboxes={toggleAllCheckboxes}/>
   </React.Fragment>;
 }
 
 function TokenStoreTable(props)
 {
-  
+
   const [error, setError] = useState();
   const [bulkDeleteMode, setBulkDeleteMode] = useState(false);
   const [addNew, setAddNew] = useState(false);
-  
+
   const serviceProviderContext = useContext(ScimServiceProviderContext);
-  
+
   function deleteTokenStore(tokenStoreArray)
   {
     function onSuccess()
     {
       props.removeTokenStore(tokenStoreArray);
     }
-    
+
     function onError(errorResponse)
     {
       setError(errorResponse);
     }
-    
+
     new TokenStoreClient().deleteTokenStore(tokenStoreArray[0], onSuccess, onError);
   }
-  
+
   function bulkDeleteTokenStore()
   {
     let tokenStoreArray = props.tokenStoreList.filter(tokenStore => tokenStore.checked);
-    
+
     function onSuccess(successfulDeleteIds, failedDeleteIds)
     {
       let deletedTokenStores = tokenStoreArray.filter(tokenStore => successfulDeleteIds.includes(tokenStore.id));
       props.removeTokenStore(deletedTokenStores);
       setBulkDeleteMode(false);
     }
-    
+
     function onError(errorResponse)
     {
       setError(errorResponse);
       setBulkDeleteMode(false);
     }
-    
+
     new TokenStoreClient().bulkDeleteTokenStores(tokenStoreArray,
-                                                 serviceProviderContext.bulk.maxOperations,
-                                                 onSuccess,
-                                                 onError);
+      serviceProviderContext.bulk.maxOperations,
+      onSuccess,
+      onError);
   }
-  
+
   return <React.Fragment>
     {
       error && error.length > 0 &&
       <Alert variant={"danger"}>
-        <GoFlame /> {error.detail}
+        <GoFlame/> {error.detail}
       </Alert>
     }
     <Table striped bordered hover size="sm" variant={"dark"}>
@@ -176,7 +176,7 @@ function TokenStoreTable(props)
         <tr>
           <th className={"checkbox-column"}>
             <input type={"checkbox"}
-                   onChange={e => props.toggleAllCheckboxes(e.target.checked)} />
+                   onChange={e => props.toggleAllCheckboxes(e.target.checked)}/>
           </th>
           <th className={"token-store-id-column"}>id</th>
           <th className={"token-store-name-column"}>name</th>
@@ -186,15 +186,15 @@ function TokenStoreTable(props)
             {
               !bulkDeleteMode &&
               <React.Fragment>
-                <PlusLg className={"listed-icon icon"} onClick={() => setAddNew(true)} />
-                <Trash className={"icon"} onClick={() => setBulkDeleteMode(true)} />
+                <PlusLg className={"listed-icon icon"} onClick={() => setAddNew(true)}/>
+                <Trash className={"icon"} onClick={() => setBulkDeleteMode(true)}/>
               </React.Fragment>
             }
             {
               bulkDeleteMode &&
               <span className={"list-delete-insertion"}>
-                sure? <CheckLg className={"listed-icon icon"} onClick={() => bulkDeleteTokenStore()} />
-                <XLg className={"icon"} onClick={() => setBulkDeleteMode(false)} />
+                sure? <CheckLg className={"listed-icon icon"} onClick={() => bulkDeleteTokenStore()}/>
+                <XLg className={"icon"} onClick={() => setBulkDeleteMode(false)}/>
               </span>
             }
           </th>
@@ -213,7 +213,7 @@ function TokenStoreTable(props)
                            setAddNew(false);
                            props.addNewTokenStores(resourceArray);
                          }}
-                         removeTokenStore={() => setAddNew(false)} />
+                         removeTokenStore={() => setAddNew(false)}/>
         }
         {
           props.tokenStoreList.map(tokenStore => <TokenStoreRow key={tokenStore.id}
@@ -221,7 +221,7 @@ function TokenStoreTable(props)
                                                                 toggleSingleCeckbox={props.toggleSingleCeckbox}
                                                                 addNewTokenStores={props.addNewTokenStores}
                                                                 updateTokenStore={props.updateTokenStore}
-                                                                removeTokenStore={deleteTokenStore} />)
+                                                                removeTokenStore={deleteTokenStore}/>)
         }
       </tbody>
     </Table>
@@ -230,20 +230,20 @@ function TokenStoreTable(props)
 
 function TokenStoreRow(props)
 {
-  
+
   const [error, setError] = useState();
   const [deleteMode, setDeleteMode] = useState(false);
   const [editMode, setEditMode] = useState(props.editMode);
   const [viewTokenMode, setViewTokenMode] = useState(false);
-  
+
   const [token, setToken] = useState(props.tokenStore.token || "");
   const [tokenName, setTokenName] = useState(props.tokenStore.name || "");
-  
+
   function onError(errorResponse)
   {
     setError(errorResponse);
   }
-  
+
   function createNewTokenStore()
   {
     function onSuccess(resource)
@@ -251,11 +251,11 @@ function TokenStoreRow(props)
       setEditMode(false);
       props.addNewTokenStores([resource]);
     }
-    
+
     setError(null);
     new TokenStoreClient().createTokenStore(tokenName, token, props.tokenStore.categoryId, onSuccess, onError);
   }
-  
+
   function updateTokenStore()
   {
     function onSuccess(resource)
@@ -263,34 +263,35 @@ function TokenStoreRow(props)
       setEditMode(false);
       props.updateTokenStore(props.tokenStore, resource);
     }
-    
+
     setError(null);
     if (props.tokenStore.name !== tokenName || props.tokenStore.token !== token)
     {
       new TokenStoreClient().updateTokenStore(props.tokenStore.id,
-                                              tokenName,
-                                              token,
-                                              props.tokenStore.categoryId,
-                                              onSuccess,
-                                              onError);
-    }
-    else
+        tokenName,
+        token,
+        props.tokenStore.categoryId,
+        onSuccess,
+        onError);
+    } else
     {
       setEditMode(false);
     }
   }
-  
+
   function resetChanges()
   {
     setTokenName(props.tokenStore.name);
     setToken(props.tokenStore.token);
     setEditMode(false);
   }
-  
+
   return <React.Fragment>
     <tr>
-      <td><input type={"checkbox"} checked={props.tokenStore.checked || false}
-                 onChange={e => props.toggleSingleCeckbox(e.target.checked, props.tokenStore)} /></td>
+      <td>
+        <input type={"checkbox"} checked={props.tokenStore.checked || false}
+               onChange={e => props.toggleSingleCeckbox(e.target.checked, props.tokenStore)}/>
+      </td>
       <td>{props.tokenStore.id}</td>
       <td>
         {
@@ -299,7 +300,7 @@ function TokenStoreRow(props)
         }
         {
           editMode &&
-          <input type={"text"} value={tokenName} onChange={e => setTokenName(e.target.value)} />
+          <input type={"text"} value={tokenName} onChange={e => setTokenName(e.target.value)}/>
         }
       </td>
       <td className={"overflow-column"}>
@@ -312,34 +313,34 @@ function TokenStoreRow(props)
             }
             {
               viewTokenMode &&
-              <textarea className={"token-overview"} readOnly={true} value={token} />
+              <textarea className={"token-overview"} readOnly={true} value={token}/>
             }
             {
               !viewTokenMode &&
-              <Eye className={"right-floating-icon eye-icon"} onClick={() => setViewTokenMode(!viewTokenMode)} />
+              <Eye className={"right-floating-icon eye-icon"} onClick={() => setViewTokenMode(!viewTokenMode)}/>
             }
             {
               viewTokenMode &&
-              <EyeFill className={"right-floating-icon eye-icon"} onClick={() => setViewTokenMode(!viewTokenMode)} />
+              <EyeFill className={"right-floating-icon eye-icon"} onClick={() => setViewTokenMode(!viewTokenMode)}/>
             }
           </React.Fragment>
         }
         {
           editMode &&
-          <textarea value={token} onChange={e => setToken(e.target.value)} className={"token-area"} wrap="off" />
+          <textarea value={token} onChange={e => setToken(e.target.value)} className={"token-area"} wrap="off"/>
         }
       </td>
       <td>
         <span>
           created: {new Optional(props.tokenStore.meta).map(val => val.created)
-                                                       .map(val => new Date(val).toLocaleString())
-                                                       .orElse(null)}
+          .map(val => new Date(val).toLocaleString())
+          .orElse(null)}
         </span>
-        <br />
+        <br/>
         <span>
           modified: {new Optional(props.tokenStore.meta).map(val => val.lastModified)
-                                                        .map(val => new Date(val).toLocaleString())
-                                                        .orElse(null)}
+          .map(val => new Date(val).toLocaleString())
+          .orElse(null)}
         </span>
       </td>
       <td>
@@ -348,7 +349,7 @@ function TokenStoreRow(props)
           <React.Fragment>
             {
               !editMode &&
-              <PencilSquare onClick={() => setEditMode(!editMode)} className={"listed-icon icon"} />
+              <PencilSquare onClick={() => setEditMode(!editMode)} className={"listed-icon icon"}/>
             }
             {
               editMode &&
@@ -359,17 +360,16 @@ function TokenStoreRow(props)
                         if (props.tokenStore.id === 0)
                         {
                           createNewTokenStore();
-                        }
-                        else
+                        } else
                         {
                           updateTokenStore();
                         }
-                      }} />
+                      }}/>
                 <XLg className={"listed-icon icon"}
-                     onClick={() => resetChanges()} />
+                     onClick={() => resetChanges()}/>
               </React.Fragment>
             }
-            <Trash onClick={() => setDeleteMode(true)} className={"icon"} />
+            <Trash onClick={() => setDeleteMode(true)} className={"icon"}/>
           </React.Fragment>
         }
         {
@@ -380,13 +380,13 @@ function TokenStoreRow(props)
                            {
                              setDeleteMode(false);
                              props.removeTokenStore([props.tokenStore]);
-                           }} />
+                           }}/>
             <XLg className={"listed-icon icon"}
-                 onClick={() => setDeleteMode(false)} />
+                 onClick={() => setDeleteMode(false)}/>
           </span>
         }
       </td>
     </tr>
-  
+
   </React.Fragment>;
 }

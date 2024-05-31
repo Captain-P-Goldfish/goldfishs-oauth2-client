@@ -7,127 +7,124 @@ import {fireEvent, waitFor} from "@testing-library/react";
 
 export function mockFetch(status, fakeResponse)
 {
-    jest.spyOn(global, "fetch").mockImplementation(() =>
-    {
-        return Promise.resolve({
-            status: status,
-            json: () =>
-            {
-                return Promise.resolve(fakeResponse)
-            }
-        })
-    });
+  jest.spyOn(global, "fetch").mockImplementation(() =>
+  {
+    return Promise.resolve({
+      status: status,
+      json: () =>
+      {
+        return Promise.resolve(fakeResponse)
+      }
+    })
+  });
 }
 
 export default class Assertions
 {
 
-    querySelector;
-    element;
+  querySelector;
+  element;
 
-    constructor(querySelector)
+  constructor(querySelector)
+  {
+    this.querySelector = querySelector;
+    this.element = document.querySelector(this.querySelector);
+  }
+
+  findClosest(querySelector)
+  {
+    this.element.closest(querySelector);
+  }
+
+  isPresent()
+  {
+    expect(this.element).toBeInTheDocument();
+    return this;
+  }
+
+  isVisible()
+  {
+    expect(this.element).toBeVisible();
+    return this;
+  }
+
+  isNotPresent()
+  {
+    expect(this.element).not.toBeInTheDocument();
+    return this;
+  }
+
+  assertEquals(expectedText)
+  {
+    if (this.element.textContent.trim() === "")
     {
-        this.querySelector = querySelector;
-        this.element = document.querySelector(this.querySelector);
-    }
-
-    findClosest(querySelector)
+      if (expectedText === undefined)
+      {
+        expect(undefined).toBe(expectedText);
+      } else
+      {
+        expect(this.element.textContent.trim()).toBe(expectedText);
+      }
+    } else
     {
-        this.element.closest(querySelector);
+      expect(this.element.textContent.trim()).toBe(expectedText);
     }
+    return this;
+  }
 
-    isPresent()
+  hasClass(className)
+  {
+    expect(this.element).toHaveClass(className);
+    return this;
+  }
+
+  hasNotClass(className)
+  {
+    expect(this.element).not.toHaveClass(className);
+    return this;
+  }
+
+  hasValueSelected(value)
+  {
+    expect(this.element.value).toBe(value);
+    return this;
+  }
+
+  async fireChangeEvent(value)
+  {
+    if (value instanceof File)
     {
-        expect(this.element).toBeInTheDocument();
-        return this;
-    }
-
-    isVisible()
+      await fireEvent.change(this.element, {target: {files: [value]}});
+    } else
     {
-        expect(this.element).toBeVisible();
-        return this;
+      await fireEvent.change(this.element, {target: {value: value}});
     }
+    return this;
+  }
 
-    isNotPresent()
+  async clickElement(awaitCondition)
+  {
+    this.element.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+    if (awaitCondition !== undefined)
     {
-        expect(this.element).not.toBeInTheDocument();
-        return this;
+      await waitFor(() =>
+      {
+        awaitCondition();
+      });
     }
+    return this
+  }
 
-    assertEquals(expectedText)
+  hasErrors(errorMessages)
+  {
+    let fieldErrors = this.element.querySelectorAll(".error-list-item");
+    expect(fieldErrors.length).toBe(errorMessages.length)
+
+    for (let i = 0; i < errorMessages; i++)
     {
-        if (this.element.textContent.trim() === "")
-        {
-            if (expectedText === undefined)
-            {
-                expect(undefined).toBe(expectedText);
-            }
-            else
-            {
-                expect(this.element.textContent.trim()).toBe(expectedText);
-            }
-        }
-        else
-        {
-            expect(this.element.textContent.trim()).toBe(expectedText);
-        }
-        return this;
+      const message = errorMessages[i];
+      expect(fieldErrors[i].textContent).toBe(message);
     }
-
-    hasClass(className)
-    {
-        expect(this.element).toHaveClass(className);
-        return this;
-    }
-
-    hasNotClass(className)
-    {
-        expect(this.element).not.toHaveClass(className);
-        return this;
-    }
-
-    hasValueSelected(value)
-    {
-        expect(this.element.value).toBe(value);
-        return this;
-    }
-
-    async fireChangeEvent(value)
-    {
-        if (value instanceof File)
-        {
-            await fireEvent.change(this.element, {target: {files: [value]}});
-        }
-        else
-        {
-            await fireEvent.change(this.element, {target: {value: value}});
-        }
-        return this;
-    }
-
-    async clickElement(awaitCondition)
-    {
-        this.element.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-        if (awaitCondition !== undefined)
-        {
-            await waitFor(() =>
-            {
-                awaitCondition();
-            });
-        }
-        return this
-    }
-
-    hasErrors(errorMessages)
-    {
-        let fieldErrors = this.element.querySelectorAll(".error-list-item");
-        expect(fieldErrors.length).toBe(errorMessages.length)
-
-        for (let i = 0; i < errorMessages; i++)
-        {
-            const message = errorMessages[i];
-            expect(fieldErrors[i].textContent).toBe(message);
-        }
-    }
+  }
 }
 

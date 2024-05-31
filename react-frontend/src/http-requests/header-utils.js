@@ -6,24 +6,24 @@ import {Optional} from "../services/utils";
 
 export function toHeadersObject(headerText)
 {
-    if (new Optional(headerText).isEmpty())
-    {
-        return {};
-    }
-    let lines = headerText.split('\n');
-    for (let i = 0; i < lines.length; i++)
-    {
-        let line = lines[i];
-        let keyValue = line.split(':');
-        
-    }
+  if (new Optional(headerText).isEmpty())
+  {
+    return {};
+  }
+  let lines = headerText.split('\n');
+  for (let i = 0; i < lines.length; i++)
+  {
+    let line = lines[i];
+    let keyValue = line.split(':');
+
+  }
 }
 
 export function toHeaderString(headerArray)
 {
-    if (new Optional(headerArray).map(a => a.length === 0).isEmpty())
-    {
-        return "";
-    }
-    return headerArray.map(keyValue => keyValue.name + ": " + keyValue.value).join("\n");
+  if (new Optional(headerArray).map(a => a.length === 0).isEmpty())
+  {
+    return "";
+  }
+  return headerArray.map(keyValue => keyValue.name + ": " + keyValue.value).join("\n");
 }

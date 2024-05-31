@@ -3,14 +3,14 @@ import {SEARCH_REQUEST_URI, TOKEN_CATEGORY_ENDPOINT, TOKEN_CATEGORY_URI} from ".
 
 export class TokenCategoryClient
 {
-  
+
   constructor()
   {
     this.scimClient = new ScimClient(TOKEN_CATEGORY_ENDPOINT, () =>
     {
     });
   }
-  
+
   createCategory(name, onSuccess, onError)
   {
     let category = {
@@ -18,25 +18,24 @@ export class TokenCategoryClient
       name: name
     };
     this.scimClient.createResource(category)
-        .then(response =>
-              {
-                if (response.success)
-                {
-                  response.resource.then(resource =>
-                                         {
-                                           onSuccess(resource);
-                                         });
-                }
-                else
-                {
-                  response.resource.then(errorResponse =>
-                                         {
-                                           onError(errorResponse);
-                                         });
-                }
-              });
+      .then(response =>
+      {
+        if (response.success)
+        {
+          response.resource.then(resource =>
+          {
+            onSuccess(resource);
+          });
+        } else
+        {
+          response.resource.then(errorResponse =>
+          {
+            onError(errorResponse);
+          });
+        }
+      });
   }
-  
+
   listCategories({
                    startIndex,
                    filter,
@@ -53,7 +52,7 @@ export class TokenCategoryClient
     };
     this.scimClient.listResourcesWithPost(searchRequest, onSuccess, onError);
   }
-  
+
   updateCategory(id, name, onSuccess, onError)
   {
     let category = {
@@ -61,41 +60,39 @@ export class TokenCategoryClient
       name: name
     };
     this.scimClient.updateResource(category, id)
-        .then(response =>
-              {
-                if (response.success)
-                {
-                  response.resource.then(resource =>
-                                         {
-                                           onSuccess(resource);
-                                         });
-                }
-                else
-                {
-                  response.resource.then(errorResponse =>
-                                         {
-                                           onError(errorResponse);
-                                         });
-                }
-              });
+      .then(response =>
+      {
+        if (response.success)
+        {
+          response.resource.then(resource =>
+          {
+            onSuccess(resource);
+          });
+        } else
+        {
+          response.resource.then(errorResponse =>
+          {
+            onError(errorResponse);
+          });
+        }
+      });
   }
-  
+
   deleteCategory(category, onSuccess, onError)
   {
     this.scimClient.deleteResource(category.id)
-        .then(response =>
-              {
-                if (response.success)
-                {
-                  onSuccess(category);
-                }
-                else
-                {
-                  response.resource.then(errorResponse =>
-                                         {
-                                           onError(errorResponse);
-                                         });
-                }
-              });
+      .then(response =>
+      {
+        if (response.success)
+        {
+          onSuccess(category);
+        } else
+        {
+          response.resource.then(errorResponse =>
+          {
+            onError(errorResponse);
+          });
+        }
+      });
   }
 }

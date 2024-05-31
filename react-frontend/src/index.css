@@ -465,7 +465,7 @@ div.grant-type-workflow {
     margin-top: 20px;
 }
 
-div.workflow-details{
+div.workflow-details {
     color: whitesmoke;
 }
 
@@ -719,7 +719,7 @@ span.add-new-resource {
     margin-left: 10px;
 }
 
-.clickable-inner-menu-entry{
+.clickable-inner-menu-entry {
     text-decoration: underline;
     cursor: pointer;
 }
@@ -728,7 +728,7 @@ span.add-new-resource {
     background-color: lightgrey !important;
 }
 
-.new-menu-entry-input, .new-menu-entry-input:active  {
+.new-menu-entry-input, .new-menu-entry-input:active {
     color: black !important;
     outline: none !important;
     width: 75% !important;
@@ -799,7 +799,7 @@ span.add-new-resource {
     color: #c58e02;
 }
 
-.alert-danger{
+.alert-danger {
     background-color: #f8d7da;
 }
 

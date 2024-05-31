@@ -44,70 +44,70 @@ export const HTTP_RESPONSE_HISTORY_ENDPOINT = BASE_URL + "/HttpResponseHistory";
  */
 export function httpHeaderToScimJson(httpHeaderString)
 {
-    let lines = httpHeaderString.split('\n');
-    let jsonArray = [];
-    for (let i = 0; i < lines.length; i++)
+  let lines = httpHeaderString.split('\n');
+  let jsonArray = [];
+  for (let i = 0; i < lines.length; i++)
+  {
+    let line = lines[i];
+    let keyValue = line.split(':');
+    if (keyValue.length === 2)
     {
-        let line = lines[i];
-        let keyValue = line.split(':');
-        if (keyValue.length === 2)
-        {
-            let key = keyValue[0];
-            let value = keyValue[1];
-            jsonArray.push({
-                               name: key,
-                               value: value
-                           });
-        }
+      let key = keyValue[0];
+      let value = keyValue[1];
+      jsonArray.push({
+        name: key,
+        value: value
+      });
     }
-    return jsonArray;
+  }
+  return jsonArray;
 }
 
 export function scimHttpHeaderToString(scimHttpHeader)
 {
-    if (new Optional(scimHttpHeader).isEmpty())
-    {
-        return "";
-    }
-    let httpHeaderString = "";
-    for (let i = 0; i < scimHttpHeader.length; i++)
-    {
-        let keyValue = scimHttpHeader[i];
-        httpHeaderString += keyValue.name + ": " + keyValue.value + "\n";
-    }
-    return httpHeaderString;
+  if (new Optional(scimHttpHeader).isEmpty())
+  {
+    return "";
+  }
+  let httpHeaderString = "";
+  for (let i = 0; i < scimHttpHeader.length; i++)
+  {
+    let keyValue = scimHttpHeader[i];
+    httpHeaderString += keyValue.name + ": " + keyValue.value + "\n";
+  }
+  return httpHeaderString;
 }
 
 export function loadProxies(setResources)
 {
-    let scimClient = new ScimClient2();
-    let onSuccess = listResponse =>
-    {
-        setResources(listResponse.Resources);
-    };
-    scimClient.listResources({
-                                 resourcePath: PROXY_ENDPOINT,
-                                 onSuccess: onSuccess
-                             });
+  let scimClient = new ScimClient2();
+  let onSuccess = listResponse =>
+  {
+    setResources(listResponse.Resources);
+  };
+  scimClient.listResources({
+    resourcePath: PROXY_ENDPOINT,
+    onSuccess: onSuccess
+  });
 }
 
 export function loadKeystoreInfos(setResources)
 {
-    let scimClient = new ScimClient2();
-    let onSuccess = listResponse =>
-    {
-        setResources(new Optional(listResponse).map(lr => lr.Resources).map(r => r[0]).map(
-            keystore => keystore.keyInfos).orElse([]));
-    };
-    scimClient.listResources({
-                                 resourcePath: KEYSTORE_ENDPOINT,
-                                 onSuccess: onSuccess
-                             });
+  let scimClient = new ScimClient2();
+  let onSuccess = listResponse =>
+  {
+    setResources(new Optional(listResponse).map(lr => lr.Resources).map(r => r[0]).map(
+      keystore => keystore.keyInfos).orElse([]));
+  };
+  scimClient.listResources({
+    resourcePath: KEYSTORE_ENDPOINT,
+    onSuccess: onSuccess
+  });
 }
 
 export function getFieldError(errorResponse, fieldName)
 {
-    return new Optional(errorResponse).map(val => val.fieldErrors)
-                                      .map(fieldErrors => fieldErrors[fieldName])
-                                      .orElse([]);
+  return new Optional(errorResponse).map(val => val.fieldErrors)
+    .map(fieldErrors => fieldErrors[fieldName])
+    .orElse([]);
 }

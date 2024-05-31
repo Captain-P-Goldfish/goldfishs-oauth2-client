@@ -7,20 +7,20 @@ import {TokenStoreList} from "./token-store-list";
 
 export function TokenCategoryList()
 {
-  
+
   const [errors, setErrors] = useState({});
   const [filter, setFilter] = useState("");
   const [loadedOnce, setloadedOnce] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [tokenCategoryList, setTokenCategoryList] = useState([]);
-  
+
   function addNewCategories(categoryArray)
   {
     let newTokenCategories = [...tokenCategoryList, ...categoryArray];
     newTokenCategories.sort((c1, c2) => c1.name.localeCompare(c2.name));
     setTokenCategoryList(newTokenCategories);
   }
-  
+
   function updateCategory(oldCategory, newCategory)
   {
     let copiedList = [...tokenCategoryList];
@@ -28,7 +28,7 @@ export function TokenCategoryList()
     copiedList.splice(indexOf, 1, newCategory);
     setTokenCategoryList([...copiedList]);
   }
-  
+
   function removeCategory(category)
   {
     let copiedList = [...tokenCategoryList];
@@ -37,40 +37,40 @@ export function TokenCategoryList()
     setTotalResults(totalResults - 1);
     setTokenCategoryList([...copiedList]);
   }
-  
+
   function setCategoryEntires(category, numberOfEntries)
   {
     category.numberOfEntries = numberOfEntries;
     let copiedList = [...tokenCategoryList];
     setTokenCategoryList([...copiedList]);
   }
-  
+
   useEffect(() =>
-            {
-              let searchRequest = {
-                startIndex: tokenCategoryList.length,
-                sortBy: "name"
-              };
-    
-              function onSuccess(listResponse)
-              {
-                setTotalResults(listResponse.totalResults);
-                let newResources = listResponse.Resources || [];
-                addNewCategories([...newResources]);
-                setloadedOnce(true);
-              }
-    
-              function onError(errorResponse)
-              {
-                setErrors(errorResponse);
-              }
-    
-              if ((totalResults === 0 && !loadedOnce) || tokenCategoryList.length < totalResults)
-              {
-                new TokenCategoryClient().listCategories(searchRequest, onSuccess, onError);
-              }
-            }, [tokenCategoryList]);
-  
+  {
+    let searchRequest = {
+      startIndex: tokenCategoryList.length,
+      sortBy: "name"
+    };
+
+    function onSuccess(listResponse)
+    {
+      setTotalResults(listResponse.totalResults);
+      let newResources = listResponse.Resources || [];
+      addNewCategories([...newResources]);
+      setloadedOnce(true);
+    }
+
+    function onError(errorResponse)
+    {
+      setErrors(errorResponse);
+    }
+
+    if ((totalResults === 0 && !loadedOnce) || tokenCategoryList.length < totalResults)
+    {
+      new TokenCategoryClient().listCategories(searchRequest, onSuccess, onError);
+    }
+  }, [tokenCategoryList]);
+
   return <React.Fragment>
     {
       errors && errors.length > 0 &&
@@ -96,7 +96,7 @@ export function TokenCategoryList()
                          {
                            setFilter(document.getElementById("filter-input").value);
                          }
-                       }} />
+                       }}/>
                 <Button onClick={e => setFilter(document.getElementById("filter-input").value)}
                 >search</Button>
               </span>
@@ -110,16 +110,16 @@ export function TokenCategoryList()
             {
               setTotalResults(totalResults + 1);
               addNewCategories([resource]);
-            }} />
+            }}/>
             {
               tokenCategoryList &&
               tokenCategoryList.map(tokenCategory =>
-                                    {
-                                      return <CategoryListItem key={tokenCategory.id}
-                                                               category={tokenCategory}
-                                                               updateCategory={updateCategory}
-                                                               removeCategory={removeCategory} />;
-                                    })
+              {
+                return <CategoryListItem key={tokenCategory.id}
+                                         category={tokenCategory}
+                                         updateCategory={updateCategory}
+                                         removeCategory={removeCategory}/>;
+              })
             }
           </ListGroup>
         </Col>
@@ -128,13 +128,13 @@ export function TokenCategoryList()
             {
               tokenCategoryList &&
               tokenCategoryList.map(tokenCategory =>
-                                    {
-                                      return <Tab.Pane key={tokenCategory.id}
-                                                       eventKey={"#" + tokenCategory.id}>
-                                        <TokenStoreList category={tokenCategory} filter={filter}
-                                                        setCategoryEntires={setCategoryEntires} />
-                                      </Tab.Pane>;
-                                    })
+              {
+                return <Tab.Pane key={tokenCategory.id}
+                                 eventKey={"#" + tokenCategory.id}>
+                  <TokenStoreList category={tokenCategory} filter={filter}
+                                  setCategoryEntires={setCategoryEntires}/>
+                </Tab.Pane>;
+              })
             }
           </Tab.Content>
         </Col>
@@ -145,49 +145,49 @@ export function TokenCategoryList()
 
 function CategoryListItem(props)
 {
-  
+
   const [errors, setErrors] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
   const [value, setValue] = useState(props.category.name);
-  
+
   function updateCategory()
   {
     setErrors(null);
-    
+
     function onSuccess(newCategory)
     {
       props.updateCategory(props.category, newCategory);
     }
-    
+
     if (props.category.name !== value)
     {
       new TokenCategoryClient().updateCategory(props.category.id,
-                                               value,
-                                               onSuccess,
-                                               errorResponse => setErrors(errorResponse));
+        value,
+        onSuccess,
+        errorResponse => setErrors(errorResponse));
     }
   }
-  
+
   function deleteCategory()
   {
     setErrors(null);
-    
+
     function onSuccess(resource)
     {
       props.removeCategory(resource);
     }
-    
+
     new TokenCategoryClient().deleteCategory(props.category, onSuccess, errorResponse => setErrors(errorResponse));
   }
-  
+
   let numberOfEntries = props.category.numberOfEntries || 0;
-  
+
   return <ListGroup.Item variant={(numberOfEntries === 0) ? "dark" : "light"}
                          action
                          href={"#" + props.category.id}
                          onKeyDown={e => editMode && e.stopPropagation()}>
-    <ArrowRightCircle style={{margin: "0 10px 0 0"}} />
+    <ArrowRightCircle style={{margin: "0 10px 0 0"}}/>
     {
       !editMode &&
       <React.Fragment>
@@ -206,16 +206,15 @@ function CategoryListItem(props)
                {
                  updateCategory();
                  setEditMode(!editMode);
-               }
-               else if (e.key === 'Escape')
+               } else if (e.key === 'Escape')
                {
                  setValue(props.category.name);
                  setEditMode(false);
                }
-             }} />
+             }}/>
     }
     <Trash className={"add-list-item-icon delete-icon"}
-           onClick={() => setDeleteMode(!deleteMode)} />
+           onClick={() => setDeleteMode(!deleteMode)}/>
     {
       editMode &&
       <XLg className={"add-list-item-icon abort-icon listed-icon"}
@@ -223,7 +222,7 @@ function CategoryListItem(props)
            {
              setValue(props.category.name);
              setEditMode(false);
-           }} />
+           }}/>
     }
     <EditIcon editMode={editMode}
               classNames={"add-list-item-icon edit-icon listed-icon"}
@@ -235,16 +234,16 @@ function CategoryListItem(props)
                   updateCategory();
                 }
                 setEditMode(!editMode);
-              }} />
+              }}/>
     {
       deleteMode &&
-      <DeleteCategoryBlock deleteMode={deleteMode} setDeleteMode={setDeleteMode} deleteCategory={deleteCategory} />
+      <DeleteCategoryBlock deleteMode={deleteMode} setDeleteMode={setDeleteMode} deleteCategory={deleteCategory}/>
     }
     {
       errors && errors.detail &&
       <Alert variant={"danger"}>
         <Form.Text>
-          <GoFlame /> {errors.detail}
+          <GoFlame/> {errors.detail}
         </Form.Text>
       </Alert>
     }
@@ -253,7 +252,7 @@ function CategoryListItem(props)
 
 function DeleteCategoryBlock(props)
 {
-  
+
   return <div className={"list-delete-insertion"}>
     <div className={"list-delete-text"}>
       delete category?
@@ -282,22 +281,22 @@ function EditIcon(props)
     {
       !props.editMode &&
       <PencilSquare className={props.classNames}
-                    onClick={props.onClick} />
+                    onClick={props.onClick}/>
     }
     {
       props.editMode &&
       <Save className={props.classNames}
-            onClick={props.onClick} />
+            onClick={props.onClick}/>
     }
   </React.Fragment>;
 }
 
 function CategoryHeader(props)
 {
-  
+
   const [errors, setErrors] = useState({});
   const [category, setCategory] = useState();
-  
+
   function saveNewCategory()
   {
     function onSaveSuccess(category)
@@ -306,15 +305,15 @@ function CategoryHeader(props)
       setCategory(null);
       setErrors(null);
     }
-    
+
     function onSaveError(errorResponse)
     {
       setErrors(errorResponse);
     }
-    
+
     new TokenCategoryClient().createCategory(category, onSaveSuccess, onSaveError);
   }
-  
+
   return <React.Fragment>
     <ListGroup.Item variant={"warning"}>
       Categories <PlusLg className={"add-list-item-icon"}
@@ -324,7 +323,7 @@ function CategoryHeader(props)
                            {
                              setCategory("new_category");
                            }
-                         }} />
+                         }}/>
     </ListGroup.Item>
     {
       category &&
@@ -339,16 +338,16 @@ function CategoryHeader(props)
                  {
                    saveNewCategory();
                  }
-               }} />
+               }}/>
         <XLg className={"add-list-item-icon delete-icon edit"}
-             onClick={() => setCategory(null)} />
+             onClick={() => setCategory(null)}/>
         <Save className={"add-list-item-icon save-icon listed-icon edit"}
-              onClick={() => saveNewCategory()} />
+              onClick={() => saveNewCategory()}/>
         {
           errors && errors.detail &&
           <Alert variant={"danger"}>
             <Form.Text>
-              <GoFlame /> {errors.detail}
+              <GoFlame/> {errors.detail}
             </Form.Text>
           </Alert>
         }
