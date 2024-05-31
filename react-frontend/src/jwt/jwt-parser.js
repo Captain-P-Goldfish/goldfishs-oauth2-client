@@ -322,18 +322,22 @@ export default class JwtParser extends React.Component
                             if (signatureAndDisclosures.keyBindingJwt
                               && index === signatureAndDisclosures.disclosuresEncoded.length - 1)
                             {
-                              return <span key={"disclosure-paragraph-" + index} className={"text-black"}>
-                                <span className={"jwt-dot-separator"}>
+                              return <span key={"key-binding-jwt-paragraph"} className={"text-black"}>
+                                <span>
                                   <br/>~<br/>
                                 </span>
-                                  {disclosure}
+                                {disclosure}
                               </span>
                             }
                             return <span key={"disclosure-paragraph-" + index}
                                          className={"disclosure disclosure-" + (index <= 4 ? index
                                            : "over")}>
-                              <span className={"jwt-dot-separator"}>
-                                <br/>~<br/>
+                              <span>
+                                {
+                                  index > 0 &&
+                                  <br/>
+                                }
+                                ~<br/>
                               </span>
                               {disclosure}
                             </span>
@@ -347,7 +351,7 @@ export default class JwtParser extends React.Component
               <Col sm={5}>
                 <FormInputField id={"jwt-parser-key-id"}
                                 name="keyId"
-                                readOnly={true}
+                                contentEditable={false}
                                 type="hidden"
                                 value={this.state.selectedKey}
                                 onError={fieldName => this.scimClient.getErrors(this.state,
@@ -380,8 +384,8 @@ export default class JwtParser extends React.Component
                     {
                       signatureAndDisclosures.disclosures.map((disclosure, index) =>
                       {
-                        return <div className={"plain-disclosure"}>
-                          <FormText key={"jwt-disclosure-text-" + index}>
+                        return <div key={"jwt-plain-disclosure-text-" + index} className={"plain-disclosure"}>
+                          <FormText>
                             {"Disclosure " + index}
                           </FormText>
                           <Form.Control id={"jwt-disclosure-" + index}
@@ -389,6 +393,8 @@ export default class JwtParser extends React.Component
                                         name={"jwt-disclosure-" + index}
                                         type="text"
                                         as="textarea"
+                                        contentEditable={false}
+                                        onChange={() => {/*do nothing*/}}
                                         value={disclosure}
                           />
                         </div>
@@ -400,18 +406,12 @@ export default class JwtParser extends React.Component
                   signatureAndDisclosures && signatureAndDisclosures.keyBindingJwt &&
                   <>
                     <FormText className={"text-secondary"}>KB-JWT</FormText>
-                    <FormInputField id={"sd-key-binding-jwt"}
-                                    name={"sd-key-binding-jwt"}
-                      // className={"jwt-part-1"}
-                                    type="text"
-                                    as="textarea"
-                                    value={signatureAndDisclosures.keyBindingJwt}
-                                    onChange={() =>
-                                    {/*do nothing*/
-                                    }}
-                                    onError={() =>
-                                    {/* do nothing */
-                                    }}/>
+                    <Form.Control id={"sd-key-binding-jwt"}
+                                  name={"sd-key-binding-jwt"}
+                                  type="text"
+                                  as="textarea"
+                                  value={signatureAndDisclosures.keyBindingJwt}
+                                  onChange={() => {/*do nothing*/}}/>
                   </>
                 }
               </Col>
