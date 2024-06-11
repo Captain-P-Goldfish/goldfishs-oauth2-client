@@ -36,8 +36,8 @@
     </developers>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -45,49 +45,50 @@
         <!--suppress UnresolvedMavenProperty -->
         <formatter-path>${project.parent.basedir}</formatter-path>
 
-        <version.lombok>1.18.24</version.lombok>
+        <version.lombok>1.18.32</version.lombok>
 
         <!-- application dependencies -->
-        <version.scim.sdk>1.15.0</version.scim.sdk>
+        <version.scim.sdk>1.23.0</version.scim.sdk>
         <version.commons.lang3>3.11</version.commons.lang3>
-        <version.commons.io>2.8.0</version.commons.io>
-        <version.commons.codec>1.15</version.commons.codec>
-        <version.spring>5.3.23</version.spring>
-        <version.springboot>2.7.4</version.springboot>
-        <version.spring.data>2.7.3</version.spring.data>
-        <version.hsqldb>2.7.0</version.hsqldb>
-        <version.sqlserver.driver>9.2.1.jre11</version.sqlserver.driver>
-        <version.mysql.driver>8.0.30</version.mysql.driver>
-        <version.mariadb.driver>2.7.3</version.mariadb.driver>
-        <version.postgres.driver>42.2.20</version.postgres.driver>
+        <version.commons.io>2.16.1</version.commons.io>
+        <version.commons.codec>1.17.0</version.commons.codec>
+        <version.spring>6.1.8</version.spring>
+        <version.springboot>3.3.0</version.springboot>
+        <version.hsqldb>2.7.3</version.hsqldb>
+        <version.sqlserver.driver>12.7.0</version.sqlserver.driver>
+        <version.mysql.driver>8.4.0</version.mysql.driver>
+        <version.mariadb.driver>3.4.0</version.mariadb.driver>
+        <version.postgres.driver>42.7.3</version.postgres.driver>
         <version.oracle.driver>19.10.0.0</version.oracle.driver>
-        <version.liquibase>4.16.1</version.liquibase>
-        <version.bouncy.castle>1.70</version.bouncy.castle>
+        <version.liquibase>4.28.0</version.liquibase>
+        <version.bouncy.castle>1.78.1</version.bouncy.castle>
         <version.validation.api>2.0.1.Final</version.validation.api>
-        <version.nimbus.jose.jwt>9.25.4</version.nimbus.jose.jwt>
-        <version.nimbus.oauth2>9.43.1</version.nimbus.oauth2>
-        <version.caffeine>3.1.1</version.caffeine>
+        <version.nimbus.jose.jwt>9.40</version.nimbus.jose.jwt>
+        <version.nimbus.oauth2>11.12</version.nimbus.oauth2>
+        <version.caffeine>3.1.8</version.caffeine>
         <version.commons.fileupload>1.4</version.commons.fileupload>
-        <version.unirest>3.13.11</version.unirest>
+        <version.apache-httpclient>5.3.1</version.apache-httpclient>
 
         <!-- version conflicts -->
         <version.javassist>3.27.0-GA</version.javassist>
         <version.checker.qual>3.11.0</version.checker.qual>
         <version.apiguardian>1.1.2</version.apiguardian>
+        <version.opentest4j>1.3.0</version.opentest4j>
+        <version.antlr>4.13.1</version.antlr>
 
         <!-- logging dependencies -->
-        <version.log4j2>2.18.0</version.log4j2>
-        <version.slf4j>1.7.36</version.slf4j>
+        <version.log4j2>2.23.1</version.log4j2>
+        <version.slf4j>2.0.13</version.slf4j>
 
         <!-- test dependencies -->
-        <version.junit.jupiter>5.7.0</version.junit.jupiter>
+        <version.junit.jupiter>5.10.2</version.junit.jupiter>
         <version.hamcrest>2.2</version.hamcrest>
         <version.reflections>0.9.12</version.reflections>
-        <version.mockito>3.7.7</version.mockito>
+        <version.mockito>5.12.0</version.mockito>
         <version.equalsverifier>3.5.2</version.equalsverifier>
 
         <!-- plugins -->
-        <version.maven.compiler.plugin>3.8.1</version.maven.compiler.plugin>
+        <version.maven.compiler.plugin>3.13.0</version.maven.compiler.plugin>
         <version.maven.formatter.plugin>2.13.0</version.maven.formatter.plugin>
         <version.maven.enforcer.plugin>3.0.0-M3</version.maven.enforcer.plugin>
         <version.maven.surefire.plugin>3.0.0-M5</version.maven.surefire.plugin>
@@ -171,12 +172,12 @@
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk15on</artifactId>
+                <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${version.bouncy.castle}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
+                <artifactId>bcprov-jdk18on</artifactId>
                 <version>${version.bouncy.castle}</version>
             </dependency>
             <dependency>
@@ -207,8 +208,8 @@
                 <version>${version.sqlserver.driver}</version>
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
                 <version>${version.mysql.driver}</version>
             </dependency>
             <dependency>
@@ -242,9 +243,9 @@
                 <version>${version.commons.fileupload}</version>
             </dependency>
             <dependency>
-                <groupId>com.konghq</groupId>
-                <artifactId>unirest-java</artifactId>
-                <version>${version.unirest}</version>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>${version.apache-httpclient}</version>
             </dependency>
 
             <!-- version conflicts -->
@@ -263,6 +264,16 @@
                 <artifactId>apiguardian-api</artifactId>
                 <version>${version.apiguardian}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opentest4j</groupId>
+                <artifactId>opentest4j</artifactId>
+                <version>${version.opentest4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${version.antlr}</version>
+            </dependency>
 
 
             <!-- logging dependencies -->
@@ -278,7 +289,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
                 <version>${version.log4j2}</version>
             </dependency>
             <dependency>
@@ -387,7 +398,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

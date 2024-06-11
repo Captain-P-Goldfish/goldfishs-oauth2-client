@@ -1,7 +1,5 @@
 package de.captaingoldfish.restclient.database.springboot;
 
-import javax.servlet.Filter;
-
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -9,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
+import jakarta.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -28,7 +27,7 @@ public class SpringBootInitializer extends SpringBootServletInitializer
   /**
    * this bean will automatically be added into the servlet context and ensure that the request- and
    * response-encoding is set to UTF-8
-   * 
+   *
    * @return the UTF-8 filter
    */
   @Bean

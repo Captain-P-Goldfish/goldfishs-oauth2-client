@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.request.AccessTokenRequestBuilder;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.request.AccessTokenRequestBuilderFactory;
 import de.captaingoldfish.restclient.application.endpoints.tokenrequest.validation.AccessTokenRequestValidator;
+import de.captaingoldfish.restclient.application.utils.HttpResponseDetails;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.HttpHeaders;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.RequestHeaders;
@@ -22,7 +23,6 @@ import de.captaingoldfish.scim.sdk.server.endpoints.ResourceHandler;
 import de.captaingoldfish.scim.sdk.server.endpoints.validation.RequestValidator;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
-import kong.unirest.HttpResponse;
 
 
 /**
@@ -47,7 +47,7 @@ public class AccessTokenRequestHandler extends ResourceHandler<ScimAccessTokenRe
       Map<String, String> requestHeaders = requestBuilder.getRequestHeaders();
       Map<String, String> requestParameters = requestBuilder.getRequestParameters();
 
-      HttpResponse<String> accessTokenResponse = requestBuilder.sendAccessTokenRequest();
+      HttpResponseDetails accessTokenResponse = requestBuilder.sendAccessTokenRequest();
 
       String metadata = requestBuilder.getMetaDataString();
 
@@ -61,10 +61,16 @@ public class AccessTokenRequestHandler extends ResourceHandler<ScimAccessTokenRe
                                    .requestParamsList(requestParameters.entrySet().stream().map(entry -> {
                                      return new RequestParams(entry.getKey(), entry.getValue());
                                    }).collect(Collectors.toList()))
-                                   .statusCode(accessTokenResponse.getStatus())
-                                   .responseHeadersList(accessTokenResponse.getHeaders().all().stream().map(header -> {
-                                     return new HttpHeaders(header.getName(), header.getValue());
-                                   }).collect(Collectors.toList()))
+                                   .statusCode(accessTokenResponse.getStatusCode())
+                                   .responseHeadersList(accessTokenResponse.getHeaders()
+                                                                           .entrySet()
+                                                                           .stream()
+                                                                           .map(entry -> {
+                                                                             String name = entry.getKey();
+                                                                             String value = entry.getValue();
+                                                                             return new HttpHeaders(name, value);
+                                                                           })
+                                                                           .collect(Collectors.toList()))
                                    .resourceEndpointHeaders(resourceEndpointHeaders)
                                    .plainResponse(accessTokenResponse.getBody())
                                    .metaDataJson(metadata)

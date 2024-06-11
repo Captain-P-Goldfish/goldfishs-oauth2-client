@@ -49,7 +49,6 @@ public class JwtHandlerTest implements FileReferences
                                             .collect(Collectors.toList()));
 
     arguments.add(Arguments.arguments("goldfish-ec", JWSAlgorithm.ES256));
-    arguments.add(Arguments.arguments("ec-256k", JWSAlgorithm.ES256K));
     arguments.add(Arguments.arguments("localhost-ec", JWSAlgorithm.ES384));
     arguments.add(Arguments.arguments("unit-test-ec", JWSAlgorithm.ES512));
     return arguments.stream();

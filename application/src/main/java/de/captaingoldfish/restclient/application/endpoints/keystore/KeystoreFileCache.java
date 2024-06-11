@@ -22,7 +22,7 @@ public class KeystoreFileCache
    * @param stateId this id is an identifier that must be set and then returned from the view
    * @return either the keystore file or null
    */
-  @Cacheable(value = CacheConfiguration.KEYSTORE_CACHE, key = "#stateId")
+  @Cacheable(value = CacheConfiguration.KEYSTORE_CACHE, key = "#p0")
   public Keystore getKeystoreFile(String stateId)
   {
     return null;
@@ -35,7 +35,7 @@ public class KeystoreFileCache
    * @param keystoreFile the uploaded keystore file
    * @return the keystore file that was cached
    */
-  @CachePut(value = CacheConfiguration.KEYSTORE_CACHE, key = "#stateId")
+  @CachePut(value = CacheConfiguration.KEYSTORE_CACHE, key = "#p0")
   public Keystore setKeystoreFile(String stateId, Keystore keystoreFile)
   {
     return keystoreFile;

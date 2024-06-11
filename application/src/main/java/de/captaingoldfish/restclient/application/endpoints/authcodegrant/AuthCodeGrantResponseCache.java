@@ -17,11 +17,11 @@ public class AuthCodeGrantResponseCache
 
   /**
    * retrieves the authorization code response from an identity provider
-   * 
+   *
    * @param state The state-parameter from the OAuth2 request
    * @return the full authorization code response url
    */
-  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_RESPONSE_CACHE, key = "#state")
+  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_RESPONSE_CACHE, key = "#p0")
   public String getAuthorizationResponseUrl(String state)
   {
     return null;
@@ -30,11 +30,11 @@ public class AuthCodeGrantResponseCache
   /**
    * this method will store the authorization response of an identity provider so it can be retrieved by the
    * javascript frontend
-   * 
+   *
    * @param state The state-parameter from the OAuth2 request
    * @return the full authorization code response url
    */
-  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_RESPONSE_CACHE, key = "#state")
+  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_RESPONSE_CACHE, key = "#p0")
   public String setAuthorizationResponseUrl(String state, String authorizationResponseUrl)
   {
     return authorizationResponseUrl;

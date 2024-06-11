@@ -7,18 +7,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.nimbusds.jose.util.Pair;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
@@ -55,7 +55,8 @@ public class AuthCodeGrantRequestService
    * @param workflowSettings the dynamic settings from the javascript frontend
    * @return the authorization code grant url
    */
-  public String generateAuthCodeRequestUrl(OpenIdClient openIdClient, ScimCurrentWorkflowSettings workflowSettings)
+  public Pair<String, String> generateAuthCodeRequestUrl(OpenIdClient openIdClient,
+                                                         ScimCurrentWorkflowSettings workflowSettings)
   {
     OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
@@ -86,10 +87,11 @@ public class AuthCodeGrantRequestService
       requestUrlBuilder.queryParam(OAuthConstants.CODE_CHALLENGE_METHOD, "S256");
       pkceCodeVerifierCache.setCodeVerifier(state, pkceCodeVerifier);
     }
-    final String authCodeRequestUrl = requestUrlBuilder.build().toString();
+    final UriComponents requestUrl = requestUrlBuilder.build();
+    final String authCodeRequestUrl = requestUrl.toString();
 
     authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
-    return authCodeRequestUrl;
+    return Pair.of(authCodeRequestUrl, requestUrl.getQuery());
   }
 
   /**

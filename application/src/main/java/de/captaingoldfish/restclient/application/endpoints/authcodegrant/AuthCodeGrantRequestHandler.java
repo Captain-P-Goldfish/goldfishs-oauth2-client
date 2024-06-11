@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.validation.AuthCodeGrantRequestValidator;
@@ -52,19 +54,24 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
                                         .flatMap(openIdClientDao::findById)
                                         .orElseThrow();
     final String id = UUID.randomUUID().toString(); // random id that has no actual meaning
-    final String authCodeGrantUrl = requestService.generateAuthCodeRequestUrl(openIdClient,
-                                                                              resource.getCurrentWorkflowSettings()
-                                                                                      .orElseThrow());
+    final Pair<String, String> authCodeGrantUrl = //
+      requestService.generateAuthCodeRequestUrl(openIdClient, resource.getCurrentWorkflowSettings().orElseThrow());
     OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String metaDataString = metadata.toJSONObject().toJSONString();
 
-    CurrentWorkflowSettings currentWorkflowSettings = currentWorkflowSettingsDao.findByOpenIdClient(openIdClient)
-                                                                                .orElseGet(CurrentWorkflowSettings::new);
+    CurrentWorkflowSettings currentWorkflowSettings = //
+      currentWorkflowSettingsDao.findByOpenIdClient(openIdClient).orElseGet(() -> {
+        CurrentWorkflowSettings settings = new CurrentWorkflowSettings();
+        settings.setOpenIdClient(openIdClient);
+        settings = currentWorkflowSettingsDao.save(settings);
+        return settings;
+      });
     ScimCurrentWorkflowSettings scimWorkflowSettings = //
       CurrentWorkflowSettingsConverter.toScimWorkflowSettings(currentWorkflowSettings);
     return ScimAuthCodeGrantRequest.builder()
                                    .id(id)
-                                   .authorizationCodeGrantUrl(authCodeGrantUrl)
+                                   .authorizationCodeGrantUrl(authCodeGrantUrl.getLeft())
+                                   .authorizationCodeGrantParameters(authCodeGrantUrl.getRight())
                                    .metaDataJson(metaDataString)
                                    .meta(Meta.builder().created(Instant.now()).build())
                                    .currentWorkflowSettings(scimWorkflowSettings)

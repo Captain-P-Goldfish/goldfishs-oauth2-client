@@ -13,6 +13,7 @@ import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.ClientCredentialsParameters;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.Dpop;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.ResourceOwnerPasswordParameters;
+import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
 
 
 /**
@@ -107,8 +108,16 @@ public class CurrentWorkflowSettingsConverter
                     .htm(settings.getDpopHtm())
                     .htu(settings.getDpopHtu())
                     .build();
+    if (dpop.isEmpty())
+    {
+      dpop = null;
+    }
 
     Pkce pkce = Pkce.builder().use(settings.isPkceUse()).codeVerifier(settings.getPkceCodeVerifier()).build();
+    if (pkce.isEmpty())
+    {
+      pkce = null;
+    }
 
     return ScimCurrentWorkflowSettings.builder()
                                       .openIdClientId(settings.getOpenIdClient().getId())
@@ -117,6 +126,11 @@ public class CurrentWorkflowSettingsConverter
                                       .authCodeParameters(authCodeParameters)
                                       .clientCredentialsParameters(clientCredentialsParameters)
                                       .resourceOwnerPasswordParameters(passwordParams)
+                                      .meta(Meta.builder()
+                                                .resourceType("CurrentWorkflowSettings")
+                                                .created(settings.getCreated())
+                                                .lastModified(settings.getLastModified())
+                                                .build())
                                       .build();
   }
 }

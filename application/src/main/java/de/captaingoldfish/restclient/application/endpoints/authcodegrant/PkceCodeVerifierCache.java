@@ -21,7 +21,7 @@ public class PkceCodeVerifierCache
    * @param state The state-parameter from the OAuth2 request
    * @return the PKCE code-verifier of RFC7636
    */
-  @Cacheable(value = CacheConfiguration.PKCE_CODE_VERIFIER_CACHE, key = "#state")
+  @Cacheable(value = CacheConfiguration.PKCE_CODE_VERIFIER_CACHE, key = "#p0")
   public String getCodeVerifier(String state)
   {
     return null;
@@ -34,7 +34,7 @@ public class PkceCodeVerifierCache
    * @param state The state-parameter from the OAuth2 request
    * @return the PKCE code-verifier of RFC7636
    */
-  @CachePut(value = CacheConfiguration.PKCE_CODE_VERIFIER_CACHE, key = "#state")
+  @CachePut(value = CacheConfiguration.PKCE_CODE_VERIFIER_CACHE, key = "#p0")
   public String setCodeVerifier(String state, String codeVerifier)
   {
     return codeVerifier;

@@ -284,7 +284,7 @@ public class JwtHandler
   private String createEncryptedJwt(PublicKey publicKey, JWEHeader jweHeader, String body)
   {
     JWEEncrypter jweEncrypter = getJweEncrypter(publicKey);
-    JWECryptoParts jweCryptoParts = jweEncrypter.encrypt(jweHeader, body.getBytes(StandardCharsets.UTF_8));
+    JWECryptoParts jweCryptoParts = jweEncrypter.encrypt(jweHeader, body.getBytes(StandardCharsets.UTF_8), null);
     EncryptedJWT encryptedJWT = new EncryptedJWT(jweCryptoParts.getHeader().toBase64URL(),
                                                  jweCryptoParts.getEncryptedKey(),
                                                  jweCryptoParts.getInitializationVector(),

@@ -4,15 +4,16 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +38,8 @@ public class OpenIdProvider
    * primary key of this table
    */
   @Id
-  @GeneratedValue
+  @GeneratedValue(generator = "OPENID_PROVIDER_SEQ")
+  @SequenceGenerator(name = "OPENID_PROVIDER_SEQ", sequenceName = "hibernate_sequence", allocationSize = 1)
   @Column(name = "ID")
   private long id;
 

@@ -17,11 +17,11 @@ public class AuthCodeGrantRequestCache
 
   /**
    * retrieves the authorization code request that was generated to delegate to an identity provider
-   * 
+   *
    * @param state The state-parameter from the OAuth2 request
    * @return the full authorization code request url
    */
-  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "#state")
+  @Cacheable(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "#p0")
   public String getAuthorizationRequestUrl(String state)
   {
     return null;
@@ -30,11 +30,11 @@ public class AuthCodeGrantRequestCache
   /**
    * this method will store the authorization code request for an identity provider, to validate the
    * authorization response of an identity provider
-   * 
+   *
    * @param state The state-parameter from the OAuth2 request
    * @return the full authorization code request url
    */
-  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "#state")
+  @CachePut(value = CacheConfiguration.AUTH_CODE_GRANT_REQUEST_CACHE, key = "#p0")
   public String setAuthorizationRequestUrl(String state, String authorizationRequestUrl)
   {
     return authorizationRequestUrl;

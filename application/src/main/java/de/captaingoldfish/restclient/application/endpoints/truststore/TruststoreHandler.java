@@ -34,12 +34,14 @@ import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
 import de.captaingoldfish.scim.sdk.server.response.PartialListResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * @author Pascal Knueppel
  * @since 19.05.2021
  */
+@Slf4j
 @RequiredArgsConstructor
 public class TruststoreHandler extends ResourceHandler<ScimTruststore>
 {
@@ -166,7 +168,16 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
                                     List<SchemaAttribute> excludedAttributes,
                                     Context context)
   {
-    final String alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
+    String alias;
+    try
+    {
+      alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
+    }
+    catch (IllegalArgumentException ex)
+    {
+      log.trace(ex.getMessage(), ex);
+      alias = id;
+    }
     Truststore applicationTruststore = truststoreDao.getTruststore();
 
     boolean downloadTruststoreFile = attributes.stream().anyMatch(attribute -> {
@@ -248,7 +259,16 @@ public class TruststoreHandler extends ResourceHandler<ScimTruststore>
   @Override
   public void deleteResource(String id, Context context)
   {
-    final String alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
+    String alias;
+    try
+    {
+      alias = URLDecoder.decode(id, StandardCharsets.UTF_8);
+    }
+    catch (IllegalArgumentException ex)
+    {
+      log.trace(ex.getMessage(), ex);
+      alias = id;
+    }
     Truststore truststore = truststoreDao.getTruststore();
     truststore.getTruststore().deleteEntry(alias);
     byte[] truststoreBytes = KeyStoreSupporter.getBytes(truststore.getTruststore(), truststore.getTruststorePassword());

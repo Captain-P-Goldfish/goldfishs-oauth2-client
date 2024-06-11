@@ -2,13 +2,12 @@ package de.captaingoldfish.restclient.application.endpoints.tokenrequest;
 
 import java.util.UUID;
 
-import javax.ws.rs.core.MediaType;
-
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
@@ -20,9 +19,9 @@ import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest;
+import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.HttpHeaders;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.RequestHeaders;
 import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.RequestParams;
-import de.captaingoldfish.restclient.scim.resources.ScimAccessTokenRequest.HttpHeaders;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +94,7 @@ public class AccessTokenRequestHandlerTest extends AbstractScimClientConfig
       Assertions.assertEquals("Basic Z29sZGZpc2g6MTIzNDU2", authorization.getValue());
       RequestHeaders contentType = accessTokenRequest.getRequestHeaders().get(1);
       Assertions.assertEquals(org.apache.http.HttpHeaders.CONTENT_TYPE, contentType.getName());
-      Assertions.assertEquals(MediaType.APPLICATION_FORM_URLENCODED, contentType.getValue());
+      Assertions.assertEquals(MediaType.APPLICATION_FORM_URLENCODED_VALUE, contentType.getValue());
     }
     // validate request parameters
     {

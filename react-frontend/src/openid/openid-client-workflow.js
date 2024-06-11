@@ -38,6 +38,7 @@ export default class OpenidClientWorkflow extends React.Component
     this.authCodeGrantType = "authorization_code";
     this.clientCredentialsGrantType = "client_credentials";
     this.resourceOwnerGrantType = "password";
+    this.parAuthCodeGrantType = "pushed_authorization_code";
 
     this.state = {
       authenticationType: this.authCodeGrantType,
@@ -112,8 +113,9 @@ export default class OpenidClientWorkflow extends React.Component
   {
     let authTypes = [
       {value: this.authCodeGrantType, display: "Authorization Code Grant/Flow"},
+      {value: this.parAuthCodeGrantType, display: "Pushed Authorization Code Grant/Flow"},
       {value: this.clientCredentialsGrantType, display: "Client Credentials Grant"},
-      {value: this.resourceOwnerGrantType, display: "Resource Owner Password Credentials Grant"}
+      {value: this.resourceOwnerGrantType, display: "Resource Owner Password Credentials Grant"},
     ]
 
     return (
@@ -132,7 +134,8 @@ export default class OpenidClientWorkflow extends React.Component
                               {
                               }}/>
           {
-            this.state.authenticationType === this.authCodeGrantType &&
+            (this.state.authenticationType === this.authCodeGrantType ||
+              this.state.authenticationType === this.parAuthCodeGrantType) &&
             <AuthorizationCodeGrantForm formReference={this.formReference}
                                         originalRedirectUri={this.props.originalRedirectUri}
                                         workflowDetails={this.state.workflowDetails}

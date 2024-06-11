@@ -1,10 +1,10 @@
 package de.captaingoldfish.restclient.database.repositories;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.Root;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.Root;
+import jakarta.transaction.Transactional;
 
 import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;

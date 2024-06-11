@@ -6,7 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * used to authenticate at the token endpoint with basic client credentials
- * 
+ *
  * @author Pascal Knueppel
  * @since 21.08.2021
  */

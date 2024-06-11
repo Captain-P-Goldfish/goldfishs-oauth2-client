@@ -150,7 +150,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     Assertions.assertEquals(1, validationContext.getFieldErrors().size());
     List<String> headerErrors = validationContext.getFieldErrors().get(ScimJwtBuilder.FieldNames.HEADER);
     Assertions.assertEquals(1, headerErrors.size());
-    final String errorMessage = "Invalid JWK: Must be an instance of class com.nimbusds.jose.jwk.ECKey";
+    final String errorMessage = "Unsupported JWK type, JWK curve and / or JWS algorithm";
     Assertions.assertEquals(errorMessage, headerErrors.get(0));
   }
 
@@ -177,7 +177,7 @@ public class ScimJwtBuilderValidatorTest implements FileReferences
     Assertions.assertEquals(1, validationContext.getFieldErrors().size());
     List<String> headerErrors = validationContext.getFieldErrors().get(ScimJwtBuilder.FieldNames.HEADER);
     Assertions.assertEquals(1, headerErrors.size());
-    final String errorMessage = "Invalid JWK: Must be an instance of class com.nimbusds.jose.jwk.RSAKey";
+    final String errorMessage = "Unsupported JWK type, JWK curve and / or JWS algorithm";
     Assertions.assertEquals(errorMessage, headerErrors.get(0));
   }
 

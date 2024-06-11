@@ -27,9 +27,9 @@ import de.captaingoldfish.restclient.scim.resources.ScimTruststore.CertificateUp
 import de.captaingoldfish.restclient.scim.resources.ScimTruststore.TruststoreUpload;
 import de.captaingoldfish.restclient.scim.resources.ScimTruststore.TruststoreUploadResponse;
 import de.captaingoldfish.scim.sdk.client.response.ServerResponse;
+import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.response.ErrorResponse;
 import de.captaingoldfish.scim.sdk.common.response.ListResponse;
-import kong.unirest.HttpStatus;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -308,10 +308,12 @@ public class TruststoreHandlerTest extends AbstractScimClientConfig
                                              ScimTruststore.FieldNames.TRUSTSTORE_UPLOAD,
                                              ScimTruststore.FieldNames.TRUSTSTORE_FILE);
       List<String> fieldErrorMessages = fieldErrors.get(fieldName);
-      Assertions.assertEquals(1, fieldErrorMessages.size());
+      Assertions.assertEquals(2, fieldErrorMessages.size());
 
-      String errorMessage = "PKCS12 key store mac invalid - wrong password or corrupted file.";
-      MatcherAssert.assertThat(fieldErrorMessages, Matchers.containsInAnyOrder(errorMessage));
+      String errorMessage = "keystore password was incorrect";
+      String errorMessage2 = "failed to decrypt safe contents entry: javax.crypto.BadPaddingException: Given final "
+                             + "block not properly padded. Such issues can arise if a bad key is used during decryption.";
+      MatcherAssert.assertThat(fieldErrorMessages, Matchers.containsInAnyOrder(errorMessage, errorMessage2));
     }
   }
 

@@ -3,11 +3,12 @@ package de.captaingoldfish.restclient.database.entities;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +31,8 @@ public class HttpRequestGroup
    * the unique identifier of this group
    */
   @Id
-  @GeneratedValue
+  @GeneratedValue(generator = "HTTP_REQUEST_GROUPS_SEQ")
+  @SequenceGenerator(name = "HTTP_REQUEST_GROUPS_SEQ", sequenceName = "hibernate_sequence", allocationSize = 1)
   @Column(name = "ID")
   private long id;
 

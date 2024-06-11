@@ -3,24 +3,19 @@ package de.captaingoldfish.restclient.application.utils;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
-import java.util.Optional;
 
-import javax.net.ssl.SSLContext;
+import org.apache.commons.io.IOUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
-import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
-import de.captaingoldfish.restclient.database.entities.Proxy;
-import de.captaingoldfish.restclient.database.repositories.HttpClientSettingsDao;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
-import kong.unirest.Config;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestInstance;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -70,15 +65,17 @@ public final class Utils
     }
     String discoveryUrl = openIdProvider.getDiscoveryEndpoint();
     final String responseBody;
-    try (UnirestInstance unirest = getUnirestInstance(openIdClient))
+
+    HttpGet httpGet = new HttpGet(discoveryUrl);
+    try (CloseableHttpClient httpClient = HttpClientBuilder.getHttpClient(openIdClient);
+      CloseableHttpResponse response = httpClient.execute(httpGet))
     {
-      HttpResponse<String> response = unirest.get(discoveryUrl).asString();
-      if (!response.isSuccess())
+      responseBody = Utils.getBody(response);
+      if (response.getCode() != 200)
       {
         throw new BadRequestException(String.format("Failed to load meta-data from OpenID Discovery endpoint: %s",
-                                                    response.getStatusText()));
+                                                    responseBody));
       }
-      responseBody = response.getBody();
     }
     catch (Exception ex)
     {
@@ -91,30 +88,10 @@ public final class Utils
     return metadata;
   }
 
-  /**
-   * builds an unirest instance with the http settings for the given OpenID Connect client
-   *
-   * @param openIdClient the client that has the associated http client settings
-   * @return the configured unirest instance that should be used
-   */
-  public static UnirestInstance getUnirestInstance(OpenIdClient openIdClient)
+  @SneakyThrows
+  public static String getBody(CloseableHttpResponse response)
   {
-    UnirestInstance unirest = Unirest.spawnInstance();
-    HttpClientSettingsDao httpSettingsDao = WebAppConfig.getApplicationContext().getBean(HttpClientSettingsDao.class);
-    HttpClientSettings httpSettings = httpSettingsDao.findByOpenIdClient(openIdClient).orElseThrow();
-    Proxy proxy = httpSettings.getProxy();
-    SSLContext sslContext = SSLContextHelper.getSslContext(httpSettings);
-    Config unirestConfig = unirest.config();
-    unirestConfig.sslContext(sslContext);
-    if (!httpSettings.isUseHostnameVerifier())
-    {
-      unirestConfig.hostnameVerifier((s, sslSession) -> true);
-    }
-    unirestConfig.connectTimeout(httpSettings.getConnectionTimeout() * 1000);
-    unirestConfig.socketTimeout(httpSettings.getSocketTimeout() * 1000);
-    Optional.ofNullable(proxy)
-            .ifPresent(p -> unirestConfig.proxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword()));
-    return unirest;
+    return IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
   }
 
   /**

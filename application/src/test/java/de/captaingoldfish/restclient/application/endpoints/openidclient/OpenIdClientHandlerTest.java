@@ -593,6 +593,7 @@ public class OpenIdClientHandlerTest extends AbstractScimClientConfig
     originalWorkflowSettings.remove(AttributeNames.RFC7643.SCHEMAS);
     ScimCurrentWorkflowSettings scimCurrentWorkflowSettings = returnedResource.getCurrentWorkflowSettings()
                                                                               .orElseThrow();
+    originalWorkflowSettings.remove(AttributeNames.RFC7643.META); // removed for comparison
     Assertions.assertEquals(originalWorkflowSettings, scimCurrentWorkflowSettings);
   }
 

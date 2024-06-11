@@ -3,8 +3,8 @@ package de.captaingoldfish.restclient.database.repositories;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Truststore;

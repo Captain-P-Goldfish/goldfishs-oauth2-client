@@ -4,9 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 
 import de.captaingoldfish.restclient.commons.keyhelper.KeyStoreSupporter;
 import de.captaingoldfish.restclient.database.entities.Keystore;

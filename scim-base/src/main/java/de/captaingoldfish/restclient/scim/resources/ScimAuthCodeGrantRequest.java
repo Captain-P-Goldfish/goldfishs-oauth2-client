@@ -3,6 +3,9 @@ package de.captaingoldfish.restclient.scim.resources;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+
+import de.captaingoldfish.restclient.scim.constants.AuthCodeGrantType;
 import de.captaingoldfish.scim.sdk.common.resources.ResourceNode;
 import de.captaingoldfish.scim.sdk.common.resources.base.ScimObjectNode;
 import de.captaingoldfish.scim.sdk.common.resources.complex.Meta;
@@ -26,7 +29,9 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   @Builder
   public ScimAuthCodeGrantRequest(String id,
                                   Pkce pkce,
+                                  AuthCodeGrantType authenticationType,
                                   String authorizationCodeGrantUrl,
+                                  String authorizationCodeGrantParameters,
                                   String authorizationResponseUrl,
                                   String metaDataJson,
                                   ScimCurrentWorkflowSettings currentWorkflowSettings,
@@ -34,12 +39,33 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   {
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
+    setAuthenticationType(authenticationType);
     setPkce(pkce);
     setAuthorizationCodeGrantUrl(authorizationCodeGrantUrl);
+    setAuthorizationCodeGrantParameters(authorizationCodeGrantParameters);
     setAuthorizationResponseUrl(authorizationResponseUrl);
     setMetaDataJson(metaDataJson);
     setCurrentWorkflowSettings(currentWorkflowSettings);
     setMeta(meta);
+  }
+
+  /**
+   * If the normal Authorization Code Grant or a Pushed Authorization Code Grant should be executed.
+   */
+  public AuthCodeGrantType getAuthenticationType()
+  {
+    return getStringAttribute(FieldNames.AUTHENTICATION_TYPE).map(StringUtils::stripToNull)
+                                                             .map(StringUtils::toRootUpperCase)
+                                                             .map(AuthCodeGrantType::valueOf)
+                                                             .orElseThrow();
+  }
+
+  /**
+   * If the normal Authorization Code Grant or a Pushed Authorization Code Grant should be executed.
+   */
+  public void setAuthenticationType(AuthCodeGrantType authenticationType)
+  {
+    setAttribute(FieldNames.AUTHENTICATION_TYPE, Optional.ofNullable(authenticationType).map(Enum::name).orElse(null));
   }
 
   /**
@@ -75,6 +101,26 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   public void setAuthorizationCodeGrantUrl(String authorizationCodeGrantUrl)
   {
     setAttribute(FieldNames.AUTHORIZATION_CODE_GRANT_URL, authorizationCodeGrantUrl);
+  }
+
+  /**
+   * This string will contain the query-string of the authorization Code Grant Url. This is added as an
+   * additional parameter because the 'authorizationCodeGrantUrl' may not contain the query parameters in case
+   * of Pushed Authorization Requests
+   */
+  public Optional<String> getAuthorizationCodeGrantParameters()
+  {
+    return getStringAttribute(FieldNames.AUTHORIZATION_CODE_GRANT_PARAMETERS);
+  }
+
+  /**
+   * This string will contain the query-string of the authorization Code Grant Url. This is added as an
+   * additional parameter because the 'authorizationCodeGrantUrl' may not contain the query parameters in case
+   * of Pushed Authorization Requests
+   */
+  public void setAuthorizationCodeGrantParameters(String authorizationCodeGrantParameters)
+  {
+    setAttribute(FieldNames.AUTHORIZATION_CODE_GRANT_PARAMETERS, authorizationCodeGrantParameters);
   }
 
   /**
@@ -184,6 +230,8 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
 
     public static final String SCHEMA_ID = "urn:ietf:params:scim:schemas:captaingoldfish:2.0:AuthCodeGrantRequest";
 
+    public static final String AUTHENTICATION_TYPE = "authenticationType";
+
     public static final String PKCE = "pkce";
 
     public static final String USE = "use";
@@ -191,6 +239,8 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
     public static final String CODEVERIFIER = "codeVerifier";
 
     public static final String AUTHORIZATION_CODE_GRANT_URL = "authorizationCodeGrantUrl";
+
+    public static final String AUTHORIZATION_CODE_GRANT_PARAMETERS = "authorizationCodeGrantParameters";
 
     public static final String ID = "id";
 

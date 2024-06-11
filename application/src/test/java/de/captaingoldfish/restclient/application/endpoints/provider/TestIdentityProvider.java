@@ -4,9 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +21,7 @@ import de.captaingoldfish.restclient.application.setup.FileReferences;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.scim.sdk.common.constants.HttpStatus;
 import de.captaingoldfish.scim.sdk.common.utils.JsonHelper;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 /**
@@ -46,16 +45,16 @@ public class TestIdentityProvider implements FileReferences
 
   public static Supplier<String> accessTokenResponseSupplier = () -> UUID.randomUUID().toString();
 
-  public static Supplier<String> accessTokenResponseContentTypeSupplier = () -> MediaType.TEXT_PLAIN;
+  public static Supplier<String> accessTokenResponseContentTypeSupplier = () -> MediaType.TEXT_PLAIN_VALUE;
 
   public static void resetAccessTokenResponseSupplier()
   {
     accessTokenResponseStatusSupplier = () -> HttpStatus.OK;
     accessTokenResponseSupplier = () -> UUID.randomUUID().toString();
-    accessTokenResponseContentTypeSupplier = () -> MediaType.TEXT_PLAIN;
+    accessTokenResponseContentTypeSupplier = () -> MediaType.TEXT_PLAIN_VALUE;
   }
 
-  @GetMapping(value = DISCOVERY_ENDPOINT, produces = MediaType.APPLICATION_JSON)
+  @GetMapping(value = DISCOVERY_ENDPOINT, produces = MediaType.APPLICATION_JSON_VALUE)
   public String discoveryEndpoint(UriComponentsBuilder uriComponentsBuilder)
   {
     String discoveryJson = new String(readAsBytes(TEST_IDP_OIDC_DISCOVERY_JSON), StandardCharsets.UTF_8);

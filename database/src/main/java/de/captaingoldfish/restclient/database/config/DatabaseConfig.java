@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +25,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import jakarta.persistence.EntityManagerFactory;
 import liquibase.integration.spring.SpringLiquibase;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -71,7 +71,7 @@ public class DatabaseConfig
 
   public DatabaseConfig(@Value("${database.url:jdbc:hsqldb:file:./hsql-db/application-db}") String databaseUrl,
                         @Value("${database.user:sa}") String databaseUsername,
-                        @Value("${database.password:}") String databasePassword)
+                        @Value("${database.password:123456}") String databasePassword)
   {
     this.databaseUrl = databaseUrl;
     this.databaseUsername = databaseUsername;
@@ -136,7 +136,7 @@ public class DatabaseConfig
    * sets up a spring container managed {@link EntityManagerFactory} for JTA transaction.
    *
    * @return the {@link EntityManagerFactory} that creates container managed
-   *         {@link javax.persistence.EntityManager}
+   *         {@link jakarta.persistence.EntityManager}
    */
   @Bean
   protected EntityManagerFactory entityManagerFactory(DataSource dataSource, SupportedDatabases usedDatabase)
@@ -181,15 +181,15 @@ public class DatabaseConfig
   {
 
     HSQLDB("jdbc:hsqldb", "org.hsqldb.jdbcDriver", "org.hibernate.dialect.HSQLDialect",
-    // @formatter:off
-         Map.of("hibernate.format_sql", "false",
-                "hibernate.show_sql", "false")
-    // @formatter:on
+      // @formatter:off
+        Map.of("hibernate.format_sql", "false",
+              "hibernate.show_sql", "false")
+      // @formatter:on
     ),
 
     SQLSERVER("jdbc:sqlserver",
               "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-              "org.hibernate.dialect.SQLServer2012Dialect",
+              "org.hibernate.dialect.SQLServerDialect",
               null),
 
     MYSQL("jdbc:mysql", "com.mysql.cj.jdbc.Driver", "org.hibernate.dialect.MySQL8Dialect", null),
