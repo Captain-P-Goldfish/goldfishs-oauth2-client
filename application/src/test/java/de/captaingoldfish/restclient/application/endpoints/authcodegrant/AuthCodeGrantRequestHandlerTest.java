@@ -120,7 +120,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
     expectedAuthorizationUrl = Pattern.quote(expectedAuthorizationUrl) + ".*";
     MatcherAssert.assertThat(responseResource.getAuthorizationCodeGrantUrl().orElseThrow(),
                              Matchers.matchesPattern(expectedAuthorizationUrl));
-    Mockito.verify(authCodeGrantRequestService).generateAuthCodeRequestUrl(Mockito.any(), Mockito.any());
+    Mockito.verify(authCodeGrantRequestService).generateAuthCodeRequestUrl(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**

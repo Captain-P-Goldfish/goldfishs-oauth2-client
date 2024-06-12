@@ -99,4 +99,9 @@ public final class OAuthConstants
    * the code-challenge-method parameter of the Proof Key for Code Exchange specification: RFC7636
    */
   public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
+
+  /**
+   * used in Pushed Authorization Request responses
+   */
+  public static final String REQUEST_URI = "request_uri";
 }

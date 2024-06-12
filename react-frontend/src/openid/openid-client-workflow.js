@@ -85,6 +85,7 @@ export default class OpenidClientWorkflow extends React.Component
   {
     let responseDetailsArray = (this.state.responseDetails || []);
     responseDetails.grantType = type;
+    responseDetails.metaDataJson = JSON.parse(responseDetails.metaDataJson);
     responseDetailsArray.unshift(responseDetails);
     let wrapperObject = {};
     wrapperObject.responseDetails = responseDetailsArray

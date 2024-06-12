@@ -58,7 +58,8 @@ public class ScimController
   {
     Map<String, String> httpHeaders = getHttpHeaders(request);
     String query = request.getQueryString() == null ? "" : "?" + request.getQueryString();
-    ScimResponse scimResponse = resourceEndpoint.handleRequest(request.getRequestURL().toString() + query,
+    final String fullUrl = request.getRequestURL().toString() + query;
+    ScimResponse scimResponse = resourceEndpoint.handleRequest(fullUrl,
                                                                HttpMethod.valueOf(request.getMethod()),
                                                                requestBody,
                                                                httpHeaders,

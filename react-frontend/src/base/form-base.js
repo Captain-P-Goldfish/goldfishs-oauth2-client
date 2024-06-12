@@ -223,7 +223,7 @@ export function FormRadioSelection(props)
   let inputFieldErrorMessages = props.onError(props.name);
 
   return (
-    <Form.Group as={Row} controlId={props.name}>
+    <Form.Group as={Row} id={props.name}>
       <Form.Label column sm={2}>{labelText}</Form.Label>
       <Col sm={10} style={{alignSelf: "center"}}>
         {

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
@@ -54,8 +54,10 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
                                         .flatMap(openIdClientDao::findById)
                                         .orElseThrow();
     final String id = UUID.randomUUID().toString(); // random id that has no actual meaning
-    final Pair<String, String> authCodeGrantUrl = //
-      requestService.generateAuthCodeRequestUrl(openIdClient, resource.getCurrentWorkflowSettings().orElseThrow());
+    final Triple<String, String, String> authCodeGrantUrl = //
+      requestService.generateAuthCodeRequestUrl(openIdClient,
+                                                resource.getCurrentWorkflowSettings().orElseThrow(),
+                                                resource.getAuthenticationType());
     OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String metaDataString = metadata.toJSONObject().toJSONString();
 
@@ -70,8 +72,10 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
       CurrentWorkflowSettingsConverter.toScimWorkflowSettings(currentWorkflowSettings);
     return ScimAuthCodeGrantRequest.builder()
                                    .id(id)
+                                   .authenticationType(resource.getAuthenticationType())
                                    .authorizationCodeGrantUrl(authCodeGrantUrl.getLeft())
-                                   .authorizationCodeGrantParameters(authCodeGrantUrl.getRight())
+                                   .authorizationCodeGrantParameters(authCodeGrantUrl.getMiddle())
+                                   .pushedAuthorizationResponse(authCodeGrantUrl.getRight())
                                    .metaDataJson(metaDataString)
                                    .meta(Meta.builder().created(Instant.now()).build())
                                    .currentWorkflowSettings(scimWorkflowSettings)

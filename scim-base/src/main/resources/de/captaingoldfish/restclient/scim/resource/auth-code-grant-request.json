@@ -107,6 +107,17 @@
       ]
     },
     {
+      "name": "pushedAuthorizationResponse",
+      "type": "string",
+      "description": "shall contain the body of the Pushed Authorization Response",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "metaDataJson",
       "type": "string",
       "description": "the json string that represents the metadata of the openId provider",

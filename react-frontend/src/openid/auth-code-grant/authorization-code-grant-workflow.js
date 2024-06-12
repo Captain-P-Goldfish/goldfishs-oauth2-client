@@ -43,6 +43,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     };
     this.setState = this.setState.bind(this);
     this.forceUpdate = this.forceUpdate.bind(this);
+    this.loadPushedAuthorizationRequestView = this.loadPushedAuthorizationRequestView.bind(this);
     this.loadAuthorizationQueryParameterView = this.loadAuthorizationQueryParameterView.bind(this);
     this.getAuthRequestStatus = this.getAuthRequestStatus.bind(this);
     this.loadAuthorizationCodeResponseDetailsView = this.loadAuthorizationCodeResponseDetailsView.bind(this);
@@ -73,7 +74,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
   {
     let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
     let authCodeQueryParams = Object.fromEntries(
-      new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
+      new URL("http://localhost?" + this.props.requestDetails.authorizationCodeGrantParameters).searchParams);
     let stateParam = authCodeQueryParams.state;
 
     let state = this.state;
@@ -95,6 +96,77 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     });
   }
 
+  loadPushedAuthorizationRequestView()
+  {
+    return <div className={"workflow-details mb-2"}>
+      <Collapseable header={"Pushed Authorization Request Details"} variant={"workflow-details"}
+                    bodyClass={"workflow-card-details"}
+                    content={() =>
+                    {
+                      let parEndpoint = this.props.requestDetails.metaDataJson.pushed_authorization_request_endpoint;
+                      if (!parEndpoint || !this.props.requestDetails?.authorizationCodeGrantParameters)
+                      {
+                        return null;
+                      }
+
+                      let queryParameters = this.props.requestDetails.authorizationCodeGrantParameters;
+                      let fullUrl = parEndpoint + '?' + queryParameters;
+
+                      let authCodeQueryParams = Object.fromEntries(new URL(fullUrl).searchParams);
+
+                      return <React.Fragment>
+                        <Row>
+                          <Col sm={2} className={"url-base-value"}>HTTP method</Col>
+                          <Col sm={10}
+                               className={"url-base-value"}>POST</Col>
+                        </Row>
+                        <Row>
+                          <Col sm={2} className={"url-base-value"}>authCodeUrl</Col>
+                          <Col sm={10}
+                               className={"url-base-value"}>{parEndpoint}</Col>
+                        </Row>
+                        <Row>
+                          <Col sm={2} className={"url-base-value"}>request body</Col>
+                          <Col sm={10}
+                               className={"url-base-value"}>{queryParameters}</Col>
+                        </Row>
+                        {
+                          Object.keys(authCodeQueryParams).map((key, index) =>
+                          {
+                            return <Row key={"auth-code-request-row-" + index}>
+                              <Col sm={2}>{key}</Col>
+                              <Col sm={10}>{authCodeQueryParams[key]}</Col>
+                            </Row>;
+                          })
+                        }
+                      </React.Fragment>;
+                    }}/>
+    </div>
+  }
+
+  loadPushedAuthorizationResponseView()
+  {
+    let formattedJson = JSON.stringify(JSON.parse(this.props.requestDetails.pushedAuthorizationResponse), null, 2);
+
+    return <div className={"workflow-details"}>
+      <Collapseable header={"Pushed Authorization Request Details"} variant={"workflow-details"}
+                    bodyClass={"workflow-card-details"}
+                    content={() =>
+                    {
+                      return <React.Fragment>
+                        <Row>
+                          <Col sm={2} className={"url-base-value"}>Response Body</Col>
+                          <Col sm={10} className={"url-base-value"}>
+                            <pre className={"mb-0"}>
+                              {formattedJson}
+                            </pre>
+                          </Col>
+                        </Row>
+                      </React.Fragment>;
+                    }}/>
+    </div>
+  }
+
   loadAuthorizationQueryParameterView()
   {
     let authCodeQueryParams = Object.fromEntries(
@@ -102,7 +174,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     let showInfoMessage = this.state.authorizationResponseUrl === undefined;
 
-    return <div className={"workflow-details"}>
+    return <div className={"workflow-details mb-2"}>
       <Alert variant={"info"} show={showInfoMessage}>
         <ExclamationLg/> The authorization code grant will try to open a new browser window. Make sure your
                          popup blocker does not block this. If you closed this window before finishing the
@@ -176,8 +248,8 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
     const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
     let authCodeQueryParams = Object.fromEntries(
-      new URL(this.props.requestDetails.authorizationCodeGrantUrl).searchParams);
-
+      new URL(this.props.requestDetails.authorizationCodeGrantUrl
+        + "?" + this.props.requestDetails.authorizationCodeGrantParameters).searchParams);
 
     let resource = {
       grantType: "authorization_code",
@@ -336,11 +408,21 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                             content={() =>
                             {
                               return <pre>
-                                            {JSON.stringify(JSON.parse(this.props.requestDetails.metaDataJson),
-                                              undefined,
-                                              2)}
-                                          </pre>;
+                                        {JSON.stringify(this.props.requestDetails.metaDataJson,
+                                          undefined,
+                                          2)}
+                                     </pre>;
                             }}/>
+
+              <hr/>
+              {
+                "PUSHED_AUTHORIZATION_CODE" === this.props.requestDetails.authenticationType &&
+                <>
+                  {this.loadPushedAuthorizationRequestView()}
+                  {this.loadPushedAuthorizationResponseView()}
+                  <hr/>
+                </>
+              }
               {this.loadAuthorizationQueryParameterView()}
               {this.loadAuthorizationCodeResponseDetailsView()}
             </React.Fragment>;

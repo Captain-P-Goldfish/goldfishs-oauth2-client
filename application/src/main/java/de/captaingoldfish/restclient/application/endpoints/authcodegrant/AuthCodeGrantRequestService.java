@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.endpoints.authcodegrant;
 
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -7,29 +8,42 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
+import de.captaingoldfish.restclient.application.utils.HttpClientBuilder;
+import de.captaingoldfish.restclient.application.utils.HttpResponseDetails;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
+import de.captaingoldfish.restclient.scim.constants.AuthCodeGrantType;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest.Pkce;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
+import de.captaingoldfish.scim.sdk.common.exceptions.PreconditionFailedException;
+import de.captaingoldfish.scim.sdk.common.utils.JsonHelper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 
 /**
@@ -53,10 +67,13 @@ public class AuthCodeGrantRequestService
    *
    * @param openIdClient the owner of the authorization code grant request
    * @param workflowSettings the dynamic settings from the javascript frontend
-   * @return the authorization code grant url
+   * @param authenticationType tells us if we should use a Pushed Authorization Request or a standard
+   *          Authorization Request
+   * @return the authorization code grant url, the query parameters and optionally a response body if present
    */
-  public Pair<String, String> generateAuthCodeRequestUrl(OpenIdClient openIdClient,
-                                                         ScimCurrentWorkflowSettings workflowSettings)
+  public Triple<String, String, String> generateAuthCodeRequestUrl(OpenIdClient openIdClient,
+                                                                   ScimCurrentWorkflowSettings workflowSettings,
+                                                                   AuthCodeGrantType authenticationType)
   {
     OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
@@ -90,8 +107,55 @@ public class AuthCodeGrantRequestService
     final UriComponents requestUrl = requestUrlBuilder.build();
     final String authCodeRequestUrl = requestUrl.toString();
 
-    authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
-    return Pair.of(authCodeRequestUrl, requestUrl.getQuery());
+
+    if (AuthCodeGrantType.AUTHORIZATION_CODE.equals(authenticationType))
+    {
+      authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
+      return Triple.of(authCodeRequestUrl, requestUrl.getQuery(), null);
+    }
+    else
+    {
+      HttpResponseDetails parResponseDetails = sendPushedAuthorizationRequest(openIdClient, metadata, requestUrl);
+      ObjectNode responseNode = JsonHelper.readJsonDocument(parResponseDetails.getBody(), ObjectNode.class);
+      UriComponents authCodeUrl = UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri)
+                                                      .queryParam(OAuthConstants.CLIENT_ID, openIdClient.getClientId())
+                                                      .queryParam(OAuthConstants.REQUEST_URI,
+                                                                  responseNode.get(OAuthConstants.REQUEST_URI)
+                                                                              .textValue())
+                                                      .build();
+      authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeUrl.toString());
+      return Triple.of(authCodeUrl.toString(), requestUrl.getQuery(), parResponseDetails.getBody());
+    }
+  }
+
+  /**
+   * sends a pushed authorization request to the remote system and retrieves the responseBody with the
+   * redirectUri to the authorizationCode endpoint for the pushed authorization request
+   *
+   * @param openIdClient required to generate a http client with its corresponding settings
+   * @param metadata needed to get the pushed-authorization-code endpoint
+   * @param authCodeRequestUrl the authorization code grant URL that would be normally used to access the
+   *          standard authorization endpoint
+   * @return
+   */
+  @SneakyThrows
+  public HttpResponseDetails sendPushedAuthorizationRequest(OpenIdClient openIdClient,
+                                                            OIDCProviderMetadata metadata,
+                                                            UriComponents authCodeRequestUrl)
+  {
+    URI parEndpoint = metadata.getPushedAuthorizationRequestEndpointURI();
+    if (parEndpoint == null)
+    {
+      throw new PreconditionFailedException("Remote Provider does not offer a Pushed Authorization Code Endpoint");
+    }
+    HttpPost httpPost = new HttpPost(parEndpoint);
+    httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+    httpPost.setEntity(new StringEntity(authCodeRequestUrl.getQuery()));
+    try (CloseableHttpClient httpClient = HttpClientBuilder.getHttpClient(openIdClient);
+      CloseableHttpResponse response = httpClient.execute(httpPost))
+    {
+      return new HttpResponseDetails(response);
+    }
   }
 
   /**

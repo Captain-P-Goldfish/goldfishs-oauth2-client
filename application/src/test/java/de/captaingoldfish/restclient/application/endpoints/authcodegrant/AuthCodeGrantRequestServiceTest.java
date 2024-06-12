@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +23,7 @@ import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
+import de.captaingoldfish.restclient.scim.constants.AuthCodeGrantType;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
 import lombok.extern.slf4j.Slf4j;
@@ -89,8 +90,10 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                               .openIdClientId(openIdClient.getId())
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
-    Pair<String, String> authorizationCodeRequestUrl = //
-      authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient, workflowSettings);
+    Triple<String, String, String> authorizationCodeRequestUrl = //
+      authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient,
+                                                             workflowSettings,
+                                                             AuthCodeGrantType.AUTHORIZATION_CODE);
 
     String expectedAuthorizationUrl = String.format("%s?response_type=%s&client_id=%s&redirect_uri=%s&state=",
                                                     getApplicationUrl(TestIdentityProvider.IDP_PATH
@@ -141,8 +144,10 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                               .openIdClientId(openIdClient.getId())
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
-    Pair<String, String> authorizationCodeRequestUrl = //
-      authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient, workflowSettings);
+    Triple<String, String, String> authorizationCodeRequestUrl = //
+      authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient,
+                                                             workflowSettings,
+                                                             AuthCodeGrantType.AUTHORIZATION_CODE);
 
     String expectedAuthorizationUrl = String.format("%s?client_id=%s&state=%s&response_type=%s&redirect_uri=%s",
                                                     getApplicationUrl(TestIdentityProvider.IDP_PATH
@@ -184,8 +189,10 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                               .openIdClientId(openIdClient.getId())
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
-    Pair<String, String> authorizationCodeRequestUrl = //
-      authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient, workflowSettings);
+    Triple<String, String, String> authorizationCodeRequestUrl = //
+      authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient,
+                                                             workflowSettings,
+                                                             AuthCodeGrantType.AUTHORIZATION_CODE);
 
     String expectedAuthorizationUrl = String.format("%s?state=%s&response_type=%s&client_id=%s",
                                                     getApplicationUrl(TestIdentityProvider.IDP_PATH

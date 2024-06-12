@@ -33,6 +33,7 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
                                   String authorizationCodeGrantUrl,
                                   String authorizationCodeGrantParameters,
                                   String authorizationResponseUrl,
+                                  String pushedAuthorizationResponse,
                                   String metaDataJson,
                                   ScimCurrentWorkflowSettings currentWorkflowSettings,
                                   Meta meta)
@@ -44,6 +45,7 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
     setAuthorizationCodeGrantUrl(authorizationCodeGrantUrl);
     setAuthorizationCodeGrantParameters(authorizationCodeGrantParameters);
     setAuthorizationResponseUrl(authorizationResponseUrl);
+    setPushedAuthorizationResponse(pushedAuthorizationResponse);
     setMetaDataJson(metaDataJson);
     setCurrentWorkflowSettings(currentWorkflowSettings);
     setMeta(meta);
@@ -139,6 +141,22 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
   public void setAuthorizationResponseUrl(String authorizationResponseUrl)
   {
     setAttribute(FieldNames.AUTHORIZATION_RESPONSE_URL, authorizationResponseUrl);
+  }
+
+  /**
+   * shall contain the body of the Pushed Authorization Response
+   */
+  public Optional<String> getPushedAuthorizationResponse()
+  {
+    return getStringAttribute(FieldNames.PUSHEDAUTHORIZATIONRESPONSE);
+  }
+
+  /**
+   * shall contain the body of the Pushed Authorization Response
+   */
+  public void setPushedAuthorizationResponse(String pushedAuthorizationResponse)
+  {
+    setAttribute(FieldNames.PUSHEDAUTHORIZATIONRESPONSE, pushedAuthorizationResponse);
   }
 
   /**
@@ -245,6 +263,8 @@ public class ScimAuthCodeGrantRequest extends ResourceNode
     public static final String ID = "id";
 
     public static final String AUTHORIZATION_RESPONSE_URL = "authorizationResponseUrl";
+
+    public static final String PUSHEDAUTHORIZATIONRESPONSE = "pushedAuthorizationResponse";
 
     public static final String META_DATA_JSON = "metaDataJson";
   }

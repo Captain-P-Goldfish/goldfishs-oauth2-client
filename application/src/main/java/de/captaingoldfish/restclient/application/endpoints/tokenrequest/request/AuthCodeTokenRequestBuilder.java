@@ -64,6 +64,7 @@ public class AuthCodeTokenRequestBuilder extends AccessTokenRequestBuilder
   public void addRequestParameters(Map<String, String> requestParameters)
   {
     requestParameters.put(OAuthConstants.GRANT_TYPE, OAuthConstants.AUTH_CODE_GRANT_TYPE);
+    requestParameters.put(OAuthConstants.REDIRECT_URI, redirectUri);
     requestParameters.put(OAuthConstants.CLIENT_ID, openIdClient.getClientId());
     requestParameters.put(OAuthConstants.CODE, authorizationCode);
     Optional.ofNullable(state).map(pkceCodeVerifierCache::getCodeVerifier).ifPresent(codeVerifier -> {
