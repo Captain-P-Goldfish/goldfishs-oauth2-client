@@ -67,7 +67,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     this.state.interval = setInterval(function ()
     {
       getAuthRequestStatus();
-    }, 1000);
+    }, 2500);
   }
 
   getAuthRequestStatus()
