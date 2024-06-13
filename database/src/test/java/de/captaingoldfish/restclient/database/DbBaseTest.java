@@ -2,9 +2,6 @@ package de.captaingoldfish.restclient.database;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.math.BigInteger;
-
-import jakarta.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +22,7 @@ import de.captaingoldfish.restclient.database.repositories.ProxyDao;
 import de.captaingoldfish.restclient.database.repositories.TokenCategoryDao;
 import de.captaingoldfish.restclient.database.repositories.TokenStoreDao;
 import de.captaingoldfish.restclient.database.repositories.TruststoreDao;
+import jakarta.persistence.EntityManager;
 import lombok.SneakyThrows;
 
 
@@ -106,8 +104,7 @@ public abstract class DbBaseTest implements FileReferences
 
   protected int countEntriesOfTableNative(String tableName)
   {
-    return ((BigInteger)entityManager.createNativeQuery("select count(*) from " + tableName)
-                                     .getSingleResult()).intValue();
+    return ((Long)entityManager.createNativeQuery("select count(*) from " + tableName).getSingleResult()).intValue();
   }
 
   protected int countEntriesOfTable(String tableName)

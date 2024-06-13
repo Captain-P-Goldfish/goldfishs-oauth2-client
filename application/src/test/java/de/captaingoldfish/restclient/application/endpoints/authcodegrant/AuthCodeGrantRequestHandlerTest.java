@@ -25,6 +25,7 @@ import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.HttpClientSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
+import de.captaingoldfish.restclient.scim.constants.AuthCodeGrantType;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
@@ -99,6 +100,7 @@ public class AuthCodeGrantRequestHandlerTest extends AbstractScimClientConfig
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
     ScimAuthCodeGrantRequest grantRequest = ScimAuthCodeGrantRequest.builder()
+                                                                    .authenticationType(AuthCodeGrantType.AUTHORIZATION_CODE)
                                                                     .currentWorkflowSettings(workflowSettings)
                                                                     .build();
     ServerResponse<ScimAuthCodeGrantRequest> response = scimRequestBuilder.create(ScimAuthCodeGrantRequest.class,
