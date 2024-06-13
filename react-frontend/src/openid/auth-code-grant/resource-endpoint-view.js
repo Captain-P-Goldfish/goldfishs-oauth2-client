@@ -17,7 +17,7 @@ export function ResourceEndpointDetailsView(props)
   return <React.Fragment>
     <h5>Access Resource Endpoints</h5>
     <HttpRequest minHeight={"10vh"}
-                 url={JSON.parse(props.metaData).userinfo_endpoint}
+                 url={props.metaData.userinfo_endpoint}
                  httpHeader={"Authorization: " + accessTokenDetails.token_type + " " +
                    accessTokenDetails.access_token +
                    (props.accessTokenDetails.resourceEndpointHeaders || []).map(header =>

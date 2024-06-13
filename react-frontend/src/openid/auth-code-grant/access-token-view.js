@@ -72,7 +72,7 @@ export function AccessTokenDetailsView(props)
                     variant={"workflow-details"}
                     content={() =>
                     {
-                      return <pre>{JSON.stringify(JSON.parse(props.metaData), undefined, 2)}</pre>;
+                      return <pre>{JSON.stringify(props.metaData, undefined, 2)}</pre>;
                     }}/>
     }
     <AccessTokenRequestView accessTokenDetails={props.accessTokenDetails}/>
