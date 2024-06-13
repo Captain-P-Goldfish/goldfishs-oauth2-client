@@ -55,7 +55,7 @@
         <version.spring>6.1.8</version.spring>
         <version.springboot>3.3.0</version.springboot>
         <version.hsqldb>2.7.3</version.hsqldb>
-        <version.sqlserver.driver>12.7.0</version.sqlserver.driver>
+        <version.sqlserver.driver>12.6.2.jre11</version.sqlserver.driver>
         <version.mysql.driver>8.4.0</version.mysql.driver>
         <version.mariadb.driver>3.4.0</version.mariadb.driver>
         <version.postgres.driver>42.7.3</version.postgres.driver>

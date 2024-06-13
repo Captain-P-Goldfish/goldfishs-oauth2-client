@@ -181,7 +181,7 @@ public class DatabaseConfig
   {
 
     HSQLDB("jdbc:hsqldb", "org.hsqldb.jdbcDriver", "org.hibernate.dialect.HSQLDialect",
-      // @formatter:off
+    // @formatter:off
         Map.of("hibernate.format_sql", "false",
               "hibernate.show_sql", "false")
       // @formatter:on
