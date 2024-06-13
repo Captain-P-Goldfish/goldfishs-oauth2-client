@@ -16,6 +16,7 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
@@ -117,14 +119,20 @@ public class AuthCodeGrantRequestService
     {
       HttpResponseDetails parResponseDetails = sendPushedAuthorizationRequest(openIdClient, metadata, requestUrl);
       ObjectNode responseNode = JsonHelper.readJsonDocument(parResponseDetails.getBody(), ObjectNode.class);
-      UriComponents authCodeUrl = UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri)
-                                                      .queryParam(OAuthConstants.CLIENT_ID, openIdClient.getClientId())
-                                                      .queryParam(OAuthConstants.REQUEST_URI,
-                                                                  responseNode.get(OAuthConstants.REQUEST_URI)
-                                                                              .textValue())
-                                                      .build();
-      authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeUrl.toString());
-      return Triple.of(authCodeUrl.toString(), requestUrl.getQuery(), parResponseDetails.getBody());
+
+      UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri);
+      responseNode.fieldNames().forEachRemaining(fieldName -> {
+        builder.queryParam(fieldName,
+                           Optional.ofNullable(responseNode.get(fieldName)).map(JsonNode::textValue).orElse(null));
+      });
+
+      if (HttpStatus.SC_CREATED == parResponseDetails.getStatusCode())
+      {
+        builder.queryParam(OAuthConstants.CLIENT_ID, openIdClient.getClientId());
+      }
+      String authCodeUrl = builder.build().toString();
+      authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeUrl);
+      return Triple.of(authCodeUrl, requestUrl.getQuery(), parResponseDetails.getBody());
     }
   }
 
