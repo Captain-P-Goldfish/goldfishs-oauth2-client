@@ -16,8 +16,10 @@ import {AccessTokenDetailsView} from "./access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../../services/utils";
 import {ResourceEndpointDetailsView} from "./resource-endpoint-view";
+import {AiFillWarning} from "react-icons/ai";
 
-const MAX_GET_AUTHCODE_RETRIES = 50;
+const INTERVAL_TIME_IN_SECONDS = 2;
+const MAX_GET_AUTHCODE_RETRIES = 60;
 
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
@@ -33,6 +35,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     let previousDpopHtu = props.requestDetails[CURRENT_WORKFLOW_URI]?.dpop?.htu;
 
     this.state = {
+      isLoading: true,
       responses: [],
       dpopKeyId: previousDpopKeyId || ((props.keyInfos || []).length > 0 ? props.keyInfos[0].alias : null),
       dpopSignatureAlgorithm: previousDpopSignatureAlgorithm ||
@@ -57,25 +60,42 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     if (this.state.interval)
     {
       clearInterval(this.state.interval);
+      if (this.openedWindow)
+      {
+        this.openedWindow.close();
+      }
     }
   }
 
   componentDidMount()
   {
     let getAuthRequestStatus = this.getAuthRequestStatus;
-    window.open(this.props.requestDetails.authorizationCodeGrantUrl,
+    let browserWindow = window.open(this.props.requestDetails.authorizationCodeGrantUrl,
       '_blank',
       'location=yes,height=570,width=520,scrollbars=yes,status=yes');
     let requestCounter = 0;
+    let state = this.state;
+    let setState = this.setState;
+    this.openedWindow = browserWindow;
+
     this.state.interval = setInterval(function ()
     {
       getAuthRequestStatus();
       requestCounter++;
-      if (requestCounter >= MAX_GET_AUTHCODE_RETRIES)
+      if (browserWindow.closed || requestCounter >= MAX_GET_AUTHCODE_RETRIES)
       {
-        clearInterval(this.state.interval);
+        clearInterval(state.interval);
+        browserWindow.close();
+        setState({isLoading: false});
+        if (browserWindow.closed)
+        {
+          setState({windowClosed: true});
+        } else
+        {
+          setState({maxRetriesExceeded: true});
+        }
       }
-    }, 2500);
+    }, INTERVAL_TIME_IN_SECONDS * 1000);
   }
 
   getAuthRequestStatus()
@@ -96,8 +116,10 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         {
           clearInterval(state.interval);
           delete state.interval;
+
           setState({
-            authorizationResponseUrl: resource.authorizationResponseUrl
+            authorizationResponseUrl: resource.authorizationResponseUrl,
+            isLoading: resource.authorizationResponseUrl === undefined
           });
         });
       }
@@ -402,13 +424,29 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
   render()
   {
+    let isLoading = !this.openedWindow?.closed;
+
     return (
       <div className={"grant-type-workflow"}>
         <AuthorizationCodeGrantDetails
-          isLoading={this.state.authorizationResponseUrl === undefined}
+          isLoading={isLoading}
           content={() =>
           {
             return <React.Fragment>
+              {
+                this.state.maxRetriesExceeded &&
+                <Alert variant={"warning"} show={true}>
+                  <AiFillWarning/>
+                  Was not able to retrieve the AuthorizationCode in due time. The PopUp was closed automatically.
+                </Alert>
+              }
+              {
+                this.state.windowClosed && this.state.authorizationResponseUrl === undefined &&
+                <Alert variant={"warning"} show={true}>
+                  <AiFillWarning/>
+                  PopUp closed, process stopped
+                </Alert>
+              }
               <Collapseable header={"OpenID Connect Discovery Details"}
                             headerClass={"mb-2"}
                             variant={"workflow-details"}

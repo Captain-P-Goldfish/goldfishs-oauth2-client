@@ -59,4 +59,4 @@ The project requires JDK 11+
                
 1. Install npm packages for the React frontend build: `mvn clean process-resources -DskipTests -P npm-install`. This must be executed only once. (NOTE: the build will fail on the `application`-module. Ignore the build-failure. This command is just for installing a local node-setup)
 2. Build the artifact with `mvn clean package -DskipTests -P npm-build`
-3. The executable artifact can be found at `application/target/oauth2-test-client.jar` after `maven clean package`
+3. The executable artifact can be found at `application/target/oauth2-test-client.jar` after `mvn clean package`
