@@ -17,6 +17,8 @@ import {GoFlame} from "react-icons/go";
 import {Optional} from "../../services/utils";
 import {ResourceEndpointDetailsView} from "./resource-endpoint-view";
 
+const MAX_GET_AUTHCODE_RETRIES = 50;
+
 export default class AuthorizationCodeGrantWorkflow extends React.Component
 {
   constructor(props)
@@ -64,9 +66,15 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     window.open(this.props.requestDetails.authorizationCodeGrantUrl,
       '_blank',
       'location=yes,height=570,width=520,scrollbars=yes,status=yes');
+    let requestCounter = 0;
     this.state.interval = setInterval(function ()
     {
       getAuthRequestStatus();
+      requestCounter++;
+      if (requestCounter >= MAX_GET_AUTHCODE_RETRIES)
+      {
+        clearInterval(this.state.interval);
+      }
     }, 2500);
   }
 
