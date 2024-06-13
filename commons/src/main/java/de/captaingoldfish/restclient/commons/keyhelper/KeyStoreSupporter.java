@@ -712,7 +712,7 @@ public final class KeyStoreSupporter
         getCertificateChain(keyStore2, alias).ifPresent(certificates -> {
           try
           {
-            addEntryToKeystore(mergedKeyStore, alias, key.get(), certificates, password2);
+            tryCopyEntry(keyStore2, mergedKeyStoreKeyPassword, password2, keyStoreType, mergedKeyStore, alias);
           }
           catch (IllegalArgumentException ex)
           {
