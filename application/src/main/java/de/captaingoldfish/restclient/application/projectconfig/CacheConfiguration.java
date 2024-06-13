@@ -26,6 +26,11 @@ public class CacheConfiguration
   public static final String KEYSTORE_CACHE = "keystore-cache";
 
   /**
+   * the name of the cache that contains the metdata details
+   */
+  public static final String PROVIDER_METADATA_CACHE = "provider-metadata-cache";
+
+  /**
    * the name of the cache that contains information of authorization requests
    */
   public static final String AUTH_CODE_GRANT_REQUEST_CACHE = "auth-code-grant-request-cache";

@@ -4,7 +4,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.CacheManager;
+
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.validation.OpenIdProviderRequestValidator;
+import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
@@ -99,6 +102,13 @@ public class OpenIdProviderHandler extends ResourceHandler<ScimOpenIdProvider>
     openIdProvider.setCreated(oldProvider.getCreated());
     openIdProvider.setLastModified(Instant.now());
     openIdProvider = openIdProviderDao.save(openIdProvider);
+
+    {
+      // if such a provider is updated we need to remove the cache-entries
+      CacheManager cacheManager = WebAppConfig.getApplicationContext().getBean(CacheManager.class);
+      cacheManager.getCacheNames().parallelStream().forEach(name -> cacheManager.getCache(name).clear());
+    }
+
     return OpenIdProviderConverter.toScimOpenIdProvider(openIdProvider);
   }
 
