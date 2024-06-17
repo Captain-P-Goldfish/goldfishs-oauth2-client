@@ -7,7 +7,7 @@
     <parent>
         <artifactId>oauth2-rest-client</artifactId>
         <groupId>de.captaingoldfish</groupId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>scim-base</artifactId>
