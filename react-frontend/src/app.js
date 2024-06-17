@@ -93,9 +93,9 @@ class Application extends React.Component
                 <LinkContainer exact to="/views/openIdProvider">
                   <Nav.Link>OpenID</Nav.Link>
                 </LinkContainer>
-                <LinkContainer exact to="/views/httpClient">
-                  <Nav.Link>Http Client</Nav.Link>
-                </LinkContainer>
+                {/*<LinkContainer exact to="/views/httpClient">*/}
+                {/*  <Nav.Link>Http Client</Nav.Link>*/}
+                {/*</LinkContainer>*/}
                 <LinkContainer exact to="/views/jwts">
                   <Nav.Link>JWTs</Nav.Link>
                 </LinkContainer>
@@ -139,9 +139,9 @@ class Application extends React.Component
                   <Route path="/views/jwts">
                     <JwtHandler/>
                   </Route>
-                  <Route path="/views/httpClient">
-                    <HttpClientRequester/>
-                  </Route>
+                  {/*<Route path="/views/httpClient">*/}
+                  {/*  <HttpClientRequester/>*/}
+                  {/*</Route>*/}
                   <Route path="/views/tokenCategories">
                     <TokenCategoryList/>
                   </Route>
