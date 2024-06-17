@@ -2,12 +2,7 @@ package de.captaingoldfish.restclient.application.endpoints.tokenstore.filtering
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import org.apache.commons.lang3.StringUtils;
 
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.TokenStore;
@@ -16,6 +11,12 @@ import de.captaingoldfish.scim.sdk.common.constants.enums.Type;
 import de.captaingoldfish.scim.sdk.server.filter.AndExpressionNode;
 import de.captaingoldfish.scim.sdk.server.filter.AttributeExpressionLeaf;
 import de.captaingoldfish.scim.sdk.server.filter.FilterNode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 
 /**
@@ -97,13 +98,13 @@ public class TokenStoreFilterResolver
    */
   private Predicate getComparisonPredicate(AttributeExpressionLeaf attributeExpressionLeaf, Object attributeValue)
   {
-    Path objectPath = resolveAttributeName(root, attributeExpressionLeaf);
+    Expression objectPath = resolveAttributeName(root, attributeExpressionLeaf);
     switch (attributeExpressionLeaf.getComparator())
     {
       case EQ:
         return criteriaBuilder.equal(objectPath, attributeValue);
       case CO:
-        return criteriaBuilder.like(objectPath, "%" + attributeValue + "%");
+        return criteriaBuilder.like(objectPath, "%" + StringUtils.toRootLowerCase((String)attributeValue) + "%");
       default:
         throw new UnsupportedOperationException(String.format("Found unsupported operation '%s'",
                                                               attributeExpressionLeaf.getComparator(),
@@ -114,14 +115,15 @@ public class TokenStoreFilterResolver
   /**
    * resolves the attribute path on the {@link TokenStore} jpa entity
    */
-  private Path resolveAttributeName(Root<TokenStore> root, AttributeExpressionLeaf attributeExpressionLeaf)
+  private Expression<? extends Object> resolveAttributeName(Root<TokenStore> root,
+                                                            AttributeExpressionLeaf attributeExpressionLeaf)
   {
     switch (attributeExpressionLeaf.getAttributeName())
     {
       case ScimTokenStore.FieldNames.CATEGORY_ID:
         return root.get("tokenCategory").get("id");
       case ScimTokenStore.FieldNames.TOKEN:
-        return root.get("token");
+        return criteriaBuilder.lower(root.get("token"));
       default:
         throw new UnsupportedOperationException(String.format("Found unsupported filter attribute in filter expression: %s",
                                                               attributeExpressionLeaf));
