@@ -119,7 +119,7 @@ public class TokenStoreFilterResolver
     switch (attributeExpressionLeaf.getAttributeName())
     {
       case ScimTokenStore.FieldNames.CATEGORY_ID:
-        return root.get("tokenCategory");
+        return root.get("tokenCategory").get("id");
       case ScimTokenStore.FieldNames.TOKEN:
         return root.get("token");
       default:
