@@ -1,5 +1,7 @@
 package de.captaingoldfish.restclient.application.endpoints.tokenrequest.request;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -9,6 +11,7 @@ import de.captaingoldfish.restclient.application.crypto.DpopBuilder;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
+import de.captaingoldfish.scim.sdk.common.constants.HttpHeader;
 
 
 /**
@@ -58,5 +61,21 @@ public class ResourcePasswordTokenRequestBuilder extends AccessTokenRequestBuild
     Optional.ofNullable(scope).ifPresent(s -> {
       requestParameters.put(OAuthConstants.SCOPE, s);
     });
+  }
+
+  @Override
+  public Map<String, String> getRequestHeaders()
+  {
+    Map<String, String> headers = super.getRequestHeaders();
+    if (!headers.containsKey(HttpHeader.AUTHORIZATION))
+    {
+      headers.put(HttpHeader.AUTHORIZATION,
+                  "Basic " + Base64.getEncoder()
+                                   .encodeToString(String.format("%s:%s",
+                                                                 openIdClient.getClientId(),
+                                                                 StringUtils.stripToEmpty(openIdClient.getClientSecret()))
+                                                         .getBytes(StandardCharsets.UTF_8)));
+    }
+    return headers;
   }
 }
