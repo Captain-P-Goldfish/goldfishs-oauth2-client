@@ -1,10 +1,13 @@
 import React, {useContext, useEffect, useState} from "react";
 import {TokenStoreClient} from "./token-store-client";
-import {Alert, Table} from "react-bootstrap";
+import { Alert, Button, Popover, Table, Tooltip } from "react-bootstrap";
 import {CheckLg, Eye, EyeFill, PencilSquare, PlusLg, Save, Trash, XLg} from "react-bootstrap-icons";
 import {Optional} from "../services/utils";
 import {GoFlame} from "react-icons/go";
 import {ScimServiceProviderContext} from "../app";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import { LuClipboardCopy } from "react-icons/lu";
+import { AiTwotoneCopy } from "react-icons/ai";
 
 export function TokenStoreList(props)
 {
@@ -234,7 +237,7 @@ function TokenStoreRow(props)
   const [error, setError] = useState();
   const [deleteMode, setDeleteMode] = useState(false);
   const [editMode, setEditMode] = useState(props.editMode);
-  const [viewTokenMode, setViewTokenMode] = useState(false);
+  const [wasCopied, setWasCopied] = useState(false);
 
   const [token, setToken] = useState(props.tokenStore.token || "");
   const [tokenName, setTokenName] = useState(props.tokenStore.name || "");
@@ -303,43 +306,70 @@ function TokenStoreRow(props)
           <input type={"text"} value={tokenName} onChange={e => setTokenName(e.target.value)}/>
         }
       </td>
-      <td className={"overflow-column"}>
-        {
-          !editMode &&
-          <React.Fragment>
-            {
-              !viewTokenMode &&
+      {
+        !editMode &&
+        <React.Fragment>
+          <OverlayTrigger placement="bottom"
+                          trigger={"click"}
+                          delay={{ show: 0, hide: 400 }}
+                          overlay={<Popover className={"token-popover"}>
+                            <Popover.Header as="h3" style={{ height: "35px" }}>
+                              {tokenName}
+                              <OverlayTrigger
+                                placement="top"
+                                delay={{ show: 250, hide: 400 }}
+                                overlay={<Tooltip>
+                                  {
+                                    wasCopied &&
+                                    "Copy successful"
+                                  }
+                                  {
+                                    !wasCopied &&
+                                    "Copy to Clipboard"
+                                  }
+                                </Tooltip>}
+                              >
+                                <Button className={"m-0 p-0 bg-transparent float-start border-0 me-2 text-black"}>
+                                  <AiTwotoneCopy style={{ height: "25px", width: "20px" }}
+                                                 onClick={() => {
+                                                   navigator.clipboard.writeText(token);
+                                                   setWasCopied(true);
+                                                   setTimeout(function(){
+                                                     setWasCopied(() => false);
+                                                   }, 1500)
+                                                 }}/>
+                                </Button>
+                              </OverlayTrigger>
+                            </Popover.Header>
+                            <Popover.Body>
+                              <pre className={"text-start text-primary"}>
+                                {token}
+                              </pre>
+                            </Popover.Body>
+                          </Popover>}
+          >
+            <td className={"overflow-column"}>
               <article className={"token-overview-short"}>{token}</article>
-            }
-            {
-              viewTokenMode &&
-              <textarea className={"token-overview"} readOnly={true} value={token}/>
-            }
-            {
-              !viewTokenMode &&
-              <Eye className={"right-floating-icon eye-icon"} onClick={() => setViewTokenMode(!viewTokenMode)}/>
-            }
-            {
-              viewTokenMode &&
-              <EyeFill className={"right-floating-icon eye-icon"} onClick={() => setViewTokenMode(!viewTokenMode)}/>
-            }
-          </React.Fragment>
-        }
-        {
-          editMode &&
+            </td>
+          </OverlayTrigger>
+        </React.Fragment>
+      }
+      {
+        editMode &&
+        <td className={"overflow-column"}>
           <textarea value={token} onChange={e => setToken(e.target.value)} className={"token-area"} wrap="off"/>
-        }
-      </td>
+        </td>
+      }
       <td>
         <span>
           created: {new Optional(props.tokenStore.meta).map(val => val.created)
-          .map(val => new Date(val).toLocaleString())
-          .orElse(null)}
+                                                       .map(val => new Date(val).toLocaleString())
+                                                       .orElse(null)}
         </span>
         <br/>
         <span>
           modified: {new Optional(props.tokenStore.meta).map(val => val.lastModified)
-          .map(val => new Date(val).toLocaleString())
+                                                        .map(val => new Date(val).toLocaleString())
           .orElse(null)}
         </span>
       </td>

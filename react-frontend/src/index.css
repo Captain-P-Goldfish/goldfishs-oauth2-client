@@ -76,6 +76,12 @@ div > h1, div > h2, div > h3, div > h4, div > h5 {
     color: sandybrown;
 }
 
+pre {
+    display: block;
+    margin: 0;
+    line-height: 1.1;
+}
+
 span.bold {
     font-weight: bold;
 }
@@ -653,6 +659,7 @@ span.add-new-resource {
 }
 
 .overflow-column {
+    cursor: pointer;
     max-width: 300px;
     overflow: hidden;
     white-space: nowrap;
@@ -826,4 +833,26 @@ span.add-new-resource {
 .plain-disclosure > textarea
 {
     min-height: 137px !important;
+}
+
+.popover.token-popover {
+    max-width: 1000px;
+    max-height: 500px;
+}
+
+.popover.token-popover .popover-body {
+    max-height: 500px;
+}
+
+.popover.token-popover .popover-body pre{
+    overflow-y: scroll;
+    max-width: 1000px;
+    max-height: 440px;
+
+
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
