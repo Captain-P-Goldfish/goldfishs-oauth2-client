@@ -36,7 +36,7 @@ export function ResourceEndpointDetailsView(props)
                  onSuccess={resource =>
                  {
                    let resources = [...responses];
-                   resources.splice(0, 0, resource);
+                   resources.unshift(resource);
                    setResponses(resources);
                  }}
                  onError={errorResponse =>
@@ -46,7 +46,7 @@ export function ResourceEndpointDetailsView(props)
     {
       (responses || []).map((response, index) =>
       {
-        return <HttpResponse key={index}
+        return <HttpResponse key={response.id}
                              responseStatus={response.responseStatus}
                              httpHeader={scimHttpHeaderToString(response.responseHeaders)}
                              responseBody={response.responseBody}

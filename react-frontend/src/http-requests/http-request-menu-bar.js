@@ -399,9 +399,9 @@ export function HttpResponse({
           {
             Object.keys(jsonBody).map(key =>
             {
-              return <>
-                {"  "}"{key}": "<JwsOffCanvas key={key} name={key} value={jsonBody[key]} />"{"\n"}
-              </>
+              return <React.Fragment key={key}>
+                {"  "}"{key}": <JwsOffCanvas name={key} value={JSON.stringify(jsonBody[key], undefined, 2)} />{"\n"}
+              </React.Fragment>
             })
           }
           {"\n}"}
