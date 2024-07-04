@@ -12,6 +12,8 @@ import {ScimClient2} from "../scim/scim-client-2";
 import {HTTP_REQUESTS_ENDPOINT, HTTP_RESPONSE_HISTORY_ENDPOINT} from "../scim/scim-constants";
 import Button from "react-bootstrap/Button";
 import * as lodash from "lodash";
+import {isJson} from "../base/utils";
+import {JwsOffCanvas} from "../base/form-base";
 
 export function HttpRequestMenuBar()
 {
@@ -312,10 +314,17 @@ export function HttpResponse({
 
   const [body, setBody] = useState(responseBody || "");
   const [error, setError] = useState();
+  const [jsonBody, setJsonBody] = useState();
 
   useEffect(() =>
   {
     setBody(responseBody);
+    if (isJson(body) === true)
+    {
+      let json = JSON.parse(body);
+      setJsonBody(json);
+      setBody(JSON.stringify(json, undefined, 2));
+    }
   }, [responseBody]);
 
   return <Alert className={"mt-4"} variant={responseStatusToVariant(responseStatus)}>
@@ -330,9 +339,9 @@ export function HttpResponse({
       new Optional(originalRequest).isPresent() &&
       <React.Fragment>
         <Alert.Heading>Original Request</Alert.Heading>
-        <pre id={"response-http-header"}>
-                {originalRequest.trim()}
-              </pre>
+        <pre className={"response-http-header"}>
+          {originalRequest.trim()}
+        </pre>
         <hr/>
       </React.Fragment>
     }
@@ -341,9 +350,9 @@ export function HttpResponse({
     </Alert.Heading>
     <p>Status: {responseStatus}</p>
     <b>HTTP Header</b>
-    <pre id={"response-http-header"}>
-          {httpHeader}
-        </pre>
+    <pre className={"response-http-header"}>
+      {httpHeader}
+    </pre>
     <b>Response Body</b>
     <a className={"ms-3 cursor-pointer"}
        onClick={e =>
@@ -352,8 +361,7 @@ export function HttpResponse({
          e.preventDefault();
          try
          {
-           let json = JSON.parse(body);
-           setBody(JSON.stringify(json, undefined, 2));
+           setBody(JSON.stringify(jsonBody, undefined, 2));
          } catch (e)
          {
            setError(e.message);
@@ -383,9 +391,23 @@ export function HttpResponse({
 
        }}>pretty print XML
     </a>
-    <pre id={"response-http-header"}>
-          {body}
-        </pre>
+    <pre className={"response-http-header"}>
+      {
+        jsonBody !== undefined &&
+        <>
+          {"{\n"}
+          {
+            Object.keys(jsonBody).map(key =>
+            {
+              return <>
+                {"  "}"{key}": "<JwsOffCanvas key={key} name={key} value={jsonBody[key]} />"{"\n"}
+              </>
+            })
+          }
+          {"\n}"}
+        </>
+      }
+    </pre>
     {
       new Optional(error).isPresent() &&
       <Alert variant={"danger"} dismissible onClick={() => setError(null)}>

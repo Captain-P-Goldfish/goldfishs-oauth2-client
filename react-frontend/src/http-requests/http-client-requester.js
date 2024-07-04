@@ -8,6 +8,8 @@ import {XLg} from "react-bootstrap-icons";
 import {HTTP_REQUESTS_ENDPOINT, httpHeaderToScimJson, scimHttpHeaderToString} from "../scim/scim-constants";
 import {ScimClient2} from "../scim/scim-client-2";
 import {Optional} from "../services/utils";
+import {isJson, prettyPrintJson} from "../base/utils";
+import {JwsOffCanvas} from "../base/form-base";
 
 export function HttpClientRequester(props)
 {
@@ -125,20 +127,21 @@ export function HttpRequest(props)
 
   const httpMethods = ["POST", "GET", "PUT", "PATCH", "DELETE"];
   const [selectedMethod, setSelectedMethod] = useState(props.method || httpMethods[1]);
-  const [url, setUrl] = useState(new Optional(props.url).orElse("http://localhost:8080"));
+  const [selectedUrl, setSelectedUrl] = useState(new Optional(props.url).orElse("http://localhost:8080"));
+  const selectableUrls = props.selectableUrls;
   const [httpHeader, setHttpHeader] = useState(props.httpHeader || "");
   const [requestBody, setRequestBody] = useState(props.requestBody || "");
 
   useEffect(() =>
   {
-    setUrl(new Optional(props.url).orElse("http://localhost:8080"));
+    setSelectedUrl(new Optional(props.url).orElse("http://localhost:8080"));
   }, [props.url]);
 
   function sendHttpRequest()
   {
     let httpRequest = {
       httpMethod: selectedMethod,
-      url: url,
+      url: selectedUrl,
       requestHeaders: httpHeaderToScimJson(httpHeader),
       requestBody: requestBody,
       "urn:ietf:params:scim:schemas:captaingoldfish:2.0:HttpClientSettings": props.httpClientSettings || {}
@@ -148,6 +151,27 @@ export function HttpRequest(props)
   }
 
   return <Container>
+    {
+      selectableUrls && selectableUrls.length > 1 &&
+      <Row>
+        <Col>
+          <Form.Select className={"text-secondary"}
+                       onChange={e => setSelectedUrl(e.target.value)}>
+            {
+              selectableUrls.map((url, index) =>
+              {
+                return <option key={index} value={url}>
+                  {url}
+                </option>
+              })
+            }
+          </Form.Select>
+          <Form.Text id="select-url-description" className={"text-secondary"}>
+            Select one of the known resource-endpoints
+          </Form.Text>
+        </Col>
+      </Row>
+    }
     <Row>
       <Col xs={2}>
         <Form.Control as="select" name={"httpMethod"}
@@ -164,7 +188,7 @@ export function HttpRequest(props)
         </Form.Control>
       </Col>
       <Col>
-        <Form.Control name={"url"} value={url} onChange={e => setUrl(e.target.value)}
+        <Form.Control name={"url"} value={selectedUrl} onChange={e => setSelectedUrl(e.target.value)}
                       placeholder={"https://localhost:8443/my-application"}>
         </Form.Control>
       </Col>
@@ -194,13 +218,24 @@ export function HttpResponse(props)
 {
 
   const [showResponse, setShowResponse] = useState(true);
-  const [body, setBody] = useState(props.responseBody || "");
+  const [body, setBody] = useState(formatJsonBody(props.responseBody) || "");
   const [error, setError] = useState();
 
   useEffect(() =>
   {
-    setBody(props.responseBody);
+    setBody(formatJsonBody(props.responseBody))
   }, [props.responseBody]);
+
+  function formatJsonBody(body){
+    if (isJson(props.responseBody))
+    {
+      return prettyPrintJson(props.responseBody);
+    }
+    else
+    {
+      return props.responseBody;
+    }
+  }
 
   function responseStatusToVariant()
   {
@@ -222,7 +257,7 @@ export function HttpResponse(props)
     <Alert.Heading>HTTP Response</Alert.Heading>
     <p>Status: {props.responseStatus}</p>
     <b>HTTP Header</b>
-    <pre id={"response-http-header"}>
+    <pre className={"response-http-header"}>
       {props.httpHeader}
     </pre>
     <b>Response Body</b>
@@ -263,9 +298,15 @@ export function HttpResponse(props)
 
        }}>pretty print XML
     </a>
-    <pre id={"response-http-header"}>
-          {body}
-        </pre>
+    <pre className={"response-http-header"}>
+      {body}
+    </pre>
+    {
+      isJson(body) &&
+      Object.entries(JSON.parse(body)).map((key, value) => {
+        return <JwsOffCanvas name={key} value={this.state.json[key]} printIfNoJws={false}/>
+      })
+    }
     {
       new Optional(error).isPresent() &&
       <Alert variant={"danger"} dismissible onClick={() => setError(null)}>

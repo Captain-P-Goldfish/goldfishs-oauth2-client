@@ -14,11 +14,20 @@ export function ResourceEndpointDetailsView(props)
 
   let accessTokenDetails = JSON.parse(props.accessTokenDetails.plainResponse);
 
+  let selectableUrls = [props.metaData.userinfo_endpoint];
+  if (props.metaData.credential_endpoint)
+  {
+    selectableUrls.push(props.metaData.credential_endpoint);
+  }
+
   return <React.Fragment>
     <h5>Access Resource Endpoints</h5>
     <HttpRequest minHeight={"10vh"}
                  url={props.metaData.userinfo_endpoint}
-                 httpHeader={"Authorization: " + accessTokenDetails.token_type + " " +
+                 selectableUrls={selectableUrls}
+                 httpHeader={
+                   "Content-Type: application/json\n" +
+                   "Authorization: " + accessTokenDetails.token_type + " " +
                    accessTokenDetails.access_token +
                    (props.accessTokenDetails.resourceEndpointHeaders || []).map(header =>
                    {

@@ -676,14 +676,20 @@ export function Collapseable(props)
 /**
  * adds an off-canvas if the given value matches a JWS and returns simply the value if it does not
  */
-export function JwsOffCanvas({name, value, ...props})
+export function JwsOffCanvas({name, value, printIfNoJws = true, ...props})
 {
   const [show, setShow] = useState(false);
   const jws = decodeJws(value);
 
   if (!isDecodedJws(jws))
   {
-    return value;
+    if (printIfNoJws)
+    {
+      return value;
+    } else
+    {
+      return null;
+    }
   }
 
   return <>
