@@ -11,7 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,6 +42,7 @@ public class CurrentWorkflowSettings
   @OneToOne
   @JoinColumn(name = "OPENID_CLIENT_ID")
   private OpenIdClient openIdClient;
+
 
   /**
    * the redirect uri that was used in the last authorization code grant request for the parent client
@@ -83,6 +83,12 @@ public class CurrentWorkflowSettings
    */
   @Column(name = "RESOURCE_PASSWORD_GRANT_SCOPE")
   private String resourcePasswordGrantScope;
+
+  /**
+   * The grant_type to use in the tokenRequest
+   */
+  @Column(name = "GRANT_TYPE")
+  private String grantType;
 
   /**
    * the key that should be used for DPoP binding
@@ -152,6 +158,7 @@ public class CurrentWorkflowSettings
                                  String username,
                                  String userPassword,
                                  String resourcePasswordGrantScope,
+                                 String grantType,
                                  String dpopKeyId,
                                  String dpopJwsAlgorithm,
                                  String dpopNonce,
@@ -168,6 +175,7 @@ public class CurrentWorkflowSettings
     this.username = username;
     this.userPassword = userPassword;
     this.resourcePasswordGrantScope = resourcePasswordGrantScope;
+    this.grantType = grantType;
     this.dpopKeyId = dpopKeyId;
     this.dpopJwsAlgorithm = dpopJwsAlgorithm;
     this.dpopNonce = dpopNonce;

@@ -336,8 +336,14 @@
             <column name="PKCE_USE" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="PKCE_CODE_VERIFIER" type="VARCHAR(1024)"/>
         </addColumn>
-        <modifyDataType tableName="OPENID_CLIENT" columnName="AUTHENTICATION_TYPE" newDataType="VARCHAR(50)" />
+        <modifyDataType tableName="OPENID_CLIENT" columnName="AUTHENTICATION_TYPE" newDataType="VARCHAR(50)"/>
 
+    </changeSet>
+
+    <changeSet id="grantType" author="pascal_knueppel">
+        <addColumn tableName="CURRENT_WORKFLOW_SETTINGS">
+            <column name="GRANT_TYPE" type="VARCHAR(100)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

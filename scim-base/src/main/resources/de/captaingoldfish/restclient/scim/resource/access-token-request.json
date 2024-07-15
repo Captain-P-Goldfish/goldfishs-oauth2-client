@@ -37,12 +37,7 @@
       "uniqueness": "server",
       "multiValued": false,
       "required": true,
-      "caseExact": false,
-      "canonicalValues": [
-        "authorization_code",
-        "client_credentials",
-        "password"
-      ]
+      "caseExact": false
     },
     {
       "name": "authorizationCode",

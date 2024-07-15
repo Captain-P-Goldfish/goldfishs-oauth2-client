@@ -43,13 +43,13 @@ public class AccessTokenRequestBuilderFactory
                                              accessTokenRequest.getCurrentWorkflowSettings().orElse(null), dpopBuilder,
                                              pkceCodeVerifierCache);
     }
-    if (OAuthConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
+    else if (OAuthConstants.CLIENT_CREDENTIALS_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
     {
       return new ClientCredentialsTokenRequestBuilder(openIdClient, accessTokenRequest.getScope().orElse(null),
                                                       accessTokenRequest.getCurrentWorkflowSettings().orElse(null),
                                                       dpopBuilder);
     }
-    if (OAuthConstants.RESOURCE_PASSWORD_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
+    else if (OAuthConstants.RESOURCE_PASSWORD_GRANT_TYPE.equals(accessTokenRequest.getGrantType()))
     {
       return new ResourcePasswordTokenRequestBuilder(openIdClient, accessTokenRequest.getUsername().orElseThrow(),
                                                      accessTokenRequest.getPassword().orElseThrow(),
@@ -57,7 +57,14 @@ public class AccessTokenRequestBuilderFactory
                                                      accessTokenRequest.getCurrentWorkflowSettings().orElse(null),
                                                      dpopBuilder);
     }
-    throw new IllegalStateException(String.format("Unsupported grant_type '%s'", accessTokenRequest.getGrantType()));
+    else
+    {
+      return new AuthCodeTokenRequestBuilder(openIdClient, accessTokenRequest.getAuthorizationCode().orElseThrow(),
+                                             accessTokenRequest.getState().orElse(null),
+                                             accessTokenRequest.getRedirectUri().orElse(null),
+                                             accessTokenRequest.getCurrentWorkflowSettings().orElse(null), dpopBuilder,
+                                             pkceCodeVerifierCache, accessTokenRequest.getGrantType());
+    }
   }
 
 }

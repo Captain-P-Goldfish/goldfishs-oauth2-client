@@ -17,6 +17,7 @@ import {GoFlame} from "react-icons/go";
 import {Optional} from "../../services/utils";
 import {ResourceEndpointDetailsView} from "./resource-endpoint-view";
 import {AiFillWarning} from "react-icons/ai";
+import Form from "react-bootstrap/Form";
 
 const INTERVAL_TIME_IN_SECONDS = 2;
 const MAX_GET_AUTHCODE_RETRIES = 60;
@@ -33,6 +34,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     let previousDpopJti = props.requestDetails[CURRENT_WORKFLOW_URI]?.dpop?.jti;
     let previousDpopHtm = props.requestDetails[CURRENT_WORKFLOW_URI]?.dpop?.htm;
     let previousDpopHtu = props.requestDetails[CURRENT_WORKFLOW_URI]?.dpop?.htu;
+    let grantType = props.requestDetails[CURRENT_WORKFLOW_URI]?.grantType || "authorization_code";
 
     this.state = {
       isLoading: true,
@@ -45,6 +47,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
       dpopJti: previousDpopJti || "",
       dpopHtm: previousDpopHtm || "",
       dpopHtu: previousDpopHtu || "",
+      grantType: grantType
     };
     this.setState = this.setState.bind(this);
     this.forceUpdate = this.forceUpdate.bind(this);
@@ -249,7 +252,8 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
           jti: this.state.dpopJti,
           htm: this.state.dpopHtm,
           htu: this.state.dpopHtu
-        }
+        },
+        grantType: this.state.grantType
       }
       let patchRequest = {
         schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
@@ -282,7 +286,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         + "?" + this.props.requestDetails.authorizationCodeGrantParameters).searchParams);
 
     let resource = {
-      grantType: "authorization_code",
+      grantType: this.state.grantType,
       openIdClientId: parseInt(this.props.client.id),
       redirectUri: authCodeQueryParams.redirect_uri,
       authorizationCode: queryParamsObject.code,
@@ -381,22 +385,42 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                       }}>
                 <LoadingSpinner show={this.state.isLoading}/> Get Access Token
               </Button>
-              <FormCheck
-                type="switch"
-                id="dpop-switch"
-                className={"ms-5 d-inline-block"}
-                label="Demonstrate Proof of Posession (DPoP)"
-                onChange={e =>
-                {
-                  this.setState({useDpop: e.target.checked})
-                }}/>
+
+              <Collapseable header={"Modify Access Token Request Parameters"}
+                            open={true}
+                            variant={"workflow-details"}
+                            bodyClass={"workflow-card-details"}
+                            content={() =>
+                            {
+                              return <Row>
+                                <Col md={3}>
+                                  <Form.Group className="mb-3" controlId="access_token.grant_type">
+                                    <Form.Label>grant_type</Form.Label>
+                                    <Form.Control value={this.state.grantType}
+                                                  onChange={e => this.setState({grantType: e.target.value})}/>
+                                  </Form.Group>
+                                </Col>
+                                <Col md={3}>
+                                  <FormCheck
+                                    type="switch"
+                                    id="dpop-switch"
+                                    className={"ms-5 d-inline-block"}
+                                    label="Demonstrate Proof of Posession (DPoP)"
+                                    onChange={e =>
+                                    {
+                                      this.setState({useDpop: e.target.checked})
+                                    }}/>
+                                </Col>
+                                {
+                                  this.state.useDpop &&
+                                  <Col md={6}>
+                                    <DpopDetails props={this.props} state={this.state} setState={this.setState}/>
+                                  </Col>
+                                }
+                              </Row>;
+                            }}
+              />
             </Col>
-            {
-              this.state.useDpop &&
-              <Col md={7}>
-                <DpopDetails props={this.props} state={this.state} setState={this.setState}/>
-              </Col>
-            }
           </Row>
           {
             this.state.accessTokenDetails &&

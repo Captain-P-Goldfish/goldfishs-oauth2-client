@@ -24,6 +24,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   @Builder
   public ScimCurrentWorkflowSettings(String id,
                                      Long openIdClientId,
+                                     String grantType,
                                      Dpop dpop,
                                      ScimAuthCodeGrantRequest.Pkce pkce,
                                      AuthCodeParameters authCodeParameters,
@@ -34,12 +35,25 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     setSchemas(Collections.singletonList(FieldNames.SCHEMA_ID));
     setId(id);
     setOpenIdClientId(openIdClientId);
+    setGrantType(grantType);
     setDpop(dpop);
     setPkce(pkce);
     setAuthCodeParameters(authCodeParameters);
     setClientCredentialsParameters(clientCredentialsParameters);
     setResourceOwnerPasswordParameters(resourceOwnerPasswordParameters);
     setMeta(meta);
+  }
+
+  /** The grant_type to use in the tokenRequest. */
+  public String getGrantType()
+  {
+    return getStringAttribute(FieldNames.GRANT_TYPE).orElse(null);
+  }
+
+  /** The grant_type to use in the tokenRequest. */
+  public void setGrantType(String grantType)
+  {
+    setAttribute(FieldNames.GRANT_TYPE, grantType);
   }
 
   /** The foreign key reference to an open-id-client resource. */
@@ -425,6 +439,8 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     public static final String OPENID_CLIENT_ID = "openIdClientId";
 
     public static final String USERNAME = "username";
+
+    public static final String GRANT_TYPE = "grantType";
 
     public static final String DPOP = "dpop";
 

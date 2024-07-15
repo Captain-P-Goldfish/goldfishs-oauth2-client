@@ -53,6 +53,7 @@ public class CurrentWorkflowSettingsConverter
                                   .resourcePasswordGrantScope(scimSettings.getResourceOwnerPasswordParameters()
                                                                           .map(ResourceOwnerPasswordParameters::getScope)
                                                                           .orElse(null))
+                                  .grantType(scimSettings.getGrantType())
                                   .dpopKeyId(scimSettings.getDpop()
                                                          .flatMap(Dpop::getKeyId)
                                                          .orElseGet(previousConfig::getDpopKeyId))
@@ -121,6 +122,7 @@ public class CurrentWorkflowSettingsConverter
 
     return ScimCurrentWorkflowSettings.builder()
                                       .openIdClientId(settings.getOpenIdClient().getId())
+                                      .grantType(settings.getGrantType())
                                       .dpop(dpop)
                                       .pkce(pkce)
                                       .authCodeParameters(authCodeParameters)

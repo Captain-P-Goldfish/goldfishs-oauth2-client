@@ -41,6 +41,11 @@ public class AuthCodeTokenRequestBuilder extends AccessTokenRequestBuilder
    */
   private final PkceCodeVerifierCache pkceCodeVerifierCache;
 
+  /**
+   * the grant type to use in the token-request
+   */
+  private final String grantType;
+
 
   public AuthCodeTokenRequestBuilder(OpenIdClient openIdClient,
                                      String authorizationCode,
@@ -50,11 +55,25 @@ public class AuthCodeTokenRequestBuilder extends AccessTokenRequestBuilder
                                      DpopBuilder dpopBuilder,
                                      PkceCodeVerifierCache pkceCodeVerifierCache)
   {
+    this(openIdClient, authorizationCode, state, redirectUri, currentWorkflowSettings, dpopBuilder,
+         pkceCodeVerifierCache, OAuthConstants.AUTH_CODE_GRANT_TYPE);
+  }
+
+  public AuthCodeTokenRequestBuilder(OpenIdClient openIdClient,
+                                     String authorizationCode,
+                                     String state,
+                                     String redirectUri,
+                                     ScimCurrentWorkflowSettings currentWorkflowSettings,
+                                     DpopBuilder dpopBuilder,
+                                     PkceCodeVerifierCache pkceCodeVerifierCache,
+                                     String grantType)
+  {
     super(openIdClient, currentWorkflowSettings, dpopBuilder);
     this.authorizationCode = authorizationCode;
     this.state = state;
     this.redirectUri = redirectUri;
     this.pkceCodeVerifierCache = pkceCodeVerifierCache;
+    this.grantType = grantType;
   }
 
   /**
@@ -63,7 +82,7 @@ public class AuthCodeTokenRequestBuilder extends AccessTokenRequestBuilder
   @Override
   public void addRequestParameters(Map<String, String> requestParameters)
   {
-    requestParameters.put(OAuthConstants.GRANT_TYPE, OAuthConstants.AUTH_CODE_GRANT_TYPE);
+    requestParameters.put(OAuthConstants.GRANT_TYPE, grantType);
     requestParameters.put(OAuthConstants.REDIRECT_URI, redirectUri);
     requestParameters.put(OAuthConstants.CLIENT_ID, openIdClient.getClientId());
     requestParameters.put(OAuthConstants.CODE, authorizationCode);
