@@ -864,3 +864,116 @@ pre.response-http-header {
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+div.accordion .accordion-header {
+    background-color: #313131;
+    color: white;
+}
+
+/* -----------------------------------------------------------
+   OIDC Claims Editor – Dark / Warning Accordion Theme
+   Scope it via a wrapper class: .oidc-claims-editor
+   ----------------------------------------------------------- */
+
+.oidc-claims-editor .accordion {
+    --oidc-bg: #262b31;         /* dark card base */
+    --oidc-bg-2: #31363d;       /* header */
+    --oidc-claim-bg: #424100;       /* header */
+    --oidc-border: #ffc107;     /* warning */
+    --oidc-text: #f8f9fa;       /* light text */
+    --oidc-muted: rgba(248, 249, 250, 0.65);
+    --oidc-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.35);
+}
+
+/* Make items look like your cards */
+.oidc-claims-editor .accordion-item {
+    background: var(--oidc-bg);
+    border: 1px solid var(--oidc-border);
+    border-radius: 0.5rem;
+    box-shadow: var(--oidc-shadow);
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+/* Remove default inner borders between items */
+.oidc-claims-editor .accordion-item + .accordion-item {
+    border-top: 1px solid var(--oidc-border);
+}
+
+/* Header button styling */
+.oidc-claims-editor .accordion-button {
+    background: var(--oidc-bg-2);
+    color: var(--oidc-text);
+    padding: 0.85rem 1rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+
+    /* Bootstrap adds shadows; we want a cleaner card look */
+    box-shadow: none;
+    border: none;
+}
+
+.oidc-claims-editor .claim-accordion-header .accordion-button {
+    background: var(--oidc-claim-bg);
+    color: var(--oidc-text);
+}
+
+/* Hover: slightly brighter header */
+.oidc-claims-editor .accordion-button:hover {
+    filter: brightness(1.07);
+}
+
+/* Expanded header */
+.oidc-claims-editor .accordion-button:not(.collapsed) {
+    background: var(--oidc-bg-2);
+    color: var(--oidc-text);
+    box-shadow: none;
+}
+.oidc-claims-editor .claim-accordion-header .accordion-button:not(.collapsed) {
+    background: var(--oidc-claim-bg);
+}
+
+/* Focus ring: warning-ish */
+.oidc-claims-editor .accordion-button:focus {
+    box-shadow: 0 0 0 0.15rem rgba(255, 193, 7, 0.35);
+}
+
+/* Chevron icon (Bootstrap uses ::after with an SVG mask/background) */
+.oidc-claims-editor .accordion-button::after {
+    filter: invert(1);         /* make it bright on dark background */
+    opacity: 0.85;
+}
+
+/* Body like a darker card content area */
+.oidc-claims-editor .accordion-body {
+    background: var(--oidc-bg);
+    color: var(--oidc-text);
+    padding: 1rem;
+}
+
+/* Muted text inside accordions */
+.oidc-claims-editor .text-muted {
+    color: var(--oidc-muted) !important;
+}
+
+/* Make nested accordions slightly tighter so it doesn't explode */
+.oidc-claims-editor .accordion .accordion-item {
+    margin-bottom: 0.6rem;
+}
+
+/* Optional: badges in headers align nicer */
+.oidc-claims-editor .accordion-button .badge {
+    position: relative;
+    top: -1px;
+}
+
+/* Optional: give accordions the same "warning outline" feel as your cards */
+.oidc-claims-editor .accordion-item {
+    outline: 1px solid rgba(255, 193, 7, 0.25);
+    outline-offset: -2px;
+}
+
+/* Optional: remove the default accordion outer border radius collisions */
+.oidc-claims-editor .accordion {
+    border-radius: 0.5rem;
+}

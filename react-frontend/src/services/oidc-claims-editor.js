@@ -75,6 +75,32 @@ function onEnter(e, fn) {
   }
 }
 
+function isValuesArray(x) {
+  return Array.isArray(x);
+}
+
+function isValuesString(x) {
+  return typeof x === "string";
+}
+
+function getSingleFromClaimObject(obj) {
+  if (obj && typeof obj.value === "string") return obj.value;
+  if (obj && isValuesString(obj.values)) return obj.values;
+  if (obj && isValuesArray(obj.values) && obj.values.length === 1 && typeof obj.values[0] === "string") {
+    return obj.values[0];
+  }
+  return "";
+}
+
+function getValuesMode(obj) {
+  // true => store single as "values" (string), false => store as "value" (string)
+  if (!obj) return false;
+  if (typeof obj.value === "string") return false;
+  if (isValuesString(obj.values)) return true;
+  // If it's an array, that's multi-mode (we should not treat as single-values-mode switchable)
+  return false;
+}
+
 /* =========================
  Parse / Write claims
  ========================= */
@@ -179,74 +205,75 @@ export function OidcClaimsEditor({
 
   const claimsActive = Object.keys(jsonPreview).length > 0;
 
-  return (
-    <Accordion activeKey={openKey} onSelect={(k) => setOpenKey(k)}>
-      <Accordion.Item eventKey="oidc-claims-editor">
-        <Accordion.Header>
-          <strong>OpenID Connect “claims” editor</strong>
-          <Badge bg="warning" text="dark" className="ms-2">
-            OIDC
-          </Badge>
-          {claimsActive ? (
-            <Badge bg="info" className="ms-2">
-              active
+  return (<div className="oidc-claims-editor">
+      <Accordion activeKey={openKey} onSelect={(k) => setOpenKey(k)}>
+        <Accordion.Item eventKey="oidc-claims-editor">
+          <Accordion.Header>
+            <strong>OpenID Connect “claims” editor</strong>
+            <Badge bg="warning" text="dark" className="ms-2">
+              OIDC
             </Badge>
-          ) : (
-            <Badge bg="secondary" className="ms-2">
-              omitted
-            </Badge>
-          )}
-        </Accordion.Header>
+            {claimsActive ? (
+              <Badge bg="info" className="ms-2">
+                active
+              </Badge>
+            ) : (
+              <Badge bg="secondary" className="ms-2">
+                omitted
+              </Badge>
+            )}
+          </Accordion.Header>
 
-        <Accordion.Body>
-          <div className="text-muted" style={{ fontSize: 12, marginBottom: 10 }}>
-            Writes back to <code>{fieldPath}</code> on every change. (claims will be written single-URL-encoded)
-          </div>
+          <Accordion.Body>
+            <div className="text-muted" style={{fontSize: 12, marginBottom: 10}}>
+              Writes back to <code>{fieldPath}</code> on every change. (claims will be written single-URL-encoded)
+            </div>
 
-          {parseWarning && (
-            <Alert variant="warning">
-              Could not parse <code>claims</code> cleanly: {parseWarning}
-            </Alert>
-          )}
+            {parseWarning && (
+              <Alert variant="warning">
+                Could not parse <code>claims</code> cleanly: {parseWarning}
+              </Alert>
+            )}
 
-          <Row className="g-3">
-            <Col lg={7}>
-              <ClaimsSection
-                title="UserInfo (userinfo)"
-                sectionKey="userinfo"
-                section={claims.userinfo}
-                onChange={(fn) => updateSection("userinfo", fn)}
-              />
+            <Row className="g-3">
+              <Col lg={7}>
+                <ClaimsSection
+                  title="UserInfo (userinfo)"
+                  sectionKey="userinfo"
+                  section={claims.userinfo}
+                  onChange={(fn) => updateSection("userinfo", fn)}
+                />
 
-              <ClaimsSection
-                title="ID Token (id_token)"
-                sectionKey="id_token"
-                section={claims.id_token}
-                onChange={(fn) => updateSection("id_token", fn)}
-              />
-            </Col>
+                <ClaimsSection
+                  title="ID Token (id_token)"
+                  sectionKey="id_token"
+                  section={claims.id_token}
+                  onChange={(fn) => updateSection("id_token", fn)}
+                />
+              </Col>
 
-            <Col lg={5}>
-              <Card bg="dark" border="warning">
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                  <strong>claims JSON</strong>
-                  {claimsActive ? (
-                    <Badge bg="info">active</Badge>
-                  ) : (
-                    <Badge bg="secondary">omitted</Badge>
-                  )}
-                </Card.Header>
-                <Card.Body>
-                  <pre style={{ fontSize: 12, marginBottom: 0, whiteSpace: "pre-wrap" }}>
+              <Col lg={5}>
+                <Card bg="dark" border="warning">
+                  <Card.Header className="d-flex justify-content-between align-items-center">
+                    <strong>claims JSON</strong>
+                    {claimsActive ? (
+                      <Badge bg="info">active</Badge>
+                    ) : (
+                      <Badge bg="secondary">omitted</Badge>
+                    )}
+                  </Card.Header>
+                  <Card.Body>
+                  <pre style={{fontSize: 12, marginBottom: 0, whiteSpace: "pre-wrap"}}>
                     {JSON.stringify(jsonPreview, null, 2)}
                   </pre>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+    </div>
   );
 }
 
@@ -256,20 +283,26 @@ export function OidcClaimsEditor({
 
 function ClaimsSection({ title, sectionKey, section, onChange }) {
   const [newName, setNewName] = useState("");
+  const [openClaimKey, setOpenClaimKey] = useState(null);
 
   const claimNames = useMemo(() => Object.keys(section || {}).sort(), [section]);
 
   const addClaim = useCallback(() => {
     const name = newName.trim();
     if (!name) return;
+
+    // Create/ensure claim
     onChange((s) => {
-      if (s[name] === undefined) s[name] = null; // default new claim to null (requested w/o options)
+      if (s[name] === undefined) s[name] = {}; // default: request-as-null OFF
     });
+
+    // Open the new claim accordion item
+    setOpenClaimKey(name);
     setNewName("");
   }, [newName, onChange]);
 
   return (
-    <Accordion defaultActiveKey={sectionKey} alwaysOpen className="mb-3">
+    <Accordion defaultActiveKey={sectionKey} className="mb-3">
       <Accordion.Item eventKey={sectionKey}>
         <Accordion.Header>
           {title}{" "}
@@ -300,13 +333,20 @@ function ClaimsSection({ title, sectionKey, section, onChange }) {
               No claims configured for <code>{sectionKey}</code>.
             </Alert>
           ) : (
-            <Accordion alwaysOpen>
+            <Accordion
+              activeKey={openClaimKey}
+              onSelect={(k) => setOpenClaimKey(k)}
+            >
               {claimNames.map((name) => (
                 <ClaimAccordion
                   key={name}
                   name={name}
                   value={section[name]}
-                  onRemove={() => onChange((s) => delete s[name])}
+                  onRemove={() => {
+                    // If currently open claim gets removed, close it
+                    if (openClaimKey === name) setOpenClaimKey(null);
+                    onChange((s) => delete s[name]);
+                  }}
                   onUpdate={(fn) =>
                     onChange((s) => {
                       s[name] = fn(s[name]);
@@ -330,6 +370,22 @@ function ClaimsSection({ title, sectionKey, section, onChange }) {
 
 function ClaimAccordion({ name, value, onRemove, onUpdate }) {
   const isNull = isClaimNull(value);
+
+  // Cache the last non-null object so toggling "request as null" doesn't destroy data.
+  const lastNonNullRef = React.useRef(null);
+
+  // Keep cache up-to-date whenever we have a non-null object
+  React.useEffect(() => {
+    if (value !== null && isPlainObject(value)) {
+      // deep-ish copy to avoid accidental mutation issues
+      lastNonNullRef.current = structuredClone(value);
+    }
+    // If value is {}, that's also a valid state worth caching
+    if (value !== null && isPlainObject(value) && Object.keys(value).length === 0) {
+      lastNonNullRef.current = structuredClone(value);
+    }
+  }, [value]);
+
   const objForRead = isNull ? {} : ensureClaimObject(value);
 
   const valuesArr = Array.isArray(objForRead.values) ? objForRead.values : [];
@@ -339,9 +395,15 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
     ? Object.entries(objForRead).filter(([k]) => !["essential", "values", "value"].includes(k))
     : [];
 
+  const restoreOrEmptyObject = () => {
+    const cached = lastNonNullRef.current;
+    if (cached && isPlainObject(cached)) return structuredClone(cached);
+    return {};
+  };
+
   return (
     <Accordion.Item eventKey={name}>
-      <Accordion.Header>
+      <Accordion.Header className={"claim-accordion-header"}>
         <span className="d-inline-flex align-items-center gap-2 flex-wrap">
           <strong>{name}</strong>
           {isNull && <Badge bg="secondary">null</Badge>}
@@ -367,125 +429,273 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
       </Accordion.Header>
 
       <Accordion.Body>
-        {/* NEW SWITCH: request as null */}
-        <Form.Check
-          type="switch"
-          id={`null-request-${name}`}
-          label="request as null"
-          checked={isNull}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            onUpdate((prev) => {
-              if (checked) {
-                // Force null, hide everything else
-                return null;
-              }
-              // Switch off: make sure it's editable again
-              // If it was null, convert to empty object.
-              return prev === null ? {} : prev;
-            });
-          }}
-        />
-
-        {/* When null-request is ON, hide the other controls */}
-        {!isNull && (
-          <>
+        {/* Switch row: request-as-null LEFT, essential RIGHT */}
+        <Row className="g-3 align-items-center">
+          <Col md={6}>
             <Form.Check
               type="switch"
-              id={`essential-${name}`}
-              label="essential"
-              checked={objForRead.essential === true}
+              id={`null-request-${name}`}
+              label="request as null"
+              checked={isNull}
               onChange={(e) => {
                 const checked = e.target.checked;
+
                 onUpdate((prev) => {
-                  const obj = ensureClaimObject(prev);
-                  if (checked) obj.essential = true;
-                  else delete obj.essential;
-                  return obj;
+                  if (checked) {
+                    // Cache current non-null state (if any) BEFORE switching to null
+                    if (prev !== null && isPlainObject(prev)) {
+                      lastNonNullRef.current = structuredClone(prev);
+                    } else if (prev !== null && prev === undefined) {
+                      lastNonNullRef.current = {};
+                    }
+                    return null;
+                  }
+
+                  // Switch off: restore cached state if available, otherwise {}
+                  return prev === null ? restoreOrEmptyObject() : prev;
                 });
               }}
             />
+          </Col>
 
-            <Accordion className="mt-3">
-              <Accordion.Item eventKey={`${name}-value`}>
-                <Accordion.Header>value (single)</Accordion.Header>
-                <Accordion.Body>
-                  <Form.Control
-                    value={singleValue}
-                    placeholder='Single value test (e.g. "admin")'
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      onUpdate((prev) => {
-                        const obj = ensureClaimObject(prev);
-                        if (v && v.trim().length > 0) obj.value = v;
-                        else delete obj.value;
-                        return obj;
-                      });
-                    }}
-                  />
-                </Accordion.Body>
-              </Accordion.Item>
+          <Col md={6}>
+            {!isNull && (
+              <Form.Check
+                type="switch"
+                id={`essential-${name}`}
+                label="essential"
+                checked={objForRead.essential === true}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  onUpdate((prev) => {
+                    const obj = ensureClaimObject(prev);
+                    if (checked) obj.essential = true;
+                    else delete obj.essential;
 
-              <Accordion.Item eventKey={`${name}-values`}>
-                <Accordion.Header>values (multi)</Accordion.Header>
-                <Accordion.Body>
-                  <ValuesEditor
-                    values={valuesArr}
-                    onChangeValues={(nextValues) => {
-                      onUpdate((prev) => {
-                        const obj = ensureClaimObject(prev);
-                        if (nextValues.length > 0) obj.values = nextValues;
-                        else delete obj.values;
-                        return obj;
-                      });
-                    }}
-                  />
-                </Accordion.Body>
-              </Accordion.Item>
+                    // update cache too (so it restores correctly after null-toggle)
+                    lastNonNullRef.current = structuredClone(obj);
+                    return obj;
+                  });
+                }}
+              />
+            )}
+          </Col>
+        </Row>
 
-              <Accordion.Item eventKey={`${name}-custom`}>
-                <Accordion.Header>
-                  Custom attributes{" "}
-                  <span className="ms-2">
-                    {customEntries.length > 0 ? (
-                      <Badge bg="dark">count:{customEntries.length}</Badge>
-                    ) : (
-                      <Badge bg="secondary">none</Badge>
-                    )}
-                  </span>
-                </Accordion.Header>
-                <Accordion.Body>
-                  <CustomAttributesEditor
-                    entries={customEntries}
-                    onAdd={(key) => {
-                      onUpdate((prev) => {
-                        const obj = ensureClaimObject(prev);
-                        const k = (key ?? "").trim();
-                        if (!k) return prev;
-                        if (obj[k] === undefined) obj[k] = "";
-                        return obj;
-                      });
-                    }}
-                    onRemove={(key) => {
-                      onUpdate((prev) => {
-                        const obj = ensureClaimObject(prev);
-                        delete obj[key];
-                        return obj;
-                      });
-                    }}
-                    onUpdate={(key, rawValue) => {
-                      onUpdate((prev) => {
-                        const obj = ensureClaimObject(prev);
-                        const parsed = safeJsonParse(rawValue);
-                        obj[key] = parsed !== null ? parsed : rawValue;
-                        return obj;
-                      });
-                    }}
-                  />
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </>
+        {/* When request-as-null is ON, hide the editor */}
+        {!isNull && (
+          <Accordion className="mt-3" defaultActiveKey={`${name}-value`}>
+            <Accordion.Item eventKey={`${name}-value`}>
+              <Accordion.Header>value (single)</Accordion.Header>
+              <Accordion.Body>
+                {(() => {
+                  const hasMultiValues = Array.isArray(objForRead.values) && objForRead.values.length > 1;
+
+                  const single = getSingleFromClaimObject(objForRead);
+                  const storeAsValuesString = getValuesMode(objForRead); // true => values:"x", false => value:"x"
+
+                  return (
+                    <React.Fragment>
+                      <Row className="g-3 align-items-center mb-2">
+                        <Col md={6}>
+                          <Form.Check
+                            type="switch"
+                            id={`single-as-values-${name}`}
+                            label='store as "values" (single)'
+                            disabled={hasMultiValues}
+                            checked={storeAsValuesString}
+                            onChange={(e) => {
+                              const useValues = e.target.checked;
+
+                              onUpdate((prev) => {
+                                const obj = ensureClaimObject(prev);
+
+                                // If already multi-values, don't rewrite representation here.
+                                if (Array.isArray(obj.values) && obj.values.length > 1)
+                                {
+                                  return obj;
+                                }
+
+                                const v = getSingleFromClaimObject(obj).trim();
+
+                                if (useValues)
+                                {
+                                  // Single stays single: values: "x"
+                                  delete obj.value;
+                                  if (v.length > 0)
+                                  {
+                                    obj.values = v;
+                                  }
+                                  else
+                                  {
+                                    delete obj.values;
+                                  }
+                                }
+                                else
+                                {
+                                  // value: "x"
+                                  delete obj.values;
+                                  if (v.length > 0)
+                                  {
+                                    obj.value = v;
+                                  }
+                                  else
+                                  {
+                                    delete obj.value;
+                                  }
+                                }
+
+                                lastNonNullRef.current = structuredClone(obj);
+                                return obj;
+                              });
+                            }}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          {hasMultiValues && (
+                            <div className="text-muted" style={{fontSize: 12}}>
+                              Multiple <code>values</code> are set (array). Please edit them in{" "}
+                              <strong>values (multi)</strong>.
+                            </div>
+                          )}
+                        </Col>
+                      </Row>
+
+                      <Form.Control
+                        value={single}
+                        placeholder='Single value test (e.g. "admin")'
+                        disabled={hasMultiValues}
+                        onChange={(e) => {
+                          const v = e.target.value;
+
+                          onUpdate((prev) => {
+                            const obj = ensureClaimObject(prev);
+
+                            // Don't destruct multi-values array from here
+                            if (Array.isArray(obj.values) && obj.values.length > 1)
+                            {
+                              return obj;
+                            }
+
+                            const trimmed = v.trim();
+                            const useValues = getValuesMode(obj);
+
+                            if (useValues)
+                            {
+                              delete obj.value;
+                              if (trimmed.length > 0)
+                              {
+                                obj.values = trimmed;
+                              }// <-- STRING, NOT ARRAY
+                              else
+                              {
+                                delete obj.values;
+                              }
+                            }
+                            else
+                            {
+                              delete obj.values;
+                              if (trimmed.length > 0)
+                              {
+                                obj.value = trimmed;
+                              }
+                              else
+                              {
+                                delete obj.value;
+                              }
+                            }
+
+                            lastNonNullRef.current = structuredClone(obj);
+                            return obj;
+                          });
+                        }}
+                      />
+                    </React.Fragment>
+                  );
+                })()}
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey={`${name}-values`}>
+              <Accordion.Header>values (multi)</Accordion.Header>
+              <Accordion.Body>
+                <ValuesEditor
+                  values={valuesArr}
+                  onChangeValues={(nextValues) => {
+                    onUpdate((prev) => {
+                      const obj = ensureClaimObject(prev);
+                      if (nextValues.length > 0)
+                      {
+                        obj.values = nextValues;
+                      }
+                      else
+                      {
+                        delete obj.values;
+                      }
+
+                      lastNonNullRef.current = structuredClone(obj);
+                      return obj;
+                    });
+                  }}
+                />
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey={`${name}-custom`}>
+              <Accordion.Header>
+                Custom attributes{" "}
+                <span className="ms-2">
+                  {customEntries.length > 0 ? (
+                    <Badge bg="dark">count:{customEntries.length}</Badge>
+                  ) : (
+                    <Badge bg="secondary">none</Badge>
+                  )}
+                </span>
+              </Accordion.Header>
+              <Accordion.Body>
+                <CustomAttributesEditor
+                  entries={customEntries}
+                  onAdd={(key) => {
+                    onUpdate((prev) => {
+                      const obj = ensureClaimObject(prev);
+                      const k = (key ?? "").trim();
+                      if (!k)
+                      {
+                        return prev;
+                      }
+                      if (obj[k] === undefined)
+                      {
+                        obj[k] = "";
+                      }
+
+                      lastNonNullRef.current = structuredClone(obj);
+                      return obj;
+                    });
+                  }}
+                  onRemove={(key) => {
+                    onUpdate((prev) => {
+                      const obj = ensureClaimObject(prev);
+                      delete obj[key];
+
+                      lastNonNullRef.current = structuredClone(obj);
+                      return obj;
+                    });
+                  }}
+                  onUpdate={(key, rawValue) => {
+                    onUpdate((prev) => {
+                      const obj = ensureClaimObject(prev);
+                      const parsed = safeJsonParse(rawValue);
+                      obj[key] = parsed !== null ? parsed : rawValue;
+
+                      lastNonNullRef.current = structuredClone(obj);
+                      return obj;
+                    });
+                  }}
+                />
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
         )}
       </Accordion.Body>
     </Accordion.Item>
@@ -507,7 +717,7 @@ function ValuesEditor({ values, onChangeValues }) {
   }, [draft, values, onChangeValues]);
 
   return (
-    <>
+    <React.Fragment>
       <InputGroup className="mb-2">
         <Form.Control
           value={draft}
@@ -548,7 +758,7 @@ function ValuesEditor({ values, onChangeValues }) {
           ))}
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 }
 
@@ -567,7 +777,7 @@ function CustomAttributesEditor({ entries, onAdd, onRemove, onUpdate }) {
   }, [newKey, onAdd]);
 
   return (
-    <>
+    <React.Fragment>
       <InputGroup className="mb-2">
         <Form.Control
           value={newKey}
@@ -613,6 +823,6 @@ function CustomAttributesEditor({ entries, onAdd, onRemove, onUpdate }) {
           ))}
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 }
