@@ -5,6 +5,7 @@ target
 *.iml
 .idea
 .cache
+.run
 
 config
 temp

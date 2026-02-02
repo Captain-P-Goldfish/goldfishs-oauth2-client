@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import bsCustomFileInput from "bs-custom-file-input";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
@@ -21,11 +21,23 @@ import {CardInputField} from "./card-base";
 import {decodeJws, isDecodedJws} from "./utils";
 import {ApplicationInfoContext} from "../app";
 
+function setNativeValueAndDispatch(el, value) {
+  const prototype = Object.getPrototypeOf(el);
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+  const set = descriptor?.set;
+
+  if (set) set.call(el, value);
+  else el.value = value;
+
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 /**
  * a simple input field that might also display error messages directly bound to this input field
  */
-export function FormInputField(props)
-{
+export function FormInputField(props) {
+  const inputRef = useRef(null);
 
   let controlId = props.id || props.name;
   let label = new Optional(props.label).map(label => <Form.Label column sm={2}>{label}</Form.Label>);
@@ -37,25 +49,86 @@ export function FormInputField(props)
   let isReadOnly = props.readOnly === true;
   let isHidden = props.type === "hidden" || props.isHidden;
   let as = new Optional(props.as).orElse("input");
-
   let sm = new Optional(props.sm).orElse(label.isPresent() ? 10 : 12);
+
+  const onKeyDown = useCallback((e) => {
+    // optional: user handler zuerst/zuletzt? meistens zuletzt ist besser
+    // Wir greifen nur ein, wenn wir wirklich handeln.
+    if (!e.ctrlKey) {
+      props.onKeyDown?.(e);
+      return;
+    }
+
+    const el = inputRef.current;
+    if (!el || isReadOnly || isDisabled) {
+      props.onKeyDown?.(e);
+      return;
+    }
+
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    if (start === end) {
+      props.onKeyDown?.(e);
+      return;
+    }
+
+    const selected = el.value.slice(start, end);
+    let replacement = null;
+
+    // Ctrl+U => encode
+    if (e.key === "u" && !e.shiftKey) {
+      e.preventDefault();
+      replacement = encodeURIComponent(selected);
+    }
+
+    // Ctrl+Shift+U => decode
+    if (replacement === null && (e.key === "U" || (e.key === "u" && e.shiftKey))) {
+      e.preventDefault();
+      try {
+        replacement = decodeURIComponent(selected);
+      } catch {
+        // ungültig: nichts tun
+        return;
+      }
+    }
+
+    if (replacement === null) {
+      props.onKeyDown?.(e);
+      return;
+    }
+
+    const nextValue = el.value.slice(0, start) + replacement + el.value.slice(end);
+
+    // setzt Wert so, dass React/Forms/Dein onChange sauber feuert
+    setNativeValueAndDispatch(el, nextValue);
+
+    // Auswahl wiederherstellen (nachdem React evtl. re-rendered)
+    queueMicrotask(() => {
+      try {
+        el.setSelectionRange(start, start + replacement.length);
+      } catch {}
+    });
+  }, [props, isDisabled, isReadOnly]);
+
   return (
     <Form.Group as={Row} controlId={controlId} style={{display: isHidden ? "none" : ""}}>
       {label.get()}
       <Col sm={sm}>
-        <Form.Control type={inputFieldType}
-                      as={as}
-                      name={inputFieldName}
-                      className={props.className}
-                      disabled={isDisabled}
-                      readOnly={isReadOnly}
-                      placeholder={inputFieldPlaceholder}
-                      onChange={props.onChange}
-                      value={props.value}/>
+        <Form.Control
+          ref={inputRef}
+          type={inputFieldType}
+          as={as}
+          name={inputFieldName}
+          className={props.className}
+          disabled={isDisabled}
+          readOnly={isReadOnly}
+          placeholder={inputFieldPlaceholder}
+          onChange={props.onChange}
+          onKeyDown={onKeyDown}
+          value={props.value}
+        />
 
-        {
-          props.children
-        }
+        {props.children}
 
         <ErrorMessageList controlId={props.name + "-error-list"}
                           fieldErrors={inputFieldErrorMessages}/>

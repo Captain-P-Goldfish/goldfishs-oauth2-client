@@ -11,7 +11,7 @@ import {
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import {Reply} from "react-bootstrap-icons";
+import {InfoCircle, Reply} from "react-bootstrap-icons";
 import AuthorizationCodeGrantWorkflow from "./auth-code-grant/authorization-code-grant-workflow";
 import * as lodash from "lodash";
 import ScimClient from "../scim/scim-client";
@@ -25,9 +25,11 @@ import AccessTokenView from "./auth-code-grant/access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../services/utils";
 import CurrentWorkflowSettingsClient from "../scim/current-workflow-settings-client";
-import {Alert, FormCheck, FormText} from "react-bootstrap";
+import {Alert, Card, FormCheck, FormText, Tooltip} from "react-bootstrap";
 import {value} from "lodash/seq";
 import {ApplicationInfoContext} from "../app";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import {OidcClaimsEditor} from "../services/oidc-claims-editor";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -341,11 +343,30 @@ class AuthorizationCodeGrantForm extends React.Component
           </a>
         </FormInputField>
         <FormInputField name="authCodeParameters.queryParameters"
-                        label="Additional URL Query"
+                        label=
+                          {
+                            <span>
+                              Additional URL Query{" "}
+                              <OverlayTrigger placement="bottom"
+                                              overlay={
+                                                <Tooltip className={"opacity-100"}>
+                                                  <Card border={"warning"} bg={"dark"} className={"small text-start"}>
+                                                    <Card.Body>
+                                                      URL Encode:<br/><strong className={"ms-4"}>Ctrl + U</strong><br />
+                                                      URL Decode:<br/><strong className={"ms-4"}>Ctrl+Shift+U</strong>
+                                                    </Card.Body>
+                                                  </Card>
+                                                </Tooltip>
+                                              }>
+                                <InfoCircle />
+                              </OverlayTrigger>
+                            </span>
+                          }
                         value={authCodeParameters.queryParameters}
                         placeholder="add an optional query string that is appended to the request URL"
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
-                        onError={fieldname => this.props.onError(fieldname)}/>
+                        onError={fieldname => this.props.onError(fieldname)}>
+        </FormInputField>
         <Form.Group as={Row}>
           <Col sm={2}>
             Proof Key for Code Exchange (RFC7636)
@@ -366,7 +387,7 @@ class AuthorizationCodeGrantForm extends React.Component
                        }}/>
             {
               this.state.pkce?.use &&
-              <>
+              <React.Fragment>
                 <FormInputField name="pkce.codeVerifier"
                                 label="Code Verifier"
                                 placeholder="Optional. Will be auto-generated if not entered manually"
@@ -385,9 +406,16 @@ class AuthorizationCodeGrantForm extends React.Component
                   <FormText className={"text-secondary"}>Must have a minimum length of 43 characters </FormText>
                   <FormText className={"text-secondary"}>({this.state.pkceCodeVerifierLength || 0} / 43)</FormText>
                 </FormInputField>
-              </>
+              </React.Fragment>
             }
           </Col>
+        </Form.Group>
+        <Form.Group as={Row}>
+          <OidcClaimsEditor
+            workflowDetails={this.props.workflowDetails}
+            handleChange={(name, value) => this.props.handleChange(name, value)}
+            fieldPath="authCodeParameters.queryParameters"
+          />
         </Form.Group>
         <Form.Group as={Row}>
           <Col sm={{span: 10, offset: 2}}>

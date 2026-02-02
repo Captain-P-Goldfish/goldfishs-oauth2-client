@@ -1,12 +1,11 @@
 import React, {useContext, useEffect, useState} from "react";
 import {TokenStoreClient} from "./token-store-client";
 import { Alert, Button, Popover, Table, Tooltip } from "react-bootstrap";
-import {CheckLg, Eye, EyeFill, PencilSquare, PlusLg, Save, Trash, XLg} from "react-bootstrap-icons";
+import {CheckLg, PencilSquare, PlusLg, Save, Trash, XLg} from "react-bootstrap-icons";
 import {Optional} from "../services/utils";
 import {GoFlame} from "react-icons/go";
 import {ScimServiceProviderContext} from "../app";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import { LuClipboardCopy } from "react-icons/lu";
 import { AiTwotoneCopy } from "react-icons/ai";
 
 export function TokenStoreList(props)
