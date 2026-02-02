@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Accordion,
   Alert,
@@ -23,11 +23,6 @@ function isClaimNull(entry) {
   return entry === null;
 }
 
-/**
- * Convert to an object ONLY when we actually want to write attributes.
- * If entry is null, we keep it null until the first attribute is set
- * OR until "null request" switch is turned off.
- */
 function ensureClaimObject(entry) {
   if (entry === null) return {};
   if (!isPlainObject(entry)) return {};
@@ -86,7 +81,12 @@ function isValuesString(x) {
 function getSingleFromClaimObject(obj) {
   if (obj && typeof obj.value === "string") return obj.value;
   if (obj && isValuesString(obj.values)) return obj.values;
-  if (obj && isValuesArray(obj.values) && obj.values.length === 1 && typeof obj.values[0] === "string") {
+  if (
+    obj &&
+    isValuesArray(obj.values) &&
+    obj.values.length === 1 &&
+    typeof obj.values[0] === "string"
+  ) {
     return obj.values[0];
   }
   return "";
@@ -97,7 +97,6 @@ function getValuesMode(obj) {
   if (!obj) return false;
   if (typeof obj.value === "string") return false;
   if (isValuesString(obj.values)) return true;
-  // If it's an array, that's multi-mode (we should not treat as single-values-mode switchable)
   return false;
 }
 
@@ -110,7 +109,6 @@ function parseClaimsFromQuery(query) {
   const raw = sp.get("claims");
   if (!raw) return { userinfo: {}, id_token: {} };
 
-  // try raw, decode once, decode twice (covers previous double-encoding states)
   const candidates = [
     raw,
     safeDecodeURIComponent(raw),
@@ -130,14 +128,6 @@ function parseClaimsFromQuery(query) {
   return { userinfo: {}, id_token: {} };
 }
 
-/**
- * Write back SINGLE-URL-encoded:
- * set raw JSON string and let URLSearchParams encode once.
- *
- * Also:
- * - omit empty userinfo / id_token
- * - if both empty => remove claims
- */
 function writeClaimsToQuery(query, claims) {
   const sp = toSearchParams(query);
 
@@ -160,12 +150,19 @@ export function OidcClaimsEditor({
                                    handleChange,
                                    fieldPath = "authCodeParameters.queryParameters",
                                  }) {
-  const query = useMemo(() => getQueryParameters(workflowDetails), [workflowDetails]);
+  // IMPORTANT: do NOT memoize off workflowDetails ref; parent may mutate in place.
+  const query = getQueryParameters(workflowDetails);
+
+  // IMPORTANT: do NOT overwrite this ref during render (stale props would clobber it).
+  const latestQueryRef = useRef(query);
+  useEffect(() => {
+    latestQueryRef.current = query;
+  }, [query]);
+
   const [claims, setClaims] = useState(() => parseClaimsFromQuery(query));
   const [parseWarning, setParseWarning] = useState(null);
 
-  // collapsed by default
-  const [openKey, setOpenKey] = useState(null);
+  const [openKey, setOpenKey] = useState(null); // collapsed by default
 
   useEffect(() => {
     try {
@@ -178,12 +175,18 @@ export function OidcClaimsEditor({
   }, [query]);
 
   const commit = useCallback(
-    (next) => {
-      setClaims(next);
-      const nextQuery = writeClaimsToQuery(query, next);
+    (nextClaims) => {
+      setClaims(nextClaims);
+
+      const baseQuery = latestQueryRef.current || "";
+      const nextQuery = writeClaimsToQuery(baseQuery, nextClaims);
+
+      // IMPORTANT: immediately update ref to prevent resurrecting params across editors
+      latestQueryRef.current = nextQuery;
+
       handleChange(fieldPath, nextQuery);
     },
-    [query, handleChange, fieldPath]
+    [handleChange, fieldPath]
   );
 
   const updateSection = useCallback(
@@ -196,16 +199,17 @@ export function OidcClaimsEditor({
     [claims, commit]
   );
 
-  const jsonPreview = useMemo(() => {
+  const jsonPreview = (() => {
     const out = {};
     if (!isEmptySection(claims.userinfo)) out.userinfo = claims.userinfo;
     if (!isEmptySection(claims.id_token)) out.id_token = claims.id_token;
     return out;
-  }, [claims]);
+  })();
 
   const claimsActive = Object.keys(jsonPreview).length > 0;
 
-  return (<div className="oidc-claims-editor">
+  return (
+    <div className="oidc-claims-editor">
       <Accordion activeKey={openKey} onSelect={(k) => setOpenKey(k)}>
         <Accordion.Item eventKey="oidc-claims-editor">
           <Accordion.Header>
@@ -225,13 +229,9 @@ export function OidcClaimsEditor({
           </Accordion.Header>
 
           <Accordion.Body>
-            <div className="text-muted" style={{fontSize: 12, marginBottom: 10}}>
-              Writes back to <code>{fieldPath}</code> on every change. (claims will be written single-URL-encoded)
-            </div>
-
             {parseWarning && (
               <Alert variant="warning">
-                Could not parse <code>claims</code> cleanly: {parseWarning}
+                Could not parse <code>claims</code>: {parseWarning}
               </Alert>
             )}
 
@@ -263,9 +263,9 @@ export function OidcClaimsEditor({
                     )}
                   </Card.Header>
                   <Card.Body>
-                  <pre style={{fontSize: 12, marginBottom: 0, whiteSpace: "pre-wrap"}}>
-                    {JSON.stringify(jsonPreview, null, 2)}
-                  </pre>
+                    <pre style={{ fontSize: 12, marginBottom: 0, whiteSpace: "pre-wrap" }}>
+                      {JSON.stringify(jsonPreview, null, 2)}
+                    </pre>
                   </Card.Body>
                 </Card>
               </Col>
@@ -285,24 +285,22 @@ function ClaimsSection({ title, sectionKey, section, onChange }) {
   const [newName, setNewName] = useState("");
   const [openClaimKey, setOpenClaimKey] = useState(null);
 
-  const claimNames = useMemo(() => Object.keys(section || {}).sort(), [section]);
+  const claimNames = Object.keys(section || {}).sort();
 
   const addClaim = useCallback(() => {
     const name = newName.trim();
     if (!name) return;
 
-    // Create/ensure claim
     onChange((s) => {
       if (s[name] === undefined) s[name] = {}; // default: request-as-null OFF
     });
 
-    // Open the new claim accordion item
     setOpenClaimKey(name);
     setNewName("");
   }, [newName, onChange]);
 
   return (
-    <Accordion defaultActiveKey={sectionKey} className="mb-3">
+    <Accordion defaultActiveKey={sectionKey} alwaysOpen className="mb-3">
       <Accordion.Item eventKey={sectionKey}>
         <Accordion.Header>
           {title}{" "}
@@ -333,17 +331,13 @@ function ClaimsSection({ title, sectionKey, section, onChange }) {
               No claims configured for <code>{sectionKey}</code>.
             </Alert>
           ) : (
-            <Accordion
-              activeKey={openClaimKey}
-              onSelect={(k) => setOpenClaimKey(k)}
-            >
+            <Accordion activeKey={openClaimKey} onSelect={(k) => setOpenClaimKey(k)}>
               {claimNames.map((name) => (
                 <ClaimAccordion
                   key={name}
                   name={name}
                   value={section[name]}
                   onRemove={() => {
-                    // If currently open claim gets removed, close it
                     if (openClaimKey === name) setOpenClaimKey(null);
                     onChange((s) => delete s[name]);
                   }}
@@ -363,25 +357,15 @@ function ClaimsSection({ title, sectionKey, section, onChange }) {
 }
 
 /* =========================
- SINGLE CLAIM (Claim = Accordion Item)
- - New switch: "request as null"
- - When enabled => value becomes null and attribute UI is hidden
+ SINGLE CLAIM
  ========================= */
 
 function ClaimAccordion({ name, value, onRemove, onUpdate }) {
   const isNull = isClaimNull(value);
 
-  // Cache the last non-null object so toggling "request as null" doesn't destroy data.
-  const lastNonNullRef = React.useRef(null);
-
-  // Keep cache up-to-date whenever we have a non-null object
-  React.useEffect(() => {
+  const lastNonNullRef = useRef(null);
+  useEffect(() => {
     if (value !== null && isPlainObject(value)) {
-      // deep-ish copy to avoid accidental mutation issues
-      lastNonNullRef.current = structuredClone(value);
-    }
-    // If value is {}, that's also a valid state worth caching
-    if (value !== null && isPlainObject(value) && Object.keys(value).length === 0) {
       lastNonNullRef.current = structuredClone(value);
     }
   }, [value]);
@@ -389,7 +373,8 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
   const objForRead = isNull ? {} : ensureClaimObject(value);
 
   const valuesArr = Array.isArray(objForRead.values) ? objForRead.values : [];
-  const singleValue = typeof objForRead.value === "string" ? objForRead.value : "";
+  const single = getSingleFromClaimObject(objForRead);
+  const singleAsValues = getValuesMode(objForRead);
 
   const customEntries = isPlainObject(objForRead)
     ? Object.entries(objForRead).filter(([k]) => !["essential", "values", "value"].includes(k))
@@ -403,13 +388,17 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
 
   return (
     <Accordion.Item eventKey={name}>
-      <Accordion.Header className={"claim-accordion-header"}>
+      <Accordion.Header>
         <span className="d-inline-flex align-items-center gap-2 flex-wrap">
           <strong>{name}</strong>
           {isNull && <Badge bg="secondary">null</Badge>}
-          {objForRead.essential === true && <Badge bg="warning" text="dark">essential</Badge>}
-          {valuesArr.length > 0 && <Badge bg="info">values:{valuesArr.length}</Badge>}
-          {singleValue && <Badge bg="secondary">value</Badge>}
+          {objForRead.essential === true && (
+            <Badge bg="warning" text="dark">
+              essential
+            </Badge>
+          )}
+          {valuesArr.length > 1 && <Badge bg="info">values:{valuesArr.length}</Badge>}
+          {single && <Badge bg="secondary">{singleAsValues ? "values" : "value"}</Badge>}
           {customEntries.length > 0 && <Badge bg="dark">custom:{customEntries.length}</Badge>}
         </span>
 
@@ -429,7 +418,6 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
       </Accordion.Header>
 
       <Accordion.Body>
-        {/* Switch row: request-as-null LEFT, essential RIGHT */}
         <Row className="g-3 align-items-center">
           <Col md={6}>
             <Form.Check
@@ -439,19 +427,13 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
               checked={isNull}
               onChange={(e) => {
                 const checked = e.target.checked;
-
                 onUpdate((prev) => {
                   if (checked) {
-                    // Cache current non-null state (if any) BEFORE switching to null
                     if (prev !== null && isPlainObject(prev)) {
                       lastNonNullRef.current = structuredClone(prev);
-                    } else if (prev !== null && prev === undefined) {
-                      lastNonNullRef.current = {};
                     }
                     return null;
                   }
-
-                  // Switch off: restore cached state if available, otherwise {}
                   return prev === null ? restoreOrEmptyObject() : prev;
                 });
               }}
@@ -471,8 +453,6 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
                     const obj = ensureClaimObject(prev);
                     if (checked) obj.essential = true;
                     else delete obj.essential;
-
-                    // update cache too (so it restores correctly after null-toggle)
                     lastNonNullRef.current = structuredClone(obj);
                     return obj;
                   });
@@ -482,138 +462,73 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
           </Col>
         </Row>
 
-        {/* When request-as-null is ON, hide the editor */}
         {!isNull && (
           <Accordion className="mt-3" defaultActiveKey={`${name}-value`}>
             <Accordion.Item eventKey={`${name}-value`}>
               <Accordion.Header>value (single)</Accordion.Header>
               <Accordion.Body>
-                {(() => {
-                  const hasMultiValues = Array.isArray(objForRead.values) && objForRead.values.length > 1;
+                <Row className="g-3 align-items-center mb-2">
+                  <Col md={6}>
+                    <Form.Check
+                      type="switch"
+                      id={`single-as-values-${name}`}
+                      label='store as "values" (single)'
+                      disabled={Array.isArray(objForRead.values) && objForRead.values.length > 1}
+                      checked={singleAsValues}
+                      onChange={(e) => {
+                        const useValues = e.target.checked;
+                        onUpdate((prev) => {
+                          const obj = ensureClaimObject(prev);
+                          if (Array.isArray(obj.values) && obj.values.length > 1) return obj;
 
-                  const single = getSingleFromClaimObject(objForRead);
-                  const storeAsValuesString = getValuesMode(objForRead); // true => values:"x", false => value:"x"
+                          const v = getSingleFromClaimObject(obj).trim();
 
-                  return (
-                    <React.Fragment>
-                      <Row className="g-3 align-items-center mb-2">
-                        <Col md={6}>
-                          <Form.Check
-                            type="switch"
-                            id={`single-as-values-${name}`}
-                            label='store as "values" (single)'
-                            disabled={hasMultiValues}
-                            checked={storeAsValuesString}
-                            onChange={(e) => {
-                              const useValues = e.target.checked;
+                          if (useValues) {
+                            delete obj.value;
+                            if (v.length > 0) obj.values = v; // STRING (single)
+                            else delete obj.values;
+                          } else {
+                            delete obj.values;
+                            if (v.length > 0) obj.value = v;
+                            else delete obj.value;
+                          }
 
-                              onUpdate((prev) => {
-                                const obj = ensureClaimObject(prev);
+                          lastNonNullRef.current = structuredClone(obj);
+                          return obj;
+                        });
+                      }}
+                    />
+                  </Col>
+                </Row>
 
-                                // If already multi-values, don't rewrite representation here.
-                                if (Array.isArray(obj.values) && obj.values.length > 1)
-                                {
-                                  return obj;
-                                }
+                <Form.Control
+                  value={single}
+                  placeholder='Single value test (e.g. "admin")'
+                  disabled={Array.isArray(objForRead.values) && objForRead.values.length > 1}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    onUpdate((prev) => {
+                      const obj = ensureClaimObject(prev);
+                      if (Array.isArray(obj.values) && obj.values.length > 1) return obj;
 
-                                const v = getSingleFromClaimObject(obj).trim();
+                      const trimmed = v.trim();
+                      const useValues = getValuesMode(obj);
 
-                                if (useValues)
-                                {
-                                  // Single stays single: values: "x"
-                                  delete obj.value;
-                                  if (v.length > 0)
-                                  {
-                                    obj.values = v;
-                                  }
-                                  else
-                                  {
-                                    delete obj.values;
-                                  }
-                                }
-                                else
-                                {
-                                  // value: "x"
-                                  delete obj.values;
-                                  if (v.length > 0)
-                                  {
-                                    obj.value = v;
-                                  }
-                                  else
-                                  {
-                                    delete obj.value;
-                                  }
-                                }
+                      if (useValues) {
+                        delete obj.value;
+                        if (trimmed.length > 0) obj.values = trimmed; // STRING (single)
+                        else delete obj.values;
+                      } else {
+                        delete obj.values;
+                        if (trimmed.length > 0) obj.value = trimmed;
+                        else delete obj.value;
+                      }
 
-                                lastNonNullRef.current = structuredClone(obj);
-                                return obj;
-                              });
-                            }}
-                          />
-                        </Col>
-
-                        <Col md={6}>
-                          {hasMultiValues && (
-                            <div className="text-muted" style={{fontSize: 12}}>
-                              Multiple <code>values</code> are set (array). Please edit them in{" "}
-                              <strong>values (multi)</strong>.
-                            </div>
-                          )}
-                        </Col>
-                      </Row>
-
-                      <Form.Control
-                        value={single}
-                        placeholder='Single value test (e.g. "admin")'
-                        disabled={hasMultiValues}
-                        onChange={(e) => {
-                          const v = e.target.value;
-
-                          onUpdate((prev) => {
-                            const obj = ensureClaimObject(prev);
-
-                            // Don't destruct multi-values array from here
-                            if (Array.isArray(obj.values) && obj.values.length > 1)
-                            {
-                              return obj;
-                            }
-
-                            const trimmed = v.trim();
-                            const useValues = getValuesMode(obj);
-
-                            if (useValues)
-                            {
-                              delete obj.value;
-                              if (trimmed.length > 0)
-                              {
-                                obj.values = trimmed;
-                              }// <-- STRING, NOT ARRAY
-                              else
-                              {
-                                delete obj.values;
-                              }
-                            }
-                            else
-                            {
-                              delete obj.values;
-                              if (trimmed.length > 0)
-                              {
-                                obj.value = trimmed;
-                              }
-                              else
-                              {
-                                delete obj.value;
-                              }
-                            }
-
-                            lastNonNullRef.current = structuredClone(obj);
-                            return obj;
-                          });
-                        }}
-                      />
-                    </React.Fragment>
-                  );
-                })()}
+                      lastNonNullRef.current = structuredClone(obj);
+                      return obj;
+                    });
+                  }}
+                />
               </Accordion.Body>
             </Accordion.Item>
 
@@ -625,14 +540,8 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
                   onChangeValues={(nextValues) => {
                     onUpdate((prev) => {
                       const obj = ensureClaimObject(prev);
-                      if (nextValues.length > 0)
-                      {
-                        obj.values = nextValues;
-                      }
-                      else
-                      {
-                        delete obj.values;
-                      }
+                      if (nextValues.length > 0) obj.values = nextValues; // ARRAY (multi)
+                      else delete obj.values;
 
                       lastNonNullRef.current = structuredClone(obj);
                       return obj;
@@ -660,15 +569,8 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
                     onUpdate((prev) => {
                       const obj = ensureClaimObject(prev);
                       const k = (key ?? "").trim();
-                      if (!k)
-                      {
-                        return prev;
-                      }
-                      if (obj[k] === undefined)
-                      {
-                        obj[k] = "";
-                      }
-
+                      if (!k) return prev;
+                      if (obj[k] === undefined) obj[k] = "";
                       lastNonNullRef.current = structuredClone(obj);
                       return obj;
                     });
@@ -677,7 +579,6 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
                     onUpdate((prev) => {
                       const obj = ensureClaimObject(prev);
                       delete obj[key];
-
                       lastNonNullRef.current = structuredClone(obj);
                       return obj;
                     });
@@ -687,7 +588,6 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
                       const obj = ensureClaimObject(prev);
                       const parsed = safeJsonParse(rawValue);
                       obj[key] = parsed !== null ? parsed : rawValue;
-
                       lastNonNullRef.current = structuredClone(obj);
                       return obj;
                     });
@@ -702,10 +602,6 @@ function ClaimAccordion({ name, value, onRemove, onUpdate }) {
   );
 }
 
-/* =========================
- Values editor
- ========================= */
-
 function ValuesEditor({ values, onChangeValues }) {
   const [draft, setDraft] = useState("");
 
@@ -717,7 +613,7 @@ function ValuesEditor({ values, onChangeValues }) {
   }, [draft, values, onChangeValues]);
 
   return (
-    <React.Fragment>
+    <>
       <InputGroup className="mb-2">
         <Form.Control
           value={draft}
@@ -758,13 +654,9 @@ function ValuesEditor({ values, onChangeValues }) {
           ))}
         </div>
       )}
-    </React.Fragment>
+    </>
   );
 }
-
-/* =========================
- Custom attributes editor
- ========================= */
 
 function CustomAttributesEditor({ entries, onAdd, onRemove, onUpdate }) {
   const [newKey, setNewKey] = useState("");
@@ -777,7 +669,7 @@ function CustomAttributesEditor({ entries, onAdd, onRemove, onUpdate }) {
   }, [newKey, onAdd]);
 
   return (
-    <React.Fragment>
+    <>
       <InputGroup className="mb-2">
         <Form.Control
           value={newKey}
@@ -823,6 +715,6 @@ function CustomAttributesEditor({ entries, onAdd, onRemove, onUpdate }) {
           ))}
         </div>
       )}
-    </React.Fragment>
+    </>
   );
 }

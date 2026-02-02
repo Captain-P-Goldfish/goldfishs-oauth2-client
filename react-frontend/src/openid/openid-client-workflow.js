@@ -30,6 +30,7 @@ import {value} from "lodash/seq";
 import {ApplicationInfoContext} from "../app";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import {OidcClaimsEditor} from "../services/oidc-claims-editor";
+import {AuthorizationDetailsEditor} from "../services/auth-details-editor";
 
 export default class OpenidClientWorkflow extends React.Component
 {
@@ -412,6 +413,13 @@ class AuthorizationCodeGrantForm extends React.Component
         </Form.Group>
         <Form.Group as={Row}>
           <OidcClaimsEditor
+            workflowDetails={this.props.workflowDetails}
+            handleChange={(name, value) => this.props.handleChange(name, value)}
+            fieldPath="authCodeParameters.queryParameters"
+          />
+        </Form.Group>
+        <Form.Group as={Row}>
+          <AuthorizationDetailsEditor
             workflowDetails={this.props.workflowDetails}
             handleChange={(name, value) => this.props.handleChange(name, value)}
             fieldPath="authCodeParameters.queryParameters"
