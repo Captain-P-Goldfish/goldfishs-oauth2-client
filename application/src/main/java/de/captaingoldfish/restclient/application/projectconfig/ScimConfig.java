@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.crypto.JwtHandler;
+import de.captaingoldfish.restclient.application.endpoints.CredentialIssuerMetdatdataCache;
+import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.endpoints.appinfo.AppInfoHandler;
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
@@ -17,6 +19,7 @@ import de.captaingoldfish.restclient.application.endpoints.jwt.JwtBuilderHandler
 import de.captaingoldfish.restclient.application.endpoints.jwt.validation.ScimJwtBuilderValidator;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreFileCache;
 import de.captaingoldfish.restclient.application.endpoints.keystore.KeystoreHandler;
+import de.captaingoldfish.restclient.application.endpoints.metadata.ProviderMetadataResourceHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidclient.OpenIdClientHandler;
 import de.captaingoldfish.restclient.application.endpoints.openidprovider.OpenIdProviderHandler;
 import de.captaingoldfish.restclient.application.endpoints.proxy.ProxyHandler;
@@ -41,12 +44,13 @@ import de.captaingoldfish.restclient.scim.endpoints.AppInfoEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.AuthCodeGrantRequestEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.CurrentWorkflowSettingsEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.HttpClientSettingsEndpoint;
-import de.captaingoldfish.restclient.scim.endpoints.HttpRequestGroupEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.HttpRequestEndpointDefinition;
+import de.captaingoldfish.restclient.scim.endpoints.HttpRequestGroupEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.JwtBuilderEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.KeystoreEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdClientEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.OpenIdProviderEndpoint;
+import de.captaingoldfish.restclient.scim.endpoints.ProviderMetadataEndpointDefinition;
 import de.captaingoldfish.restclient.scim.endpoints.ProxyEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TokenCategoryEndpoint;
 import de.captaingoldfish.restclient.scim.endpoints.TokenStoreEndpoint;
@@ -331,6 +335,25 @@ public class ScimConfig
   {
     HttpRequestHandler handler = new HttpRequestHandler(httpRequestCategoriesDao, httpRequestsDao, httpRequestExecutor);
     HttpRequestEndpointDefinition endpoint = new HttpRequestEndpointDefinition(handler);
+    return resourceEndpoint.registerEndpoint(endpoint);
+  }
+
+  /**
+   * registers the http-request resourceType under the endpoint /HttpRequests.
+   *
+   * @param resourceEndpoint the resource endpoint that was previously defined
+   * @return the http-requests resource type
+   */
+  @Bean
+  public ResourceType metadataProviderResourceType(ResourceEndpoint resourceEndpoint,
+                                                   OpenIdClientDao openIdClientDao,
+                                                   OpenIdProviderMetdatdataCache openIdProviderMetdatdataCache,
+                                                   CredentialIssuerMetdatdataCache credentialIssuerMetdatdataCache)
+  {
+    ProviderMetadataResourceHandler handler = new ProviderMetadataResourceHandler(openIdClientDao,
+                                                                                  openIdProviderMetdatdataCache,
+                                                                                  credentialIssuerMetdatdataCache);
+    ProviderMetadataEndpointDefinition endpoint = new ProviderMetadataEndpointDefinition(handler);
     return resourceEndpoint.registerEndpoint(endpoint);
   }
 }

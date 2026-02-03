@@ -23,8 +23,15 @@ import {LinkContainer} from "react-router-bootstrap";
 import {ApplicationInfoContext} from "../app";
 import {OPENID_CLIENT_ENDPOINT, OPENID_PROVIDER_ENDPOINT} from "../scim/scim-constants";
 import Row from "react-bootstrap/Row";
+import {useParams} from "react-router-dom";
 
-export default class OpenidClients extends React.Component
+
+export default function OpenidClientsRoute(props) {
+  const params = useParams();
+  return <OpenidClients {...props} params={params} />;
+}
+
+export class OpenidClients extends React.Component
 {
   constructor(props)
   {
@@ -51,7 +58,7 @@ export default class OpenidClients extends React.Component
     let startIndex = (this.state.currentPage * this.props.serviceProviderConfig.filter.maxResults) + 1;
     let count = this.props.serviceProviderConfig.filter.maxResults;
 
-    let openIdProviderId = this.props.match.params.id;
+    let openIdProviderId = this.props.params.id;
     let openIdProviderResourcePath = OPENID_PROVIDER_ENDPOINT;
     await this.scimClient.getResource(openIdProviderId, openIdProviderResourcePath).then(response =>
     {
@@ -195,8 +202,7 @@ export default class OpenidClients extends React.Component
   {
     return (
       <React.Fragment>
-        <LinkContainer exact
-                       to={"/views/openIdProvider/"}>
+        <LinkContainer to={"/views/openIdProvider/"}>
           <a href={"/#"} className={"action-link"}>
             <h5 style={{
               height: "35px",
@@ -329,8 +335,7 @@ class OpenIdClientCardEntry extends React.Component
               <div className={"card-name-header"}>
                 {
                   this.state.client.clientId !== undefined &&
-                  <LinkContainer exact
-                                 to={"/views/openIdProvider/" + this.props.provider.id + "/client/"
+                  <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/client/"
                                    + this.state.client.id}>
                     <a href={"/#"} className={"action-link"}>
                       <h5>

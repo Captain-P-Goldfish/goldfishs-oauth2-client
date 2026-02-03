@@ -1,20 +1,20 @@
 import React from "react";
+import GoldfishLogo from "./media/goldfish-logo.png";
 import logo from "./media/logo.svg";
-import {Container, Nav, Navbar} from "react-bootstrap";
-import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
-import {LinkContainer} from 'react-router-bootstrap'
+import {Container, Image, Nav, Navbar} from "react-bootstrap";
+import {BrowserRouter as Router, Link, Route, Routes} from "react-router-dom";
 import SystemOverview from "./admin/system/system-overview";
 import ScimClient from "./scim/scim-client";
 import OpenidProvider from "./openid/openid-provider";
 import JwtHandler from "./jwt/jwt-handler";
-import OpenidClients from "./openid/openid-clients";
-import OpenidClientOverview from "./openid/openid-client-overview";
 import {AlertListMessages} from "./base/form-base";
 import {GoFlame} from "react-icons/go";
 import {TokenCategoryList} from "./tokens/token-category";
 import {APP_INFO_ENDPOINT, SERVICE_PROVIDER_CONFIG_ENDPOINT} from "./scim/scim-constants";
 import {FileParser} from "./file-parser/file-parser";
-import {HttpClientRequester} from "./http-requests/http-client-requester";
+import OpenidClientsRoute from "./openid/openid-clients";
+import OpenidClientOverviewRoute from "./openid/openid-client-overview";
+import CertIcon from "./media/certificate.png";
 
 
 export const ApplicationInfoContext = React.createContext(null);
@@ -73,43 +73,20 @@ class Application extends React.Component
         <Router>
           <Navbar collapseOnSelect expand="lg" bg="navigation">
             <Container>
-              <Navbar.Brand href="#home">Captain Goldfish's Rest Client</Navbar.Brand>
+              <Image src={GoldfishLogo} width={"50px"} fluid/>
+              <Navbar.Brand href="#home"><span className={"mobile-aware"}>Captain Goldfish's Rest Client</span></Navbar.Brand>
               <Navbar.Toggle aria-controls="responsive-navbar-nav"/>
               <Navbar.Collapse id="responsive-navbar-nav">
-                <Nav className="me-auto"/>
-                <Nav>
-                  <Nav.Link href="#">
-                    <img src={logo} className="react-logo" alt="logo"/>
-                  </Nav.Link>
+                <Nav className="me-auto">
+                  <Nav.Link as={Link} to="/views/openIdProvider">OpenID</Nav.Link>
+                  <Nav.Link as={Link} to="/views/jwts">JWTs</Nav.Link>
+                  <Nav.Link as={Link} to="/views/tokenCategories">Storage</Nav.Link>
+                  <Nav.Link as={Link} to="/views/fileParser">File Parser</Nav.Link>
+                  <Nav.Link as={Link} to="/views/system">System</Nav.Link>
                 </Nav>
               </Navbar.Collapse>
+              <Image src={logo} className="react-logo" alt="logo"/>
             </Container>
-          </Navbar>
-
-          <Navbar bg="navigation-left" className={"navbar-left"} expand="md" variant="dark">
-            <Navbar.Collapse>
-
-              <Nav className="flex-column">
-                <LinkContainer exact to="/views/openIdProvider">
-                  <Nav.Link>OpenID</Nav.Link>
-                </LinkContainer>
-                {/*<LinkContainer exact to="/views/httpClient">*/}
-                {/*  <Nav.Link>Http Client</Nav.Link>*/}
-                {/*</LinkContainer>*/}
-                <LinkContainer exact to="/views/jwts">
-                  <Nav.Link>JWTs</Nav.Link>
-                </LinkContainer>
-                <LinkContainer exact to="/views/tokenCategories">
-                  <Nav.Link>Storage</Nav.Link>
-                </LinkContainer>
-                <LinkContainer exact to="/views/fileParser">
-                  <Nav.Link>File Parser</Nav.Link>
-                </LinkContainer>
-                <LinkContainer exact to="/views/system">
-                  <Nav.Link>System</Nav.Link>
-                </LinkContainer>
-              </Nav>
-            </Navbar.Collapse>
           </Navbar>
 
           <div className="main">
@@ -119,39 +96,19 @@ class Application extends React.Component
 
             <ApplicationInfoContext.Provider value={this.state.appInfo}>
               <ScimServiceProviderContext.Provider value={this.state.serviceProviderConfig}>
-                {/* A <Switch> looks through its children <Route>s and
-                                 renders the first one that matches the current URL. */}
-                <Switch>
-                  <Route path="/views/system">
-                    <SystemOverview/>
-                  </Route>
+                <Routes>
+                  <Route path="/views/system" element={<SystemOverview/>}/>
                   <Route path={"/views/openIdProvider/:providerId/client/:clientId"}
-                         component={OpenidClientOverview}/>
+                         element={<OpenidClientOverviewRoute/>}/>
                   <Route path={"/views/openIdProvider/:id/openIdClients"}
-                         render={route =>
-                         {
-                           return <OpenidClients match={route.match}
-                                                 serviceProviderConfig={this.state.serviceProviderConfig}/>
-                         }}/>
-                  <Route path="/views/openIdProvider">
-                    <OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig}/>
-                  </Route>
-                  <Route path="/views/jwts">
-                    <JwtHandler/>
-                  </Route>
-                  {/*<Route path="/views/httpClient">*/}
-                  {/*  <HttpClientRequester/>*/}
-                  {/*</Route>*/}
-                  <Route path="/views/tokenCategories">
-                    <TokenCategoryList/>
-                  </Route>
-                  <Route path="/views/fileParser">
-                    <FileParser/>
-                  </Route>
-                  <Route path="/">
-                    <Redirect to="/views/jwts"/>
-                  </Route>
-                </Switch>
+                         element={<OpenidClientsRoute serviceProviderConfig={this.state.serviceProviderConfig}/>}/>
+                  <Route path="/views/openIdProvider"
+                         element={<OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig}/>} />
+                  <Route path="/views/jwts" element={<JwtHandler/>}/>
+                  <Route path="/views/tokenCategories" element={<TokenCategoryList/>}/>
+                  <Route path="/views/fileParser" element={<FileParser/>}/>
+                  <Route path="/" element={<OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig} />} />
+                </Routes>
               </ScimServiceProviderContext.Provider>
             </ApplicationInfoContext.Provider>
           </div>

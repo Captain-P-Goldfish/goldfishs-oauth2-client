@@ -7,8 +7,16 @@ import HttpSettings from "./http-settings";
 import {Optional} from "../services/utils";
 import OpenidClientWorkflow from "./openid-client-workflow";
 import {ApplicationInfoContext} from "../app";
+import {useParams} from "react-router-dom";
+import {OpenidClients} from "./openid-clients";
+import {CredentialOfferBuilder, CredentialOfferEditor} from "./oid4vci-relying-party";
 
-export default class OpenidClientOverview extends React.Component
+export default function OpenidClientOverviewRoute(props) {
+  const params = useParams();
+  return <OpenidClientOverview {...props} params={params} />;
+}
+
+export class OpenidClientOverview extends React.Component
 {
   constructor(props)
   {
@@ -19,8 +27,8 @@ export default class OpenidClientOverview extends React.Component
 
   async componentDidMount()
   {
-    let openIdProviderId = this.props.match.params.providerId;
-    let clientId = this.props.match.params.clientId;
+    let openIdProviderId = this.props.params.providerId;
+    let clientId = this.props.params.clientId;
 
     let openIdProviderResourcePath = "/scim/v2/OpenIdProvider";
     new ScimClient(openIdProviderResourcePath, this.setState).getResource(openIdProviderId).then(response =>
@@ -65,6 +73,36 @@ export default class OpenidClientOverview extends React.Component
         })
       }
     });
+
+    let metadataResourcePath = "/scim/v2/ProviderMetadata";
+    new ScimClient(metadataResourcePath, this.setState).getResource(clientId).then(response => {
+      if (response.success) {
+        response.resource.then(metadata => {
+
+          const safeParse = (val) => {
+            if (!val) return null;
+            if (typeof val === "object") return val;          // falls Backend irgendwann mal "richtig" liefert
+            if (typeof val !== "string") return null;
+            try { return JSON.parse(val); } catch (e) { return null; }
+          };
+
+          const oidc = safeParse(metadata.oidcMetadata);
+          const oid4vci = safeParse(metadata.oid4vciMetadata);
+
+          this.setState({
+                          oidcMetadata: oidc,
+                          oid4vciMetadata: oid4vci,
+                          errors: null
+                        });
+        });
+      } else {
+        response.resource.then(errorResponse => {
+          this.setState({
+                          errors: { errorMessages: [errorResponse.detail] }
+                        });
+        });
+      }
+    });
   }
 
 
@@ -75,21 +113,27 @@ export default class OpenidClientOverview extends React.Component
 
     return (
       <React.Fragment>
-        <LinkContainer exact
-                       to={"/views/openIdProvider/" + this.props.match.params.providerId
-                         + "/openIdClients"}>
-          <a href={"/#"} className={"action-link"}>
-            <h5 style={{height: "35px", padding: "0", paddingLeft: "10px"}}>
-              <ArrowLeftCircle height={"35px"} size={"25px"}/>
-              <span style={{marginLeft: "15px"}}>Back to
-                                <span style={{color: "lightgray"}}> "{provider.map(val => val.name).orElse("")}" </span>
-                                                               Overview
-                            </span>
+        <LinkContainer to={`/views/openIdProvider/${this.props.params.providerId}/openIdClients`}>
+          <a href="/#" className="action-link mobile-aware">
+            <h5 className="mobile-aware-title">
+              <ArrowLeftCircle className="mobile-aware-icon" />
+              <span className="mobile-aware-text">
+                Back to
+                <span className="mobile-aware-provider">
+                  {" \""}{provider.map(val => val.name).orElse("")}{"\" "}
+                </span>
+                Overview
+              </span>
             </h5>
           </a>
         </LinkContainer>
 
-        <h5>Client: <span style={{color: "lightgray"}}>{client.map(c => c.clientId).orElse("")}</span></h5>
+        <h5 className="mobile-aware mb-3 mt-2">
+          Client:{" "}
+          <span className="mobile-aware-muted" style={{color: "lightgray"}}>
+            {client.map(c => c.clientId).orElse("")}
+          </span>
+        </h5>
 
         <Tabs defaultActiveKey="workflow" id="uncontrolled-tab-example">
           <Tab eventKey="workflow" title="OpenID Workflow">
@@ -102,6 +146,14 @@ export default class OpenidClientOverview extends React.Component
                 }
               </ApplicationInfoContext.Consumer>
             }
+          </Tab>
+          <Tab eventKey="oid4vci" title="OID4VCI">
+            <CredentialOfferEditor
+              oid4vciMetadata={this.state.oid4vciMetadata}
+              oidcMetadata={this.state.oidcMetadata}
+              credentialIssuer={this.state.oid4vciMetadata?.credential_issuer || this.state.oidcMetadata?.issuer}
+            />
+
           </Tab>
           <Tab eventKey="clients" title="HTTP Settings">
             {

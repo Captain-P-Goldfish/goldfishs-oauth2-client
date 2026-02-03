@@ -4,7 +4,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.captaingoldfish.restclient.application.projectconfig.CacheConfiguration;
 
@@ -14,32 +14,32 @@ import de.captaingoldfish.restclient.application.projectconfig.CacheConfiguratio
  * @since 20.08.2021
  */
 @Component
-public class OpenIdProviderMetdatdataCache
+public class CredentialIssuerMetdatdataCache
 {
 
   /**
-   * the cached metadata of an OpenID Connect discovery endpoint
+   * the cached metadata of a Credential Issuers discovery endpoint
    *
    * @param openIdProviderId the database id of a
    *          {@link de.captaingoldfish.restclient.database.entities.OpenIdProvider}
    * @return the OpenID Provider metadata of an existing provider if already retrieved once
    */
-  @Cacheable(value = CacheConfiguration.OIDC_PROVIDER_METADATA_CACHE, key = "#p0")
-  public OIDCProviderMetadata getProviderMetadata(Long openIdProviderId)
+  @Cacheable(value = CacheConfiguration.OID4VCI_PROVIDER_METADATA_CACHE, key = "#p0")
+  public ObjectNode getProviderMetadata(Long openIdProviderId)
   {
     return null;
   }
 
   /**
-   * cache the metadata of an OpenID Connect discovery endpoint for the given provider
+   * cache the metadata of a Credential Issuers discovery endpoint for the given provider
    *
    * @param openIdProviderId the database id of a
    *          {@link de.captaingoldfish.restclient.database.entities.OpenIdProvider}
-   * @return the OpenID Provider metadata of an existing provider
+   * @return the Credential Issuers metadata of an existing provider
    */
-  @CachePut(value = CacheConfiguration.OIDC_PROVIDER_METADATA_CACHE, key = "#p0")
-  public OIDCProviderMetadata setProviderMetadata(Long openIdProviderId, OIDCProviderMetadata authorizationResponseUrl)
+  @CachePut(value = CacheConfiguration.OID4VCI_PROVIDER_METADATA_CACHE, key = "#p0")
+  public ObjectNode setProviderMetadata(Long openIdProviderId, ObjectNode oid4vciMetadata)
   {
-    return authorizationResponseUrl;
+    return oid4vciMetadata;
   }
 }

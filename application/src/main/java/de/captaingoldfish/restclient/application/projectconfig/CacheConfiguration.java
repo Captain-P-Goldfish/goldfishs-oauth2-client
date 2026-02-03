@@ -26,9 +26,14 @@ public class CacheConfiguration
   public static final String KEYSTORE_CACHE = "keystore-cache";
 
   /**
-   * the name of the cache that contains the metdata details
+   * the name of the cache that contains the metadata for oidc providers
    */
-  public static final String PROVIDER_METADATA_CACHE = "provider-metadata-cache";
+  public static final String OIDC_PROVIDER_METADATA_CACHE = "oidc-provider-metadata-cache";
+
+  /**
+   * the name of the cache that contains the metadata for oid4vci credential issuers
+   */
+  public static final String OID4VCI_PROVIDER_METADATA_CACHE = "oid4vci-provider-metadata-cache";
 
   /**
    * the name of the cache that contains information of authorization requests

@@ -229,8 +229,7 @@ class OpenIdProviderCardEntry extends React.Component
               {
                 this.state.editMode === false &&
                 <React.Fragment>
-                  <LinkContainer exact
-                                 to={"/views/openIdProvider/" + this.props.provider.id + "/openIdClients"}>
+                  <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/openIdClients"}>
                     <a href={"/#"} className={"action-link"}>
                       <h5>
                         <ArrowRightCircle style={{

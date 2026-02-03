@@ -88,6 +88,12 @@ public final class ClasspathReferences
   public static final String HTTP_RESPONSE_HISTORY_RESOURCE_TYPE = BASE_PATH
                                                                    + "/resourcetypes/http-response-history-resource-type.json";
 
+
   public static final String HTTP_RESPONSE_HISTORY_SCHEMA = BASE_PATH + "/resource/http-response-history.json";
+
+  public static final String PROVIDER_METADATA_SCHEMA = BASE_PATH + "/resource/provider-metadata.json";
+
+  public static final String PROVIDER_METADATA_RESOURCE_TYPE = BASE_PATH
+                                                               + "/resourcetypes/provider-metadata-resource-type.json";
 
 }

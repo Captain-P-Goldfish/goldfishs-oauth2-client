@@ -1,0 +1,49 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Schema"
+  ],
+  "id": "urn:ietf:params:scim:schemas:captaingoldfish:2.0:ProviderMetadata",
+  "name": "Provider Metadata",
+  "description": "Contains the metadata of an OpenID Connect Provider / Credential Issuer.",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "description": "Unique identifier for the SCIM Resource as defined by the Service Provider.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": true,
+      "caseExact": true
+    },
+    {
+      "name": "oidcMetadata",
+      "type": "string",
+      "description": "The complete JSON representation of the OpenID Connect Discovery Document.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "oid4vciMetadata",
+      "type": "string",
+      "description": "The complete JSON representation of the Credential Issuer Discovery Document.",
+      "mutability": "readOnly",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    }
+  ],
+  "meta": {
+    "resourceType": "ResourceType",
+    "created": "2026-02-03T22:51:00+02:00",
+    "lastModified": "2021-02-03T22:51:00+02:00",
+    "location": "/ResourceTypes/ProviderMetadata"
+  }
+}

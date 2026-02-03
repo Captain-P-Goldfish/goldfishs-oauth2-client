@@ -1,5 +1,6 @@
 package de.captaingoldfish.restclient.application.utils;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
@@ -10,11 +11,10 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
+import de.captaingoldfish.restclient.application.endpoints.CredentialIssuerMetdatdataCache;
 import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
@@ -91,20 +91,6 @@ public final class Utils
                                     ex);
     }
     OIDCProviderMetadata metadata = OIDCProviderMetadata.parse(responseBody);
-    loadOidc4vciDiscoveryEndpointInfos(openIdClient).ifPresent(oidc4VciMetadata -> {
-      oidc4VciMetadata.fieldNames().forEachRemaining(key -> {
-        JsonNode jsonNode = oidc4VciMetadata.get(key);
-        if (jsonNode instanceof TextNode textNode)
-        {
-          metadata.setCustomParameter(key, textNode.textValue());
-        }
-        else
-        {
-          metadata.setCustomParameter(key, jsonNode.toString());
-        }
-      });
-    });
-
     metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
     return metadata;
   }
@@ -114,12 +100,20 @@ public final class Utils
    * authorization server has such an endpoint
    */
   @SneakyThrows
-  private synchronized static Optional<ObjectNode> loadOidc4vciDiscoveryEndpointInfos(OpenIdClient openIdClient)
+  public synchronized static Optional<ObjectNode> loadOidc4vciDiscoveryEndpointInfos(OpenIdClient openIdClient)
   {
     final OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
-    String discoveryUrl = openIdProvider.getDiscoveryEndpoint()
-                                        .replace(".well-known/openid-configuration",
-                                                 ".well-known/openid-credential-issuer");
+    CredentialIssuerMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
+                                                                .getBean(CredentialIssuerMetdatdataCache.class);
+    {
+      ObjectNode metadata = metadataCache.getProviderMetadata(openIdProvider.getId());
+      if (metadata != null)
+      {
+        return Optional.of(metadata);
+      }
+    }
+
+    String discoveryUrl = toOid4vciDiscoveryUrl(openIdProvider.getDiscoveryEndpoint());
     final String responseBody;
 
     HttpGet httpGet = new HttpGet(discoveryUrl);
@@ -138,7 +132,19 @@ public final class Utils
                                                   ex.getMessage()),
                                     ex);
     }
-    return Optional.of(JsonHelper.readJsonDocument(responseBody, ObjectNode.class));
+    ObjectNode metadata = JsonHelper.readJsonDocument(responseBody, ObjectNode.class);
+    metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
+    return Optional.of(metadata);
+  }
+
+  private static String toOid4vciDiscoveryUrl(String oidcDiscoveryUrl)
+  {
+    URI uri = URI.create(oidcDiscoveryUrl);
+    // remove /.well-known/openid-configuration
+    String path = uri.getPath().replace("/.well-known/openid-configuration", "");
+    String newPath = "/.well-known/openid-credential-issuer" + path;
+    URI result = URI.create(uri.getScheme() + "://" + uri.getAuthority() + newPath);
+    return result.toString();
   }
 
   @SneakyThrows

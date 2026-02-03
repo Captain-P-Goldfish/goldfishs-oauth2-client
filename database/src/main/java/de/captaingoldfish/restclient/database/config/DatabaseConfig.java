@@ -180,11 +180,10 @@ public class DatabaseConfig
   public enum SupportedDatabases
   {
 
-    HSQLDB("jdbc:hsqldb", "org.hsqldb.jdbcDriver", "org.hibernate.dialect.HSQLDialect",
-    // @formatter:off
-        Map.of("hibernate.format_sql", "false",
-              "hibernate.show_sql", "false")
-      // @formatter:on
+    HSQLDB("jdbc:hsqldb",
+           "org.hsqldb.jdbcDriver",
+           "org.hibernate.dialect.HSQLDialect", // @formatter:off
+           Map.of("hibernate.format_sql", "false", "hibernate.show_sql", "false")// @formatter:on
     ),
 
     SQLSERVER("jdbc:sqlserver",
