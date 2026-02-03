@@ -107,6 +107,7 @@ class Application extends React.Component
                   <Route path="/views/jwts" element={<JwtHandler/>}/>
                   <Route path="/views/tokenCategories" element={<TokenCategoryList/>}/>
                   <Route path="/views/fileParser" element={<FileParser/>}/>
+                  <Route path="/views" element={<OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig} />} />
                   <Route path="/" element={<OpenidProvider serviceProviderConfig={this.state.serviceProviderConfig} />} />
                 </Routes>
               </ScimServiceProviderContext.Provider>
