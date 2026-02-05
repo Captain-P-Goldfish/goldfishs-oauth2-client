@@ -9,11 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
-import de.captaingoldfish.restclient.application.endpoints.CredentialIssuerMetdatdataCache;
-import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.utils.Utils;
-import de.captaingoldfish.restclient.database.entities.OpenIdClient;
-import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
+import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
+import de.captaingoldfish.restclient.database.repositories.OpenIdProviderDao;
 import de.captaingoldfish.restclient.scim.resources.ScimProviderMetadata;
 import de.captaingoldfish.scim.sdk.common.constants.enums.SortOrder;
 import de.captaingoldfish.scim.sdk.common.exceptions.ResourceNotFoundException;
@@ -33,11 +31,7 @@ public class ProviderMetadataResourceHandler extends ResourceHandler<ScimProvide
 {
 
 
-  private final OpenIdClientDao openIdClientDao;
-
-  private final OpenIdProviderMetdatdataCache openIdProviderMetdatdataCache;
-
-  private final CredentialIssuerMetdatdataCache credentialIssuerMetdatdataCache;
+  private final OpenIdProviderDao openIdProviderDao;
 
   /**
    * {@inheritDoc}
@@ -59,12 +53,12 @@ public class ProviderMetadataResourceHandler extends ResourceHandler<ScimProvide
                                           Context context)
   {
 
-    Long openIdClientId = Utils.parseId(id);
-    OpenIdClient openIdClient = openIdClientDao.findById(openIdClientId).orElseThrow(() -> {
+    Long openIdProviderId = Utils.parseId(id);
+    OpenIdProvider openIdProvider = openIdProviderDao.findById(openIdProviderId).orElseThrow(() -> {
       return new ResourceNotFoundException(String.format("OpenID Client with id '%s' does not exist", id));
     });
-    Optional<OIDCProviderMetadata> oidcMetadata = Optional.ofNullable(Utils.loadDiscoveryEndpointInfos(openIdClient));
-    Optional<ObjectNode> oid4vciMetadata = Utils.loadOidc4vciDiscoveryEndpointInfos(openIdClient);
+    Optional<OIDCProviderMetadata> oidcMetadata = Optional.ofNullable(Utils.loadDiscoveryEndpointInfos(openIdProvider));
+    Optional<ObjectNode> oid4vciMetadata = Utils.loadOidc4vciDiscoveryEndpointInfos(openIdProvider);
 
     return ScimProviderMetadata.builder()
                                .oidcMetadata(oidcMetadata.map(OIDCProviderMetadata::toString).orElse(null))

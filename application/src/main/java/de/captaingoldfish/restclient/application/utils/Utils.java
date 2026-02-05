@@ -17,7 +17,6 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import de.captaingoldfish.restclient.application.endpoints.CredentialIssuerMetdatdataCache;
 import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.projectconfig.WebAppConfig;
-import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.entities.OpenIdProvider;
 import de.captaingoldfish.scim.sdk.common.exceptions.BadRequestException;
 import de.captaingoldfish.scim.sdk.common.utils.JsonHelper;
@@ -54,13 +53,12 @@ public final class Utils
   /**
    * loads the OpenID Connect metadata from the identity provider
    *
-   * @param openIdClient the OpenID Provider definition
+   * @param openIdProvider the OpenID Provider definition
    * @return the metadata of the OpenID Provider
    */
   @SneakyThrows
-  public synchronized static OIDCProviderMetadata loadDiscoveryEndpointInfos(OpenIdClient openIdClient)
+  public synchronized static OIDCProviderMetadata loadDiscoveryEndpointInfos(OpenIdProvider openIdProvider)
   {
-    final OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
     OpenIdProviderMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
                                                               .getBean(OpenIdProviderMetdatdataCache.class);
     {
@@ -74,7 +72,7 @@ public final class Utils
     final String responseBody;
 
     HttpGet httpGet = new HttpGet(discoveryUrl);
-    try (CloseableHttpClient httpClient = HttpClientBuilder.getHttpClient(openIdClient);
+    try (CloseableHttpClient httpClient = HttpClientBuilder.getDefaultHttpClient();
       CloseableHttpResponse response = httpClient.execute(httpGet))
     {
       responseBody = Utils.getBody(response);
@@ -100,9 +98,8 @@ public final class Utils
    * authorization server has such an endpoint
    */
   @SneakyThrows
-  public synchronized static Optional<ObjectNode> loadOidc4vciDiscoveryEndpointInfos(OpenIdClient openIdClient)
+  public synchronized static Optional<ObjectNode> loadOidc4vciDiscoveryEndpointInfos(OpenIdProvider openIdProvider)
   {
-    final OpenIdProvider openIdProvider = openIdClient.getOpenIdProvider();
     CredentialIssuerMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
                                                                 .getBean(CredentialIssuerMetdatdataCache.class);
     {
@@ -117,7 +114,7 @@ public final class Utils
     final String responseBody;
 
     HttpGet httpGet = new HttpGet(discoveryUrl);
-    try (CloseableHttpClient httpClient = HttpClientBuilder.getHttpClient(openIdClient);
+    try (CloseableHttpClient httpClient = HttpClientBuilder.getDefaultHttpClient();
       CloseableHttpResponse response = httpClient.execute(httpGet))
     {
       responseBody = Utils.getBody(response);

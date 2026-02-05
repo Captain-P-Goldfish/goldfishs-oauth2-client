@@ -15,6 +15,7 @@ import {FileParser} from "./file-parser/file-parser";
 import OpenidClientsRoute from "./openid/openid-clients";
 import OpenidClientOverviewRoute from "./openid/openid-client-overview";
 import CertIcon from "./media/certificate.png";
+import {CredentialOfferEditor} from "./openid/oid4vci-relying-party";
 
 
 export const ApplicationInfoContext = React.createContext(null);
@@ -100,6 +101,8 @@ class Application extends React.Component
                   <Route path="/views/system" element={<SystemOverview/>}/>
                   <Route path={"/views/openIdProvider/:providerId/client/:clientId"}
                          element={<OpenidClientOverviewRoute/>}/>
+                  <Route path={"/views/openIdProvider/:providerId/oid4vci"}
+                         element={<CredentialOfferEditor/>}/>
                   <Route path={"/views/openIdProvider/:id/openIdClients"}
                          element={<OpenidClientsRoute serviceProviderConfig={this.state.serviceProviderConfig}/>}/>
                   <Route path="/views/openIdProvider"

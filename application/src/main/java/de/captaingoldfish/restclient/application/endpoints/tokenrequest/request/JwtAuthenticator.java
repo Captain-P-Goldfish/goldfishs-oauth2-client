@@ -62,7 +62,7 @@ public class JwtAuthenticator implements Authenticator
 
   /**
    * will generate the client assertion for the identity provider
-   * 
+   *
    * @return the JWS representation of the client assertion
    */
   private String generateClientAssertion()
@@ -88,7 +88,7 @@ public class JwtAuthenticator implements Authenticator
 
   /**
    * builds a JWS header with the signature algorithm to use that is determined by the key-type
-   * 
+   *
    * @param signatureKeyEntry the key entry that determines the type of signature algorithm to use
    * @return the generates JWS header
    */
@@ -101,7 +101,7 @@ public class JwtAuthenticator implements Authenticator
 
   /**
    * determines the JWS-Algorithm that should be entered into the JWS header
-   * 
+   *
    * @param signatureKeyEntry the key entry that determines the algorithm type
    * @return the algorithm type to be entered into the JWS header
    */
@@ -130,7 +130,7 @@ public class JwtAuthenticator implements Authenticator
 
   /**
    * determines the signature algorithm in case for elliptic curve keys
-   * 
+   *
    * @param signatureKeyEntry the elliptic curve key
    * @return the fitting algorithm to the given key
    */
@@ -173,7 +173,7 @@ public class JwtAuthenticator implements Authenticator
    */
   private String getProviderIssuer()
   {
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
     return metadata.getIssuer().getValue();
   }
 }

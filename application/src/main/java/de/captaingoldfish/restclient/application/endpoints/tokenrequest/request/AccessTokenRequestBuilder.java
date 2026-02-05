@@ -98,7 +98,7 @@ public abstract class AccessTokenRequestBuilder
   @SneakyThrows
   public HttpResponseDetails sendAccessTokenRequest()
   {
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
 
     addRequestHeaders(this.requestHeaders, metadata);
     addRequestParameters(this.requestParameters);
@@ -133,7 +133,7 @@ public abstract class AccessTokenRequestBuilder
    */
   public String getMetaDataString()
   {
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
     return metadata.toJSONObject().toJSONString();
   }
 
@@ -155,7 +155,7 @@ public abstract class AccessTokenRequestBuilder
         String tokenType = accessTokenResponseNode.get(OAuthConstants.TOKEN_TYPE).textValue();
         if (OAuthConstants.DPOP_TOKEN_TYPE.equalsIgnoreCase(tokenType))
         {
-          OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+          OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
           final String accessToken = accessTokenResponseNode.get(OAuthConstants.ACCESS_TOKEN).textValue();
           Optional.ofNullable(currentWorkflowSettings)
                   .flatMap(ScimCurrentWorkflowSettings::getDpop)

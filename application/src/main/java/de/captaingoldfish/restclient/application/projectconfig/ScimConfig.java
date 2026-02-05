@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import de.captaingoldfish.restclient.application.crypto.JwtHandler;
-import de.captaingoldfish.restclient.application.endpoints.CredentialIssuerMetdatdataCache;
-import de.captaingoldfish.restclient.application.endpoints.OpenIdProviderMetdatdataCache;
 import de.captaingoldfish.restclient.application.endpoints.appinfo.AppInfoHandler;
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestHandler;
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.AuthCodeGrantRequestService;
@@ -346,13 +344,9 @@ public class ScimConfig
    */
   @Bean
   public ResourceType metadataProviderResourceType(ResourceEndpoint resourceEndpoint,
-                                                   OpenIdClientDao openIdClientDao,
-                                                   OpenIdProviderMetdatdataCache openIdProviderMetdatdataCache,
-                                                   CredentialIssuerMetdatdataCache credentialIssuerMetdatdataCache)
+                                                   OpenIdProviderDao openIdProviderDao)
   {
-    ProviderMetadataResourceHandler handler = new ProviderMetadataResourceHandler(openIdClientDao,
-                                                                                  openIdProviderMetdatdataCache,
-                                                                                  credentialIssuerMetdatdataCache);
+    ProviderMetadataResourceHandler handler = new ProviderMetadataResourceHandler(openIdProviderDao);
     ProviderMetadataEndpointDefinition endpoint = new ProviderMetadataEndpointDefinition(handler);
     return resourceEndpoint.registerEndpoint(endpoint);
   }

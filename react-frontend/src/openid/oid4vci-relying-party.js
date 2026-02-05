@@ -1,35 +1,73 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Col,
-  Form,
-  InputGroup,
-  ListGroup,
-  Row,
-  Accordion
-} from "react-bootstrap";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {Accordion, Alert, Badge, Button, Card, Col, Form, InputGroup, ListGroup, Row, Spinner} from "react-bootstrap";
 import QRCode from "react-qr-code";
+import {ScimClient2} from "../scim/scim-client-2";
+import {useParams} from "react-router-dom";
+import {ArrowRightCircle} from "react-bootstrap-icons";
+import {LinkContainer} from "react-router-bootstrap";
+import {AiOutlineWarning} from "react-icons/ai";
+import {Oid4vciMetadataViewer} from "./oid4vci-metadata-viewer";
 
-/**
- * Credential Offer Editor (OID4VCI)
- *
- * Props:
- * - oid4vciMetadata: object
- * - oidcMetadata: object (optional)
- * - credentialIssuer: string
- *
- * Behavior:
- * - Draft state changes freely
- * - QR-Code & Deep-Link are regenerated ONLY via button click / enter-submit
- */
-export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credentialIssuer})
+export function CredentialOfferEditor()
 {
+  const params = useParams();
+  const [oid4vciMetadata, setOid4vciMetadata] = useState();
+  const [oidcMetadata, setOidcMetadata] = useState();
+  const [loading, setLoading] = useState(true);
+
+  let openIdProviderId = params.providerId;
+
+  // NOTE: you fixed this already in your local version – keep it like that:
+  // let credentialIssuer = oid4vciMetadata?.credent...
+  // In this file we keep your intent: issuer comes from OID4VCI metadata
+  let credentialIssuer = oid4vciMetadata?.credential_issuer;
+
   /* ------------------------------------------------------------------
    * Metadata helpers
    * ------------------------------------------------------------------ */
+
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let metadataResourcePath = "/scim/v2/ProviderMetadata";
+    const safeParse = (val) => {
+      if (!val)
+      {
+        return null;
+      }
+      if (typeof val === "object")
+      {
+        return val;
+      }
+      if (typeof val !== "string")
+      {
+        return null;
+      }
+      try
+      {
+        return JSON.parse(val);
+      }
+      catch (e)
+      {
+        return null;
+      }
+    };
+
+    let onSuccess = metadata => {
+      setLoading(false)
+      const oidc = safeParse(metadata.oidcMetadata);
+      const oid4vci = safeParse(metadata.oid4vciMetadata);
+      setOidcMetadata(oidc);
+      setOid4vciMetadata(oid4vci);
+    };
+
+    let onError = errorResponse => {
+      setLoading(false)
+      setError(errorResponse.detail);
+    }
+
+    new ScimClient2().getResource(metadataResourcePath, openIdProviderId, null, onSuccess, onError);
+  }, []);
 
   const authorizationServers = useMemo(() => {
     const servers = oid4vciMetadata?.authorization_servers;
@@ -60,7 +98,8 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
     return [];
   }, [oid4vciMetadata]);
 
-  const defaultAuthorizationServer = useMemo(() => {
+  // kept (might be useful later), but selection defaults are now driven by authorizationServers length
+  useMemo(() => {
     if (authorizationServers.length > 0)
     {
       return authorizationServers[0];
@@ -79,6 +118,9 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
    * ------------------------------------------------------------------ */
 
   const [authorizationServerDraft, setAuthorizationServerDraft] = useState("");
+  const [customAuthorizationServerInput, setCustomAuthorizationServerInput] = useState("");
+  const [customAuthorizationServers, setCustomAuthorizationServers] = useState([]);
+
   const [selectedFromDropdown, setSelectedFromDropdown] = useState([]);
   const [manualIdInput, setManualIdInput] = useState("");
   const [manualIds, setManualIds] = useState([]);
@@ -89,11 +131,27 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
 
   const [committedOffer, setCommittedOffer] = useState(null);
   const [committedDeepLink, setCommittedDeepLink] = useState("");
-  const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
+  const didAutoInitRef = useRef(false);
+  const pendingAutoGenerateRef = useRef(false);
 
   useEffect(() => {
-    setAuthorizationServerDraft(prev => prev || defaultAuthorizationServer);
-  }, [defaultAuthorizationServer]);
+    // Default selection rules:
+    // - If exactly one authorization server is advertised: default to EMPTY (user may optionally select it)
+    // - If multiple are advertised: preselect the first
+    // - If none are advertised: keep empty
+    setAuthorizationServerDraft(prev => {
+      if (prev && String(prev).trim().length > 0)
+      {
+        return prev;
+      }
+      if (authorizationServers.length > 1)
+      {
+        return authorizationServers[0] || "";
+      }
+      return "";
+    });
+  }, [authorizationServers]);
 
   const mergedIds = useMemo(() => {
     const merged = [...selectedFromDropdown, ...manualIds]
@@ -103,12 +161,58 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
     return Array.from(new Set(merged));
   }, [selectedFromDropdown, manualIds]);
 
+  const authorizationServerCandidates = useMemo(() => {
+    const merged = [...authorizationServers, ...customAuthorizationServers]
+      .map(v => (v || "").trim())
+      .filter(Boolean);
+    return Array.from(new Set(merged));
+  }, [authorizationServers, customAuthorizationServers]);
+
   const issuer = String(credentialIssuer || "").trim();
   const authServerDraftTrimmed = String(authorizationServerDraft || "").trim();
 
+  // Auto-select first credential_configuration_id after metadata is loaded the first time,
+  // then generate the QR code once.
+  useEffect(() => {
+    if (didAutoInitRef.current)
+    {
+      return;
+    }
+    // Only run once, after we actually have metadata-derived IDs.
+    if (!oid4vciMetadata || availableCredentialConfigIds.length === 0)
+    {
+      return;
+    }
+
+    didAutoInitRef.current = true;
+
+    // Do not override user input if something is already selected/entered.
+    const hasAnyIdsSelected = (selectedFromDropdown && selectedFromDropdown.length > 0) ||
+      (manualIds && manualIds.length > 0);
+
+    if (!hasAnyIdsSelected)
+    {
+      setSelectedFromDropdown([availableCredentialConfigIds[0]]);
+      pendingAutoGenerateRef.current = true;
+    }
+  }, [oid4vciMetadata, availableCredentialConfigIds, selectedFromDropdown, manualIds]);
+
+  useEffect(() => {
+    if (!pendingAutoGenerateRef.current)
+    {
+      return;
+    }
+    if (!issuer || mergedIds.length === 0)
+    {
+      return;
+    }
+
+    pendingAutoGenerateRef.current = false;
+    generateOffer();
+  }, [issuer, mergedIds]);
+
   const canGenerate =
     Boolean(issuer) &&
-    Boolean(authServerDraftTrimmed) &&
     mergedIds.length > 0;
 
   /* ------------------------------------------------------------------
@@ -132,6 +236,24 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
     setManualIds(prev => prev.filter(x => x !== id));
   }
 
+  function addCustomAuthorizationServer()
+  {
+    const value = (customAuthorizationServerInput || "").trim();
+    if (!value)
+    {
+      return;
+    }
+
+    setCustomAuthorizationServers(prev => (prev.includes(value) ? prev : [...prev, value]));
+    setAuthorizationServerDraft(value);
+    setCustomAuthorizationServerInput("");
+  }
+
+  function clearAuthorizationServerSelection()
+  {
+    setAuthorizationServerDraft("");
+  }
+
   function onDropdownChange(e)
   {
     const values = Array.from(e.target.selectedOptions).map(o => o.value);
@@ -141,6 +263,7 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
   function generateOffer()
   {
     setError("");
+    setWarning("");
 
     if (!issuer)
     {
@@ -154,36 +277,28 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
       return;
     }
 
-    if (!authServerDraftTrimmed)
-    {
-      setError("authorization_server is empty.");
-      return;
-    }
+    // authorization_server is a parameter under grants.authorization_code.
+    // We include it whenever the user selected/entered a value.
+    const shouldIncludeAuthorizationServer = Boolean(authServerDraftTrimmed);
 
-    // Spec: authorization_server is a parameter under grants.authorization_code
-    // and MUST NOT be used unless issuer metadata has multiple authorization_servers entries.
-    const shouldIncludeAuthorizationServer = authorizationServers.length > 1;
-
-    if (shouldIncludeAuthorizationServer)
+    if (shouldIncludeAuthorizationServer && authorizationServers.length > 0 && authorizationServers.length > 1)
     {
       const matches = authorizationServers.includes(authServerDraftTrimmed);
       if (!matches)
       {
-        setError(
-          "authorization_server must match one of the authorization_servers from metadata when multiple are present."
+        // Keep it usable for interop/testing, but make it very visible.
+        setWarning(
+          "Spec note: When multiple authorization servers are advertised in metadata, authorization_server should match one of those values. (Kept for interop/testing.)"
         );
-        return;
       }
     }
 
     const offer = {
       credential_issuer: issuer,
       credential_configuration_ids: mergedIds,
-      // grants is optional in spec; we include it to explicitly request authorization_code
       grants: {
         authorization_code: {
           ...(shouldIncludeAuthorizationServer ? {authorization_server: authServerDraftTrimmed} : {})
-          // issuer_state could be added here in the future, if you want it configurable
         }
       }
     };
@@ -202,11 +317,32 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
 
   return (
     <div className="oidc-credential-offer-editor">
+
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <LinkContainer to={"/views/openIdProvider/"}>
+          <a href={"/#"} className={"action-link me-5"}>
+            <h5 className={"mobile-aware-title"}>
+              <ArrowRightCircle style={{marginRight: "15px"}} size={"20px"} height={"30px"} />
+              Back to OpenID Providers
+            </h5>
+          </a>
+        </LinkContainer>
+      </div>
+
+      <Row className="g-3 oidc-credential-offer-editor">
+        <Accordion className={"deep-link-accordion"}>
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>OID4VCI Metadata</Accordion.Header>
+            <Accordion.Body>
+              <Oid4vciMetadataViewer oid4vciMetadata={oid4vciMetadata} />
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+      </Row>
+
       <Row className="g-3">
 
-        {/* ============================================================
-         LEFT: INPUT EDITOR
-         ============================================================ */}
+        {/* LEFT */}
         <Col xl={7} lg={7} md={12}>
           <Card>
             <Card.Header className="d-flex justify-content-between align-items-center">
@@ -215,7 +351,6 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                 <Badge bg="secondary">authorization_code</Badge>
               </div>
 
-              {/* type=submit so Enter triggers generate */}
               <Button
                 variant="warning"
                 type="submit"
@@ -232,8 +367,19 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                   {error}
                 </Alert>
               )}
+              {loading && (
+                <Alert variant="warning">
+                  <Spinner variant={"warning"} /> Loading...
+                </Alert>
+              )}
 
-              {/* Enter anywhere in this form triggers submit -> generateOffer */}
+              {warning && (
+                <Alert variant="warning" className="d-flex align-items-center gap-2">
+                  <AiOutlineWarning />
+                  <div>{warning}</div>
+                </Alert>
+              )}
+
               <Form
                 id="credential-offer-form"
                 onSubmit={(e) => {
@@ -256,14 +402,54 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                 {/* Authorization Server */}
                 <Form.Group className="mb-3">
                   <Form.Label>Authorization Server</Form.Label>
-                  <Form.Control
-                    value={authorizationServerDraft}
-                    onChange={e => setAuthorizationServerDraft(e.target.value)}
-                  />
+
+                  {authorizationServerCandidates.length > 0 && (
+                    <Form.Select
+                      className="mb-2"
+                      value={authorizationServerDraft}
+                      onChange={e => setAuthorizationServerDraft(e.target.value)}
+                    >
+                      <option value="">(select authorization server)</option>
+                      {authorizationServerCandidates.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </Form.Select>
+                  )}
+
+                  {authorizationServerDraft && (
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                      <Badge bg="info">Selected</Badge>
+                      <code className="text-break">{authorizationServerDraft}</code>
+                      <Button
+                        size="sm"
+                        variant="outline-light"
+                        onClick={clearAuthorizationServerSelection}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  )}
+
+                  <InputGroup>
+                    <Form.Control
+                      placeholder="Add custom authorization server URL"
+                      value={customAuthorizationServerInput}
+                      onChange={e => setCustomAuthorizationServerInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter")
+                        {
+                          e.preventDefault();
+                          addCustomAuthorizationServer();
+                        }
+                      }}
+                    />
+                    <Button variant="outline-light" onClick={addCustomAuthorizationServer}>Add</Button>
+                  </InputGroup>
+
                   <Form.Text muted>
                     {authorizationServers.length > 1
-                      ? "Multiple authorization servers detected in metadata. The value must match one of them."
-                      : "Only one authorization server in metadata. The authorization_server parameter will not be included in the offer (per spec)."}
+                      ? "Multiple authorization servers detected in metadata. If you select one, it will be included in the offer."
+                      : "Only one authorization server in metadata. Selection is optional; if selected it will be included in the offer."}
                   </Form.Text>
                 </Form.Group>
 
@@ -294,7 +480,6 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                           value={manualIdInput}
                           onChange={e => setManualIdInput(e.target.value)}
                           onKeyDown={e => {
-                            // Enter here should ADD, not submit
                             if (e.key === "Enter")
                             {
                               e.preventDefault();
@@ -344,9 +529,7 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
           </Card>
         </Col>
 
-        {/* ============================================================
-         RIGHT: OUTPUT
-         ============================================================ */}
+        {/* RIGHT */}
         <Col xl={5} lg={5} md={12}>
           <Card className="credential-offer-output">
             <Card.Header>
@@ -360,7 +543,6 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                 </Alert>
               ) : (
                 <>
-                  {/* Deep Link */}
                   <Form.Group className="mb-3">
                     <Form.Label>Deep Link (same-device)</Form.Label>
 
@@ -383,15 +565,19 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                       <Button
                         variant="outline-light"
                         onClick={async () => {
-                          try { await navigator.clipboard.writeText(committedDeepLink); }
-                          catch (e) {}
+                          try
+                          {
+                            await navigator.clipboard.writeText(committedDeepLink);
+                          }
+                          catch (e)
+                          {
+                          }
                         }}
                       >
                         Copy
                       </Button>
                     </InputGroup>
 
-                    {/* Accordion for full URL */}
                     <Accordion className="deep-link-accordion">
                       <Accordion.Item eventKey="0">
                         <Accordion.Header>
@@ -406,7 +592,6 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                     </Accordion>
                   </Form.Group>
 
-                  {/* QR */}
                   <div className="qr-container mb-3">
                     <QRCode
                       value={committedDeepLink}
@@ -414,7 +599,6 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                     />
                   </div>
 
-                  {/* JSON (scrollable) */}
                   <Form.Group>
                     <Form.Label>Credential Offer JSON</Form.Label>
                     <Form.Control
@@ -424,9 +608,9 @@ export function CredentialOfferEditor({oid4vciMetadata, oidcMetadata, credential
                       className="credential-offer-json"
                       style={{
                         fontFamily: "monospace",
-                        height: "260px",      // fixed height so scrolling works
+                        height: "260px",
                         overflowY: "auto",
-                        resize: "vertical"    // user can resize if desired
+                        resize: "vertical"
                       }}
                     />
                   </Form.Group>

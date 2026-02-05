@@ -138,29 +138,67 @@ a.action-link {
 }
 
 /* general "a h5" styling */
-a {
-  h5 {
-    color: gold;
-    padding: 5px;
-    background: linear-gradient(
-                    200deg,
-                    transparent 0%,
-                    transparent 11%,
-                    rgba(58, 62, 66, 1) 100%
-    );
+$h5-color: gold;
+$h5-pad: 5px;
 
-    &:hover {
-      color: gold;
-      padding: 5px;
-      background: linear-gradient(
-                      200deg,
-                      transparent 0%,
-                      transparent 11%,
-                      rgba(121, 127, 135, 0.42) 100%
-      );
+$bg-base: linear-gradient(
+                200deg,
+                transparent 0%,
+                transparent 11%,
+                rgba(58, 62, 66, 1) 100%
+);
+
+$bg-hover: linear-gradient(
+                200deg,
+                transparent 0%,
+                transparent 11%,
+                rgba(121, 127, 135, 0.42) 100%
+);
+
+@mixin h5-core {
+  color: $h5-color;
+  padding: $h5-pad;
+}
+
+@mixin h5-bg-base {
+  background: $bg-base;
+}
+
+@mixin h5-bg-hover {
+  background: $bg-hover;
+}
+
+h5 {
+  @include h5-core;
+  @include h5-bg-base;
+
+  // h5 inside <a>
+  a & {
+    @include h5-core;
+  }
+
+  // hover on the <a> containing the h5
+  a:hover & {
+    @include h5-core;
+    @include h5-bg-hover;
+  }
+
+  &.provider-header {
+    @include h5-core;
+    @include h5-bg-base;
+
+    // following sibling anchors
+    & ~ a {
+      @include h5-core;
+    }
+
+    & ~ a:hover {
+      @include h5-core;
+      @include h5-bg-hover;
     }
   }
 }
+
 
 select {
   width: 100%;
@@ -1525,5 +1563,48 @@ h5.mobile-aware {
 
   .credential-offer-json {
     white-space: pre;
+  }
+}
+
+/* OID4VCI Metadata Viewer: readable on dark theme */
+.oid4vci-metadata-viewer {
+  .oid4vci-panel {
+    border-radius: var(--card-border-radius);
+  }
+
+  .oid4vci-codebox {
+    margin-top: 6px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: monospace;
+    font-size: 12px;
+    color: whitesmoke;
+  }
+
+  .oid4vci-pre {
+    margin: 0;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: whitesmoke;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+
+  /* make highlight readable on dark background */
+  .oid4vci-hl {
+    padding: 0 2px;
+    border-radius: 4px;
+    background: rgba(255, 193, 7, 0.35);
+    color: whitesmoke;
+  }
+
+  /* Accordion header text on dark backgrounds */
+  .oid4vci-acc-h button,
+  .accordion-button {
+    color: whitesmoke !important;
   }
 }

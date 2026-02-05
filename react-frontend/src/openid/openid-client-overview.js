@@ -8,8 +8,7 @@ import {Optional} from "../services/utils";
 import OpenidClientWorkflow from "./openid-client-workflow";
 import {ApplicationInfoContext} from "../app";
 import {useParams} from "react-router-dom";
-import {OpenidClients} from "./openid-clients";
-import {CredentialOfferBuilder, CredentialOfferEditor} from "./oid4vci-relying-party";
+import {CredentialOfferEditor} from "./oid4vci-relying-party";
 
 export default function OpenidClientOverviewRoute(props) {
   const params = useParams();
@@ -73,36 +72,6 @@ export class OpenidClientOverview extends React.Component
         })
       }
     });
-
-    let metadataResourcePath = "/scim/v2/ProviderMetadata";
-    new ScimClient(metadataResourcePath, this.setState).getResource(clientId).then(response => {
-      if (response.success) {
-        response.resource.then(metadata => {
-
-          const safeParse = (val) => {
-            if (!val) return null;
-            if (typeof val === "object") return val;          // falls Backend irgendwann mal "richtig" liefert
-            if (typeof val !== "string") return null;
-            try { return JSON.parse(val); } catch (e) { return null; }
-          };
-
-          const oidc = safeParse(metadata.oidcMetadata);
-          const oid4vci = safeParse(metadata.oid4vciMetadata);
-
-          this.setState({
-                          oidcMetadata: oidc,
-                          oid4vciMetadata: oid4vci,
-                          errors: null
-                        });
-        });
-      } else {
-        response.resource.then(errorResponse => {
-          this.setState({
-                          errors: { errorMessages: [errorResponse.detail] }
-                        });
-        });
-      }
-    });
   }
 
 
@@ -146,14 +115,6 @@ export class OpenidClientOverview extends React.Component
                 }
               </ApplicationInfoContext.Consumer>
             }
-          </Tab>
-          <Tab eventKey="oid4vci" title="OID4VCI">
-            <CredentialOfferEditor
-              oid4vciMetadata={this.state.oid4vciMetadata}
-              oidcMetadata={this.state.oidcMetadata}
-              credentialIssuer={this.state.oid4vciMetadata?.credential_issuer || this.state.oidcMetadata?.issuer}
-            />
-
           </Tab>
           <Tab eventKey="clients" title="HTTP Settings">
             {

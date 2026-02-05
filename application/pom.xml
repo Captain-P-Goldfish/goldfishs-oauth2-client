@@ -132,4 +132,60 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>build-docker-image</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>${version.docker.maven.plugin}</version>
+                        <executions>
+                            <execution>
+                                <id>build-local-registry</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <images>
+                                <image>
+                                    <name>captaingoldfish/${project.build.finalName}:${project.version}</name>
+                                    <build>
+                                        <contextDir>.</contextDir>
+                                        <assembly>
+                                            <mode>dir</mode>
+                                            <inline
+                                                xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+                                                xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+                                                <files>
+                                                    <file>
+                                                        <source>
+                                                            target/${project.build.finalName}.jar
+                                                        </source>
+                                                    </file>
+                                                </files>
+                                            </inline>
+                                        </assembly>
+                                        <tags>
+                                            <tag>${project.version}</tag>
+                                            <tag>latest</tag>
+                                        </tags>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

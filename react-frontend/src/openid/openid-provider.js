@@ -229,15 +229,19 @@ class OpenIdProviderCardEntry extends React.Component
               {
                 this.state.editMode === false &&
                 <React.Fragment>
+                  <h5 className={"provider-header d-inline me-5"}>
+                    {this.state.provider.name}
+                  </h5>
                   <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/openIdClients"}>
+                    <a href={"/#"} className={"action-link me-5"}>
+                      <ArrowRightCircle style={{marginRight: "15px"}} size={"20px"} height={"30px"} />
+                      OIDC
+                    </a>
+                  </LinkContainer>
+                  <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/oid4vci"}>
                     <a href={"/#"} className={"action-link"}>
-                      <h5>
-                        <ArrowRightCircle style={{
-                          marginRight: "15px"
-                        }}
-                                          size={"20px"} height={"30px"}/>
-                        {this.state.provider.name}
-                      </h5>
+                      <ArrowRightCircle style={{marginRight: "15px"}} size={"20px"} height={"30px"} />
+                      OID4VCI
                     </a>
                   </LinkContainer>
                 </React.Fragment>

@@ -77,7 +77,7 @@ public class AuthCodeGrantRequestService
                                                                    ScimCurrentWorkflowSettings workflowSettings,
                                                                    AuthCodeGrantType authenticationType)
   {
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
 
     final String redirectUri = workflowSettings.getAuthCodeParameters()

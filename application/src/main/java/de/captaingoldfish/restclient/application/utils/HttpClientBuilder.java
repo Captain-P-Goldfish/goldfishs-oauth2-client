@@ -38,6 +38,22 @@ public class HttpClientBuilder
    *
    * @return a http-client instance
    */
+  public static CloseableHttpClient getDefaultHttpClient()
+  {
+    HttpClientSettings httpSettings = HttpClientSettings.builder()
+                                                        .connectionTimeout(60)
+                                                        .socketTimeout(60)
+                                                        .requestTimeout(60)
+                                                        .useHostnameVerifier(false)
+                                                        .build();
+    return getHttpClient(httpSettings);
+  }
+
+  /**
+   * this method generates a http-client instance and will set the ssl-context
+   *
+   * @return a http-client instance
+   */
   public static CloseableHttpClient getHttpClient(OpenIdClient openIdClient)
   {
     HttpClientSettingsDao httpSettingsDao = WebAppConfig.getApplicationContext().getBean(HttpClientSettingsDao.class);

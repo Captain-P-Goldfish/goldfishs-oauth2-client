@@ -338,11 +338,8 @@ class OpenIdClientCardEntry extends React.Component
                   <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/client/"
                                    + this.state.client.id}>
                     <a href={"/#"} className={"action-link"}>
-                      <h5>
-                        <ArrowRightCircle style={{
-                          marginRight: "15px"
-                        }}
-                                          size={"20px"} height={"30px"}/>
+                      <h5 className={"p-0 m-0"}>
+                        <ArrowRightCircle style={{marginRight: "15px"}} size={"20px"} height={"30px"}/>
                         Client '{this.state.client.clientId}'
                       </h5>
                     </a>

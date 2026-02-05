@@ -58,7 +58,7 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
       requestService.generateAuthCodeRequestUrl(openIdClient,
                                                 resource.getCurrentWorkflowSettings().orElseThrow(),
                                                 resource.getAuthenticationType());
-    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient);
+    OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
     String metaDataString = metadata.toJSONObject().toJSONString();
 
     CurrentWorkflowSettings currentWorkflowSettings = //
