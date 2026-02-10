@@ -393,9 +393,7 @@ export function CredentialOfferEditor()
                 {/* Issuer */}
                 <Form.Group className="mb-3">
                   <Form.Label>Credential Issuer</Form.Label>
-                  <Form.Control
-                    readOnly
-                    value={credentialIssuer || ""}
+                  <Form.Control value={credentialIssuer || ""}
                   />
                 </Form.Group>
 

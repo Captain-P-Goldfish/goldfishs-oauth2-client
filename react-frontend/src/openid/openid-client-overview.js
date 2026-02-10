@@ -8,7 +8,6 @@ import {Optional} from "../services/utils";
 import OpenidClientWorkflow from "./openid-client-workflow";
 import {ApplicationInfoContext} from "../app";
 import {useParams} from "react-router-dom";
-import {CredentialOfferEditor} from "./oid4vci-relying-party";
 
 export default function OpenidClientOverviewRoute(props) {
   const params = useParams();
