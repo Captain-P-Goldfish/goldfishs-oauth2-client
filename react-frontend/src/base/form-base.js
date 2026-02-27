@@ -21,22 +21,30 @@ import {CardInputField} from "./card-base";
 import {decodeJws, isDecodedJws} from "./utils";
 import {ApplicationInfoContext} from "../app";
 
-function setNativeValueAndDispatch(el, value) {
+function setNativeValueAndDispatch(el, value)
+{
   const prototype = Object.getPrototypeOf(el);
   const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
   const set = descriptor?.set;
 
-  if (set) set.call(el, value);
-  else el.value = value;
+  if (set)
+  {
+    set.call(el, value);
+  }
+  else
+  {
+    el.value = value;
+  }
 
-  el.dispatchEvent(new Event("input", { bubbles: true }));
-  el.dispatchEvent(new Event("change", { bubbles: true }));
+  el.dispatchEvent(new Event("input", {bubbles: true}));
+  el.dispatchEvent(new Event("change", {bubbles: true}));
 }
 
 /**
  * a simple input field that might also display error messages directly bound to this input field
  */
-export function FormInputField(props) {
+export function FormInputField(props)
+{
   const inputRef = useRef(null);
 
   let controlId = props.id || props.name;
@@ -54,20 +62,23 @@ export function FormInputField(props) {
   const onKeyDown = useCallback((e) => {
     // optional: user handler zuerst/zuletzt? meistens zuletzt ist besser
     // Wir greifen nur ein, wenn wir wirklich handeln.
-    if (!e.ctrlKey) {
+    if (!e.ctrlKey)
+    {
       props.onKeyDown?.(e);
       return;
     }
 
     const el = inputRef.current;
-    if (!el || isReadOnly || isDisabled) {
+    if (!el || isReadOnly || isDisabled)
+    {
       props.onKeyDown?.(e);
       return;
     }
 
     const start = el.selectionStart ?? 0;
     const end = el.selectionEnd ?? 0;
-    if (start === end) {
+    if (start === end)
+    {
       props.onKeyDown?.(e);
       return;
     }
@@ -76,23 +87,29 @@ export function FormInputField(props) {
     let replacement = null;
 
     // Ctrl+U => encode
-    if (e.key === "u" && !e.shiftKey) {
+    if (e.key === "u" && !e.shiftKey)
+    {
       e.preventDefault();
       replacement = encodeURIComponent(selected);
     }
 
     // Ctrl+Shift+U => decode
-    if (replacement === null && (e.key === "U" || (e.key === "u" && e.shiftKey))) {
+    if (replacement === null && (e.key === "U" || (e.key === "u" && e.shiftKey)))
+    {
       e.preventDefault();
-      try {
+      try
+      {
         replacement = decodeURIComponent(selected);
-      } catch {
+      }
+      catch
+      {
         // ungültig: nichts tun
         return;
       }
     }
 
-    if (replacement === null) {
+    if (replacement === null)
+    {
       props.onKeyDown?.(e);
       return;
     }
@@ -104,9 +121,13 @@ export function FormInputField(props) {
 
     // Auswahl wiederherstellen (nachdem React evtl. re-rendered)
     queueMicrotask(() => {
-      try {
+      try
+      {
         el.setSelectionRange(start, start + replacement.length);
-      } catch {}
+      }
+      catch
+      {
+      }
     });
   }, [props, isDisabled, isReadOnly]);
 
@@ -131,7 +152,7 @@ export function FormInputField(props) {
         {props.children}
 
         <ErrorMessageList controlId={props.name + "-error-list"}
-                          fieldErrors={inputFieldErrorMessages}/>
+                          fieldErrors={inputFieldErrorMessages} />
       </Col>
     </Form.Group>
   );
@@ -163,10 +184,10 @@ export class FormCheckbox extends React.Component
                       readOnly={isReadOnly}
                       type="switch"
                       onChange={this.props.onChange}
-                      checked={checked}/>
+                      checked={checked} />
 
           <ErrorMessageList controlId={this.props.name + "-error-list"}
-                            fieldErrors={inputFieldErrorMessages}/>
+                            fieldErrors={inputFieldErrorMessages} />
         </Col>
       </Form.Group>
     );
@@ -184,15 +205,13 @@ export class FormSelectField extends React.Component
     let labelText = this.props.label === undefined ? this.props.name : this.props.label;
     let inputFieldErrorMessages = this.props.onError(this.props.name);
 
-    let inputFieldOptions = new Optional(this.props.options).map(options =>
-    {
-      return options.map((value) =>
-      {
+    let inputFieldOptions = new Optional(this.props.options).map(options => {
+      return options.map((value) => {
         return <option
           key={value}>{value}</option>;
       });
     })
-      .orElse([]);
+                                                            .orElse([]);
 
     return (
       <Form.Group as={Row} controlId={this.props.name}>
@@ -206,7 +225,7 @@ export class FormSelectField extends React.Component
           </Form.Control>
 
           <ErrorMessageList controlId={this.props.name + "-error-list"}
-                            fieldErrors={inputFieldErrorMessages}/>
+                            fieldErrors={inputFieldErrorMessages} />
         </Col>
       </Form.Group>
     );
@@ -219,11 +238,9 @@ export class FormSelectField extends React.Component
 export function FormFileField(props)
 {
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     bsCustomFileInput.init();
-    return () =>
-    {
+    return () => {
       bsCustomFileInput.destroy();
     };
   }, [] /* do this only once */);
@@ -235,10 +252,10 @@ export function FormFileField(props)
     <Form.Group as={Row} controlId={props.name}>
       <Form.Label column sm={2}>{labelText}</Form.Label>
       <Col sm={10}>
-        <Form.Control type={"file"} className={"form-control"} name={props.name}/>
+        <Form.Control type={"file"} className={"form-control"} name={props.name} />
 
         <ErrorMessageList controlId={props.name + "-error-list"}
-                          fieldErrors={inputFieldErrorMessages}/>
+                          fieldErrors={inputFieldErrorMessages} />
       </Col>
     </Form.Group>
   );
@@ -264,8 +281,7 @@ export function FormObjectList(props)
                       onChange={props.onChange}
                       value={props.selected}>
           {
-            props.selections.map((value, index) =>
-            {
+            props.selections.map((value, index) => {
               return (
                 <option key={index}
                         value={value.id}
@@ -278,7 +294,7 @@ export function FormObjectList(props)
         </Form.Control>
 
         <ErrorMessageList controlId={props.name + "-error-list"}
-                          fieldErrors={inputFieldErrorMessages}/>
+                          fieldErrors={inputFieldErrorMessages} />
       </Col>
     </Form.Group>
   );
@@ -300,8 +316,7 @@ export function FormRadioSelection(props)
       <Form.Label column sm={2}>{labelText}</Form.Label>
       <Col sm={10} style={{alignSelf: "center"}}>
         {
-          props.selections.map((object, index) =>
-          {
+          props.selections.map((object, index) => {
             return <Form.Check key={index}
                                style={{
                                  display: displayClass,
@@ -318,7 +333,7 @@ export function FormRadioSelection(props)
           })
         }
         <ErrorMessageList controlId={props.name + "-error-list"}
-                          fieldErrors={inputFieldErrorMessages}/>
+                          fieldErrors={inputFieldErrorMessages} />
       </Col>
     </Form.Group>
   );
@@ -330,7 +345,7 @@ export function FormRadioSelection(props)
 export function ErrorMessageList(props)
 {
   let doNotRenderComponent = new Optional(props.fieldErrors).map(val => false)
-    .orElse(true);
+                                                            .orElse(true);
 
   if (doNotRenderComponent)
   {
@@ -342,8 +357,8 @@ export function ErrorMessageList(props)
   return (
     <ul id={props.controlId} className="error-list">
       {props.fieldErrors.map((message, index) =>
-        <ErrorListItem key={"error-message-" + index} backgroundClass={backgroundClass}
-                       message={message}/>)}
+                               <ErrorListItem key={"error-message-" + index} backgroundClass={backgroundClass}
+                                              message={message} />)}
     </ul>
   );
 }
@@ -357,7 +372,7 @@ export function ErrorListItem(props)
   return (
     <li className="error-list-item">
       <small className={props.backgroundClass + " error"}>
-        <GoFlame/> {props.message}
+        <GoFlame /> {props.message}
       </small>
     </li>
   );
@@ -366,7 +381,7 @@ export function ErrorListItem(props)
 export function AlertListMessages(props)
 {
   let variant = props.variant || "info";
-  let icon = props.icon || <ExclamationLg/>;
+  let icon = props.icon || <ExclamationLg />;
   return (
     <React.Fragment>
       {
@@ -374,8 +389,7 @@ export function AlertListMessages(props)
         <Alert variant={variant} dismissible={new Optional(props.onClose).isPresent()} onClose={props.onClose}>
           <ul className="error-list">
             {
-              props.messages.map((message, index) =>
-              {
+              props.messages.map((message, index) => {
                 return <li key={"alert-" + variant + "-message-" + index}
                            className={"error-list-item"}>
                   <small className={"error"}>
@@ -397,10 +411,11 @@ export function LoadingSpinner(props)
   {
     return (
       <span style={{marginRight: 5 + 'px'}}>
-              <Spinner animation="border" variant="warning" size="sm" role="status"/>
+              <Spinner animation="border" variant="warning" size="sm" role="status" />
             </span>
     );
-  } else
+  }
+  else
   {
     return null;
   }
@@ -410,11 +425,11 @@ export function ErrorMessagesAlert(props)
 {
   return (
     new Optional(props.errors).map(errors => errors.errorMessages)
-      .filter(messages => messages.length > 0)
-      .isPresent() &&
+                              .filter(messages => messages.length > 0)
+                              .isPresent() &&
     <Alert id={"error-messages-alert"} variant={"danger"}
            show={props.errors.errorMessages !== undefined}>
-      <ErrorMessageList fieldErrors={props.errors.errorMessages} backgroundClass={""}/>
+      <ErrorMessageList fieldErrors={props.errors.errorMessages} backgroundClass={""} />
     </Alert>
   );
 }
@@ -428,31 +443,31 @@ export function CardControlIcons(props)
         props.editMode &&
         <React.Fragment>
           <Save title={"save"} id={"save-icon-" + props.resource.id}
-                onClick={() =>
-                {
+                onClick={() => {
                   if (props.resource.id === undefined)
                   {
                     props.createResource();
-                  } else
+                  }
+                  else
                   {
                     props.updateResource(props.resource.id);
                   }
                 }}
-                style={{marginRight: 5 + 'px'}}/>
+                style={{marginRight: 5 + 'px'}} />
           {
             props.resource.id !== undefined &&
             <XLg title={"reset-edit"} id={"reset-update-icon-" + props.resource.id}
-                 onClick={props.resetEditMode} style={{marginRight: 5 + 'px'}}/>
+                 onClick={props.resetEditMode} style={{marginRight: 5 + 'px'}} />
           }
         </React.Fragment>
       }
       {
         !props.editMode &&
         <PencilSquare title={"edit"} id={"update-icon-" + props.resource.id}
-                      onClick={props.edit} style={{marginRight: 5 + 'px'}}/>
+                      onClick={props.edit} style={{marginRight: 5 + 'px'}} />
       }
       <TrashFill title={"delete"} id={"delete-icon-" + props.resource.id}
-                 onClick={props.showModal}/>
+                 onClick={props.showModal} />
     </div>
   );
 }
@@ -466,10 +481,10 @@ export function CardDateRows(props)
         <td className={"card-value-cell"}>
           {
             new Optional(props.resource).map(val => val.meta)
-              .map(
-                val => val.created)
-              .map(val => new Date(val).toUTCString())
-              .orElse(null)
+                                        .map(
+                                          val => val.created)
+                                        .map(val => new Date(val).toUTCString())
+                                        .orElse(null)
           }
         </td>
       </tr>
@@ -478,11 +493,11 @@ export function CardDateRows(props)
         <td className={"card-value-cell"}>
           {
             new Optional(props.resource).map(val => val.meta)
-              .map(
-                val => val.lastModified)
-              .map(val => new Date(val).toUTCString())
-              .orElse(
-                null)
+                                        .map(
+                                          val => val.lastModified)
+                                        .map(val => new Date(val).toUTCString())
+                                        .orElse(
+                                          null)
           }
         </td>
       </tr>
@@ -504,7 +519,7 @@ export function ModifiableCardEntry(props)
                         name={props.name}
                         placeholder={props.placeholder}
                         onChange={props.onChange}
-                        onError={props.onError}/>
+                        onError={props.onError} />
       }
       {
         !props.editMode &&
@@ -524,7 +539,7 @@ export function HiddenCardEntry(props)
                       name={props.name}
                       placeholder={props.placeholder}
                       onChange={props.onChange}
-                      onError={props.onError}/>
+                      onError={props.onError} />
     </td>
   </tr>;
 }
@@ -538,10 +553,10 @@ export function ModifiableCardFileEntry(props)
       {
         props.editMode &&
         <XSquare key={"remove-key"} type={"button"} className={"remove-index"}
-                 onClick={e => props.onRemove(props.name, undefined)}/>
+                 onClick={e => props.onRemove(props.name, undefined)} />
       }
       <div className={new Optional(props.resourceValue).map(val => "light-border")
-        .orElse("")}>
+                                                       .orElse("")}>
         {props.resourceValue}
       </div>
       {
@@ -551,7 +566,7 @@ export function ModifiableCardFileEntry(props)
                         name={props.name}
                         placeholder={props.placeholder}
                         onChange={props.onChange}
-                        onError={props.onError}/>
+                        onError={props.onError} />
       }
     </td>
   </tr>;
@@ -560,7 +575,7 @@ export function ModifiableCardFileEntry(props)
 export function CardRadioSelector(props)
 {
   let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name))
-    .orElse([]);
+                                                           .orElse([]);
 
   return <tr>
     <th>{props.header}</th>
@@ -572,8 +587,7 @@ export function CardRadioSelector(props)
         }
         {
           props.editMode &&
-          props.selections.map((value, index) =>
-          {
+          props.selections.map((value, index) => {
             return (
               <Form.Check
                 key={index}
@@ -590,7 +604,7 @@ export function CardRadioSelector(props)
         }
       </fieldset>
       <ErrorMessageList controlId={props.name + "-error-list"}
-                        fieldErrors={inputFieldErrorMessages}/>
+                        fieldErrors={inputFieldErrorMessages} />
     </td>
   </tr>;
 }
@@ -598,7 +612,7 @@ export function CardRadioSelector(props)
 export function CardListSelector(props)
 {
   let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name))
-    .orElse([]);
+                                                           .orElse([]);
   return <tr>
     <th>{props.header}</th>
     <td id={"card-cell-" + props.resourceId + "-" + props.name} className={"card-value-cell"}>
@@ -618,8 +632,7 @@ export function CardListSelector(props)
                         value={props.selected}
           >
             {
-              props.selections.map((value, index) =>
-              {
+              props.selections.map((value, index) => {
                 return (
                   <option key={index}
                           defaultValue={props.selected === value}>
@@ -632,7 +645,7 @@ export function CardListSelector(props)
         }
       </fieldset>
       <ErrorMessageList controlId={props.name + "-error-list"}
-                        fieldErrors={inputFieldErrorMessages}/>
+                        fieldErrors={inputFieldErrorMessages} />
     </td>
   </tr>;
 }
@@ -640,7 +653,7 @@ export function CardListSelector(props)
 export function ModifiableCardList(props)
 {
   let inputFieldErrorMessages = new Optional(props.onError).map(val => val(props.name))
-    .orElse([]);
+                                                           .orElse([]);
 
   return <tr>
     <th>{props.header}</th>
@@ -650,17 +663,15 @@ export function ModifiableCardList(props)
         <React.Fragment>
           {
             new Optional(props.resourceValue)
-              .map(endpointArray =>
-              {
-                return endpointArray.map((endpoint, index) =>
-                {
+              .map(endpointArray => {
+                return endpointArray.map((endpoint, index) => {
                   return (
                     <div
                       key={props.name + "-container-" + props.resourceId + "-" + index}>
                       <XSquare key={"remove-" + props.resourceId + "-" + index}
                                type={"button"}
                                className={"remove-index"}
-                               onClick={e => props.onRemove(index)}/>
+                               onClick={e => props.onRemove(index)} />
                       <CardInputField
                         key={props.name + "-" + props.resourceId + "-" + index}
                         className={"list-item"}
@@ -669,7 +680,7 @@ export function ModifiableCardList(props)
                         name={props.name + "[" + index + "]"}
                         placeholder={props.placeholder}
                         onChange={props.onChange}
-                        onError={props.onError}/>
+                        onError={props.onError} />
                     </div>
                   );
 
@@ -678,22 +689,20 @@ export function ModifiableCardList(props)
               .orElse([])
           }
           <ErrorMessageList controlId={props.name + "-error-list"}
-                            fieldErrors={inputFieldErrorMessages}/>
+                            fieldErrors={inputFieldErrorMessages} />
           <Button key={"add"} type={"button"} className={"add-item"} onClick={props.onAdd}>
-            <PlusSquare/> Add new
+            <PlusSquare /> Add new
           </Button>
         </React.Fragment>
       }
       {
         !props.editMode &&
         new Optional(props.resourceValue)
-          .map(endpointArray =>
-          {
+          .map(endpointArray => {
             return (
               <ul>
                 {
-                  endpointArray.map(endpoint =>
-                  {
+                  endpointArray.map(endpoint => {
                     return (<li key={endpoint}>{endpoint}</li>);
                   })
                 }
@@ -712,9 +721,9 @@ export function Collapseable(props)
 
   let variant = props.variant || "primary";
   let headerClass = new Optional(props.headerClass).map(val => " " + val)
-    .orElse("");
+                                                   .orElse("");
   let bodyClass = new Optional(props.bodyClass).map(val => " " + val)
-    .orElse("");
+                                               .orElse("");
 
   return (
     <React.Fragment>
@@ -723,16 +732,16 @@ export function Collapseable(props)
              onClick={() => setOpen(!open)}>
         {
           open === true &&
-          <CaretDown/>
+          <CaretDown />
         }
         {
           open === false &&
-          <CaretRight/>
+          <CaretRight />
         }
         {props.header}
         {
           props.remove !== undefined &&
-          <XLg onClick={props.remove} className={"remove-collapse"}/>
+          <XLg onClick={props.remove} className={"remove-collapse"} />
         }
       </Alert>
       <Collapse in={open}>
@@ -759,7 +768,8 @@ export function JwsOffCanvas({name, value, printIfNoJws = true, ...props})
     if (printIfNoJws)
     {
       return toRenderableString(value);
-    } else
+    }
+    else
     {
       return null;
     }
@@ -781,23 +791,25 @@ export function JwsOffCanvas({name, value, printIfNoJws = true, ...props})
     </a>
 
     <Offcanvas show={show} placement={"end"} onHide={() => setShow(false)} {...props}>
-      <Offcanvas.Body>
-        {
-          name &&
-          <h3 className={"text-black"}>
-            {name}
-          </h3>
-        }
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title>
+          {
+            name &&
+            <h3 className={"text-black"}>
+              {name}
+            </h3>
+          }
+        </Offcanvas.Title>
+      </Offcanvas.Header>
 
-        <JsonViewSafe className={"jwt-part jwt-part-0"} value={jws.header}/>
+      <Offcanvas.Body>
+
+        <JsonViewSafe className={"jwt-part jwt-part-0"} value={jws.header} />
         .
-        <br/>
-        <JsonViewSafe className={"jwt-part jwt-part-0"} value={jws.body}/>
-        {/*<pre className={"jwt-part jwt-part-1"}>*/}
-        {/*  {jws.body}*/}
-        {/*</pre>*/}
+        <br />
+        <JsonViewSafe className={"jwt-part jwt-part-0"} value={jws.body} />
         .
-        <br/>
+        <br />
         <span className={"jwt-part jwt-part-2"}>
           {jws.part3}
         </span>
@@ -814,8 +826,7 @@ export function DpopDetails({props, state, setState})
                        open={true}
                        variant={"workflow-details"}
                        bodyClass={"workflow-card-details"}
-                       content={() =>
-                       {
+                       content={() => {
                          return <React.Fragment>
                            <Row>
                              <Col md={4}>
@@ -824,14 +835,12 @@ export function DpopDetails({props, state, setState})
                              <Col>
                                <FormSelect id={"dpop-key-selection"}
                                            value={state.dpopKeyId}
-                                           onChange={e =>
-                                           {
+                                           onChange={e => {
                                              setState({dpopKeyId: e.target.value})
                                            }}>
                                  {
                                    new Optional(props.keyInfos).isPresent() &&
-                                   props.keyInfos.map((keyInfo) =>
-                                   {
+                                   props.keyInfos.map((keyInfo) => {
                                      return <option key={keyInfo.alias} value={keyInfo.alias}>
                                        {keyInfo.alias + " ("
                                          + keyInfo.keyAlgorithm
@@ -851,14 +860,12 @@ export function DpopDetails({props, state, setState})
                              <Col>
                                <FormSelect id={"dpop-signature-algorithm"}
                                            value={state.dpopSignatureAlgorithm}
-                                           onChange={e =>
-                                           {
+                                           onChange={e => {
                                              setState({dpopSignatureAlgorithm: e.target.value})
                                            }}>
                                  {
                                    new Optional(applicationInfoContext.jwtInfo).isPresent() &&
-                                   (applicationInfoContext.jwtInfo.signatureAlgorithms || []).map(algorithm =>
-                                   {
+                                   (applicationInfoContext.jwtInfo.signatureAlgorithms || []).map(algorithm => {
                                      return <option key={algorithm}>{algorithm}</option>
                                    })
                                  }
@@ -873,7 +880,7 @@ export function DpopDetails({props, state, setState})
                                <FormControl id={"dpop-nonce"}
                                             placeholder="[OPTIONAL] Nonce from 'DPoP-Nonce'-HTTP-Header"
                                             value={state.dpopNonce}
-                                            onChange={e => setState({dpopNonce: e.target.value})}/>
+                                            onChange={e => setState({dpopNonce: e.target.value})} />
                              </Col>
                            </Row>
                            <Row>
@@ -884,7 +891,7 @@ export function DpopDetails({props, state, setState})
                                <FormControl id={"dpop-jti"}
                                             placeholder="[OPTIONAL] Unique ID to prevent replay-attacks"
                                             value={state.dpopJti}
-                                            onChange={e => setState({dpopJti: e.target.value})}/>
+                                            onChange={e => setState({dpopJti: e.target.value})} />
                              </Col>
                            </Row>
                            <Row>
@@ -895,7 +902,7 @@ export function DpopDetails({props, state, setState})
                                <FormControl id={"dpop-htm"}
                                             placeholder="[OPTIONAL] HTTP method to which the DPoP should be attached"
                                             value={state.dpopHtm}
-                                            onChange={e => setState({dpopHtm: e.target.value})}/>
+                                            onChange={e => setState({dpopHtm: e.target.value})} />
                              </Col>
                            </Row>
                            <Row>
@@ -906,7 +913,7 @@ export function DpopDetails({props, state, setState})
                                <FormControl id={"dpop-htu"}
                                             placeholder="[OPTIONAL] HTTP URI to which the DPoP should be attached"
                                             value={state.dpopHtu}
-                                            onChange={e => setState({dpopHtu: e.target.value})}/>
+                                            onChange={e => setState({dpopHtu: e.target.value})} />
                              </Col>
                            </Row>
                          </React.Fragment>;
