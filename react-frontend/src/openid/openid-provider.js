@@ -42,12 +42,7 @@ export default class OpenidProvider extends React.Component
 
   async componentDidMount()
   {
-    let startIndex = (this.state.currentPage * this.props.serviceProviderConfig.filter.maxResults) + 1;
-    let count = this.props.serviceProviderConfig.filter.maxResults;
-
     await this.scimClient.listResources({
-      startIndex: startIndex,
-      count: count,
       sortBy: 'name'
     }).then(listResponse =>
     {

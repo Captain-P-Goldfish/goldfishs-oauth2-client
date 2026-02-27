@@ -3,7 +3,7 @@ import bsCustomFileInput from "bs-custom-file-input";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import {Optional} from "../services/utils";
+import {JsonViewSafe, Optional, toRenderableString} from "../services/utils";
 import {GoFlame} from "react-icons/go";
 import {Alert, Button, Card, Collapse, FormControl, FormLabel, FormSelect, Offcanvas, Spinner} from "react-bootstrap";
 import {
@@ -758,14 +758,14 @@ export function JwsOffCanvas({name, value, printIfNoJws = true, ...props})
   {
     if (printIfNoJws)
     {
-      return value;
+      return toRenderableString(value);
     } else
     {
       return null;
     }
   }
 
-  return <>
+  return <React.Fragment>
     <a className={"cursor-pointer"} title={"Show details"} onClick={() => setShow(true)}>
       <span className={"jwt-part jwt-part-0"}>
         {jws.part1}
@@ -789,14 +789,13 @@ export function JwsOffCanvas({name, value, printIfNoJws = true, ...props})
           </h3>
         }
 
-        <pre className={"jwt-part jwt-part-0"}>
-          {jws.header}
-        </pre>
+        <JsonViewSafe className={"jwt-part jwt-part-0"} value={jws.header}/>
         .
         <br/>
-        <pre className={"jwt-part jwt-part-1"}>
-          {jws.body}
-        </pre>
+        <JsonViewSafe className={"jwt-part jwt-part-0"} value={jws.body}/>
+        {/*<pre className={"jwt-part jwt-part-1"}>*/}
+        {/*  {jws.body}*/}
+        {/*</pre>*/}
         .
         <br/>
         <span className={"jwt-part jwt-part-2"}>
@@ -804,7 +803,7 @@ export function JwsOffCanvas({name, value, printIfNoJws = true, ...props})
         </span>
       </Offcanvas.Body>
     </Offcanvas>
-  </>;
+  </React.Fragment>;
 }
 
 export function DpopDetails({props, state, setState})
