@@ -94,7 +94,7 @@ public class JwtAuthenticator implements Authenticator
    */
   private String generateClientAssertionHeader(KeystoreEntry signatureKeyEntry)
   {
-    JWSAlgorithm jwsAlgorithm = determineJwsAlgorithm(signatureKeyEntry);
+    JWSAlgorithm jwsAlgorithm = determineJwsAlgorithm(openIdClient, signatureKeyEntry);
     JWSHeader jwsHeader = new JWSHeader(jwsAlgorithm);
     return jwsHeader.toString();
   }
@@ -105,7 +105,7 @@ public class JwtAuthenticator implements Authenticator
    * @param signatureKeyEntry the key entry that determines the algorithm type
    * @return the algorithm type to be entered into the JWS header
    */
-  private JWSAlgorithm determineJwsAlgorithm(KeystoreEntry signatureKeyEntry)
+  public static JWSAlgorithm determineJwsAlgorithm(OpenIdClient openIdClient, KeystoreEntry signatureKeyEntry)
   {
     Optional<JWSAlgorithm> clientSignatureAlgorithm = Optional.ofNullable(openIdClient.getSignatureAlgorithm())
                                                               .map(JWSAlgorithm::parse);
@@ -134,7 +134,7 @@ public class JwtAuthenticator implements Authenticator
    * @param signatureKeyEntry the elliptic curve key
    * @return the fitting algorithm to the given key
    */
-  private JWSAlgorithm determineEcJwsAlgorithm(KeystoreEntry signatureKeyEntry)
+  private static JWSAlgorithm determineEcJwsAlgorithm(KeystoreEntry signatureKeyEntry)
   {
     switch (signatureKeyEntry.getKeyLength())
     {

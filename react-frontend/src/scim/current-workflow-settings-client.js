@@ -10,7 +10,7 @@ export default class CurrentWorkflowSettingsClient
     this.scimClient = new ScimClient(CURRENT_WORKFLOW_SETTINGS_ENDPOINT, setState);
   }
 
-  updateAuthCodeSettings(openidClientId, redirectUri, usePkce, pkceCodeVerifier, queryParameters, callback)
+  updateAuthCodeSettings(openidClientId, redirectUri, usePkce, pkceCodeVerifier, jar, queryParameters, callback)
   {
     let resource = {
       authCodeParameters: {
@@ -20,7 +20,8 @@ export default class CurrentWorkflowSettingsClient
       pkce: {
         use: usePkce,
         codeVerifier: pkceCodeVerifier
-      }
+      },
+      jar: jar
     };
     this.patchResource(openidClientId, resource, callback);
   }
@@ -59,12 +60,10 @@ export default class CurrentWorkflowSettingsClient
       ]
     };
 
-    this.scimClient.patchResource(patchOperation, openIdClientId).then(response =>
-    {
+    this.scimClient.patchResource(patchOperation, openIdClientId).then(response => {
       if (response.success)
       {
-        response.resource.then(resource =>
-        {
+        response.resource.then(resource => {
           new Optional(callback).ifPresent(method => method(resource, response.status));
         })
       }

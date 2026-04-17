@@ -44,8 +44,6 @@ export default class HttpSettings extends React.Component
       onCreateSuccess: (resource) => console.error("create must not be called!"),
       onUpdateSuccess: this.onUpdateSuccess
     });
-
-    this.onUpdateSuccess = this.onUpdateSuccess.bind(this);
   }
 
   async componentDidMount()
@@ -105,11 +103,6 @@ export default class HttpSettings extends React.Component
         });
       }
     });
-  }
-
-  onUpdateSuccess()
-  {
-
   }
 
   render()

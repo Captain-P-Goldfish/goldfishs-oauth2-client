@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.tuple.Triple;
-
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.authcodegrant.validation.AuthCodeGrantRequestValidator;
@@ -54,7 +52,7 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
                                         .flatMap(openIdClientDao::findById)
                                         .orElseThrow();
     final String id = UUID.randomUUID().toString(); // random id that has no actual meaning
-    final Triple<String, String, String> authCodeGrantUrl = //
+    final AuthcodeRequestDetails authcodeRequestDetails = //
       requestService.generateAuthCodeRequestUrl(openIdClient,
                                                 resource.getCurrentWorkflowSettings().orElseThrow(),
                                                 resource.getAuthenticationType());
@@ -73,9 +71,11 @@ public class AuthCodeGrantRequestHandler extends ResourceHandler<ScimAuthCodeGra
     return ScimAuthCodeGrantRequest.builder()
                                    .id(id)
                                    .authenticationType(resource.getAuthenticationType())
-                                   .authorizationCodeGrantUrl(authCodeGrantUrl.getLeft())
-                                   .authorizationCodeGrantParameters(authCodeGrantUrl.getMiddle())
-                                   .pushedAuthorizationResponse(authCodeGrantUrl.getRight())
+                                   .state(authcodeRequestDetails.state())
+                                   .redirectUri(authcodeRequestDetails.redirectUri())
+                                   .authorizationCodeGrantUrl(authcodeRequestDetails.authCodeUrl())
+                                   .authorizationCodeGrantParameters(authcodeRequestDetails.query())
+                                   .pushedAuthorizationResponse(authcodeRequestDetails.requestBody())
                                    .metaDataJson(metaDataString)
                                    .meta(Meta.builder().created(Instant.now()).build())
                                    .currentWorkflowSettings(scimWorkflowSettings)

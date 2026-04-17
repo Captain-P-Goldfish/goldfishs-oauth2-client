@@ -346,4 +346,14 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="jar" author="pascal_knueppel">
+        <addColumn tableName="CURRENT_WORKFLOW_SETTINGS">
+            <column name="JAR_USE" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="JAR_REQUEST_TYPE" type="VARCHAR(11)"/>
+            <column name="JAR_SIGNATURE_KEY" type="VARCHAR(512)"/>
+            <column name="JAR_SIGNATURE_ALGORITHM" type="VARCHAR(50)"/>
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>

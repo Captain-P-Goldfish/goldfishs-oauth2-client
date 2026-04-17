@@ -27,6 +27,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
                                      String grantType,
                                      Dpop dpop,
                                      ScimAuthCodeGrantRequest.Pkce pkce,
+                                     ScimAuthCodeGrantRequest.Jar jar,
                                      AuthCodeParameters authCodeParameters,
                                      ClientCredentialsParameters clientCredentialsParameters,
                                      ResourceOwnerPasswordParameters resourceOwnerPasswordParameters,
@@ -38,6 +39,7 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
     setGrantType(grantType);
     setDpop(dpop);
     setPkce(pkce);
+    setJar(jar);
     setAuthCodeParameters(authCodeParameters);
     setClientCredentialsParameters(clientCredentialsParameters);
     setResourceOwnerPasswordParameters(resourceOwnerPasswordParameters);
@@ -100,6 +102,23 @@ public class ScimCurrentWorkflowSettings extends ResourceNode
   public void setPkce(ScimAuthCodeGrantRequest.Pkce pkce)
   {
     setAttribute(ScimAuthCodeGrantRequest.FieldNames.PKCE, pkce);
+  }
+
+  /**
+   * Used if we want to send the AuthorizationRequest as JWT Secured Authorization Request (JAR)
+   */
+  public Optional<ScimAuthCodeGrantRequest.Jar> getJar()
+  {
+
+    return getObjectAttribute(ScimAuthCodeGrantRequest.FieldNames.JAR, ScimAuthCodeGrantRequest.Jar.class);
+  }
+
+  /**
+   * Used if we want to send the AuthorizationRequest as JWT Secured Authorization Request (JAR)
+   */
+  public void setJar(ScimAuthCodeGrantRequest.Jar jar)
+  {
+    setAttribute(ScimAuthCodeGrantRequest.FieldNames.JAR, jar);
   }
 
   /** The settings that have been used for the authorization code grant in the last request. */

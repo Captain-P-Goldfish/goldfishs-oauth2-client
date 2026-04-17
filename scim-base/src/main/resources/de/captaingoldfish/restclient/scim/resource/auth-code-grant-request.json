@@ -33,6 +33,28 @@
       ]
     },
     {
+      "name": "state",
+      "type": "string",
+      "description": "The state parameter that was used in the AuthorizationRequest.",
+      "mutability": "readWrite",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
+      "name": "redirectUri",
+      "type": "string",
+      "description": "The redirectUri parameter that was used in the AuthorizationRequest.",
+      "mutability": "readWrite",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false
+    },
+    {
       "name": "pkce",
       "type": "complex",
       "description": "Tells us if PKCE should be used for the authorization-request and token-request and what value to use",
@@ -58,6 +80,67 @@
           "name": "codeVerifier",
           "type": "string",
           "description": "optional value. If present this value is used as code_verifier. If missing a value will be generated.",
+          "mutability": "readWrite",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        }
+      ]
+    },
+    {
+      "name": "jar",
+      "type": "complex",
+      "description": "Used if we want to send the AuthorizationRequest as JWT Secured Authorization Request (JAR)",
+      "mutability": "readWrite",
+      "returned": "always",
+      "uniqueness": "server",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "subAttributes": [
+        {
+          "name": "use",
+          "type": "boolean",
+          "description": "If JAR should be used or not",
+          "mutability": "readWrite",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "requestType",
+          "type": "string",
+          "description": "How the JAR request should be sent to the remote system. Either ['request', 'request_uri'].",
+          "canonicalValues": [
+            "request",
+            "request_uri"
+          ],
+          "mutability": "readWrite",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "signatureKey",
+          "type": "string",
+          "description": "The key alias that should be used to sign the JAR request.",
+          "mutability": "readWrite",
+          "returned": "always",
+          "uniqueness": "server",
+          "multiValued": false,
+          "required": false,
+          "caseExact": false
+        },
+        {
+          "name": "signatureAlgorithm",
+          "type": "string",
+          "description": "The signature algorithm that should be used to sign the JAR request.",
           "mutability": "readWrite",
           "returned": "always",
           "uniqueness": "server",

@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -90,7 +89,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                               .openIdClientId(openIdClient.getId())
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
-    Triple<String, String, String> authorizationCodeRequestUrl = //
+    AuthcodeRequestDetails authcodeRequestDetails = //
       authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient,
                                                              workflowSettings,
                                                              AuthCodeGrantType.AUTHORIZATION_CODE);
@@ -102,9 +101,9 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     openIdClient.getClientId(),
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
     expectedAuthorizationUrl = Pattern.quote(expectedAuthorizationUrl) + ".*";
-    MatcherAssert.assertThat(authorizationCodeRequestUrl.getLeft(), Matchers.matchesPattern(expectedAuthorizationUrl));
+    MatcherAssert.assertThat(authcodeRequestDetails.authCodeUrl(), Matchers.matchesPattern(expectedAuthorizationUrl));
 
-    UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authorizationCodeRequestUrl.getLeft()).build();
+    UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(authcodeRequestDetails.authCodeUrl()).build();
     final String state = uriComponents.getQueryParams().getFirst(OAuthConstants.STATE);
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
   }
@@ -144,7 +143,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                               .openIdClientId(openIdClient.getId())
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
-    Triple<String, String, String> authorizationCodeRequestUrl = //
+    AuthcodeRequestDetails authcodeRequestDetails = //
       authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient,
                                                              workflowSettings,
                                                              AuthCodeGrantType.AUTHORIZATION_CODE);
@@ -156,7 +155,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     state,
                                                     OAuthConstants.CODE,
                                                     URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
-    Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl.getLeft());
+    Assertions.assertEquals(expectedAuthorizationUrl, authcodeRequestDetails.authCodeUrl());
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
   }
 
@@ -189,7 +188,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                                               .openIdClientId(openIdClient.getId())
                                                                               .authCodeParameters(authCodeParameters)
                                                                               .build();
-    Triple<String, String, String> authorizationCodeRequestUrl = //
+    AuthcodeRequestDetails authorizationCodeRequestUrl = //
       authCodeGrantRequestService.generateAuthCodeRequestUrl(openIdClient,
                                                              workflowSettings,
                                                              AuthCodeGrantType.AUTHORIZATION_CODE);
@@ -200,7 +199,7 @@ public class AuthCodeGrantRequestServiceTest extends AbstractScimClientConfig
                                                     state,
                                                     OAuthConstants.CODE,
                                                     openIdClient.getClientId());
-    Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl.getLeft());
+    Assertions.assertEquals(expectedAuthorizationUrl, authorizationCodeRequestUrl.authCodeUrl());
     Assertions.assertNotNull(authCodeGrantRequestCache.getAuthorizationRequestUrl(state));
   }
 }

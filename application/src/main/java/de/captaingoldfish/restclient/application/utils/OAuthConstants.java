@@ -101,7 +101,12 @@ public final class OAuthConstants
   public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
 
   /**
-   * used in Pushed Authorization Request responses
+   * used in Jwt Secured Authorization Requests
+   */
+  public static final String REQUEST = "request";
+
+  /**
+   * used in Pushed Authorization Request responses or in JWT Secured Authorization Requests
    */
   public static final String REQUEST_URI = "request_uri";
 }

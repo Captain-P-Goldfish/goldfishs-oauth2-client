@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import Col from "react-bootstrap/Col";
-import {AlertListMessages, Collapseable, DpopDetails, LoadingSpinner} from "../../base/form-base";
+import {AlertListMessages, Collapseable, DpopDetails, JwsOffCanvas, LoadingSpinner} from "../../base/form-base";
 import Row from "react-bootstrap/Row";
 import {CaretDown, CaretRight, ExclamationLg, XLg} from "react-bootstrap-icons";
 import {Alert, Card, Collapse, FormCheck} from "react-bootstrap";
@@ -56,6 +56,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     this.getAuthRequestStatus = this.getAuthRequestStatus.bind(this);
     this.loadAuthorizationCodeResponseDetailsView = this.loadAuthorizationCodeResponseDetailsView.bind(this);
     this.retrieveAccessTokenDetails = this.retrieveAccessTokenDetails.bind(this);
+    this.loadBrowserWindowWithRedirect = this.loadBrowserWindowWithRedirect.bind(this);
   }
 
   componentWillUnmount()
@@ -72,18 +73,31 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
   componentDidMount()
   {
-    let getAuthRequestStatus = this.getAuthRequestStatus;
-    let browserWindow = window.open(this.props.requestDetails.authorizationCodeGrantUrl,
-      '_blank',
-      'location=yes,height=570,width=520,scrollbars=yes,status=yes');
+    let redirectUrl = this.props.requestDetails.authorizationCodeGrantUrl;
+    if (redirectUrl)
+    {
+      this.loadBrowserWindowWithRedirect(redirectUrl);
+    }
+    else
+    {
+      this.openedWindow = {closed: true};
+      this.setState({isLoading: false});
+    }
+  }
+
+  loadBrowserWindowWithRedirect(redirectUrl)
+  {
+    let authRequestStatus = this.getAuthRequestStatus;
+    let browserWindow = window.open(redirectUrl,
+                                    '_blank',
+                                    'location=yes,height=570,width=520,scrollbars=yes,status=yes');
     let requestCounter = 0;
     let state = this.state;
     let setState = this.setState;
     this.openedWindow = browserWindow;
 
-    this.state.interval = setInterval(function ()
-    {
-      getAuthRequestStatus();
+    this.state.interval = setInterval(function () {
+      authRequestStatus();
       requestCounter++;
       if (browserWindow.closed || requestCounter >= MAX_GET_AUTHCODE_RETRIES)
       {
@@ -93,7 +107,8 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         if (browserWindow.closed)
         {
           setState({windowClosed: true});
-        } else
+        }
+        else
         {
           setState({maxRetriesExceeded: true});
         }
@@ -104,26 +119,22 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
   getAuthRequestStatus()
   {
     let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
-    let authCodeQueryParams = Object.fromEntries(
-      new URL("http://localhost?" + this.props.requestDetails.authorizationCodeGrantParameters).searchParams);
-    let stateParam = authCodeQueryParams.state;
+    let stateParam = this.props.requestDetails.state;
 
     let state = this.state;
     let setState = this.setState;
 
-    scimClient.getResource(stateParam).then(response =>
-    {
+    scimClient.getResource(stateParam).then(response => {
       if (response.success)
       {
-        response.resource.then(resource =>
-        {
+        response.resource.then(resource => {
           clearInterval(state.interval);
           delete state.interval;
 
           setState({
-            authorizationResponseUrl: resource.authorizationResponseUrl,
-            isLoading: resource.authorizationResponseUrl === undefined
-          });
+                     authorizationResponseUrl: resource.authorizationResponseUrl,
+                     isLoading: resource.authorizationResponseUrl === undefined
+                   });
         });
       }
     });
@@ -134,8 +145,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     return <div className={"workflow-details mb-2"}>
       <Collapseable header={"Pushed Authorization Request Details"} variant={"workflow-details"}
                     bodyClass={"workflow-card-details"}
-                    content={() =>
-                    {
+                    content={() => {
                       let parEndpoint = this.props.requestDetails.metaDataJson.pushed_authorization_request_endpoint;
                       if (!parEndpoint || !this.props.requestDetails?.authorizationCodeGrantParameters)
                       {
@@ -164,16 +174,17 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                className={"url-base-value"}>{queryParameters}</Col>
                         </Row>
                         {
-                          Object.keys(authCodeQueryParams).map((key, index) =>
-                          {
+                          Object.keys(authCodeQueryParams).map((key, index) => {
                             return <Row key={"auth-code-request-row-" + index}>
                               <Col sm={2}>{key}</Col>
-                              <Col sm={10}>{authCodeQueryParams[key]}</Col>
+                              <Col sm={10}>
+                                <JwsOffCanvas name={key} value={authCodeQueryParams[key]} />
+                              </Col>
                             </Row>;
                           })
                         }
                       </React.Fragment>;
-                    }}/>
+                    }} />
     </div>
   }
 
@@ -182,10 +193,10 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
     let formattedJson = JSON.stringify(JSON.parse(this.props.requestDetails.pushedAuthorizationResponse), null, 2);
 
     return <div className={"workflow-details"}>
-      <Collapseable header={"Pushed Authorization Request Details"} variant={"workflow-details"}
+      <Collapseable header={"Pushed Authorization Response Details"} variant={"workflow-details"}
+                    open={true}
                     bodyClass={"workflow-card-details"}
-                    content={() =>
-                    {
+                    content={() => {
                       return <React.Fragment>
                         <Row>
                           <Col sm={2} className={"url-base-value"}>Response Body</Col>
@@ -196,7 +207,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                           </Col>
                         </Row>
                       </React.Fragment>;
-                    }}/>
+                    }} />
     </div>
   }
 
@@ -209,14 +220,13 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     return <div className={"workflow-details mb-2"}>
       <Alert variant={"info"} show={showInfoMessage}>
-        <ExclamationLg/> The authorization code grant will try to open a new browser window. Make sure your
-                         popup blocker does not block this. If you closed this window before finishing the
-                         login process. Close this workflow and start again.
+        <ExclamationLg /> The authorization code grant will try to open a new browser window. Make sure your
+                          popup blocker does not block this. If you closed this window before finishing the
+                          login process. Close this workflow and start again.
       </Alert>
       <Collapseable header={"Authorization Request Details"} variant={"workflow-details"}
                     bodyClass={"workflow-card-details"}
-                    content={() =>
-                    {
+                    content={() => {
                       return <React.Fragment>
                         <Row>
                           <Col sm={2} className={"url-base-value"}>authCodeUrl</Col>
@@ -224,16 +234,17 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                className={"url-base-value"}>{this.props.requestDetails.authorizationCodeGrantUrl}</Col>
                         </Row>
                         {
-                          Object.keys(authCodeQueryParams).map((key, index) =>
-                          {
+                          Object.keys(authCodeQueryParams).map((key, index) => {
                             return <Row key={"auth-code-request-row-" + index}>
                               <Col sm={2}>{key}</Col>
-                              <Col sm={10}>{authCodeQueryParams[key]}</Col>
+                              <Col sm={10}>
+                                <JwsOffCanvas name={key} value={authCodeQueryParams[key]} />
+                              </Col>
                             </Row>;
                           })
                         }
                       </React.Fragment>;
-                    }}/>
+                    }} />
     </div>;
   }
 
@@ -265,12 +276,10 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
         ]
       }
       let scimClient = new ScimClient(CURRENT_WORKFLOW_SETTINGS_ENDPOINT, this.setState);
-      scimClient.patchResource(patchRequest, openIdClientId).then(response =>
-      {
+      scimClient.patchResource(patchRequest, openIdClientId).then(response => {
         if (response.success)
         {
-          response.resource.then(resource =>
-          {
+          response.resource.then(resource => {
             this.props.requestDetails[CURRENT_WORKFLOW_URI] = resource;
           });
         }
@@ -281,14 +290,11 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
 
     let authorizationResponseUrl = new URL(this.state.authorizationResponseUrl);
     const queryParamsObject = Object.fromEntries(authorizationResponseUrl.searchParams);
-    let authCodeQueryParams = Object.fromEntries(
-      new URL(this.props.requestDetails.authorizationCodeGrantUrl
-        + "?" + this.props.requestDetails.authorizationCodeGrantParameters).searchParams);
 
     let resource = {
       grantType: this.state.grantType,
       openIdClientId: parseInt(this.props.client.id),
-      redirectUri: authCodeQueryParams.redirect_uri,
+      redirectUri: this.props.requestDetails.redirectUri,
       authorizationCode: queryParamsObject.code,
       state: queryParamsObject.state
     };
@@ -309,18 +315,16 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
       }
     }
 
-    scimClient.createResource(resource).then(response =>
-    {
+    scimClient.createResource(resource).then(response => {
       if (response.success)
       {
-        response.resource.then(resource =>
-        {
+        response.resource.then(resource => {
           this.setState({accessTokenDetails: resource});
         });
-      } else
+      }
+      else
       {
-        response.resource.then(errorResponse =>
-        {
+        response.resource.then(errorResponse => {
           this.setState({errors: errorResponse})
         })
       }
@@ -344,8 +348,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                         open={true}
                         variant={"workflow-details"}
                         bodyClass={"workflow-card-details"}
-                        content={() =>
-                        {
+                        content={() => {
                           return <React.Fragment>
                             <Row>
                               <Col sm={2} className={"url-base-value"}>authResponseUrl</Col>
@@ -354,8 +357,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                               </Col>
                             </Row>
                             {
-                              Object.keys(queryParamsObject).map((key, index) =>
-                              {
+                              Object.keys(queryParamsObject).map((key, index) => {
                                 return <Row key={"auth-code-response-row-" + index}>
                                   <Col sm={2}>{key}</Col>
                                   <Col sm={10}>{queryParamsObject[key]}</Col>
@@ -365,39 +367,37 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                           </React.Fragment>;
                         }}
           />
-          <AlertListMessages variant={"danger"} icon={<GoFlame/>}
+          <AlertListMessages variant={"danger"} icon={<GoFlame />}
                              messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                               .orElse(
-                                 [])}
-                             onClose={() => this.setState({errors: null})}/>
+                                                                                          .orElse(
+                                                                                            [])}
+                             onClose={() => this.setState({errors: null})} />
           <Row>
             <Col>
-              <Button type="submit" onClick={async e =>
-              {
+              <Button type="submit" onClick={async e => {
                 await this.setState({
-                  isLoading: true
-                });
+                                      isLoading: true
+                                    });
                 this.retrieveAccessTokenDetails(e);
               }}
                       style={{
                         marginTop: "15px",
                         marginBottom: "15px"
                       }}>
-                <LoadingSpinner show={this.state.isLoading}/> Get Access Token
+                <LoadingSpinner show={this.state.isLoading} /> Get Access Token
               </Button>
 
               <Collapseable header={"Modify Access Token Request Parameters"}
                             open={true}
                             variant={"workflow-details"}
                             bodyClass={"workflow-card-details"}
-                            content={() =>
-                            {
+                            content={() => {
                               return <Row>
                                 <Col md={3}>
                                   <Form.Group className="mb-3" controlId="access_token.grant_type">
                                     <Form.Label>grant_type</Form.Label>
                                     <Form.Control value={this.state.grantType}
-                                                  onChange={e => this.setState({grantType: e.target.value})}/>
+                                                  onChange={e => this.setState({grantType: e.target.value})} />
                                   </Form.Group>
                                 </Col>
                                 <Col md={3}>
@@ -406,15 +406,14 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                                     id="dpop-switch"
                                     className={"ms-5 d-inline-block"}
                                     label="Demonstrate Proof of Posession (DPoP)"
-                                    onChange={e =>
-                                    {
+                                    onChange={e => {
                                       this.setState({useDpop: e.target.checked})
-                                    }}/>
+                                    }} />
                                 </Col>
                                 {
                                   this.state.useDpop &&
                                   <Col md={6}>
-                                    <DpopDetails props={this.props} state={this.state} setState={this.setState}/>
+                                    <DpopDetails props={this.props} state={this.state} setState={this.setState} />
                                   </Col>
                                 }
                               </Row>;
@@ -425,12 +424,12 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
           {
             this.state.accessTokenDetails &&
             <AccessTokenDetailsView key={this.state.accessTokenDetails.id}
-                                    accessTokenDetails={this.state.accessTokenDetails}/>
+                                    accessTokenDetails={this.state.accessTokenDetails} />
           }
 
           {
             new Optional(this.state.accessTokenDetails).map(details => JSON.parse(details.plainResponse))
-              .map(json => json.access_token).isPresent() &&
+                                                       .map(json => json.access_token).isPresent() &&
             <Collapseable header={"Access Resource Endpoints"}
                           variant={"workflow-details"}
                           headerClass={"nested-workflow-details-header"}
@@ -438,7 +437,7 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                           open={true}
                           content={() => <ResourceEndpointDetailsView
                             metaData={this.props.requestDetails.metaDataJson}
-                            accessTokenDetails={this.state.accessTokenDetails}/>}/>
+                            accessTokenDetails={this.state.accessTokenDetails} />} />
           }
 
         </React.Fragment>
@@ -454,20 +453,19 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
       <div className={"grant-type-workflow"}>
         <AuthorizationCodeGrantDetails
           isLoading={isLoading}
-          content={() =>
-          {
+          content={() => {
             return <React.Fragment>
               {
                 this.state.maxRetriesExceeded &&
                 <Alert variant={"warning"} show={true}>
-                  <AiFillWarning/>
+                  <AiFillWarning />
                   Was not able to retrieve the AuthorizationCode in due time. The PopUp was closed automatically.
                 </Alert>
               }
               {
                 this.state.windowClosed && this.state.authorizationResponseUrl === undefined &&
                 <Alert variant={"warning"} show={true}>
-                  <AiFillWarning/>
+                  <AiFillWarning />
                   PopUp closed, process stopped
                 </Alert>
               }
@@ -475,29 +473,28 @@ export default class AuthorizationCodeGrantWorkflow extends React.Component
                             headerClass={"mb-2"}
                             variant={"workflow-details"}
                             bodyClass={"workflow-card-details"}
-                            content={() =>
-                            {
+                            content={() => {
                               return <pre>
                                         {JSON.stringify(this.props.requestDetails.metaDataJson,
-                                          undefined,
-                                          2)}
+                                                        undefined,
+                                                        2)}
                                      </pre>;
-                            }}/>
+                            }} />
 
-              <hr/>
+              <hr />
               {
                 "PUSHED_AUTHORIZATION_CODE" === this.props.requestDetails.authenticationType &&
-                <>
+                <React.Fragment>
                   {this.loadPushedAuthorizationRequestView()}
                   {this.loadPushedAuthorizationResponseView()}
-                  <hr/>
-                </>
+                  <hr />
+                </React.Fragment>
               }
               {this.loadAuthorizationQueryParameterView()}
               {this.loadAuthorizationCodeResponseDetailsView()}
             </React.Fragment>;
           }}
-          remove={this.props.onRemove}/>
+          remove={this.props.onRemove} />
       </div>
     );
   }
@@ -512,23 +509,22 @@ function AuthorizationCodeGrantDetails(props)
     <React.Fragment>
       <Alert className={"collapse-header authorization-code-grant"}
              variant={variant}
-             onClick={() =>
-             {
+             onClick={() => {
                setOpen(!open);
              }}
       >
         {
           open === true &&
-          <CaretDown/>
+          <CaretDown />
         }
         {
           open === false &&
-          <CaretRight/>
+          <CaretRight />
         }
-        <span><LoadingSpinner show={props.isLoading}/> Authorization Code Grant/Flow</span>
+        <span><LoadingSpinner show={props.isLoading} /> Authorization Code Grant/Flow</span>
         {
           props.remove !== undefined &&
-          <XLg onClick={props.remove} className={"remove-collapse"}/>
+          <XLg onClick={props.remove} className={"remove-collapse"} />
         }
       </Alert>
       <Collapse in={open}>

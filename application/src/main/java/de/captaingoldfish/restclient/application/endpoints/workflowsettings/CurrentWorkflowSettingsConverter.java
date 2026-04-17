@@ -7,6 +7,7 @@ import de.captaingoldfish.restclient.database.entities.CurrentWorkflowSettings;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.database.repositories.CurrentWorkflowSettingsDao;
 import de.captaingoldfish.restclient.database.repositories.OpenIdClientDao;
+import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest.Jar;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest.Pkce;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
@@ -33,6 +34,38 @@ public class CurrentWorkflowSettingsConverter
     CurrentWorkflowSettings previousConfig = workflowSettingsDao.findByOpenIdClient(openIdClient)
                                                                 .orElseGet(CurrentWorkflowSettings::new);
     boolean usePkce = scimSettings.getPkce().map(Pkce::isUse).orElseGet(previousConfig::isPkceUse);
+    String pkceCodeVerifier = scimSettings.getPkce().flatMap(Pkce::getCodeVerifier).orElseGet(() -> {
+      // otherwise it is not possible to delete the value
+      // again from the settings object
+      if (usePkce)
+      {
+        return null;
+      }
+      return previousConfig.getPkceCodeVerifier();
+    });
+    boolean useJar = scimSettings.getJar().map(Jar::isUse).orElseGet(previousConfig::isJarUse);
+    String jarRequestType = scimSettings.getJar().flatMap(Jar::getRequestType).orElseGet(() -> {
+      if (!useJar)
+      {
+        return null;
+      }
+      return previousConfig.getJarRequestType();
+    });
+    String jarSignatureKeyAlias = scimSettings.getJar().flatMap(Jar::getSignatureKey).orElseGet(() -> {
+      if (!useJar)
+      {
+        return null;
+      }
+      return previousConfig.getJarSignatureKeyAlias();
+    });
+    String jarSignatureAlgorithm = scimSettings.getJar().flatMap(Jar::getSignatureAlgorithm).orElseGet(() -> {
+      if (!useJar)
+      {
+        return null;
+      }
+      return previousConfig.getJarSignatureAlgorithm();
+    });
+
     return CurrentWorkflowSettings.builder()
                                   .openIdClient(openIdClient)
                                   .redirectUri(scimSettings.getAuthCodeParameters()
@@ -73,17 +106,11 @@ public class CurrentWorkflowSettingsConverter
                                                        .flatMap(Dpop::getHtu)
                                                        .orElseGet(previousConfig::getDpopHtu))
                                   .pkceUse(usePkce)
-                                  .pkceCodeVerifier(scimSettings.getPkce()
-                                                                .flatMap(Pkce::getCodeVerifier)
-                                                                .orElseGet(() -> {
-                                                                  // otherwise it is not possible to delete the value
-                                                                  // again from the settings object
-                                                                  if (usePkce)
-                                                                  {
-                                                                    return null;
-                                                                  }
-                                                                  return previousConfig.getPkceCodeVerifier();
-                                                                }))
+                                  .pkceCodeVerifier(pkceCodeVerifier)
+                                  .jarUse(useJar)
+                                  .jarRequestType(jarRequestType)
+                                  .jarSignatureKeyAlias(jarSignatureKeyAlias)
+                                  .jarSignatureAlgorithm(jarSignatureAlgorithm)
                                   .build();
   }
 
@@ -120,11 +147,23 @@ public class CurrentWorkflowSettingsConverter
       pkce = null;
     }
 
+    Jar jar = Jar.builder()
+                 .use(settings.isJarUse())
+                 .requestType(settings.getJarRequestType())
+                 .signatureKey(settings.getJarSignatureKeyAlias())
+                 .signatureAlgorithm(settings.getJarSignatureAlgorithm())
+                 .build();
+    if (jar.isEmpty())
+    {
+      jar = null;
+    }
+
     return ScimCurrentWorkflowSettings.builder()
                                       .openIdClientId(settings.getOpenIdClient().getId())
                                       .grantType(settings.getGrantType())
                                       .dpop(dpop)
                                       .pkce(pkce)
+                                      .jar(jar)
                                       .authCodeParameters(authCodeParameters)
                                       .clientCredentialsParameters(clientCredentialsParameters)
                                       .resourceOwnerPasswordParameters(passwordParams)

@@ -5,6 +5,7 @@ import {
   DpopDetails,
   ErrorMessagesAlert,
   FormInputField,
+  FormObjectList,
   FormRadioSelection,
   LoadingSpinner
 } from "../base/form-base";
@@ -26,7 +27,6 @@ import {GoFlame} from "react-icons/go";
 import {Optional} from "../services/utils";
 import CurrentWorkflowSettingsClient from "../scim/current-workflow-settings-client";
 import {Alert, Card, FormCheck, FormText, Tooltip} from "react-bootstrap";
-import {value} from "lodash/seq";
 import {ApplicationInfoContext} from "../app";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import {OidcClaimsEditor} from "../services/oidc-claims-editor";
@@ -47,7 +47,8 @@ export default class OpenidClientWorkflow extends React.Component
       authenticationType: this.authCodeGrantType,
       workflowDetails: this.props.client[CURRENT_WORKFLOW_URI] || {},
       isLoading: false,
-      responseDetails: []
+      responseDetails: [],
+      keyInfos: []
     }
 
     this.formReference = createRef();
@@ -61,14 +62,12 @@ export default class OpenidClientWorkflow extends React.Component
 
   componentDidMount()
   {
-    // load private keys for DPoP
+    // load private keys
     {
-      new ScimClient(KEYSTORE_ENDPOINT, this.setState).getResource(null).then(response =>
-      {
+      new ScimClient(KEYSTORE_ENDPOINT, this.setState).getResource(null).then(response => {
         if (response.success)
         {
-          response.resource.then(listResponse =>
-          {
+          response.resource.then(listResponse => {
             this.setState({keyInfos: listResponse.Resources[0].keyInfos});
           })
         }
@@ -125,7 +124,7 @@ export default class OpenidClientWorkflow extends React.Component
     return (
       <React.Fragment>
         <h2>OpenID Connect Workflow</h2>
-        <ErrorMessagesAlert errors={this.state.errors}/>
+        <ErrorMessagesAlert errors={this.state.errors} />
 
         <Form ref={this.formReference} onSubmit={e => e.preventDefault()}>
           <FormRadioSelection name="authenticationType"
@@ -134,28 +133,28 @@ export default class OpenidClientWorkflow extends React.Component
                               selected={this.state.authenticationType}
                               selections={authTypes}
                               onChange={e => this.setState({authenticationType: e.target.value})}
-                              onError={() =>
-                              {
-                              }}/>
-          {
-            (this.state.authenticationType === this.authCodeGrantType ||
-              this.state.authenticationType === this.parAuthCodeGrantType) &&
-            <AuthorizationCodeGrantForm formReference={this.formReference}
-                                        originalRedirectUri={this.props.originalRedirectUri}
-                                        workflowDetails={this.state.workflowDetails}
-                                        isLoading={this.state.isLoading}
-                                        handleChange={this.handleNestedElementChange}
-                                        resetRedirectUri={this.resetRedirectUri}
-                                        handleResponse={details => this.handleGrantTypeResponseDetails(
-                                          this.authCodeGrantType, details)}
-                                        onError={() =>
-                                        {
-                                        }}/>
-          }
+                              onError={() => {
+                              }} />
           <ApplicationInfoContext.Consumer>
             {appInfo =>
               appInfo &&
-              <>
+              <React.Fragment>
+                {
+                  (this.state.authenticationType === this.authCodeGrantType ||
+                    this.state.authenticationType === this.parAuthCodeGrantType) &&
+                  <AuthorizationCodeGrantForm formReference={this.formReference}
+                                              appInfo={appInfo}
+                                              originalRedirectUri={this.props.originalRedirectUri}
+                                              workflowDetails={this.state.workflowDetails}
+                                              isLoading={this.state.isLoading}
+                                              keyInfos={this.state.keyInfos}
+                                              handleChange={this.handleNestedElementChange}
+                                              resetRedirectUri={this.resetRedirectUri}
+                                              handleResponse={details => this.handleGrantTypeResponseDetails(
+                                                this.authCodeGrantType, details)}
+                                              onError={() => {
+                                              }} />
+                }
                 {
                   this.state.authenticationType === this.clientCredentialsGrantType &&
                   <ClientCredentialsGrantForm formReference={this.formReference}
@@ -167,9 +166,8 @@ export default class OpenidClientWorkflow extends React.Component
                                               handleChange={this.handleNestedElementChange}
                                               handleResponse={details => this.handleGrantTypeResponseDetails(
                                                 this.clientCredentialsGrantType, details)}
-                                              onError={() =>
-                                              {
-                                              }}/>
+                                              onError={() => {
+                                              }} />
                 }
                 {
                   this.state.authenticationType === this.resourceOwnerGrantType &&
@@ -182,23 +180,21 @@ export default class OpenidClientWorkflow extends React.Component
                     handleChange={this.handleNestedElementChange}
                     handleResponse={details => this.handleGrantTypeResponseDetails(
                       this.state.authenticationType, details)}
-                    onError={() =>
-                    {
-                    }}/>
+                    onError={() => {
+                    }} />
                 }
-              </>
+              </React.Fragment>
             }
           </ApplicationInfoContext.Consumer>
         </Form>
         {
-          (this.state.responseDetails || []).map(responseDetails =>
-          {
+          (this.state.responseDetails || []).map(responseDetails => {
             return <ResponseDetailsView key={"response-details-" + responseDetails.id}
                                         responseDetails={responseDetails}
                                         keyInfos={this.state.keyInfos}
                                         client={this.props.client}
                                         metaData={this.state.metaData}
-                                        removeGrantTypeDetails={this.removeGrantTypeDetails}/>
+                                        removeGrantTypeDetails={this.removeGrantTypeDetails} />
           })
         }
       </React.Fragment>
@@ -223,7 +219,7 @@ function ResponseDetailsView(props)
                                       keyInfos={props.keyInfos}
                                       requestDetails={responseDetails}
                                       onRemove={() => props.removeGrantTypeDetails(
-                                        responseDetails)}/>
+                                        responseDetails)} />
     </React.Fragment>
   }
 
@@ -235,7 +231,7 @@ function ResponseDetailsView(props)
                        metaData={props.metaData}
                        accessTokenDetails={responseDetails}
                        onRemove={() => props.removeGrantTypeDetails(
-                         responseDetails)}/>
+                         responseDetails)} />
     </React.Fragment>
   }
 
@@ -245,7 +241,7 @@ function ResponseDetailsView(props)
                      metaData={props.metaData}
                      accessTokenDetails={responseDetails}
                      onRemove={() => props.removeGrantTypeDetails(
-                       responseDetails)}/>
+                       responseDetails)} />
   </React.Fragment>
 }
 
@@ -258,6 +254,7 @@ class AuthorizationCodeGrantForm extends React.Component
       intervals: [],
       requestDetails: [],
       pkce: props.workflowDetails.pkce,
+      jar: props.workflowDetails.jar,
       pkceCodeVerifierLength: props.workflowDetails.pkce?.codeVerifier?.length || 0
     }
     this.setState = this.setState.bind(this);
@@ -268,8 +265,7 @@ class AuthorizationCodeGrantForm extends React.Component
 
   componentWillUnmount()
   {
-    this.state.requestDetails.forEach(requestDetails =>
-    {
+    this.state.requestDetails.forEach(requestDetails => {
       if (requestDetails.interval !== undefined)
       {
         clearInterval(requestDetails.interval);
@@ -286,22 +282,22 @@ class AuthorizationCodeGrantForm extends React.Component
     let scimClient = new ScimClient(AUTH_CODE_GRANT_ENDPOINT, this.setState);
     let resource = await scimClient.getResourceFromFormReference(this.props.formReference);
     resource[CURRENT_WORKFLOW_URI] = this.props.workflowDetails;
-    lodash.set(resource[CURRENT_WORKFLOW_URI], "authCodeParameters.redirectUri", resource.authCodeParameters.redirectUri)
+    lodash.set(resource[CURRENT_WORKFLOW_URI],
+               "authCodeParameters.redirectUri",
+               resource.authCodeParameters.redirectUri)
 
     let handleResponse = this.props.handleResponse;
-    scimClient.createResource(resource).then(response =>
-    {
+    scimClient.createResource(resource).then(response => {
       this.setState({getAuthcode: false});
       if (response.success)
       {
-        response.resource.then(resource =>
-        {
+        response.resource.then(resource => {
           handleResponse(resource);
         })
-      } else
+      }
+      else
       {
-        response.resource.then(errorResponse =>
-        {
+        response.resource.then(errorResponse => {
           this.setState({errorMessage: errorResponse.detail});
         })
       }
@@ -313,22 +309,54 @@ class AuthorizationCodeGrantForm extends React.Component
     let workflowSettingsClient = new CurrentWorkflowSettingsClient(this.setState);
 
     let openIdClientId = new Optional(this.props.workflowDetails).map(w => w.openIdClientId)
-      .orElse(undefined);
+                                                                 .orElse(undefined);
     let redirectUri = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
-      .map(a => a.redirectUri)
-      .orElse(this.props.originalRedirectUri);
+                                                              .map(a => a.redirectUri)
+                                                              .orElse(this.props.originalRedirectUri);
     let queryParams = new Optional(this.props.workflowDetails).map(w => w.authCodeParameters)
-      .map(a => a.queryParameters)
-      .orElse(undefined);
+                                                              .map(a => a.queryParameters)
+                                                              .orElse(undefined);
     let usePkce = new Optional(this.state.pkce).map(a => a.use).orElse(undefined);
     let pkceCodeVerifier = new Optional(this.state.pkce).map(a => a.codeVerifier).orElse(undefined);
-    workflowSettingsClient.updateAuthCodeSettings(openIdClientId, redirectUri, usePkce, pkceCodeVerifier, queryParams);
+    let jar = new Optional(this.state.jar).orElse(null);
+    workflowSettingsClient.updateAuthCodeSettings(openIdClientId,
+                                                  redirectUri,
+                                                  usePkce,
+                                                  pkceCodeVerifier,
+                                                  jar,
+                                                  queryParams);
   }
 
   render()
   {
     let authCodeParameters = this.props.workflowDetails.authCodeParameters
       || {redirectUri: this.props.originalRedirectUri};
+
+    let jarRequestTypeSelections = [
+      {
+        display: "request",
+        value: "request"
+      },
+      {
+        display: "request_uri",
+        value: "request_uri"
+      }
+    ];
+
+    let aliases = [];
+    (this.props.keyInfos || []).forEach(keyInfo => {
+      if (keyInfo.hasPrivateKey === true)
+      {
+        aliases.push({
+                       id: keyInfo.alias,
+                       value: keyInfo.alias + " (" + keyInfo.keyAlgorithm + "-" + keyInfo.keyLength + ")"
+                     });
+      }
+    });
+
+    let signatureAlgorithmSelections = (this.props.appInfo.jwtInfo?.signatureAlgorithms || []).map(sa => {
+      return {id: sa, value: sa}
+    });
 
     return (
       <React.Fragment>
@@ -339,7 +367,7 @@ class AuthorizationCodeGrantForm extends React.Component
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
                         onError={fieldname => this.props.onError(fieldname)}>
           <a href={"/#"} onClick={this.props.resetRedirectUri} className={"action-link"}>
-            <Reply/>
+            <Reply />
             <span>reset redirect uri</span>
           </a>
         </FormInputField>
@@ -353,8 +381,9 @@ class AuthorizationCodeGrantForm extends React.Component
                                                 <Tooltip className={"opacity-100"}>
                                                   <Card border={"warning"} bg={"dark"} className={"small text-start"}>
                                                     <Card.Body>
-                                                      URL Encode:<br/><strong className={"ms-4"}>Ctrl + U</strong><br />
-                                                      URL Decode:<br/><strong className={"ms-4"}>Ctrl+Shift+U</strong>
+                                                      URL Encode:<br /><strong className={"ms-4"}>Ctrl + U</strong>
+                                                      <br />
+                                                      URL Decode:<br /><strong className={"ms-4"}>Ctrl+Shift+U</strong>
                                                     </Card.Body>
                                                   </Card>
                                                 </Tooltip>
@@ -379,13 +408,12 @@ class AuthorizationCodeGrantForm extends React.Component
                        key={"pkce.use-" + this.state.pkce?.use}
                        checked={this.state.pkce?.use}
                        className={"d-inline-block"}
-                       onChange={e =>
-                       {
+                       onChange={e => {
                          let pkce = this.state.pkce || {}
                          this.props.handleChange(e.target.name, e.target.checked)
                          lodash.set(pkce, "use", e.target.checked);
                          this.setState({pkce: pkce})
-                       }}/>
+                       }} />
             {
               this.state.pkce?.use &&
               <React.Fragment>
@@ -393,15 +421,14 @@ class AuthorizationCodeGrantForm extends React.Component
                                 label="Code Verifier"
                                 placeholder="Optional. Will be auto-generated if not entered manually"
                                 value={this.state.pkce?.codeVerifier}
-                                onChange={e =>
-                                {
+                                onChange={e => {
                                   let pkce = this.state.pkce || {}
                                   this.props.handleChange(e.target.name, e.target.value)
                                   lodash.set(pkce, "codeVerifier", e.target.value);
                                   this.setState({
-                                    pkce: pkce,
-                                    pkceCodeVerifierLength: e.target.value.length
-                                  })
+                                                  pkce: pkce,
+                                                  pkceCodeVerifierLength: e.target.value.length
+                                                })
                                 }}
                                 onError={fieldname => this.props.onError(fieldname)}>
                   <FormText className={"text-secondary"}>Must have a minimum length of 43 characters </FormText>
@@ -411,6 +438,72 @@ class AuthorizationCodeGrantForm extends React.Component
             }
           </Col>
         </Form.Group>
+        {
+          <Form.Group as={Row}>
+            <Col sm={2}>
+              Jwt Secured Authorization Request (RFC9101)
+            </Col>
+            <Col>
+              <FormCheck type="switch"
+                         id="jar.use"
+                         name="jar.use"
+                         key={"jar.use-" + this.state.jar?.use}
+                         checked={this.state.jar?.use}
+                         className={"d-inline-block"}
+                         onChange={e => {
+                           let jar = this.state.jar || {}
+                           this.props.handleChange(e.target.name, e.target.checked)
+                           lodash.set(jar, "use", e.target.checked);
+                           this.setState({jar: jar})
+                         }} />
+              {
+                this.state.jar?.use &&
+                <React.Fragment>
+
+                  <FormRadioSelection name="jar.requestType"
+                                      label="JAR Request Type"
+                                      displayType={"vertical"}
+                                      selected={this.state.jar?.requestType || "request"}
+                                      selections={jarRequestTypeSelections}
+                                      onChange={e => {
+                                        let jar = this.state.jar || {}
+                                        this.props.handleChange(e.target.name, e.target.value)
+                                        lodash.set(jar, "requestType", e.target.value);
+                                        this.setState({jar: jar})
+                                      }}
+                                      onError={() => {
+                                      }} />
+
+                  <FormObjectList name={"jar.signatureKey"}
+                                  label={"JAR Signing Key Reference"}
+                                  selections={["", ...aliases]}
+                                  selected={this.state.jar?.signatureKey}
+                                  onChange={e => {
+                                    this.props.handleChange(e.target.name, e.target.value)
+                                    let jar = this.state.jar || {}
+                                    lodash.set(jar, "signatureKey", e.target.value);
+                                    this.setState({jar: jar})
+                                  }}
+                                  onError={fieldName => {
+                                  }} />
+
+                  <FormObjectList name={"jar.signatureAlgorithm"}
+                                  label={"JAR Signature Algorithm"}
+                                  selections={["", ...signatureAlgorithmSelections]}
+                                  selected={this.state.jar?.signatureAlgorithm}
+                                  onChange={e => {
+                                    this.props.handleChange(e.target.name, e.target.value)
+                                    let jar = this.state.jar || {}
+                                    lodash.set(jar, "signatureAlgorithm", e.target.value);
+                                    this.setState({jar: jar})
+                                  }}
+                                  onError={fieldName => {
+                                  }} />
+                </React.Fragment>
+              }
+            </Col>
+          </Form.Group>
+        }
         <Form.Group as={Row}>
           <OidcClaimsEditor
             workflowDetails={this.props.workflowDetails}
@@ -428,13 +521,13 @@ class AuthorizationCodeGrantForm extends React.Component
         <Form.Group as={Row}>
           <Col sm={{span: 10, offset: 2}}>
             <Button type="submit" onClick={this.loadAuthorizationRequestDetails}>
-              <LoadingSpinner show={this.state.getAuthcode}/> Get Authorization Code
+              <LoadingSpinner show={this.state.getAuthcode} /> Get Authorization Code
             </Button>
             {
               this.state.errorMessage &&
               <Alert variant={"danger"}>
                 <small className={"error"}>
-                  <GoFlame/> {this.state.errorMessage}
+                  <GoFlame /> {this.state.errorMessage}
                 </small>
               </Alert>
             }
@@ -482,8 +575,8 @@ class ClientCredentialsGrantForm extends React.Component
     let scimClient = new ScimClient(ACCESS_TOKEN_REQUEST_ENDPOINT, this.setState);
 
     let scope = new Optional(this.props.workflowDetails).map(w => w.clientCredentialsParameters)
-      .map(c => c.scope)
-      .orElse(undefined);
+                                                        .map(c => c.scope)
+                                                        .orElse(undefined);
     let resource = {
       grantType: "client_credentials",
       openIdClientId: parseInt(this.props.client.id),
@@ -508,13 +601,11 @@ class ClientCredentialsGrantForm extends React.Component
     }
 
     let handleResponse = this.props.handleResponse;
-    scimClient.createResource(resource).then(response =>
-    {
+    scimClient.createResource(resource).then(response => {
       this.setState({accessingToken: false})
       if (response.success)
       {
-        response.resource.then(resource =>
-        {
+        response.resource.then(resource => {
           handleResponse(resource);
         })
       }
@@ -526,10 +617,10 @@ class ClientCredentialsGrantForm extends React.Component
     let workflowSettingsClient = new CurrentWorkflowSettingsClient(this.setState);
 
     let openIdClientId = new Optional(this.props.workflowDetails).map(w => w.openIdClientId)
-      .orElse(undefined);
+                                                                 .orElse(undefined);
     let scope = new Optional(this.props.workflowDetails).map(w => w.clientCredentialsParameters)
-      .map(c => c.scope)
-      .orElse(undefined);
+                                                        .map(c => c.scope)
+                                                        .orElse(undefined);
 
     workflowSettingsClient.updateClientCredentialsSettings(openIdClientId, scope);
   }
@@ -546,7 +637,7 @@ class ClientCredentialsGrantForm extends React.Component
                         value={clientCredentialsParameters.scope || ""}
                         placeholder="The scope to access from the identity provider"
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
-                        onError={fieldname => this.props.onError(fieldname)}/>
+                        onError={fieldname => this.props.onError(fieldname)} />
         <Form.Group as={Row}>
           <Col sm={2}>
             DPoP Details
@@ -556,24 +647,23 @@ class ClientCredentialsGrantForm extends React.Component
                        id="dpop-switch"
                        className={"d-inline-block"}
                        label="Demonstrate Proof of Posession (DPoP)"
-                       onChange={e =>
-                       {
+                       onChange={e => {
                          this.setState({useDpop: e.target.checked})
-                       }}/>
+                       }} />
             {
               this.state.useDpop &&
-              <DpopDetails props={this.props} state={this.state} setState={this.setState}/>
+              <DpopDetails props={this.props} state={this.state} setState={this.setState} />
             }
           </Col>
         </Form.Group>
         <Form.Group as={Row}>
           <Col sm={{span: 10, offset: 2}}>
             <Button id={"upload"} type="submit" onClick={this.retrieveAccessTokenDetails}>
-              <LoadingSpinner show={this.state.accessingToken}/> Get Access Token
+              <LoadingSpinner show={this.state.accessingToken} /> Get Access Token
             </Button>
-            <AlertListMessages variant={"danger"} icon={<GoFlame/>}
+            <AlertListMessages variant={"danger"} icon={<GoFlame />}
                                messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                                 .orElse([])}/>
+                                                                                            .orElse([])} />
           </Col>
         </Form.Group>
       </React.Fragment>
@@ -648,13 +738,11 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
     }
 
     let handleResponse = this.props.handleResponse;
-    scimClient.createResource(resource).then(response =>
-    {
+    scimClient.createResource(resource).then(response => {
       this.setState({accessingToken: false});
       if (response.success)
       {
-        response.resource.then(resource =>
-        {
+        response.resource.then(resource => {
           handleResponse(resource);
         })
       }
@@ -666,14 +754,14 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
     let workflowSettingsClient = new CurrentWorkflowSettingsClient(this.setState);
 
     let openIdClientId = new Optional(this.props.workflowDetails).map(w => w.openIdClientId)
-      .orElse(undefined);
+                                                                 .orElse(undefined);
     let resourceOwnerPasswordParameters = this.props.workflowDetails.resourceOwnerPasswordParameters || {};
     let username = resourceOwnerPasswordParameters.username || "";
     let password = resourceOwnerPasswordParameters.password || "";
     let scope = resourceOwnerPasswordParameters.scope || "";
 
     workflowSettingsClient.updateResourceOwnerPasswordCredentialsSettings(openIdClientId, username, password,
-      scope);
+                                                                          scope);
   }
 
   render()
@@ -691,19 +779,19 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
                         value={username}
                         placeholder={"the username to authenticate"}
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
-                        onError={fieldname => this.props.onError(fieldname)}/>
+                        onError={fieldname => this.props.onError(fieldname)} />
         <FormInputField name="resourceOwnerPasswordParameters.password"
                         label="Password"
                         placeholder={"the users password"}
                         value={password}
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
-                        onError={fieldname => this.props.onError(fieldname)}/>
+                        onError={fieldname => this.props.onError(fieldname)} />
         <FormInputField name="resourceOwnerPasswordParameters.scope"
                         label="Scope"
                         value={scope}
                         placeholder="The scope to access from the identity provider"
                         onChange={e => this.props.handleChange(e.target.name, e.target.value)}
-                        onError={fieldname => this.props.onError(fieldname)}/>
+                        onError={fieldname => this.props.onError(fieldname)} />
         <Form.Group as={Row}>
           <Col sm={2}>
             DPoP Details
@@ -713,24 +801,23 @@ class ResourceOwnerPasswordCredentialsForm extends React.Component
                        id="dpop-switch"
                        className={"d-inline-block"}
                        label="Demonstrate Proof of Posession (DPoP)"
-                       onChange={e =>
-                       {
+                       onChange={e => {
                          this.setState({useDpop: e.target.checked})
-                       }}/>
+                       }} />
             {
               this.state.useDpop &&
-              <DpopDetails props={this.props} state={this.state} setState={this.setState}/>
+              <DpopDetails props={this.props} state={this.state} setState={this.setState} />
             }
           </Col>
         </Form.Group>
         <Form.Group as={Row}>
           <Col sm={{span: 10, offset: 2}}>
             <Button id={"upload"} type="submit" onClick={this.retrieveAccessTokenDetails}>
-              <LoadingSpinner show={this.state.accessingToken}/> Get Access Token
+              <LoadingSpinner show={this.state.accessingToken} /> Get Access Token
             </Button>
-            <AlertListMessages variant={"danger"} icon={<GoFlame/>}
+            <AlertListMessages variant={"danger"} icon={<GoFlame />}
                                messages={errors.errorMessages || new Optional(errors.detail).map(d => [d])
-                                 .orElse([])}/>
+                                                                                            .orElse([])} />
           </Col>
         </Form.Group>
       </React.Fragment>

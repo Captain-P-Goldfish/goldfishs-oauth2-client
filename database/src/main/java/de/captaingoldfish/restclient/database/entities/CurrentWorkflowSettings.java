@@ -139,6 +139,31 @@ public class CurrentWorkflowSettings
   private String pkceCodeVerifier;
 
   /**
+   * if JWT Secured Authorization Requests should be used
+   */
+  @Column(name = "JAR_USE")
+  private boolean jarUse;
+
+  /**
+   * the request-type to use for the JWT Secured Authorization Request. Possible values are: request and
+   * request_uri
+   */
+  @Column(name = "JAR_REQUEST_TYPE")
+  private String jarRequestType;
+
+  /**
+   * the key to use for the JWT Secured Authorization Request
+   */
+  @Column(name = "JAR_SIGNATURE_KEY")
+  private String jarSignatureKeyAlias;
+
+  /**
+   * the signature algorithm to use for the JWT Secured Authorization Request
+   */
+  @Column(name = "JAR_SIGNATURE_ALGORITHM")
+  private String jarSignatureAlgorithm;
+
+  /**
    * the moment this instance was created
    */
   @Column(name = "CREATED")
@@ -166,7 +191,11 @@ public class CurrentWorkflowSettings
                                  String dpopHtm,
                                  String dpopHtu,
                                  boolean pkceUse,
-                                 String pkceCodeVerifier)
+                                 String pkceCodeVerifier,
+                                 boolean jarUse,
+                                 String jarRequestType,
+                                 String jarSignatureKeyAlias,
+                                 String jarSignatureAlgorithm)
   {
     this.openIdClient = openIdClient;
     this.redirectUri = redirectUri;
@@ -184,6 +213,10 @@ public class CurrentWorkflowSettings
     this.dpopHtu = dpopHtu;
     this.pkceUse = pkceUse;
     this.pkceCodeVerifier = pkceCodeVerifier;
+    this.jarUse = jarUse;
+    this.jarRequestType = jarRequestType;
+    this.jarSignatureKeyAlias = jarSignatureKeyAlias;
+    this.jarSignatureAlgorithm = jarSignatureAlgorithm;
     this.created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     this.lastModified = this.created;
   }

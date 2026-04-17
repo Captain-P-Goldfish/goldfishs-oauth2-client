@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -30,12 +29,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
 import de.captaingoldfish.restclient.application.endpoints.BrowserEntryController;
+import de.captaingoldfish.restclient.application.endpoints.tokenrequest.request.Authenticator;
+import de.captaingoldfish.restclient.application.endpoints.tokenrequest.request.AuthenticatorFactory;
 import de.captaingoldfish.restclient.application.utils.HttpClientBuilder;
 import de.captaingoldfish.restclient.application.utils.HttpResponseDetails;
 import de.captaingoldfish.restclient.application.utils.OAuthConstants;
 import de.captaingoldfish.restclient.application.utils.Utils;
 import de.captaingoldfish.restclient.database.entities.OpenIdClient;
 import de.captaingoldfish.restclient.scim.constants.AuthCodeGrantType;
+import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest;
 import de.captaingoldfish.restclient.scim.resources.ScimAuthCodeGrantRequest.Pkce;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings;
 import de.captaingoldfish.restclient.scim.resources.ScimCurrentWorkflowSettings.AuthCodeParameters;
@@ -73,9 +75,9 @@ public class AuthCodeGrantRequestService
    *          Authorization Request
    * @return the authorization code grant url, the query parameters and optionally a response body if present
    */
-  public Triple<String, String, String> generateAuthCodeRequestUrl(OpenIdClient openIdClient,
-                                                                   ScimCurrentWorkflowSettings workflowSettings,
-                                                                   AuthCodeGrantType authenticationType)
+  public AuthcodeRequestDetails generateAuthCodeRequestUrl(OpenIdClient openIdClient,
+                                                           ScimCurrentWorkflowSettings workflowSettings,
+                                                           AuthCodeGrantType authenticationType)
   {
     OIDCProviderMetadata metadata = Utils.loadDiscoveryEndpointInfos(openIdClient.getOpenIdProvider());
     String authorizationEndpointUri = metadata.getAuthorizationEndpointURI().toString();
@@ -106,18 +108,37 @@ public class AuthCodeGrantRequestService
       requestUrlBuilder.queryParam(OAuthConstants.CODE_CHALLENGE_METHOD, "S256");
       pkceCodeVerifierCache.setCodeVerifier(state, pkceCodeVerifier);
     }
-    final UriComponents requestUrl = requestUrlBuilder.build();
-    final String authCodeRequestUrl = requestUrl.toString();
 
+    UriComponents requestUrl = requestUrlBuilder.build();
+    String authCodeRequestUrl;
+
+    final String httpContentType;
+    boolean useJwtSecuredAuthRequest = workflowSettings.getJar().map(ScimAuthCodeGrantRequest.Jar::isUse).orElse(false);
+    if (useJwtSecuredAuthRequest)
+    {
+      JwtSecuredAuthRequestBuilder jarRequestBuilder = new JwtSecuredAuthRequestBuilder(openIdClient, workflowSettings,
+                                                                                        requestUrl);
+      authCodeRequestUrl = jarRequestBuilder.getAuthCodeRequestUrl();
+      requestUrl = jarRequestBuilder.getRequestUrl();
+      httpContentType = jarRequestBuilder.getHttpContentType();
+    }
+    else
+    {
+      authCodeRequestUrl = requestUrl.toUriString();
+      httpContentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+    }
 
     if (AuthCodeGrantType.AUTHORIZATION_CODE.equals(authenticationType))
     {
       authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeRequestUrl);
-      return Triple.of(authCodeRequestUrl, requestUrl.getQuery(), null);
+      return new AuthcodeRequestDetails(authCodeRequestUrl, requestUrl.getQuery(), null, state, redirectUri);
     }
     else
     {
-      HttpResponseDetails parResponseDetails = sendPushedAuthorizationRequest(openIdClient, metadata, requestUrl);
+      HttpResponseDetails parResponseDetails = sendPushedAuthorizationRequest(openIdClient,
+                                                                              metadata,
+                                                                              requestUrl,
+                                                                              httpContentType);
       ObjectNode responseNode = JsonHelper.readJsonDocument(parResponseDetails.getBody(), ObjectNode.class);
 
       UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri);
@@ -132,7 +153,8 @@ public class AuthCodeGrantRequestService
       }
       String authCodeUrl = builder.build().toString();
       authCodeGrantRequestCache.setAuthorizationRequestUrl(state, authCodeUrl);
-      return Triple.of(authCodeUrl, requestUrl.getQuery(), parResponseDetails.getBody());
+      return new AuthcodeRequestDetails(authCodeUrl, requestUrl.getQuery(), parResponseDetails.getBody(), state,
+                                        redirectUri);
     }
   }
 
@@ -149,7 +171,8 @@ public class AuthCodeGrantRequestService
   @SneakyThrows
   public HttpResponseDetails sendPushedAuthorizationRequest(OpenIdClient openIdClient,
                                                             OIDCProviderMetadata metadata,
-                                                            UriComponents authCodeRequestUrl)
+                                                            UriComponents authCodeRequestUrl,
+                                                            String httpContentType)
   {
     URI parEndpoint = metadata.getPushedAuthorizationRequestEndpointURI();
     if (parEndpoint == null)
@@ -158,6 +181,8 @@ public class AuthCodeGrantRequestService
     }
     HttpPost httpPost = new HttpPost(parEndpoint);
     httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+    Authenticator authenticator = AuthenticatorFactory.getAuthenticator(openIdClient);
+    authenticator.getRequestHeader().forEach(httpPost::setHeader);
     httpPost.setEntity(new StringEntity(authCodeRequestUrl.getQuery()));
     try (CloseableHttpClient httpClient = HttpClientBuilder.getHttpClient(openIdClient);
       CloseableHttpResponse response = httpClient.execute(httpPost))
