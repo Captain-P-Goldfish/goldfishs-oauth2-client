@@ -336,11 +336,11 @@ class AuthorizationCodeGrantForm extends React.Component
       {
         display: "request",
         value: "request"
-      },
+      }/*,
       {
         display: "request_uri",
         value: "request_uri"
-      }
+      }*/
     ];
 
     let aliases = [];
