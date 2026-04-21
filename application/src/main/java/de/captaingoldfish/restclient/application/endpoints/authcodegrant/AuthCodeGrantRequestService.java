@@ -112,7 +112,6 @@ public class AuthCodeGrantRequestService
     UriComponents requestUrl = requestUrlBuilder.build();
     String authCodeRequestUrl;
 
-    final String httpContentType;
     boolean useJwtSecuredAuthRequest = workflowSettings.getJar().map(ScimAuthCodeGrantRequest.Jar::isUse).orElse(false);
     if (useJwtSecuredAuthRequest)
     {
@@ -120,12 +119,10 @@ public class AuthCodeGrantRequestService
                                                                                         requestUrl);
       authCodeRequestUrl = jarRequestBuilder.getAuthCodeRequestUrl();
       requestUrl = jarRequestBuilder.getRequestUrl();
-      httpContentType = jarRequestBuilder.getHttpContentType();
     }
     else
     {
       authCodeRequestUrl = requestUrl.toUriString();
-      httpContentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
     }
 
     if (AuthCodeGrantType.AUTHORIZATION_CODE.equals(authenticationType))
@@ -135,10 +132,7 @@ public class AuthCodeGrantRequestService
     }
     else
     {
-      HttpResponseDetails parResponseDetails = sendPushedAuthorizationRequest(openIdClient,
-                                                                              metadata,
-                                                                              requestUrl,
-                                                                              httpContentType);
+      HttpResponseDetails parResponseDetails = sendPushedAuthorizationRequest(openIdClient, metadata, requestUrl);
       ObjectNode responseNode = JsonHelper.readJsonDocument(parResponseDetails.getBody(), ObjectNode.class);
 
       UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(authorizationEndpointUri);
@@ -171,8 +165,7 @@ public class AuthCodeGrantRequestService
   @SneakyThrows
   public HttpResponseDetails sendPushedAuthorizationRequest(OpenIdClient openIdClient,
                                                             OIDCProviderMetadata metadata,
-                                                            UriComponents authCodeRequestUrl,
-                                                            String httpContentType)
+                                                            UriComponents authCodeRequestUrl)
   {
     URI parEndpoint = metadata.getPushedAuthorizationRequestEndpointURI();
     if (parEndpoint == null)

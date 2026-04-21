@@ -263,8 +263,7 @@ nav {
 }
 
 .disabled,
-.form-control:disabled,
-.form-control[readonly] {
+.form-control:disabled {
   pointer-events: none;
   opacity: 0.5;
 }
