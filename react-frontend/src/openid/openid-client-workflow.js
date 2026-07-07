@@ -170,7 +170,7 @@ export default class OpenidClientWorkflow extends React.Component
 
         <Form ref={this.formReference} onSubmit={e => e.preventDefault()}>
           <FormRadioSelection name="authenticationType"
-                              label="AuthenticationType Type"
+                              label="AuthenticationType"
                               displayType={"vertical"}
                               selected={this.state.authenticationType}
                               selections={authTypes}
