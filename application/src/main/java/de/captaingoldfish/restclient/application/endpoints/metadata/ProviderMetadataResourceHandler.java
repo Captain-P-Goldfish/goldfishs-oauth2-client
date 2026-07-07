@@ -60,6 +60,11 @@ public class ProviderMetadataResourceHandler extends ResourceHandler<ScimProvide
     Optional<OIDCProviderMetadata> oidcMetadata = Optional.ofNullable(Utils.loadDiscoveryEndpointInfos(openIdProvider));
     Optional<ObjectNode> oid4vciMetadata = Utils.loadOidc4vciDiscoveryEndpointInfos(openIdProvider);
 
+    if (oidcMetadata.isEmpty() && oid4vciMetadata.isEmpty())
+    {
+      throw new ResourceNotFoundException(String.format("Was not able to load metadata from %s"));
+    }
+
     return ScimProviderMetadata.builder()
                                .oidcMetadata(oidcMetadata.map(OIDCProviderMetadata::toString).orElse(null))
                                .oid4vciMetadata(oid4vciMetadata.map(JsonNode::toString).orElse(null))

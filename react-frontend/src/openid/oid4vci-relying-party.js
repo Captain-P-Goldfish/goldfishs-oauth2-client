@@ -7,6 +7,7 @@ import {ArrowRightCircle} from "react-bootstrap-icons";
 import {LinkContainer} from "react-router-bootstrap";
 import {AiOutlineWarning} from "react-icons/ai";
 import {Oid4vciMetadataViewer} from "./oid4vci-metadata-viewer";
+import {PROVIDER_METADATA_ENDPOINT} from "../scim/scim-constants";
 
 export function CredentialOfferEditor()
 {
@@ -29,7 +30,7 @@ export function CredentialOfferEditor()
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let metadataResourcePath = "/scim/v2/ProviderMetadata";
+    let metadataResourcePath = PROVIDER_METADATA_ENDPOINT;
     const safeParse = (val) => {
       if (!val)
       {
@@ -59,6 +60,10 @@ export function CredentialOfferEditor()
       const oid4vci = safeParse(metadata.oid4vciMetadata);
       setOidcMetadata(oidc);
       setOid4vciMetadata(oid4vci);
+      if (!oid4vci)
+      {
+        setWarning("No OID4VCI metadata found for provider");
+      }
     };
 
     let onError = errorResponse => {

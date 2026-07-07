@@ -57,6 +57,12 @@ public class OpenIdProvider
   private String discoveryEndpoint;
 
   /**
+   * this URL is used to retrieve the credential issuer metadata if some provided by the remote system.
+   */
+  @Column(name = "OID4VCI_DISCOVERY_ENDPOINT")
+  private String oid4vciDiscoveryEndpoint;
+
+  /**
    * the authorization endpoint -> can be used if a discovery endpoint is not provided
    */
   @Column(name = "AUTHORIZATION_ENDPOINT")
@@ -100,6 +106,7 @@ public class OpenIdProvider
   @Builder
   public OpenIdProvider(String name,
                         String discoveryEndpoint,
+                        String oid4vciDiscoveryEndpoint,
                         String authorizationEndpoint,
                         String tokenEndpoint,
                         Set<String> resourceEndpoints,
@@ -107,6 +114,7 @@ public class OpenIdProvider
   {
     this.name = name;
     this.discoveryEndpoint = discoveryEndpoint;
+    this.oid4vciDiscoveryEndpoint = oid4vciDiscoveryEndpoint;
     this.authorizationEndpoint = authorizationEndpoint;
     this.tokenEndpoint = tokenEndpoint;
     this.resourceEndpoints = resourceEndpoints;

@@ -233,12 +233,15 @@ class OpenIdProviderCardEntry extends React.Component
                       OIDC
                     </a>
                   </LinkContainer>
-                  <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/oid4vci"}>
-                    <a href={"/#"} className={"action-link"}>
-                      <ArrowRightCircle style={{marginRight: "15px"}} size={"20px"} height={"30px"} />
-                      OID4VCI
-                    </a>
-                  </LinkContainer>
+                  {
+                    this.state.provider.oid4vciDiscoveryEndpoint &&
+                    <LinkContainer to={"/views/openIdProvider/" + this.props.provider.id + "/oid4vci"}>
+                      <a href={"/#"} className={"action-link"}>
+                        <ArrowRightCircle style={{marginRight: "15px"}} size={"20px"} height={"30px"} />
+                        OID4VCI
+                      </a>
+                    </LinkContainer>
+                  }
                 </React.Fragment>
               }
               {
@@ -270,7 +273,8 @@ class OpenIdProviderCardEntry extends React.Component
             <React.Fragment>
               <Table size="sm" variant="dark" borderless striped>
                 <tbody>
-                  <ModifiableCardEntry header={"Discovery Endpoint"}
+                  <ModifiableCardEntry header={"OIDC Discovery Endpoint"}
+                                       isUrl
                                        name={"discoveryEndpoint"}
                                        resourceId={this.state.provider.id}
                                        editMode={this.state.editMode}
@@ -279,6 +283,19 @@ class OpenIdProviderCardEntry extends React.Component
                                        onChange={this.scimComponentBasics.updateInput}
                                        onError={fieldName => this.scimClient.getErrors(
                                          this.state, fieldName)}/>
+                  {
+                    (this.state.provider.oid4vciDiscoveryEndpoint || this.state.editMode) &&
+                    <ModifiableCardEntry header={"OID4VCI Discovery Endpoint"}
+                                         isUrl
+                                         name={"oid4vciDiscoveryEndpoint"}
+                                         resourceId={this.state.provider.id}
+                                         editMode={this.state.editMode}
+                                         resourceValue={this.state.provider.oid4vciDiscoveryEndpoint}
+                                         placeholder={"The URL to the Credential Issuers discovery endpoint"}
+                                         onChange={this.scimComponentBasics.updateInput}
+                                         onError={fieldName => this.scimClient.getErrors(
+                                           this.state, fieldName)}/>
+                  }
                   <CardDateRows resource={this.state.provider}/>
                 </tbody>
               </Table>

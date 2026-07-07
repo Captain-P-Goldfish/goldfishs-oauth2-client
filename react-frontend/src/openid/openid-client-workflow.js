@@ -20,13 +20,14 @@ import {
   ACCESS_TOKEN_REQUEST_ENDPOINT,
   AUTH_CODE_GRANT_ENDPOINT,
   CURRENT_WORKFLOW_URI,
-  KEYSTORE_ENDPOINT
+  KEYSTORE_ENDPOINT,
+  PROVIDER_METADATA_ENDPOINT
 } from "../scim/scim-constants";
 import AccessTokenView from "./auth-code-grant/access-token-view";
 import {GoFlame} from "react-icons/go";
 import {Optional} from "../services/utils";
 import CurrentWorkflowSettingsClient from "../scim/current-workflow-settings-client";
-import {Alert, Card, FormCheck, FormText, Tooltip} from "react-bootstrap";
+import {Accordion, Alert, Card, FormCheck, FormText, Spinner, Tooltip} from "react-bootstrap";
 import {ApplicationInfoContext} from "../app";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import {OidcClaimsEditor} from "../services/oidc-claims-editor";
@@ -48,7 +49,9 @@ export default class OpenidClientWorkflow extends React.Component
       workflowDetails: this.props.client[CURRENT_WORKFLOW_URI] || {},
       isLoading: false,
       responseDetails: [],
-      keyInfos: []
+      keyInfos: [],
+      loadingMetadata: false,
+      oidcMetadata: {}
     }
 
     this.formReference = createRef();
@@ -62,6 +65,24 @@ export default class OpenidClientWorkflow extends React.Component
 
   componentDidMount()
   {
+    // load metadata of provider
+    {
+      this.setState({loadingMetadata: true});
+      new ScimClient(PROVIDER_METADATA_ENDPOINT, this.setState)
+        .getResource(this.props.client.openIdProviderId)
+        .then(response => {
+          this.setState({loadingMetadata: false});
+          if (response.success)
+          {
+            response.resource.then(resource => {
+              this.setState({oidcMetadata: JSON.parse(resource.oidcMetadata)});
+            })
+          } else {
+            this.setState({errors: {detail: "No OIDC metadata found for provider"}});
+          }
+        })
+    }
+
     // load private keys
     {
       new ScimClient(KEYSTORE_ENDPOINT, this.setState).getResource(null).then(response => {
@@ -125,6 +146,27 @@ export default class OpenidClientWorkflow extends React.Component
       <React.Fragment>
         <h2>OpenID Connect Workflow</h2>
         <ErrorMessagesAlert errors={this.state.errors} />
+        {
+          this.state.loadingMetadata &&
+          <Alert variant={"warning"}>
+            <h3>Loading metadata of provider <Spinner animation="border" variant="warning" role="status" /></h3>
+          </Alert>
+        }
+        {
+          this.state.oidcMetadata &&
+          <div className="metadata-view">
+            <Accordion className="deep-link-accordion">
+              <Accordion.Item eventKey="raw">
+                <Accordion.Header>Raw OIDC metadata JSON</Accordion.Header>
+                <Accordion.Body>
+                    <pre>
+                    {JSON.stringify(this.state.oidcMetadata, null, 2)}
+                    </pre>
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </div>
+        }
 
         <Form ref={this.formReference} onSubmit={e => e.preventDefault()}>
           <FormRadioSelection name="authenticationType"
@@ -337,10 +379,10 @@ class AuthorizationCodeGrantForm extends React.Component
         display: "request",
         value: "request"
       }/*,
-      {
-        display: "request_uri",
-        value: "request_uri"
-      }*/
+       {
+       display: "request_uri",
+       value: "request_uri"
+       }*/
     ];
 
     let aliases = [];

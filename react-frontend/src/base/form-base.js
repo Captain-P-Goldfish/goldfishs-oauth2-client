@@ -411,8 +411,8 @@ export function LoadingSpinner(props)
   {
     return (
       <span style={{marginRight: 5 + 'px'}}>
-              <Spinner animation="border" variant="warning" size="sm" role="status" />
-            </span>
+        <Spinner animation="border" variant="warning" size="sm" role="status" />
+      </span>
     );
   }
   else
@@ -523,7 +523,18 @@ export function ModifiableCardEntry(props)
       }
       {
         !props.editMode &&
-        props.resourceValue
+        <React.Fragment>
+          {
+            props.isUrl &&
+            <a href={props.resourceValue} className={"action-link"} target={"_blank"}>{props.resourceValue}</a>
+          }
+          {
+            !props.isUrl &&
+            <span className="text-break">
+              {props.resourceValue}
+            </span>
+          }
+        </React.Fragment>
       }
     </td>
   </tr>;

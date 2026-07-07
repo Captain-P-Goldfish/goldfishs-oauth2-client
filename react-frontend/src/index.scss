@@ -122,10 +122,10 @@ ul.error-list {
 
 /* action link */
 a.action-link {
-  color: bisque;
+  color: #ffe68a;
 
   path {
-    color: bisque !important;
+    color: #ffe68a !important;
   }
 
   span {
@@ -352,18 +352,27 @@ div.card-header {
 }
 
 .card.resource-card {
-  min-width: 47%;
   max-width: 47%;
   padding: 0;
   margin-bottom: 15px !important;
 
+  & * {
+    overflow-wrap: anywhere;
+  }
+
   &.modifiable-card {
-    min-width: 400px;
     border-radius: var(--card-border-radius);
 
     .card-header {
       border-radius: var(--card-border-radius);
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .card.resource-card {
+    max-width: 100%;
+    width: 100%;
   }
 }
 
@@ -955,7 +964,7 @@ div.accordion {
    scope: .oidc-claims-editor
    ======================================================================================= */
 
-.oidc-claims-editor {
+.oidc-claims-editor, .metadata-view {
   .accordion {
     --oidc-bg: #262b31;
     --oidc-bg-2: #31363d;

@@ -26,6 +26,7 @@ public class ScimOpenIdProvider extends ResourceNode
   public ScimOpenIdProvider(String id,
                             String name,
                             String discoveryEndpoint,
+                            String oid4vciDiscoveryEndpoint,
                             String authorizationEndpoint,
                             String tokenEndpoint,
                             Set<String> resourceEndpointsSet,
@@ -36,6 +37,7 @@ public class ScimOpenIdProvider extends ResourceNode
     setId(id);
     setName(name);
     setDiscoveryEndpoint(discoveryEndpoint);
+    setOid4vciDiscoveryEndpoint(oid4vciDiscoveryEndpoint);
     setAuthorizationEndpoint(authorizationEndpoint);
     setTokenEndpoint(tokenEndpoint);
     setResourceEndpoints(resourceEndpointsSet);
@@ -65,6 +67,22 @@ public class ScimOpenIdProvider extends ResourceNode
   public void setDiscoveryEndpoint(String discoveryEndpoint)
   {
     setAttribute(FieldNames.DISCOVERY_ENDPOINT, discoveryEndpoint);
+  }
+
+  /**
+   * The url to the oid4vci discovery endpoint of a Credential Provider
+   */
+  public Optional<String> getOid4vciDiscoveryEndpoint()
+  {
+    return getStringAttribute(FieldNames.OID4VCIDISCOVERYENDPOINT);
+  }
+
+  /**
+   * The url to the oid4vci discovery endpoint of a Credential Provider
+   */
+  public void setOid4vciDiscoveryEndpoint(String oid4vciDiscoveryEndpoint)
+  {
+    setAttribute(FieldNames.OID4VCIDISCOVERYENDPOINT, oid4vciDiscoveryEndpoint);
   }
 
   /**
@@ -142,6 +160,8 @@ public class ScimOpenIdProvider extends ResourceNode
     public static final String NAME = "name";
 
     public static final String DISCOVERY_ENDPOINT = "discoveryEndpoint";
+
+    public static final String OID4VCIDISCOVERYENDPOINT = "oid4vciDiscoveryEndpoint";
 
     public static final String ID = "id";
 

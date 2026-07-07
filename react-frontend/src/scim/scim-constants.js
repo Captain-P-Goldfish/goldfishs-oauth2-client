@@ -16,6 +16,7 @@ export const AUTH_CODE_GRANT_ENDPOINT = BASE_URL + "/AuthCodeGrantRequest";
 export const HTTP_CLIENT_SETTINGS_ENDPOINT = BASE_URL + "/HttpClientSettings";
 export const JWT_BUILDER_ENDPOINT = BASE_URL + "/JwtBuilder";
 export const KEYSTORE_ENDPOINT = BASE_URL + "/Keystore";
+export const PROVIDER_METADATA_ENDPOINT = BASE_URL + "/ProviderMetadata";
 export const OPENID_CLIENT_ENDPOINT = BASE_URL + "/OpenIdClient";
 export const OPENID_PROVIDER_ENDPOINT = BASE_URL + "/OpenIdProvider";
 export const PROXY_ENDPOINT = BASE_URL + "/Proxy";

@@ -353,7 +353,12 @@
             <column name="JAR_SIGNATURE_KEY" type="VARCHAR(512)"/>
             <column name="JAR_SIGNATURE_ALGORITHM" type="VARCHAR(50)"/>
         </addColumn>
+    </changeSet>
 
+    <changeSet id="oid4vci-metadata" author="pascal_knueppel">
+        <addColumn tableName="OPENID_PROVIDER">
+            <column name="OID4VCI_DISCOVERY_ENDPOINT" type="VARCHAR(1024)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

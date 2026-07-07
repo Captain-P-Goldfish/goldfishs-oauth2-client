@@ -1,12 +1,12 @@
 package de.captaingoldfish.restclient.application.utils;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -69,6 +69,7 @@ public final class Utils
       }
     }
     String discoveryUrl = openIdProvider.getDiscoveryEndpoint();
+    log.info("Requesting OIDC metadata from: {}", discoveryUrl);
     final String responseBody;
 
     HttpGet httpGet = new HttpGet(discoveryUrl);
@@ -97,7 +98,6 @@ public final class Utils
    * retrieves the metadata from the OpenId4VCI discovery endpoint ".well-known/openid-credential-issuer" if the
    * authorization server has such an endpoint
    */
-  @SneakyThrows
   public synchronized static Optional<ObjectNode> loadOidc4vciDiscoveryEndpointInfos(OpenIdProvider openIdProvider)
   {
     CredentialIssuerMetdatdataCache metadataCache = WebAppConfig.getApplicationContext()
@@ -110,7 +110,12 @@ public final class Utils
       }
     }
 
-    String discoveryUrl = toOid4vciDiscoveryUrl(openIdProvider.getDiscoveryEndpoint());
+    String discoveryUrl = openIdProvider.getOid4vciDiscoveryEndpoint();
+    if (StringUtils.isBlank(discoveryUrl))
+    {
+      return Optional.empty();
+    }
+    log.info("Requesting OID4VCI metadata from: {}", discoveryUrl);
     final String responseBody;
 
     HttpGet httpGet = new HttpGet(discoveryUrl);
@@ -120,6 +125,7 @@ public final class Utils
       responseBody = Utils.getBody(response);
       if (response.getCode() != 200)
       {
+        log.info("Status: {} - Response for oid4vci metadata request is: {}", response.getCode(), responseBody);
         return Optional.empty();
       }
     }
@@ -132,16 +138,6 @@ public final class Utils
     ObjectNode metadata = JsonHelper.readJsonDocument(responseBody, ObjectNode.class);
     metadataCache.setProviderMetadata(openIdProvider.getId(), metadata);
     return Optional.of(metadata);
-  }
-
-  private static String toOid4vciDiscoveryUrl(String oidcDiscoveryUrl)
-  {
-    URI uri = URI.create(oidcDiscoveryUrl);
-    // remove /.well-known/openid-configuration
-    String path = uri.getPath().replace("/.well-known/openid-configuration", "");
-    String newPath = "/.well-known/openid-credential-issuer" + path;
-    URI result = URI.create(uri.getScheme() + "://" + uri.getAuthority() + newPath);
-    return result.toString();
   }
 
   @SneakyThrows

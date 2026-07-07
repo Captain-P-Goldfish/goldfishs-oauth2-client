@@ -46,6 +46,21 @@
       "maxLength": 1024
     },
     {
+      "name": "oid4vciDiscoveryEndpoint",
+      "type": "reference",
+      "referenceTypes": [
+        "url"
+      ],
+      "description": "The url to the oid4vci discovery endpoint of a Credential Provider",
+      "mutability": "readWrite",
+      "returned": "default",
+      "uniqueness": "none",
+      "multiValued": false,
+      "required": false,
+      "caseExact": false,
+      "maxLength": 1024
+    },
+    {
       "name": "authorizationEndpoint",
       "type": "reference",
       "referenceTypes": [
